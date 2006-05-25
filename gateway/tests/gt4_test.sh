@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # initial sanity check
 [ -z "$GLOBUS_LOCATION" ] && { echo "please set the GLOBUS_LOCATION environment variable"; exit 1; }
 
