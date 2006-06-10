@@ -100,7 +100,7 @@ popd
 echo
 
 # seems we can't rely on the return value of globusrun-ws when using PBS :(
-RETVAL=$(awk '/^finished with result/ {print $NF}' $OUTDIR/output_file)
+RETVAL=$(awk '/finished with result/ {print $NF}' $OUTDIR/output_file)
 
 if [ "$RETVAL" -eq 0 ]; then # gold
 	cat <<-EOF
