@@ -210,7 +210,11 @@ exit $RETVAL
 ##test_script_1
 #!/bin/sh
 
-echo "test starting" > output_file
+
+OUTPUT_FILE=$1
+
+echo "test starting: $@" > output_file
+echo "OUTPUT_FILE: $OUTPUT_FILE" >> output_file
 
 RETVAL=0
 
