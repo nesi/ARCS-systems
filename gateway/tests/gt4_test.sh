@@ -210,17 +210,15 @@ exit $RETVAL
 ##test_script_1
 #!/bin/sh
 
-
 OUTPUT_FILE=$1
 
-echo "test starting: $@" > output_file
-echo "OUTPUT_FILE: $OUTPUT_FILE" >> output_file
+echo "test starting: $@" > $OUTPUT_FILE
 
 RETVAL=0
 
 function log() {
 	echo "LOG: $@"
-	echo "LOG: $@" >> output_file
+	echo "LOG: $@" >> $OUTPUT_FILE
 }
 
 function warn() {
@@ -304,14 +302,15 @@ fi
 
 # a quick modules test
 if MODULE_OUT="$(module avail 2>&1)"; then
-	echo "$MODULE_OUT" >> output_file
+	echo "$MODULE_OUT" >> $OUTPUT_FILE
 else
 	err "problem listing modules: $MODULE_OUT"
 fi
 
-echo "test finished" >> output_file
+echo "test finished" >> $OUTPUT_FILE
 
-exit $RETVAL
+exit 2
+#exit $RETVAL
 
 ##end_test_script_1
 
