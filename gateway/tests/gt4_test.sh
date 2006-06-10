@@ -307,10 +307,9 @@ else
 	err "problem listing modules: $MODULE_OUT"
 fi
 
-echo "test finished" >> $OUTPUT_FILE
+echo "test finished with result $RETVAL" >> $OUTPUT_FILE
 
-exit 2
-#exit $RETVAL
+exit $RETVAL
 
 ##end_test_script_1
 
