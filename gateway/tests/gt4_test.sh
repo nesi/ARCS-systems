@@ -212,7 +212,7 @@ exit $RETVAL
 
 OUTPUT_FILE=$1
 
-echo "test starting: $@" > $OUTPUT_FILE
+echo "test starting: $0 $@" > $OUTPUT_FILE
 
 RETVAL=0
 
@@ -235,6 +235,7 @@ function err() {
 
 
 hostname || warn "problem running hostname"
+id || warn "problem getting uid"
 
 VARIABLES="GLOBUS_USER_NAME"
 FS_VARIABLES="HOME GLOBUS_USER_HOME GLOBUS_SCRATCH_DIR USER_SCRATCH NODE_SCRATCH"
@@ -253,18 +254,18 @@ for i in $FS_VARIABLES; do
 		log "$i: ${!i}"
 
 		if [ ! -d "${!i}" ]; then
-			err "${!i} is not a directory"
+			err "$i (${!i}) is not a directory"
 			if ! mkdir -p ${!i}; then
-				err "${!i} could not be created"
+				err "$1 (${!i}) could not be created"
 			else
-				MSG="${!i} could be created, maybe you should do this yourself?"
+				MSG="$i (${!i}) could be created, maybe you should do this yourself?"
 				warn "$MSG"
 				rmdir ${!i}
 			fi
 		else
 			log "${!i} is a directory"
 			if touch ${!i}/test_$$; then
-				log "${!i} is writable"
+				log "$i (${!i}) is writable"
 
 				# individual extra tests
 				case $i in
@@ -289,7 +290,7 @@ for i in $FS_VARIABLES; do
 
 				rm -f ${!i}/test_$$
 			else
-				err "${!i} is not writable"
+				err "$i (${!i}) is not writable"
 			fi
 		fi
 	fi
