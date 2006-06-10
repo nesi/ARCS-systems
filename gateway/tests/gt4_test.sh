@@ -88,16 +88,20 @@ set +e
 set -x
 
 globusrun-ws -submit -Ft $JOBMANAGER -F https://$GATEWAY:8443/wsrf/services/ManagedJobFactoryService -S -f $JOB_1
-set_status $?
+#set_status $?
 
 globusrun-ws -submit -Ft $JOBMANAGER -F https://$GATEWAY:8443/wsrf/services/ManagedJobFactoryService -s -f $JOB_2
-set_status $?
+#set_status $?
 
 set +x
 popd
 
 
 echo
+
+# seems we can't rely on the return value of globusrun-ws when using PBS :(
+RETVAL=$(awk '/^finished with result/ {print $NF}' $OUTDIR/output_file)
+
 if [ "$RETVAL" -eq 0 ]; then # gold
 	cat <<-EOF
 		SUCCESS!
