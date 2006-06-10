@@ -256,7 +256,7 @@ for i in $FS_VARIABLES; do
 		if [ ! -d "${!i}" ]; then
 			err "$i (${!i}) is not a directory"
 			if ! mkdir -p ${!i}; then
-				err "$1 (${!i}) could not be created"
+				err "$i (${!i}) could not be created"
 			else
 				MSG="$i (${!i}) could be created, maybe you should do this yourself?"
 				warn "$MSG"
@@ -267,24 +267,29 @@ for i in $FS_VARIABLES; do
 			if touch ${!i}/test_$$; then
 				log "$i (${!i}) is writable"
 
+				FSTYPE="$(stat -f -c %T ${!i}/test_$$)"
+
+				case $FSTYPE in
+					ext*|reiser*|xfs*)
+						LOCAL=1
+					*)
+						LOCAL=0
+				esac
+
 				# individual extra tests
 				case $i in
 					NODE_SCRATCH)
-						FSTYPE="$(stat -f -c %T ${!i}/test_$$)"
-						case $FSTYPE in
-							ext*|reiser*|xfs*)
-								log "$i (${!i}) is on a local filesystem ($FSTYPE)" ;;
-							*)
-								warn "$i (${!i}) is not on a local filesystem ($FSTYPE)" ;;
-						esac ;;
+						if [ "$LOCAL" -eq 1 ]; then
+							log "$i (${!i}) is on a local filesystem ($FSTYPE)"
+						else
+							warn "$i (${!i}) is not on a local filesystem ($FSTYPE)"
+						fi ;;
 					USER_SCRATCH|HOME)
-						FSTYPE="$(stat -f -c %T ${!i}/test_$$)"
-						case $FSTYPE in
-							ext*|reiser*|xfs*)
-								warn "$i (${!i}) is on a local filesystem ($FSTYPE)" ;;
-							*)
-								log "$i (${!i}) is not on a local filesystem ($FSTYPE)" ;;
-						esac ;;
+						if [ "$LOCAL" -eq 1 ]; then
+							warn "$i (${!i}) is on a local filesystem ($FSTYPE)"
+						else
+							log "$i (${!i}) is not on a local filesystem ($FSTYPE)"
+						fi ;;
 					*) ;;
 				esac
 
