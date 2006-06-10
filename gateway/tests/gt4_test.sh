@@ -275,9 +275,9 @@ for i in $FS_VARIABLES; do
 
 				case $FSTYPE in
 					ext*|reiser*|xfs*)
-						LOCAL=1
+						LOCAL=1;;
 					*)
-						LOCAL=0
+						LOCAL=0;;
 				esac
 
 				# individual extra tests
