@@ -317,7 +317,7 @@ EOF
 		
 		foreach(@arguments) {
 			if(ref($_)) {
-			return Globus::GRAM::Error::RSL_ARGUMENTS;
+				return Globus::GRAM::Error::RSL_ARGUMENTS;
 			}
 		}
 		if($#arguments >= 0) {
