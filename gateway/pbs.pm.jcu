@@ -77,7 +77,7 @@ sub submit {
 # TODO: check if this is sane
 # UPDATE: apparently not according to Graham Jenkins
 	elsif(! -r $description->stdin()) {
-	   return Globus::GRAM::Error::STDIN_NOT_FOUND();
+		return Globus::GRAM::Error::STDIN_NOT_FOUND();
 	}
 
 	$self->log("Determining job max time cpu from job description");
@@ -100,8 +100,8 @@ sub submit {
 		$self->log("   using maxwalltime of $wall_time");
 	}
 	elsif($cluster && defined($description->max_time())) {
-	   $wall_time = $description->max_time();
-	   $self->log("   using maxtime of $wall_time");
+		$wall_time = $description->max_time();
+		$self->log("   using maxtime of $wall_time");
 	}
 	else {
 		$wall_time = 0;
@@ -270,8 +270,7 @@ EOF
 		if($library_vars{$_} == 0) {
 			my $library_path = $description->library_path();
 			push(@new_env, $_ . '=' . $library_path);
-			$rsh_env .= "$_=$library_path;\n"
-					. "export $_;\n";
+			$rsh_env .= "$_=$library_path;\n" . "export $_;\n";
 		}
 	}
   
@@ -280,31 +279,12 @@ EOF
 	# finish off the job script
 	if ($description->pbsjobscript() ne "yes") {
 
-#		# get a copy of the proxy
-##		$description->jobcredentialendpoint() =~ /.*delegationService">(.*)<\/.*$/;
-##		my $orig_proxy = $ENV{'HOME'} . "/.globus/gram_job_proxy_" . $1;
-#		my $orig_proxy = $ENV{'X509_USER_PROXY'};
-#		my $proxy_file = "job_proxy";
-#		chomp($hostname = `hostname -f`);
-
-#		local(*PROXY);
-#		open(PROXY, "<$orig_proxy");
-#		local $/;
-#		my $proxy = <PROXY>;
-#		close(PROXY);
-
-# PBS stagein isn't playing nice - job doesn't get executed for about 1/2 hour
-#		push @job_params,(['-W', "stagein=job_proxy\@$hostname:$orig_proxy"]);
-
 		# load up the job settings
 		foreach my $tuple (@job_params) {
 			print JOB "#PBS $tuple->[0] $tuple->[1]\n";
 		}
 
 		print JOB "${rsh_env}\n";
-
-		# extract proxy
-#		print JOB "sed -n "/^-----BEGIN CERTIFICATE-----\$/,\$ p" \$0 \>\> $proxy_file";
 
 		# reinstating some error detection
 		my $dir = '' . $description->directory();
@@ -409,14 +389,8 @@ EOF
 		print JOB <<EOF;
 RETVAL=\$?
 
-# remove proxy
-rm -f $proxy_file
-
 exit \$RETVAL
 EOF
-
-		# whack the proxy on the end of the job - stagein with PBS isn't playing nice
-		print JOB "$proxy";
 
 		close(JOB);
 	}
