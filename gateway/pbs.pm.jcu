@@ -136,7 +136,7 @@ EOF
 #	push @job_params,(['-S', "'/bin/sh -l'"]);
 
 	chomp($submit_host = `/bin/hostname -s`);
-	push @job_params,(['-N', "g:$submit_host"]);
+	push @job_params,(['-N', "Grid_$submit_host"]);
 
 	if($description->email_address() ne '') {
 		push @job_params,(['-M', '' . $description->email_address()]);
