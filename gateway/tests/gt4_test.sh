@@ -17,7 +17,7 @@ set -o errexit
 
 function usage() {
 	cat <<-EOF
-		usage: $0 [-g gateway_hostname] [-r gridftp_base] [-m Fork|PBS] [-h]
+		usage: $0 [-g gateway_hostname] [-f gridftp_hostname] [-m Fork|PBS] [-h]
 
 		-h	show usage
 		-g	hostname of gateway to connect to (defaults to $DEF_HOSTNAME)
