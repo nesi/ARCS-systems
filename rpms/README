@@ -1,0 +1,66 @@
+Here's how to setup your environment to build these RPMs (these instructions are for CentOS but should be very similary for other RedHat variants)
+
+IMPORTANT NOTE: DON'T put APAC-gateway-host-certificates in a yum repository or you'll defeat the purpose of the RPM.  That RPM should be installed manually _after_ the host certificate and key are installed.
+
+as a normal user (eg. billy):
+
+	create working directory
+
+		mkdir ~/rpms
+		cd ~/rpms
+
+	make sure you use an absolute path for %_topdir
+
+		cat ~/.rpmmacros
+			%_topdir /home/billy/rpms
+
+		mkdir BUILD RPMS SRPMS
+
+		svn co https://www.grid.apac.edu.au/repository/svn/systems/gateway/rpms/SPECS
+		svn co https://www.grid.apac.edu.au/repository/svn/systems/gateway/rpms/SOURCES
+
+	now you can build some rpms (WARNING: don't forget the --buildroot option)
+
+		pwd
+			/home/billy/rpms
+
+		rpmbuild -ba --buildroot /home/billy/rpms/buildroot SPECS/trunk/<specfile>
+
+	the resulting RPMs or SRPMs should be below /home/billy/rpms/{S,}RPMS
+
+
+Some packages require others to be installed to build, so there is an order.
+Here's how to build all of the RPMs
+
+	build and install the following packages
+
+		APAC-gateway-config-java (requires jdk)
+		APAC-apache-ant
+		APAC-gateway-config-ant
+		APAC-apache-tomcat
+		APAC-gateway-config-tomcat (requires APAC-apache-tomcat-jsvc)
+		APAC-gridsphere
+
+	install the following packages
+
+		APAC-gridsphere-devel
+
+	for each package listed above run the following commands
+
+		rpmbuild -ba --buildroot /home/billy/rpms/buildroot/<package name> SPECS/trunk/<package spec file>
+		sudo rpm -i RPMS/i386/<package name>.rpm
+
+	for some packages there may be more than one RPM produced
+
+	clean the build tree, first making sure there's nothing else you want to keep in there
+
+		find RPMS -type f -exec rm -f {} \;
+		find SRPMS -type f -exec rm -f {} \;
+
+	build all packages (NOTE: this probably won't work well as soon as there are different versions of the same package)
+
+		for i in SPECS/trunk/*.spec; do
+			rpmbuild -ba --buildroot /home/billy/rpms/buildroot/$i $i || break
+		done
+
+
