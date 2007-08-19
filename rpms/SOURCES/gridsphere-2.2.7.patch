@@ -1,0 +1,51 @@
+diff -ruN gridsphere-2.2.7.pristine/build.xml gridsphere-2.2.7/build.xml
+--- gridsphere-2.2.7.pristine/build.xml	2006-08-29 09:54:46.000000000 +1000
++++ gridsphere-2.2.7/build.xml	2006-11-14 11:57:07.000000000 +1000
+@@ -130,6 +130,9 @@
+             <fileset dir="${env.ANT_HOME}/lib">
+                 <include name="*.jar"/>
+             </fileset>
++            <fileset dir="${env.TOMCAT_HOME}/common/lib">
++                <include name="*.jar"/>
++            </fileset>
+             <path refid="servletpath"/>
+         </path>
+ 
+@@ -167,7 +170,8 @@
+     <target name="license" description="Prints GridSphere license">
+         <loadfile property="license" srcFile="LICENSE.txt"/>
+         <echo message="${license}"/>
+-        <input message="Do you agree to these terms? Hit y or n" validargs="y,n" addProperty="agreed"/>
++        <!-- input message="Do you agree to these terms? Hit y or n" validargs="y,n" addProperty="agreed" -->
++	<property name="agreed" value="y" />
+         <condition property="do.abort">
+             <equals arg1="n" arg2="${agreed}"/>
+         </condition>
+@@ -209,8 +213,9 @@
+         <echo>If you answer 'n' you can deploy the javadoc API documentation at a later time </echo>
+         <echo>with 'ant docs'.                                     </echo>
+         <echo>------------------------------------------------------------</echo>
+-        <input message="Do you want to install GridSphere documentation? "
+-               validargs="y,n" defaultvalue="y" addProperty="install.docs.agreed"/>
++        <!-- input message="Do you want to install GridSphere documentation? "
++               validargs="y,n" defaultvalue="y" addProperty="install.docs.agreed" -->
++	<property name="install.docs.agreed" value="y" />
+         <condition property="install.docs">
+             <equals arg1="y" arg2="${install.docs.agreed}"/>
+         </condition>
+diff -ruN gridsphere-2.2.7.pristine/config/build/build-deploy.xml gridsphere-2.2.7/config/build/build-deploy.xml
+--- gridsphere-2.2.7.pristine/config/build/build-deploy.xml	2006-08-29 09:54:13.000000000 +1000
++++ gridsphere-2.2.7/config/build/build-deploy.xml	2006-11-14 11:59:19.000000000 +1000
+@@ -156,10 +156,10 @@
+                 <if>
+                     <available classname="org.apache.catalina.valves.FastCommonAccessLogValve">
+                         <classpath>
+-                            <fileset dir="${appserver.home}/server/lib/">
++                            <fileset dir="${env.TOMCAT_HOME}/server/lib/">
+                                 <include name="*.jar"/>
+                             </fileset>
+-                            <fileset dir="${appserver.home}/bin/">
++                            <fileset dir="${env.TOMCAT_HOME}/bin/">
+                                 <include name="*.jar"/>
+                             </fileset>
+                         </classpath>

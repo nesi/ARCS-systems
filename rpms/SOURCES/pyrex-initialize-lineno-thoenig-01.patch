@@ -1,0 +1,12 @@
+--- Pyrex/Compiler/Nodes.py.org	2006-08-01 14:43:52.000000000 +0200
++++ Pyrex/Compiler/Nodes.py	2006-08-01 14:45:31.000000000 +0200
+@@ -3334,6 +3334,9 @@
+         new_error_label = code.error_label
+         catch_label = code.new_label()
+         code.putln(
++            "%s = %s;" % (
++                self.lineno_var, Naming.lineno_cname))
++        code.putln(
+             "/*try:*/ {")
+         if self.disallow_continue_in_try_finally:
+             was_in_try_finally = code.in_try_finally

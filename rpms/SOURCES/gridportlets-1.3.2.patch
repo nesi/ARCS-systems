@@ -1,0 +1,58 @@
+diff -ruN gridportlets.pristine/build.properties gridportlets/build.properties
+--- gridportlets.pristine/build.properties	2006-07-27 02:06:18.000000000 +1000
++++ gridportlets/build.properties	2006-11-26 09:52:22.000000000 +1000
+@@ -21,7 +21,7 @@
+ # Gridsphere configuration
+ #----------------------------------------------------------
+ 
+-gridsphere.home=../..
++gridsphere.home=${env.GRIDSPHERE_HOME}
+ gridsphere.build=${gridsphere.home}/build
+ gridsphere.webapp=${env.CATALINA_HOME}/webapps/gridsphere
+ 
+diff -ruN gridportlets.pristine/build.xml gridportlets/build.xml
+--- gridportlets.pristine/build.xml	2006-07-27 02:06:18.000000000 +1000
++++ gridportlets/build.xml	2006-11-26 10:16:33.000000000 +1000
+@@ -159,11 +159,14 @@
+         <echo>answer 'n' you can deploy the documentation at a later time </echo>
+         <echo>with 'ant deploy-docs'.                                     </echo>
+         <echo>------------------------------------------------------------</echo>
++<!--
+         <input message="Do you want to install Grid Portlets documentation? "
+                validargs="y,n" defaultvalue="y" addProperty="install.docs.agreed"/>
+         <condition property="install.docs">
+             <equals arg1="y" arg2="${install.docs.agreed}"/>
+         </condition>
++-->
++        <property name="install.docs" value=""/>
+ 
+         <antcall target="clean"/>
+         <antcall target="setenv"/>
+@@ -236,11 +239,13 @@
+     <target name="license" description="Prints GridSphere license">
+         <loadfile property="license" srcFile="LICENSE.txt"/>
+         <echo message="${license}"/>
++<!--
+         <input message="Do you agree to these terms? " validargs="y,n" addProperty="agreed"/>
+         <condition property="do.abort">
+             <equals arg1="n" arg2="${agreed}"/>
+         </condition>
+         <fail if="do.abort">Grid Portlets will not be installed</fail>
++-->
+     </target>
+ 
+     <!-- =================================================================== -->
+diff -ruN gridportlets.pristine/config/build/globus.properties gridportlets/config/build/globus.properties
+--- gridportlets.pristine/config/build/globus.properties	2006-07-27 02:06:18.000000000 +1000
++++ gridportlets/config/build/globus.properties	2006-11-26 10:17:48.000000000 +1000
+@@ -37,8 +37,8 @@
+ # NOTE: when this property is set to WEB-INF/lib.
+ # NOTE: We have not been able to determine why.
+ # NOTE: This is not a problem for OGSA-3.2.1 however.
+-globus.deploy.core=${env.CATALINA_HOME}/shared/lib
+-#globus.deploy.core=${project.webapp}/WEB-INF/lib
++#globus.deploy.core=${env.CATALINA_HOME}/shared/lib
++globus.deploy.core=${project.webapp}/WEB-INF/lib
+ 
+ #----------------------------------------------------------
+ #  OGSA Httpg service configuration
