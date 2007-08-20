@@ -1,0 +1,275 @@
+#!/bin/sh
+
+# author: Andrew Sharpe <andrew.sharpe1@jcu.edu.au>
+
+# VDT install script - based on http://vpac.org/grid/files/ng2_vdt_160.sh
+
+RPM_PREREQS="APAC-pacman"
+
+for i in $RPM_PREREQS; do
+	if ! rpm -q $i >&/dev/null; then
+		echo "Please install $i (see http://www.vpac.org/twiki/bin/view/Sandbox/NG2RPMInstallation) before trying again"
+		exit 1
+	fi
+done
+
+# TODO: decide if this whole script should be run as root, or just the necessary components.  My thoughts are: if you're going to run part of it as root - then run all of it as root, unless you know everything about the system (VDT).
+[ "$(id -u)" -ne 0 ] && { echo "Attempting to become root user"; su -p -c /bin/sh root "-c $0 $*"; exit $?; }
+
+
+[ -n "$http_proxy" ] && { PROXY="-http-proxy $http_proxy"; echo "Using Proxy: $http_proxy"; }
+
+
+function usage() {
+	cat <<-EOF
+		usage: $0 [-h] [-v] [-r] [-f config-file] [-c cache-url] [-l pretend-platform] [-p package-list] [-g gums-server]
+
+		-h	print this help message
+		-v	verbose
+		-f	config file
+		-i	installation root directory, defaults to current directory
+		-c	pacman cache to use. defaults to http://vdt.cs.wisc.edu/vdt_161_cache
+		-l	platform for pacman. defaults to linux-rhel-4
+		-p	VDT packages to install.  defaults to "JDK-1.5,Globus-WS,Globus-WS-PBS-Setup,PRIMA-GT4"
+		-g	GUMS server to use (only useful if installing PRIMA/PRIMA-GT4)
+		-r	set the Globus TCP port range variable e.g. 40000,41000
+	EOF
+}
+
+# so we don't get burned :)
+unset DO_RANGE VERBOSE GUMS_SERVER
+
+INSTALL_ROOT=$(pwd)
+CACHE="http://vdt.cs.wisc.edu/vdt_161_cache"
+PLATFORM="linux-rhel-4"
+PACKAGES="JDK-1.5,Globus-WS,Globus-WS-PBS-Setup,PRIMA-GT4"
+DO_RANGE=0
+
+# TODO: provide option for _not_ overwriting install directory
+# TODO: provide option for enabling audit capabilities
+# TODO: provide option for PBS_HOME variable
+while getopts "hvr:i:l:p:c:g:f:" OPTION; do
+	case $OPTION in
+		h) usage; exit 0;;
+		v) VERBOSE=1;;
+		r) ARG_GLOBUS_TCP_PORT_RANGE=$OPTARG;;
+		i) ARG_INSTALL_ROOT=$OPTARG;;
+		l) ARG_PLATFORM="$OPTARG";;
+		p) ARG_PACKAGES=$OPTARG;;
+		c) ARG_CACHE=$OPTARG;;
+		f) VDT_CFG=$OPTARG;;
+		g) ARG_GUMS_SERVER=$OPTARG;;
+		*) usage; exit 1;;
+	esac
+done
+
+# read variable from config file
+if [ -n "$VDT_CFG" ]
+then
+	if [ -r "$VDT_CFG" ] 
+	then source $VDT_CFG
+	else
+		echo "Couldn't open VDT config file: $VDT_CFG"
+		exit
+	fi
+
+fi
+
+# override config file variables with argument variables
+[ -n "$ARG_GLOBUS_TCP_PORT_RANGE" ] && GLOBUS_TCP_PORT_RANGE=$ARG_GLOBUS_TCP_PORT_RANGE
+[ -n "$ARG_INSTALL_ROOT" ] && INSTALL_ROOT=$ARG_INSTALL_ROOT
+[ -n "$ARG_PLATFORM" ] && PLATFORM=$ARG_PLATFORM
+[ -n "$ARG_PACKAGES" ] && PACKAGES=$ARG_PACKAGES
+[ -n "$ARG_CACHE" ] && CACHE=$ARG_CACHE
+[ -n "$ARG_GUMS_SERVER" ] && GUMS_SERVER=$ARG_GUMS_SERVER
+
+# if the globus tcp port range has been defined set do_range
+[ -n "$GLOBUS_TCP_PORT_RANGE" ] && DO_RANGE=1
+
+
+POST_SETUP="$INSTALL_ROOT/post-setup/apac"
+PLATFORM="-pretend-platform $PLATFORM"
+PACMAN="pacman $PLATFORM"
+
+# setup install directory
+if [ -e "$INSTALL_ROOT" ]; then
+	[ ! -d "$INSTALL_ROOT" ] && { echo "Installation root is not a directory!"; exit 1; }
+
+	read -p "$INSTALL_ROOT already exists, would you like to (c)ontinue, (d)elete or (a)bort? " ACTION
+
+	case $ACTION in
+		c);;
+		d)
+			until [ -n "$REMOVE_VDT_INSTALL_ROOT" ]; do
+				read -p "Entering 'yes' will remove the contents of $INSTALL_ROOT.  Do you wish do continue: " REMOVE_VDT_INSTALL_ROOT
+			done
+
+			# TODO: potential problem here - if user has defined REMOVE_VDT_INSTALL_ROOT
+			# and is in the wrong directory ...
+			if [ "$REMOVE_VDT_INSTALL_ROOT" = "yes" ]; then
+				rm -rf $INSTALL_ROOT/*
+			else
+				echo "Exiting without changes"
+				exit 0
+			fi
+		;;
+		a)
+			exit 0;;
+	esac
+else
+	mkdir -p ${INSTALL_ROOT} || { echo "Couldn't create installation directory ($INSTALL_ROOT)"; exit 1; }
+fi
+
+# Globus port range if requested
+if [ "$DO_RANGE" = 1 ]; then
+	while ! echo $GLOBUS_TCP_PORT_RANGE | egrep -q "^[[:digit:]]+,[[:digit:]]+$"; do
+		read -p "Please enter GLOBUS_TCP_PORT_RANGE [e.g. 40000,41000]: " GLOBUS_TCP_PORT_RANGE
+	done
+fi
+
+# if we're going to installed PRIMA, get hold of the GUMS server
+# works for PRIMA and PRIMA-GT4
+if echo $PACKAGES | grep -q PRIMA; then
+	until [ -n "$GUMS_SERVER" ]; do
+		read -p "Enter the FQDN of your GUMS server: " GUMS_SERVER
+	done
+fi
+
+# check for pre-requisites
+if echo $PACKAGES | grep -q Globus-WS-PBS-Setup; then
+	if ! which qsub >&/dev/null; then
+		echo "Please install a PBS client package before continuing"
+		exit 1
+	fi
+
+	if ! qstat >&/dev/null; then
+		echo "Please verify that your PBS client commands (eg, qstat) work before continuing"
+		exit 1
+	fi
+fi
+
+# setup pacman
+cd /usr/local/pacman
+source setup.sh
+cd $INSTALL_ROOT
+
+[ -n "$VERBOSE" ] && set -x
+
+
+# setup packages to be installed
+if echo $PACKAGES | grep -q PRIMA; then
+	if ! echo $PACKAGES | grep -q VOMS-Client; then
+		PACKAGES=$PACKAGES,VOMS-Client
+	fi
+fi
+INSTALL_PACKAGES=$(echo "$PACKAGES" | sed -e "s%^\|,% $CACHE:%g")
+
+# do the install
+echo $CACHE >> trusted.caches
+echo "Installing VDT components ..."
+$PACMAN $PROXY -get $INSTALL_PACKAGES
+
+[ $? -ne 0 ] && { echo "Error installing the VDT components ($PACKAGES)"; exit 1; }
+
+
+## POST INSTALL
+
+# fix bug in pacman
+perl -pi -e 's/grep .sh\$/grep "\\\\.sh\$"/' $INSTALL_ROOT/setup.sh
+
+source $INSTALL_ROOT/setup.sh
+
+# TODO: make this test a function
+PACKAGE="Globus-WS-Container"
+if $PACMAN -d 0 -l $PACKAGE | grep -q "^\[\*\]"; then
+	echo "Making globus modifications"
+	perl -pi -e "s/WSC_PORT=9443/WSC_PORT=${GLOBUS_PORT:-8443}/" $INSTALL_ROOT/post-install/globus-ws
+
+	# make globus publish the hostname
+	CONFIG="$INSTALL_ROOT/globus/etc/globus_wsrf_core/server-config.wsdd"
+	if ! grep -q publishHostName $CONFIG; then
+		sed --in-place=.orig -e '/<globalConfiguration>/a\        <parameter name="publishHostName" value="true"/>' $CONFIG
+	fi
+fi
+
+# if java 1.5 was installed - assume we'll use it
+# TODO: potentially make the changes in $INSTALL_ROOT/post-setup/apac.sh
+if echo $PACKAGES | grep -q JDK-1.5; then
+	echo "Making java 1.5 modifications"
+	for KEY in JAVA_HOME PATH MANPATH LD_LIBRARY_PATH; do
+		sed -ie "/^$KEY/ s/jdk1.4/jdk1.5/g" $INSTALL_ROOT/setup.sh
+		sed -ie "/$KEY/ s/jdk1.4/jdk1.5/g" $INSTALL_ROOT/setup.csh
+	done
+fi
+
+# TCP port range if requested
+[ "$DO_RANGE" -eq 1 ] && (
+	mkdir -p $(dirname $POST_SETUP)
+	echo "export GLOBUS_TCP_PORT_RANGE=\"$GLOBUS_TCP_PORT_RANGE\"" >> $POST_SETUP.sh
+	echo "setenv GLOBUS_TCP_PORT_RANGE \"$GLOBUS_TCP_PORT_RANGE\"" >> $POST_SETUP.csh
+)
+
+# TODO: work out if this gets overwritten by the PRIMA-GT4 config
+# configure PRIMA
+if [ -f $INSTALL_ROOT/vdt/setup/configure_prima ]; then
+	$INSTALL_ROOT/vdt/setup/configure_prima
+	sed -i.orig -e "/^imsContact/ s|\(.*https://\)[^:]\+\(:.*\)|\1$GUMS_SERVER\2|" $INSTALL_ROOT/post-install/prima-authz.conf
+fi
+
+
+# do things that require root privileges
+if [ $(id -u) -eq 0 ]; then
+	# TODO: do we really want this?  It can overwrite things like JAVA_HOME and others which we might not want.  I suggest trying a VDT init script that calls vdt-control.  If someone is going to source these files, they should know what variables will be set!
+	# make VDT environment available to users
+	for i in setup.{c,}sh; do
+		[ -e /etc/profile.d/vdt_$i ] || ln -s $INSTALL_ROOT/$i /etc/profile.d/vdt_$i
+	done
+
+	# PRIMA setup
+	if [ -f $INSTALL_ROOT/vdt/setup/configure_prima_gt4 ]; then
+		$INSTALL_ROOT/vdt/setup/configure_prima_gt4 --enable --gums-server $GUMS_SERVER
+	elif [ -f $INSTALL_ROOT/vdt/setup/configure_prima ]; then
+		for i in prima-authz.conf gsi-authz.conf; do
+			cp $INSTALL_ROOT/post-install/$i /etc/grid-security
+		done
+	fi
+
+
+	# TODO: this logic could probably be simplified if we knew the dependencies between the VDT packages
+	#sudo setup
+	if echo $PACKAGES | grep -q Globus-WS; then
+		if ! grep -q GLOBUSUSERS /etc/sudoers; then
+			echo "Runas_Alias GLOBUSUSERS = ALL, !root" >> /etc/sudoers
+		fi
+
+		# TODO: which is more readable ?
+		GLOBUS_USER=$(getent passwd globus >&/dev/null && echo globus || echo daemon)
+#		getent passwd globus >&/dev/null && GLOBUS_USER="globus" || GLOBUS_USER="daemon"
+		# don't use this because it doesn't deal with LDAP, NIS etc
+#		GLOBUS_USER=$(grep -q ^globus /etc/passwd && echo globus || echo daemon)
+
+		# TODO: the greps inside each branch of this if don't deal with an install in the same place using a different auth mechanism
+		if [ -f $INSTALL_ROOT/vdt/setup/configure_prima_gt4 ]; then
+			if ! grep -q "$INSTALL_ROOT/globus/libexec/globus-job-manager-script.pl" /etc/sudoers; then
+				cat <<-EOF >> /etc/sudoers
+					$GLOBUS_USER ALL=(GLOBUSUSERS) NOPASSWD: $INSTALL_ROOT/globus/libexec/globus-job-manager-script.pl *
+					$GLOBUS_USER ALL=(GLOBUSUSERS) NOPASSWD: $INSTALL_ROOT/globus/libexec/globus-gram-local-proxy-tool *
+				EOF
+			fi
+		else # old school grid-mapfile
+			# TODO: if we're going to allow two installs, then they must share the auth mechanism because of this file!
+			# so the question becomes, do we remove it - or ...
+			# remove old PRIMA conf
+			[ -f /etc/grid-security/gsi-authz.conf ] && mv /etc/grid-security/gsi-authz.conf /etc/grid-security/gsi-authz.conf.old
+
+			if ! grep -q "$INSTALL_ROOT/globus/libexec/globus-job-manager-script.pl" /etc/sudoers; then
+				cat <<-EOF >> /etc/sudoers
+					$GLOBUS_USER ALL=(GLOBUSUSERS) NOPASSWD: $INSTALL_ROOT/globus/libexec/globus-gridmap-and-execute -g /etc/grid-security/grid-mapfile $INSTALL_ROOT/globus/libexec/globus-job-manager-script.pl *
+					$GLOBUS_USER ALL=(GLOBUSUSERS) NOPASSWD: $INSTALL_ROOT/globus/libexec/globus-gridmap-and-execute -g /etc/grid-security/grid-mapfile $INSTALL_ROOT/globus/libexec/globus-gram-local-proxy-tool *
+				EOF
+			fi
+		fi
+	fi
+fi
+
+

@@ -1,0 +1,153 @@
+#!/bin/sh
+
+source /etc/profile
+
+DESTINATION="$1"
+BAD="Not OK"
+
+# we start with success
+STATUS="OK"
+
+[ -z "$DESTINATION" ] && DISPOSITION="cat" || DISPOSITION="Mail -s \"$(hostname -f) Periodic System Check\" $DESTINATION"
+
+
+LIBDIR="/usr/local/lib/gridpulse"
+CERTDIR="/etc/grid-security/certificates"
+
+seconds() {
+	date -d "$1" +%s
+}
+
+(
+# System information
+
+# all executables in LIBDIR
+for i in $LIBDIR/*; do
+	[ "$i" = "$LIBDIR/*" ] && break # nothing found
+
+	[ -x "$i" ] && $i || echo "skipping non executable $i" >&2
+done
+
+# all lines in $LIBDIR/system_shorts.pulse
+cat $LIBDIR/system_shorts.pulse | while read CMD; do
+	OUTPUT="$(eval "$CMD")"
+	[ -n "$OUTPUT" ] && echo "Info: $OUTPUT"
+done
+
+
+# separate check for wallclock and ntp
+WALLCLOCK="$(cat /proc/sys/xen/independent_wallclock)"
+if [ -n "$WALLCLOCK" ]; then # maybe not on xen?
+	echo "Info: Independent wallclock: $WALLCLOCK"
+
+	NTP="$(rpm -q ntp | sort | tail -1; echo ${PIPESTATUS[0]})"
+	NTP_INSTALLED="$(echo "$NTP" | sed -e "N; s/.*\n//")"
+
+
+	if [ $WALLCLOCK -eq 1 ]; then
+		if [ $NTP_INSTALLED -eq 1 ]; then
+			STATUS="$BAD"
+			echo "WARNING: Using independent wallclock without ntp installed"
+		elif service ntpd status | grep -q stopped; then
+			STATUS="$BAD"
+			echo "WARNING: Using independent wallclock without ntp running"
+		else
+			NTP_STATUS="$(ntpdc -nc peers | awk '/^*/ {print substr($1, 2) ", offset: " $(NF-1), "jitter: " $NF, "stratum: " $3}')"
+			[ -z "$NTP_STATUS" ] && NTP_STATUS="$(ntpstat | head -1)"
+			echo "Info: NTP $NTP_STATUS"
+		fi
+	fi
+fi
+
+
+# all RPMs listed in $LIBDIR/system_packages.pulse
+
+# copy stdin to fd 9
+exec 9<&0
+# redirect stdin from file
+exec < $LIBDIR/system_packages.pulse
+
+while read PACKAGE; do
+	OUTPUT="$(rpm -q $PACKAGE | sort | tail -1; echo ${PIPESTATUS[0]})"
+	RESULT=$(echo "$OUTPUT" | sed -e "N; s/.*\n//")
+	echo "Package: $(echo "$OUTPUT" | sed -e "N; s/\n.*//")"
+	[ $RESULT -ne 0 ] && STATUS="$BAD"
+#	rpm -q $PACKAGE > /dev/null && echo "Package: $(rpm -q $PACKAGE | sort | tail -1)"
+done
+
+# restore stdin and close file
+<&9 9<&-
+
+
+NOW="$(seconds "$(date -u)")"
+CRL_STATUS="OK"
+
+# check for valid CRLs
+for CERTIFICATE in $CERTDIR/*.0; do
+	if [ "$CERTIFICATE" = "$CERTDIR/*.0" ]; then
+		echo "Info: No CA certificates found in $CERTDIR"
+		continue
+	fi
+
+	HASH="$(echo $CERTIFICATE | sed -e "s|.*/\([^/]*\).0|\1|")"
+	
+	EXPIRY_DATE="$(openssl x509 -in $CERTIFICATE -enddate -noout 2>/dev/null |
+			awk -F= '{print $2}')"
+
+	# not sure when this is true?
+	[ -z "EXPIRY_DATE" ] && continue
+
+	echo -n "CA: $HASH, $(openssl x509 -in $CERTIFICATE -subject -noout | sed -e "s/^subject= //"), "
+
+	# expired certificate
+	if [ $(seconds "$EXPIRY_DATE") -lt $NOW ]; then
+		echo "EXPIRED"
+		continue
+	fi
+
+	CRL="${CERTIFICATE/\.*}.r0"
+
+	if [ ! -e "$CRL" ]; then
+		echo "CRL not found"
+		STATUS="$BAD"
+		continue;
+	fi
+
+	CRL_NEXT_UPDATE="$(openssl crl -in $CRL -nextupdate -noout 2>/dev/null |
+			awk -F= '{print $2}')"
+
+	# valid CRL, not sure when the first will be false?
+	if [ -n "$CRL_NEXT_UPDATE" -a $(seconds "$CRL_NEXT_UPDATE") -ge $NOW ]; then
+		echo "CRL OK"
+		continue
+	fi
+
+	# if we get here, then there's a problem
+	echo "CRL problem.  Next update: $CRL_NEXT_UPDATE"
+
+	# special treatment for APAC Certs
+	case $HASH in
+		1e12d831|21bf4d92)
+			STATUS="$BAD" 
+			CRL_STATUS="$BAD"
+		;;
+	esac
+done
+
+# check services
+IGNORE_SERVICES="iptables anacron"
+for SERVICE in $(chkconfig --list | awk "! /${IGNORE_SERVICES/ /|}/ && \$5 == \"3:on\" {print \$1}"); do
+	case "$(service $SERVICE status 2>/dev/null | head -n1)" in
+		*is\ running*) echo "Service: $SERVICE is OK"
+			;;
+		*is\ stopped*) echo "Service: $SERVICE is not OK"
+			STATUS="$BAD"
+			;;
+	esac
+done
+
+echo "Summary: $(uname -n) is $STATUS"
+
+#[ "$DISPOSITION" = "cat" ] || perl -e 'sleep int(180*rand())'
+) | eval $DISPOSITION
+

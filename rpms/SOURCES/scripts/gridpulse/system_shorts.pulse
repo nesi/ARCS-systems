@@ -1,0 +1,13 @@
+uname -nrv
+cat /etc/redhat-release
+uptime|sed -e 's/^ //'
+xm dmesg 2>/dev/null | awk -F '(' '{if(\$1~/Xen version/){sub(\" \",\"\",\$1);print \$1}}'
+xm info  2>/dev/null | awk -F : '/total_memory/ {print \$0}'
+xm info  2>/dev/null | awk -F : '/free_memory/  {print \$0}'
+df -h /|tail -1
+ls -lL /etc/grid-security/grid-mapfile 2>/dev/null | awk '{if(NR==1)if(NF>2)print \$NF,\$(NF-3),\$(NF-2),\$(NF-1)}'
+ls -lL $GLOBUS_LOCATION/lib/perl/Globus/GRAM/JobManager/pbs.pm 2>/dev/null | awk '{if(NR==1)if(NF>2)print \$NF,\$(NF-3),\$(NF-2),\$(NF-1)}'
+ls -la /opt/.ng1_vdt.stamp 2>/dev/null | awk '{if(NR==1)if(NF>2)print \$NF,\$(NF-3),\$(NF-2),\$(NF-1)}'
+java -version 2>&1 | head -1
+echo -n "globus-version $(globus-version)"
+
