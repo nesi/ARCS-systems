@@ -21,6 +21,7 @@ Group:          Development/Libraries/Python
 Source:         %{modname}-%{version}.tar.bz2
 Requires:       libxml2 libxslt
 BuildRequires:  libxml2-devel libxslt-devel APAC-pyrex python-devel
+BuildRoot: /tmp/%{name}-buildroot
 
 %description
 lxml is a Pythonic binding for the libxml2 and libxslt libraries. It
@@ -46,6 +47,7 @@ python setup.py build
 
 %install
 rm -rf %{buildroot}
+mkdir -p $RPM_BUILD_ROOT/%{_prefix}/lib/python2.3/site-packages/
 python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 %clean
@@ -55,4 +57,6 @@ python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INST
 %defattr(-,root,root)
 %doc doc CHANGES.txt CREDITS.txt LICENSES.txt README.txt TODO.txt
 
-
+%changelog
+* Wed Aug 22 2007 Ashley Wright
+- Merged Russell's branch

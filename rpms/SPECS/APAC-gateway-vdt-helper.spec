@@ -3,7 +3,7 @@
 Summary: Scripts to help the installation and configuration of the VDT for the APAC Grid
 Name: APAC-gateway-vdt-helper
 Version: 0.1
-Release: 1
+Release: 2
 Copyright: APAC
 Source: vdt_helper.tgz
 Group: Applications/Internet
@@ -18,19 +18,18 @@ Source available from %{TARBALL_URL}
 %prep
 %setup -n vdt_helper
 
-%install
-rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/local/sbin
+%build
+make
 
-cp vdt-install.sh $RPM_BUILD_ROOT/usr/local/sbin/vdt-install-helper
-chmod +x $RPM_BUILD_ROOT/usr/local/sbin/vdt-install-helper
+%install
+make install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(755,root,root)
-/usr/local/sbin/vdt-install-helper
+%attr(0755,-,-) /usr/local/sbin/vdt-install-helper
 
 %changelog
-
+* Wed Aug 22 2007 Ashley Wright
+- Merged Russell's branch
