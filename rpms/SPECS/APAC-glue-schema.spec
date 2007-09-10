@@ -4,7 +4,7 @@ Summary: The APAC glue schema extensions
 Name: APAC-glue-schema
 Version: 0.1
 Release: 1
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Source: APACGLUESchema12R1.xsd
 Source1: GLUESchema12R2.xsd

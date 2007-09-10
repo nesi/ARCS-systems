@@ -5,7 +5,7 @@ Summary: Gridportlets provides portlets that use globus
 Name: APAC-%{package_name}
 Version: 1.3.2
 Release: 2
-Copyright: GRIDSPHERE SOFTWARE LICENSE
+License: GRIDSPHERE SOFTWARE LICENSE
 Group: Applications/Internet
 Source: %{package_name}-1.3.2-src.tgz
 Patch: %{package_name}-1.3.2.patch

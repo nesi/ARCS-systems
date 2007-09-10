@@ -2,7 +2,7 @@ Summary: NG2 rpm to provide the basics for an APAC NG2 service
 Name: APAC-gateway-ng2
 Version: 1.1
 Release: 2
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Requires: APAC-gateway-crl-update, APAC-gateway-gridpulse, APAC-pacman, APAC-gateway-host-certificates, APAC-gateway-vdt-helper
 BuildArch: noarch
@@ -22,7 +22,7 @@ cp %_sourcedir/sources/vdt-template/vdt-config.ng2 $RPM_BUILD_ROOT/usr/local/etc
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
-* Mon Sep 10 2007
+* Mon Sep 10 2007 Russell Sim
 - Updated package to build with new repos layout
 * Wed Aug 22 2007 Ashley Wright
 - Merged Russell's branch

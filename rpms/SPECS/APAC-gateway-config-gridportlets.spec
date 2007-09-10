@@ -2,7 +2,7 @@ Summary: GridPortlets configuration for APAC gateways
 Name: APAC-gateway-config-gridportlets
 Version: 0.1
 Release: 1
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Requires: APAC-gridsphere, APAC-gateway-host-certificates
 BuildArch: noarch

@@ -2,7 +2,7 @@ Summary: Yum configuration for APAC gateways
 Name: APAC-gateway-config-yum
 Version: 0.1
 Release: 2
-Copyright: Apache
+License: Apache
 Group: Applications/Internet
 Requires: yum
 Buildroot: /tmp/%{name}-builtroot

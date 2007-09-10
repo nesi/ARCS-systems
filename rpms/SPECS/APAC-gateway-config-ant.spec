@@ -5,7 +5,7 @@ Summary: Ant configuration for APAC gateways
 Name: APAC-gateway-config-ant
 Version: 0.1
 Release: 3
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 BuildRoot: /tmp/%{name}-buildroot
 Requires: APAC-apache-ant

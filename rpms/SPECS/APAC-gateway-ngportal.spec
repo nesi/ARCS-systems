@@ -2,7 +2,7 @@ Summary: ngportal rpm to make a new ngportal machine
 Name: APAC-gateway-ngportal
 Version: 1.0
 Release: 2
-Copyright: APAC or QUT?
+License: APAC or QUT?
 Group: Applications/Internet
 Requires: APAC-gridportlets, ca_APAC, APAC-gateway-config-ant, APAC-gateway-config-mod_jk, APAC-gateway-config-gridsphere, Gpulse, APAC-gateway-crl-update, APAC-gateway-host-certificates
 BuildArch: noarch

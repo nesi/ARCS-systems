@@ -5,7 +5,7 @@ Name: APAC-gateway-gridpulse
 Version: 0.2
 Release: 4
 Source: %{name}-%{version}.tgz
-Copyright: GPL
+License: GPL
 Group: Applications/Internet
 BuildRoot: /tmp/%{name}-buildroot
 Requires: /usr/bin/Mail, smtpdaemon, vixie-cron

@@ -5,7 +5,7 @@ Summary: A Java-based build tool like make
 Name: APAC-apache-ant
 Version: 1.6.5
 Release: 1
-Copyright: Apache
+License: Apache
 Group: Applications/Internet
 #Source0: APAC-gateway-config-tomcat.tgz
 Source: %{package_name}-%{version}-bin.tar.gz

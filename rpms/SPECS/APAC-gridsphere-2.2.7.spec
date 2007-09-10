@@ -5,7 +5,7 @@ Summary: The GridSphere portal framework provides an open-source portlet based W
 Name: APAC-%{package_name}
 Version: 2.2.7
 Release: 1
-Copyright: GRIDSPHERE SOFTWARE LICENSE
+License: GRIDSPHERE SOFTWARE LICENSE
 Group: Applications/Internet
 Source: %{package_name}-2.2.7-src.tgz
 Patch: %{package_name}-2.2.7.patch

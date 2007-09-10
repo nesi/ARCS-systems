@@ -2,7 +2,7 @@ Summary: Cron job to update CRLs
 Name: APAC-gateway-config-globus_CA
 Version: 0.1
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Applications/Internet
 Requires: ca_APAC, APAC-CA-config
 BuildRoot: /tmp/%{name}-buildroot

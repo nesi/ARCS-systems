@@ -2,7 +2,7 @@ Summary: Sets up java environment on login, ie JAVA_HOME and PATH
 Name: APAC-gateway-config-java
 Version: 0.1
 Release: 4
-Copyright: APAC or JCU?
+License: APAC or JCU?
 Group: Applications/Internet
 #BuildRoot: /var/tmp/%{name}-buildroot
 Requires: jdk

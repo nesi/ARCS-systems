@@ -5,7 +5,7 @@ Summary: Apache Tomcat is a servlet container for the Java Servlet and JavaServe
 Name: APAC-%{package_name}
 Version: 5.5.20
 Release: 1
-Copyright: Apache
+License: Apache
 Group: Applications/Internet
 Source0: %{package_name}-%{version}.tar.gz
 Source1: %{package_name}-%{version}-compat.tar.gz

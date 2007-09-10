@@ -4,7 +4,7 @@ Summary: Mip configuration help for APAC gateways
 Name: APAC-gateway-config-mip
 Version: 0.1
 Release: 1
-Copyright: Apache
+License: Apache
 Group: Applications/Internet
 Requires: APAC-mip
 Buildroot: /tmp/%{name}-builtroot

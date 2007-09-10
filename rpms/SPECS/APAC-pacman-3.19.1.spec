@@ -5,7 +5,7 @@ Summary: Pacman - the package manager
 Name: APAC-%{package_name}
 Version: 3.19.1
 Release: 1
-Copyright: Saul Youssef
+License: Saul Youssef
 Group: Applications/Internet
 Source: %{package_name}-%{version}.tar.gz
 Requires: python

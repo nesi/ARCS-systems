@@ -2,7 +2,7 @@ Summary: Indicates that you've got your hostcert.pem and hostkey.pem setup
 Name: APAC-gateway-host-certificates
 Version: 0.1
 Release: 1
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Provides: /etc/grid-security/hostcert.pem, /etc/grid-security/hostkey.pem
 Requires: openssl

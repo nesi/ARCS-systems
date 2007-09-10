@@ -5,7 +5,7 @@ Summary: Tomcat configuration for APAC gateways, environment and startup script
 Name: APAC-gateway-config-tomcat
 Version: 0.1
 Release: 2
-Copyright: Apache
+License: Apache
 Group: Applications/Internet
 BuildRoot: /tmp/%{name}-buildroot
 Requires: APAC-apache-tomcat-jsvc, APAC-gateway-config-java

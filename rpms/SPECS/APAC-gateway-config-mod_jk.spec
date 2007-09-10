@@ -4,7 +4,7 @@ Summary: Sets up mod_jk for the gateway environment
 Name: APAC-gateway-config-mod_jk
 Version: 0.1
 Release: 1
-Copyright: APAC or JCU?
+License: APAC or JCU?
 Group: Applications/Internet
 BuildRoot: /tmp/%{name}-buildroot
 Requires: APAC-mod_jk

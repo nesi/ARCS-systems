@@ -4,7 +4,7 @@ Summary: The APAC globus default CA certificate configuration
 Name: APAC-CA-config
 Version: 0.1
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Applications/Internet
 Source: %{name}-%{version}-%{release}.tgz
 BuildRoot: /tmp/%{name}-buildroot

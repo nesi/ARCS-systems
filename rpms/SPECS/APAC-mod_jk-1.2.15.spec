@@ -4,7 +4,7 @@ Summary: Tomcat mod_jk connector
 Name: APAC-mod_jk
 Version: 1.2.15
 Release: 3
-Copyright: Apache
+License: Apache
 Group: Applications/Internet
 Source0: mod_jk-1.2.15-src.tar.gz
 Patch: mod_jk-1.2.15.patch

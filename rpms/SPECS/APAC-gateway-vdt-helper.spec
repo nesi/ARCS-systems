@@ -2,7 +2,7 @@ Summary: Scripts to help the installation and configuration of the VDT for the A
 Name: APAC-gateway-vdt-helper
 Version: 0.1
 Release: 2
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo
 BuildArch: noarch
@@ -24,7 +24,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755,-,-) /usr/local/sbin/vdt-install-helper
 
 %changelog
-* Mon Sep 10 2007
+* Mon Sep 10 2007 Russell Sim
 - Updated package to build with new repos layout
 * Wed Aug 22 2007 Ashley Wright
 - Merged Russell's branch

@@ -2,7 +2,7 @@ Summary: Creates the gridmap file hourly based on VOMS and the APAC usermapping 
 Name: APAC-gateway-gridmap-gen
 Version: 0.1
 Release: 1
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Requires: edg-mkgridmap, APAC-gateway-usermapping-tool
 BuildRoot: /tmp/%{name}-buildroot

@@ -2,7 +2,7 @@ Summary: Retrieves the gridmap file from a remote location via a cron job
 Name: APAC-gateway-gridmap-sync
 Version: 0.1
 Release: 1
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Requires: wget, util-linux
 BuildRoot: /tmp/%{name}-buildroot

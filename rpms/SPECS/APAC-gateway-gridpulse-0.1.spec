@@ -2,7 +2,7 @@ Summary: The APAC CA certificates and crl tool
 Name: APAC-gateway-gridpulse
 Version: 0.1
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Applications/Internet
 BuildRoot: /tmp/%{name}-buildroot
 Requires: vixie-cron

@@ -4,7 +4,7 @@ Summary: Cron job to update CRLs
 Name: APAC-gateway-crl-update
 Version: 0.1
 Release: 1
-Copyright: GPL
+License: GPL
 Group: Applications/Internet
 Requires: fetch-crl, ca_APAC, crontabs
 BuildRoot: /tmp/%{name}-buildroot

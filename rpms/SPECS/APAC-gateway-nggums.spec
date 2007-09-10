@@ -2,7 +2,7 @@ Summary: GUMS rpm to provide the basics for an APAC GUMS service
 Name: APAC-gateway-nggums
 Version: 1.0
 Release: 1
-Copyright: APAC
+License: APAC
 Group: Applications/Internet
 Requires: APAC-gateway-gridpulse, APAC-pacman, APAC-gateway-host-certificates, APAC-gateway-vdt-helper
 BuildArch: noarch
@@ -22,6 +22,6 @@ cp %_sourcedir/scripts/vdt-tempate/vdt-config.nggums $RPM_BUILD_ROOT/usr/local/e
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
-* Mon Sep 10 2007
+* Mon Sep 10 2007 Russell Sim
 - Updated package to build with new repos layout
 
