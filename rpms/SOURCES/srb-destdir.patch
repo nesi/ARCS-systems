@@ -1,0 +1,27 @@
+--- SRB3_4_2/Makefile.in.orig	2007-05-04 14:32:09.000000000 +1000
++++ SRB3_4_2/Makefile.in	2007-05-04 14:32:44.000000000 +1000
+@@ -666,15 +666,15 @@
+ endif
+ 
+ install:: $(TARGETS)
+-	-mkdir $(installDir);	\
+-	$(INSTALL) bin $(installDir);	\
+-	$(INSTALL) data $(installDir);	\
+-	chmod 755 $(installDir) $(installDir)/data $(installDir)/bin	\
+-	$(installDir)/bin/*; 	\
+-	chmod 644 $(installDir)/data/*; 	\
+-	chmod 755 $(installDir)/data/log; 	\
+-	chmod 600 $(installDir)/data/MdasConfig
+-	chmod 755 $(installDir)/data/lockDir $(installDir)/data/CVS
++	-mkdir $(DESTDIR)$(installDir);	\
++	$(INSTALL) bin $(DESTDIR)$(installDir);	\
++	$(INSTALL) data $(DESTDIR)$(installDir);	\
++	chmod 755 $(DESTDIR)$(installDir) $(DESTDIR)$(installDir)/data $(DESTDIR)$(installDir)/bin	\
++	$(DESTDIR)$(installDir)/bin/*; 	\
++	chmod 644 $(DESTDIR)$(installDir)/data/*; 	\
++	chmod 755 $(DESTDIR)$(installDir)/data/log; 	\
++	chmod 600 $(DESTDIR)$(installDir)/data/MdasConfig
++	chmod 755 $(DESTDIR)$(installDir)/data/lockDir $(DESTDIR)$(installDir)/data/CVS
+ 
+ clean:
+ 	rm -f $(TARGETS) $(SOBJS) $(MDAS_OBJ)	\

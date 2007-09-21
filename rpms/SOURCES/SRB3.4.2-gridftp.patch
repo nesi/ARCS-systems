@@ -1,0 +1,42 @@
+diff -uNr SRB3_4_2.orig/Makefile.in SRB3_4_2/Makefile.in
+--- SRB3_4_2.orig/Makefile.in	2006-06-22 07:10:33.000000000 +0800
++++ SRB3_4_2/Makefile.in	2007-09-03 10:05:34.000000000 +0800
+@@ -464,10 +464,10 @@
+ ifdef GRID_FTP
+ SVR_CFLAGS+=-DGRID_FTP
+ BOBJS+= $(objDir)/gridftpDvr.o
+-LDADD+=-L$(GLOBUS_LOCATION)/lib -lglobus_ftp_client_gcc32 	\
+-     -lglobus_ftp_control_gcc32 \
+-     -lglobus_io_gcc32 -lglobus_common_gcc32 \
+-     -lglobus_gss_assist_gcc32 -lglobus_gssapi_gsi_gcc32
++LDADD+=-L$(GLOBUS_LOCATION)/lib -lglobus_ftp_client_gcc32dbg 	\
++     -lglobus_ftp_control_gcc32dbg \
++     -lglobus_io_gcc32dbg -lglobus_common_gcc32dbg \
++     -lglobus_gss_assist_gcc32dbg -lglobus_gssapi_gsi_gcc32dbg
+ endif
+ 
+ ifdef MSS
+diff -uNr SRB3_4_2.orig/mk/mk.config.in SRB3_4_2/mk/mk.config.in
+--- SRB3_4_2.orig/mk/mk.config.in	2006-04-05 08:29:09.000000000 +0800
++++ SRB3_4_2/mk/mk.config.in	2007-09-03 10:06:48.000000000 +0800
+@@ -226,7 +226,7 @@
+ # HPSS5=51
+  
+ # GRID_FTP defines whether this SRB server uses grid-ftp driver functions
+-# GRID_FTP = 6
++GRID_FTP = 6
+ 
+ # ADS defines whether this SRB server can access UK's Atlas Store mass
+ # storage system.  Comment it out if the SRB server does not support ADS Access.
+diff -uNr SRB3_4_2.orig/src/back/gridftpDvr.c SRB3_4_2/src/back/gridftpDvr.c
+--- SRB3_4_2.orig/src/back/gridftpDvr.c	2006-06-20 23:37:16.000000000 +0800
++++ SRB3_4_2/src/back/gridftpDvr.c	2007-09-04 08:20:07.000000000 +0800
+@@ -1192,7 +1192,7 @@
+ 
+    globus_mutex_lock(&fp->lock);
+    done = GLOBUS_TRUE;
+-   globus_cond_signal(&fp-.cond);
++   globus_cond_signal(&fp->cond);
+    globus_mutex_unlock(&fp->lock);
+ }
+ 
