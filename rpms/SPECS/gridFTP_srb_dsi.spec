@@ -85,7 +85,7 @@ Please add
 srb_hostname_dn <YOUR SERVER DN>
 srb_default_resource <YOU DEFAULT RESOURCE>
 to %{GLOBUS_LOCATION}/etc/gridftp_srb.conf.
-The grid-mapfile for the SRB DSI can be found at: %{GLOBUS_LOCATION}/sbin/globus-gridftp-server
+The grid-mapfile for the SRB DSI can be found at: /etc/grid-security/grid-mapfile.srb
 EOF
 
 %clean
