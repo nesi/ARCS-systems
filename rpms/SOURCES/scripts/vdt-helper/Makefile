@@ -1,9 +1,11 @@
+DESTDIR=/usr/local
+
 all:
 	chmod +x vdt-helper
 
 install: all
-	mkdir -p /usr/local/share/doc/vdt-helper
-	cp vdt-config.example /usr/local/share/doc/vdt-helper
-	mkdir -p /usr/local/sbin
-	cp vdt-helper /usr/local/sbin/vdt-install-helper
+	mkdir -p $(DESTDIR)/share/doc/vdt-helper
+	cp vdt-config.example $(DESTDIR)/share/doc/vdt-helper
+	mkdir -p $(DESTDIR)/sbin
+	cp vdt-helper $(DESTDIR)/sbin/vdt-install-helper
 
