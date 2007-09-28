@@ -6,6 +6,7 @@ License: APAC
 Group: Applications/Internet
 Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo
 BuildArch: noarch
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 Install requirements for the VDT (http://vdt.cs.wisc.edu/) and provides helper scripts to install the VDT.
@@ -15,13 +16,14 @@ cp -a %_sourcedir/scripts/vdt-helper/* $RPM_BUILD_DIR
 make
 
 %install
-make install
+make DESTDIR=$RPM_BUILD_ROOT/usr/local install
 
 %clean
-rm -rf $RPM_BUILD_DIR/*
+rm -rf $RPM_BUILD_ROOT
 
 %files
 %attr(0755,-,-) /usr/local/sbin/vdt-install-helper
+%doc /usr/local/share/doc/*
 
 %changelog
 * Wed Sep 26 2007 Russell Sim
