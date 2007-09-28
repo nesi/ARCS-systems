@@ -11,8 +11,10 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 %description
 Install requirements for the VDT (http://vdt.cs.wisc.edu/) and provides helper scripts to install the VDT.
 
-%build
+%prep
 cp -a %_sourcedir/scripts/vdt-helper/* $RPM_BUILD_DIR
+
+%build
 make
 
 %install
