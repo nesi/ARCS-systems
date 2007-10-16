@@ -8,6 +8,7 @@ Release:    1
 License:    Custom
 Group:      Applications/File
 Source:     gridftp_srb_dsi-%{version}.tar.gz
+Patch:      gridftp_srb_dsi-0.28-auto_command.patch
 Packager:   Florian Goessmann <florian@ivec.org>
 Buildroot:  %{_tmppath}/%{name}-root
 BuildRequires:  make gcc
@@ -17,6 +18,8 @@ Interface for gridFTP to SRB
 
 %prep
 %setup -q -n globus_srb_dsi-%{version}
+
+%patch0 -p1 -b .auto_command.patch
 
 %build
 export GLOBUS_LOCATION=%{GLOBUS_LOCATION}
@@ -51,7 +54,7 @@ service gsiftp-srb
     env += LD_LIBRARY_PATH=%{GLOBUS_LOCATION}/lib
     env += GRIDMAP=/etc/grid-security/grid-mapfile.srb
     server = %{GLOBUS_LOCATION}/sbin/globus-gridftp-server
-    server_args = -i -p 5000 -dsi srb -auth-level 4
+    server_args = -i -p 5000 -dsi srb -auth-level 4 -log-level ALL -logfile /var/log/gridftp-srb.log
     disable = no
 }
 EOF
@@ -85,7 +88,11 @@ Please add
 srb_hostname_dn <YOUR SERVER DN>
 srb_default_resource <YOU DEFAULT RESOURCE>
 to %{GLOBUS_LOCATION}/etc/gridftp_srb.conf.
-The grid-mapfile for the SRB DSI can be found at: /etc/grid-security/grid-mapfile.srb
+If you want to use to auto command execution feature,
+you will also have to add:
+srb_auto_executable <THE FULL PATH OF THE EXECUTABLE>
+srb_user_name <THE UNIX USER TO RUN THE EXECUTABLE>
+The grid-mapfile for the SRB DSI can be found at: %{GLOBUS_LOCATION}/sbin/globus-gridftp-server
 EOF
 
 %clean
