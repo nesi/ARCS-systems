@@ -46,6 +46,7 @@ make globus_globusrun_ws
 
 find $GLOBUS_LOCATION > globusrun-ws.list
 
+$GLOBUS_LOCATION/sbin/gpt-postinstall
 
 %install
 GLOBUS_LOCATION=$RPM_BUILD_ROOT%{PREFIX}/globus
@@ -179,6 +180,7 @@ Provides the globus etc directory
 %package libraries
 Group: Applications/System
 Summary: Globus libraries
+Prereq: /sbin/ldconfig
 Requires: APAC-globus
 %description libraries
 Provides the globus libraries
@@ -189,6 +191,12 @@ Provides the globus libraries
 %{PREFIX}/globus/libexec/globus-run-cmd
 %dir %{PREFIX}/globus/libexec
 %{PREFIX}/globus/include
+
+%post libraries
+if ! grep -q %{GLOBUS_LOCATION}/lib /etc/ld.so.conf; then
+	echo "%{GLOBUS_LOCATION}/lib" >> /etc/ld.so.conf
+fi
+/sbin/ldconfig
 
 %package proxy-utils
 Group: Applications/System

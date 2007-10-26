@@ -17,7 +17,7 @@ URL:		http://www.sdsc.edu/srb/index.php/Main_Page
 Packager:	David Gwynne <dlg@itee.uq.edu.au>, Florian Goessmann <florian@ivec.org>
 Buildroot:	%{_tmppath}/%{name}-root
 BuildRequires:	make gcc srb-psqlodbc, APAC-globus-gridftp-server
-Requires:	srb-psqlodbc, APAC-globus-gridftp-server, postgresql-server
+#Requires:	srb-psqlodbc, APAC-globus-gridftp-server, postgresql-server
 %description
 The Storage Resource Broker is a distributed file system (Data Grid),
 based on a client-server architecture.
@@ -29,16 +29,18 @@ or physical locations.
 %package clients
 Summary:	The Storage Resource Broker unix client commands (Scommands)
 Group:		Applications/File
+Requires:	APAC-globus-libraries
 
 %package server
 Summary:	The Storage Resource Broker server
 Group:		Applications/File
-Prereq:		/sbin/chkconfig, /usr/sbin/useradd
+Prereq:		/sbin/chkconfig, /usr/sbin/useradd, /sbin/ldconfig
+Requires:	APAC-globus-gridftp-server, postgresql-server, srb-psqlodbc
 
 %package server-config
 Summary:	The Storage Resource Broker server configuration package
 Group:		Applications/File
-Requires:   srb-server, srb-clients
+Requires:   	srb-server, srb-clients
 
 %description clients
 The Storage Resource Broker is a distributed file system (Data Grid),
@@ -146,10 +148,12 @@ rm -rf $RPM_BUILD_ROOT/%{srbroot}/MCAT/install.ora.pl
 
 %pre server
 if ! getent passwd srb >/dev/null 2>&1 ; then
-  /usr/sbin/useradd -M -d /var/lib/srb -s /bin/bash \
-    -c "SRB Server" srb > /dev/null 2>&1 || :
-    echo "export LD_LIBRARY_PATH=%{globuslocation}/lib:%{srbroot}/lib" >> %{srbHome}/.bashrc
+    /usr/sbin/useradd -m -d /var/lib/srb -s /bin/bash -c "SRB Server" srb > /dev/null 2>&1 || :
 fi
+if ! grep -q %{srbroot}/lib /etc/ld.so.conf; then
+        echo "%{srbroot}/lib" >> /etc/ld.so.conf
+fi
+/sbin/ldconfig
 
 %post server
 if [ $1 = 1 ]; then
@@ -310,6 +314,11 @@ If you see and error like:
 Szone: Error in Performing Action: -1007
 AUTH_ERR_PROXY_NOPRIV: proxy user not privileged
 
+or
+
+Szone: Error in Performing Action: -3314
+ZONE_NAME_NOT_IN_CAT: ZONE_NAME_NOT_IN_CAT
+
 it is most likely ok.
 ---------------------------------------------------
 EOF
@@ -329,4 +338,3 @@ EOF
 %attr(0755,srb,srb) %dir /var/lib/srb
 %attr(0750,srb,srb) /var/lib/srb/.srb
 %attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
-
