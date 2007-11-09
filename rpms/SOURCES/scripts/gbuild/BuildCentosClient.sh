@@ -60,10 +60,24 @@ cd $PACMAN && source setup.sh && cd ..
 VDTMIRROR=http://www.grid.apac.edu.au/repository/mirror/vdt/vdt_181_cache
 [ -n "$http_proxy" ] && ProxyString="-http-proxy $http_proxy" &&echo "==> Using Proxy: $http_proxy"
 
+# set up platform.  More special cases need to be added here.
+# tested on Mac OS 10.4 (i386).
+# tested on Centos 5. (i686) 09/11/2007 -- S. McMahon
+Platform=""
+if [ -f /etc/redhat-release ]; then
+    Platform="-pretend-platform linux-rhel-4"
+    if grep Zod /etc/redhat-release >/dev/null 2>&1 ; then
+        # Kludge so it works for Fedora-Core 6 :(
+	Platform="-pretend-platform linux-fedora-4"
+	[ -e /lib/libssl.so.5    ] || ln -s /lib/libssl.so.6    /lib/libssl.so.5
+	[ -e /lib/libcrypto.so.5 ] || ln -s /lib/libcrypto.so.6 /lib/libcrypto.so.5
+    fi
+fi
+
 #
 # VDT Components .. 
 
 for Component in Globus-Client Globus-WS-Client GSIOpenSSH MyProxy UberFTP VOMS-Client; do
   echo "==> Checking/Installing: $Component"
-  pacman $ProxyString -get $VDTMIRROR:$Component || echo "==> Failed!"
+  pacman $Platform $ProxyString -get $VDTMIRROR:$Component || echo "==> Failed!"
 done
