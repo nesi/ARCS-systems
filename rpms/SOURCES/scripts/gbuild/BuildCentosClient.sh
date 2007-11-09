@@ -1,9 +1,8 @@
 #!/bin/bash
-# BuildCentosClient.sh	ARCS Globus Client build from VDT 1.8.x cache.
-#                       Installs useful client software from VDT
-#                       2007-09-19 S. McMahon, ANU
+# InstallVDTClient.sh	Installs useful client software from VDT
+#                       09/11/2007 -- S. McMahon, ANU
 # 
-# You should be able to install this as an ordinary user
+# Installation of VDT client components without root privileges.
 #
 
 # get the installation directory
