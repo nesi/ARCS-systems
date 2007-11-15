@@ -9,7 +9,6 @@ License: Apache
 Group: Applications/Internet
 BuildRoot: /tmp/%{name}-buildroot
 Requires: APAC-apache-tomcat-jsvc, APAC-gateway-config-java
-Buildrequires: APAC-apache-tomcat
 BuildArch: noarch
 
 %description
