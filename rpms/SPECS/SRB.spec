@@ -307,6 +307,30 @@ su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRAR
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by server-config RPM' && /usr/bin/Sexit"
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by server-config RPM' && /usr/bin/Sexit"
 
+# Setup inca test user
+
+if [[ !$SRB_INCA_DN ]]; then
+	export SRB_INCA_DN='/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest'
+fi
+
+if [[ !$SRB_NO_INCA ]]; then
+	echo "Setting up INCA Test User."
+	su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Singestuser inca GTest $SRB_DOMAIN  staff '' '' '' GSI_AUTH '/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest' && /usr/bin/Sexit"
+
+	if ! test -d /etc/grid-security; then
+		mkdir etc/grid-security
+	fi
+	if ! test -e /etc/grid-security/grid-mapfile.srb; then
+		touch /etc/grid-security/grid-mapfile.srb
+	fi 
+
+	if ! grep -q inca@$SRB_DOMAIN /etc/grid-security/grid-mapfile.srb; then
+		echo "\"$SRB_INCA_DN\" inca@$SRB_DOMAIN" >> /etc/grid-security/grid-mapfile.srb
+	fi
+	echo "done."
+fi
+# done
+
 cat<<EOF
 --------------------------------------------------
 If you see and error like:
