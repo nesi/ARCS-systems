@@ -4,6 +4,8 @@ Version: 0.1
 Release: 0
 License: ARCS
 Group: Applications/Internet
+# Source file is included in the SRPM and generally extracted into the buildroot via the setup macro
+Source: template.tar.gz
 Requires: /bin/sh, rpm
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-buildroot
