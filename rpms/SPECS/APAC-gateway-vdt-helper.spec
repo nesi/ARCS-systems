@@ -5,6 +5,7 @@ Release: 3
 License: APAC
 Group: Applications/Internet
 Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo
+Source: vdt-helper.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
@@ -12,20 +13,20 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Install requirements for the VDT (http://vdt.cs.wisc.edu/) and provides helper scripts to install the VDT.
 
 %prep
-cp -a %_sourcedir/scripts/vdt-helper/* $RPM_BUILD_DIR
+tar zxf %_sourcedir/vdt-helper.tar.gz
 
 %build
-make
+#cd %_sourcedir/vdt-helper/vdt_helper
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT/usr/local install
+make install DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %attr(0755,-,-) /usr/local/sbin/vdt-install-helper
-%doc /usr/local/share/doc/*
+%doc /usr/local/share/doc/vdt-helper/vdt-config.example
 
 %changelog
 * Wed Sep 26 2007 Russell Sim

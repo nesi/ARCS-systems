@@ -1,11 +1,12 @@
-DESTDIR=/usr/local
+PREFIX=/usr/local
 
-all:
+dist:
+	tar czf ../../vdt-helper.tar.gz *
+install:
 	chmod +x vdt-helper
+	mkdir -p $(DESTDIR)/$(PREFIX)/share/doc/vdt-helper
+	cp vdt-config.example $(DESTDIR)/$(PREFIX)/share/doc/vdt-helper
+	mkdir -p $(DESTDIR)/$(PREFIX)/sbin
+	cp vdt-helper $(DESTDIR)/$(PREFIX)/sbin/vdt-install-helper
 
-install: all
-	mkdir -p $(DESTDIR)/share/doc/vdt-helper
-	cp vdt-config.example $(DESTDIR)/share/doc/vdt-helper
-	mkdir -p $(DESTDIR)/sbin
-	cp vdt-helper $(DESTDIR)/sbin/vdt-install-helper
-
+	

@@ -5,6 +5,7 @@ Release: 3
 License: APAC
 Group: Applications/Internet
 Requires: APAC-gateway-crl-update, APAC-gateway-gridpulse, APAC-pacman, APAC-gateway-host-certificates, APAC-gateway-vdt-helper
+Source: vdt-config.ng2.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
@@ -12,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 This is a meta RPM that pulls in the dependencies for basic ng2 functionality
 
 %prep
-cp %_sourcedir/scripts/vdt-templates/vdt-config.ng2 $RPM_BUILD_DIR
+tar zxf %_sourcedir/vdt-config.ng2.tar.gz
 
 %install
 mkdir -p $RPM_BUILD_ROOT/usr/local/etc
