@@ -30,9 +30,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 # Change the attributes on an erxecutable file
-# %attr(0755,-,-) /usr/local/sbin/vdt-install-helper
+%attr(0755,-,-) /usr/local/sbin/vdt-install-helper
 # Doc file declariation
-# %doc *.txt README
+%doc *.txt README
 
 %changelog
 * Fri Nov 09 2007 Russell Sim
