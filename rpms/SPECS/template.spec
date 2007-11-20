@@ -7,6 +7,7 @@ Group: Applications/Internet
 # Source file is included in the SRPM and generally extracted into the buildroot via the setup macro
 Source: template.tar.gz
 Requires: /bin/sh, rpm
+BuildRequires: make
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-buildroot
 %description
