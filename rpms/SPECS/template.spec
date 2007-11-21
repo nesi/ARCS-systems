@@ -23,7 +23,7 @@ make
 
 %install
 # Install the binary
-make install
+make install DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 # Remove all the data in the build root
