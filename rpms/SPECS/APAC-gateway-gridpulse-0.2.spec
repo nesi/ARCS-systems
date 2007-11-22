@@ -3,7 +3,7 @@
 Summary: The APAC CA certificates and crl tool
 Name: APAC-gateway-gridpulse
 Version: 0.2
-Release: 4
+Release: 5
 Source: %{name}-%{version}.tgz
 License: GPL
 Group: Applications/Internet
@@ -31,9 +31,17 @@ perl -pi -e "s|\\\$PREFIX|%{PREFIX}|g" $RPM_BUILD_ROOT%{PREFIX}/bin/gridpulse
 rm -rf $RPM_BUILD_ROOT
 
 %post
-if ! grep -q %{PREFIX}/bin/gridpulse /var/spool/cron/root; then
+# if the root crontab doesn't exist or doesn't contain gridpulse add it.
+if [ ! -e /var/spool/cron/root ] || ! grep -q %{PREFIX}/bin/gridpulse /var/spool/cron/root; then
 	echo "3,23,43 * * * * %{PREFIX}/bin/gridpulse grid_pulse@vpac.org >/dev/null 2>&1" >> /var/spool/cron/root
-	/etc/init.d/crond restart
+/etc/init.d/crond status >> /dev/null
+	# if cron isn't running just start it
+	if [ "$?" -eq "3" ]
+	then
+		/etc/init.d/crond start
+	else
+		/etc/init.d/crond restart
+	fi
 fi
 
 echo %{name} >> %{PREFIX}/lib/gridpulse/system_packages.pulse
