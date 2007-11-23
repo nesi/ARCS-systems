@@ -4,7 +4,7 @@ Version: 0.1
 Release: 3
 License: APAC
 Group: Applications/Internet
-Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo
+Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo, which
 Source: vdt-helper.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -29,6 +29,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc /usr/local/share/doc/vdt-helper/vdt-config.example
 
 %changelog
+* Fri Nov 23 2007 Russell Sim
+- Added missing dependency on which
 * Wed Sep 26 2007 Russell Sim
 - Updated spec to copy the script to the build dir
 - Updated spec to clean correctly after building
