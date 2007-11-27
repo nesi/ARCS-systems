@@ -4,7 +4,7 @@ Version: 1.1
 Release: 3
 License: APAC
 Group: Applications/Internet
-Requires: APAC-gateway-crl-update, APAC-gateway-gridpulse, APAC-pacman, APAC-gateway-host-certificates, APAC-gateway-vdt-helper
+Requires: APAC-gateway-crl-update, APAC-gateway-gridpulse, APAC-pacman, APAC-gateway-host-certificates, APAC-gateway-vdt-helper, inetd
 Source: vdt-config.ng2.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -26,6 +26,8 @@ install vdt-config.ng2 $RPM_BUILD_ROOT/usr/local/etc
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Nov 27 2007 Russell Sim
+- added requirement, inetd which is required for gridftp
 * Thu Sep 27 2007 Russell Sim
 - refactored spec to be cleaner and use a more generic build root
 * Mon Sep 10 2007 Russell Sim
