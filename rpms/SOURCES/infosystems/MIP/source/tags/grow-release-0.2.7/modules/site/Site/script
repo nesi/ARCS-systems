@@ -1,7 +1,0 @@
-#!/bin/bash
-
-# This is an example script
-# to show site administrators that they
-# can simply override the Site name
-
-#echo "<Name>OVERRIDE</Name>"
