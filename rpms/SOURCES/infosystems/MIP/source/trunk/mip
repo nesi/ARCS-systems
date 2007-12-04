@@ -1,0 +1,15 @@
+#!/bin/bash
+LANG=C
+. /usr/local/osg/setup.sh
+cd /home/eshook/Projects/MIP/mip
+if [ ! -z "$1" ]; then
+   if [ "$1" == "-remote" ]; then
+      ./mip-remote.pl /home/eshook/Projects/MIP/mip/config
+   elif [ "$1" == "-int" -o "$1" == "-integrator" ]; then
+      ./integrator.pl /home/eshook/Projects/MIP/mip/config
+   else
+      ./mip.pl $1
+   fi
+else
+   ./mip.pl
+fi

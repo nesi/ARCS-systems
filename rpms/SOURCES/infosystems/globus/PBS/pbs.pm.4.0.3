@@ -1,0 +1,742 @@
+use Globus::GRAM::Error;
+use Globus::GRAM::JobState;
+use Globus::GRAM::JobManager;
+use Globus::Core::Paths;
+
+use Config;
+
+# NOTE: This package name must match the name of the .pm file!!
+package Globus::GRAM::JobManager::pbs;
+
+@ISA = qw(Globus::GRAM::JobManager);
+
+my ($mpisoftenv, $mpirun, $mpiexec, $qsub, $qstat, $qdel, $cluster, $cpu_per_node, $remote_shell, $soft_msc);
+
+BEGIN
+{
+    $mpisoftenv = 0; # 0=false, 1=true
+    $mpiexec        = 'no';
+    $mpirun         = 'no';
+    $qsub           = '/usr/bin/qsub';
+    $qstat          = '/usr/bin/qstat';
+    $qdel           = '/usr/bin/qdel';
+    $cluster        = 1;
+    $cpu_per_node   = 1;
+    $remote_shell   = '/usr/bin/ssh';
+    $softenv_dir    = '';
+    $soft_msc       = "$softenv_dir/bin/soft-msc";
+    $softenv_load   = "$softenv_dir/etc/softenv-load.sh";
+
+}
+
+sub myceil ($)
+{
+    my $x = shift;
+    ( abs($x-int($x)) < 1E-12 ) ? $x : int($x < 0 ? $x : $x+1.0);
+}
+
+sub submit
+{
+    my $self = shift;
+    my $description = $self->{JobDescription};
+    my $status;
+    my $pbs_job_script;
+    my $pbs_job_script_name;
+    my $pbs_qsub_err_name ;
+    my $errfile = '';
+    my $job_id;
+    my $rsh_env;
+    my @arguments;
+    my $email_when = '';
+    my $cache_pgm = "$Globus::Core::Paths::bindir/globus-gass-cache";
+    my %library_vars;
+
+
+    $self->log("Entering pbs submit");
+
+    # Reject jobs that want streaming, if so configured
+    if ( $description->streamingrequested() &&
+	 $description->streamingdisabled() ) {
+
+	$self->log("Streaming is not allowed.");
+	return Globus::GRAM::Error::OPENING_STDOUT;
+    }
+
+    # check jobtype
+    if(defined($description->jobtype()))
+    {
+        if($description->jobtype !~ /^(mpi|single|multiple)$/)
+        {
+            return Globus::GRAM::Error::JOBTYPE_NOT_SUPPORTED;
+        }
+    }
+    if( $description->directory eq '')
+    {
+        return Globus::GRAM::Error::RSL_DIRECTORY();
+    }
+    if ($description->directory() =~ m|^[^/]|) {
+        $description->add("directory",
+                $ENV{HOME} . '/' . $description->directory());
+    }
+    chdir $description->directory() or
+        return Globus::GRAM::Error::BAD_DIRECTORY();
+
+    $self->nfssync( $description->executable() )
+        unless $description->executable() eq '';
+    $self->nfssync( $description->stdin() )
+        unless $description->stdin() eq '';
+    if( $description->executable eq '')
+    {
+        return Globus::GRAM::Error::RSL_EXECUTABLE();
+    }
+    #elsif(! -f $description->executable())
+    #{
+        #return Globus::GRAM::Error::EXECUTABLE_NOT_FOUND();
+    #}
+    #elsif(! -x $description->executable())
+    #{
+        #return Globus::GRAM::Error::EXECUTABLE_PERMISSIONS();
+    #}
+    elsif( $description->stdin() eq '')
+    {
+        return Globus::GRAM::Error::RSL_STDIN;
+    }
+    #elsif(! -r $description->stdin())
+    #{
+       #return Globus::GRAM::Error::STDIN_NOT_FOUND();
+    #}
+
+    $self->log("Determining job max time cpu from job description");
+    if(defined($description->max_cpu_time())) 
+    {
+        $cpu_time = $description->max_cpu_time();
+        $self->log("   using maxcputime of $cpu_time");
+    }
+    elsif(! $cluster && defined($description->max_time()))
+    {
+        $cpu_time = $description->max_time();
+        $self->log("   using maxtime of $cpu_time");
+    }
+    else
+    {
+        $cpu_time = 0;
+        $self->log('   using queue default');
+    }
+
+    $self->log("Determining job max wall time limit from job description");
+    if(defined($description->max_wall_time()))
+    {
+        $wall_time = $description->max_wall_time();
+        $self->log("   using maxwalltime of $wall_time");
+    }
+    elsif($cluster && defined($description->max_time()))
+    {
+       $wall_time = $description->max_time();
+       $self->log("   using maxtime of $wall_time");
+    }
+    else
+    {
+        $wall_time = 0;
+        $self->log('   using queue default');
+    }
+
+    $self->log('Building job script');
+
+    $pbs_job_script_name = $self->job_dir() . '/scheduler_pbs_job_script';
+
+    local(*JOB);
+    open( JOB, '>' . $pbs_job_script_name );
+    print JOB<<"EOF";
+#! /bin/sh
+# PBS batch job script built by Globus job manager
+#
+#PBS -S /bin/sh
+EOF
+
+    if($description->email_address() ne '')
+    {
+        print JOB '#PBS -M ', $description->email_address(), "\n";
+    }
+    if($description->emailonabort() eq 'yes')
+    {
+        $email_when .= 'a';
+    }
+    if($description->emailonexecution() eq 'yes')
+    {
+        $email_when .= 'b';
+    }
+    if($description->emailontermination() eq 'yes')
+    {
+        $email_when .= 'e';
+    }
+    if($email_when eq '')
+    {
+        $email_when = 'n';
+    }
+    print JOB "#PBS -m $email_when\n";
+
+    if($description->queue() ne '')
+    {
+        print JOB '#PBS -q ', $description->queue(), "\n";
+    }
+    if($description->project() ne '')
+    {
+        print JOB '#PBS -A ', $description->project(), "\n";
+    }
+
+    if($cpu_time != 0)
+    {
+        if($description->jobtype() eq 'multiple')
+        {
+            if ($description->totalprocesses() > 0)
+            {
+                $total_cpu_time = $cpu_time * $description->totalprocesses();
+            }
+            else
+            {
+                $total_cpu_time = $cpu_time * $description->count();
+            }
+        }
+        else
+        {
+            $total_cpu_time = $cpu_time;
+        }
+        print JOB "#PBS -l pcput=${cpu_time}:00\n";
+        print JOB "#PBS -l cput=${total_cpu_time}:00\n";
+    }
+
+    if($wall_time != 0)
+    {
+        print JOB "#PBS -l walltime=${wall_time}:00\n";
+    }
+
+    if($description->max_memory() != 0)
+    {
+        if($description->jobtype() eq 'multiple')
+        {
+            if ($description->totalprocesses() > 0)
+            {
+                $max_memory = $description->max_memory()
+                            * $description->totalprocesses();
+            }
+            else
+            {
+                $max_memory = $description->max_memory()
+                            * $description->count();
+            }
+        }
+        else
+        {
+            $max_memory = $description->max_memory();
+        }
+        print JOB "#PBS -l mem=${max_memory}mb\n";
+    }
+    print JOB '#PBS -o ', $description->stdout(), "\n";
+    print JOB '#PBS -e ', $description->stderr(), "\n";
+
+###############################################################################
+# TeraGrid -- prews node type/property and node name based selection support
+###############################################################################
+    my @hosttypes = $description->hosttypes();
+    my @hostnames = $description->hostnames();
+    my @hostxcount = $description->hostxcount();
+    my @xcount = $description->xcount();
+    if ( (scalar @hosttypes) || (scalar @hostnames) || (scalar @hostxcount) || (scalar @xcount) ) {
+        handle_prews_nodes($self, $description);
+        print JOB '#PBS -l nodes=', $description->nodes(), "\n";
+    }
+    elsif(defined $description->nodes())
+    {
+        #Generated by ExtensionsHandler.pm from resourceAllocationGroup elements
+        print JOB '#PBS -l nodes=', $description->nodes(), "\n";
+    }
+    elsif($description->host_count() != 0)
+    {
+        print JOB '#PBS -l nodes=', $description->host_count(), "\n";
+    }
+    elsif($cluster && $cpu_per_node != 0)
+    {
+        print JOB '#PBS -l nodes=',
+        myceil($description->count() / $cpu_per_node), "\n";
+    }
+
+    ### SoftEnv extension ###
+    if ($softenv_dir ne '')
+    {
+        $self->setup_softenv(
+            $self->job_dir() . '/pbs_softenv_job_script',
+            $soft_msc,
+            $softenv_load,
+            *JOB);
+    }
+    #########################
+
+    $rsh_env = '';
+
+    $library_vars{LD_LIBRARY_PATH} = 0;
+    if($Config{osname} eq 'irix')
+    {
+        $library_vars{LD_LIBRARYN32_PATH} = 0;
+        $library_vars{LD_LIBRARY64_PATH} = 0;
+    }
+
+    foreach my $tuple ($description->environment())
+    {
+        if(!ref($tuple) || scalar(@$tuple) != 2)
+        {
+            return Globus::GRAM::Error::RSL_ENVIRONMENT();
+        }
+        if(exists($library_vars{$tuple->[0]}))
+        {
+            $tuple->[1] .= ":$library_string";
+            $library_vars{$tuple->[0]} = 1;
+        }
+
+        push(@new_env, $tuple->[0] . '="' . $tuple->[1] . '"');
+
+        $tuple->[0] =~ s/\\/\\\\/g;
+        $tuple->[0] =~ s/\$/\\\$/g;
+        $tuple->[0] =~ s/"/\\\"/g; #"
+        $tuple->[0] =~ s/`/\\\`/g; #`
+
+        $tuple->[1] =~ s/\\/\\\\/g;
+        $tuple->[1] =~ s/\$/\\\$/g;
+        $tuple->[1] =~ s/"/\\\"/g; #"
+        $tuple->[1] =~ s/`/\\\`/g; #`
+
+        $rsh_env .= $tuple->[0] . '="' . $tuple->[1] . "\";\n"
+                 .  'export ' . $tuple->[0] . ";\n";
+    }
+###############################################################################
+# TeraGrid -- Do not reset library variables
+# 06/30/2005, JP Navarro <navarro@mcs.anl.gov>
+###############################################################################
+  if (0) {
+    foreach (keys %library_vars)
+    {
+        if($library_vars{$_} == 0)
+        {
+            my $library_path = $description->library_path();
+            push(@new_env, $_ . '=' . $library_path);
+            $rsh_env .= "$_=$library_path;\n"
+                      . "export $_;\n";
+        }
+    }
+  }
+###############################################################################
+
+###############################################################################
+# TeraGrid -- Advanced reservation selection
+# 06/30/2005, JP Navarro <navarro@mcs.anl.gov>
+###############################################################################
+    if($description->reservation_id() ne '')
+    {
+        print JOB '#PBS -W x=FLAGS:ADVRES:' .  $description->reservation_id() . "\n";
+    }
+###############################################################################
+
+    print JOB '#PBS -v ' . join(',', @new_env) . "\n";
+
+###############################################################################
+
+    print JOB "$rsh_env";
+
+    print JOB "\n#Change to directory requested by user\n";
+    print JOB 'cd ' . $description->directory() . "\n";
+
+    @arguments = $description->arguments();
+
+    foreach(@arguments)
+    {
+        if(ref($_))
+        {
+            return Globus::GRAM::Error::RSL_ARGUMENTS;
+        }
+    }
+    if($#arguments >= 0)
+    {
+        foreach(@arguments)
+        {
+            $self->log("Transforming argument \"$_\"\n");
+            $_ =~ s/\\/\\\\/g;
+            $_ =~ s/\$/\\\$/g;
+            $_ =~ s/"/\\\"/g; #"
+            $_ =~ s/`/\\\`/g; #`
+            $self->log("Transformed to \"$_\"\n");
+
+            $args .= '"' . $_ . '" ';
+        }
+    }
+    else
+    {
+        $args = '';
+    }
+
+    if ($description->executable() =~ m|^[^/]|)
+    {
+        $description->add('executable', './' . $description->executable());
+    }
+    if($description->jobtype() eq 'multiple' && !$cluster)
+    {
+        my $process_count;
+        if ($description->totalprocesses() > 0)
+        {
+            $process_count = $description->totalprocesses();
+        }
+        else
+        {
+            $process_count = $description->count();
+        }
+
+        print JOB "pids=''\n";
+        print JOB "exit_code=0\n";
+        for(my $i = 0; $i < $process_count; $i++)
+        {
+            print JOB $description->executable(), " $args <",
+                $description->stdin(), "&\n";
+            print JOB "pids=\"\$pids \$!\"\n";
+        }
+        print JOB <<EOF;
+            for x in \$pids; do
+                wait \$x
+                tmp_exit_code=\$?
+                if [ \$exit_code = 0 -a \$tmp_exit_code != 0 ]; then
+                    exit_code=\$tmp_exit_code
+                fi
+            done
+            exit \$exit_code
+EOF
+    }
+    elsif($description->jobtype() eq 'mpi' ||
+            $description->jobtype() eq 'multiple')
+    {
+        my $count;
+        if ($description->totalprocesses() > 0)
+        {
+            $count = $description->totalprocesses();
+        }
+        else
+        {
+            $count = $description->count();
+        }
+        my $cmd_script_name ;
+        my $cmd_script ;
+        my $stdin = $description->stdin();
+
+        $cmd_script_name = $self->job_dir() . '/scheduler_pbs_cmd_script';
+
+        local(*CMD);
+        if ( open( CMD, ">$cmd_script_name" ) ) 
+        {
+            print CMD "#!/bin/sh -l\n";
+
+            ### SoftEnv extension ###
+            $self->setup_softenv(
+                $self->job_dir() . '/pbs_softenv_cmd_script',
+                $soft_msc,
+                *CMD);
+            #########################
+
+            print CMD 'cd ', $description->directory(), "\n";
+            print CMD "$rsh_env\n";
+            print CMD $description->executable(), " $args\n";
+            close(CMD);
+            chmod 0700, $cmd_script_name;
+
+            $self->nfssync( $cmd_script_name );
+        } 
+        else 
+        {
+            # FIXME: what to do in error?
+            return Globus::GRAM::Error::TEMP_SCRIPT_FILE_FAILED();
+        }
+
+        if ($description->jobtype() eq "mpi")
+        {
+            my $this_count = ($description->totalprocesses() > 0) ?
+                $description->totalprocesses() : $description->count();
+            my $machinefilearg = ($cluster) ? ' -machinefile $PBS_NODEFILE' : '';
+
+            if ($mpisoftenv)
+            {
+                print JOB 'which mpiexec >/dev/null 2>&1' . "\n";
+                print JOB 'if [ $? == 0 ]; then' . "\n";
+                print JOB "  mpiexec $machinefilearg -n " . $this_count;
+                print JOB " $cmd_script_name < " .  $description->stdin() . "\n";
+                print JOB 'else' . "\n";
+                print JOB '  which mpirun >/dev/null 2>&1' . "\n";
+                print JOB '  if [ $? == 0 ]; then' . "\n";
+                print JOB "    mpirun -np " . $this_count . $machinefilearg;
+                print JOB " $cmd_script_name < " .  $description->stdin() . "\n";
+                print JOB '  else' . "\n";
+            }
+            if ($mpiexec ne 'no')
+            {
+                print JOB "$mpiexec $machinefilearg -n " . $this_count;
+                print JOB " $cmd_script_name < " .  $description->stdin() . "\n";
+            }
+            else
+            {
+                print JOB "$mpirun -np " . $this_count . $machinefilearg;
+                print JOB " $cmd_script_name < " .  $description->stdin() . "\n";
+            }
+            if ($mpisoftenv)
+            {
+                print JOB '  fi' . "\n";
+                print JOB 'fi' . "\n";
+            }
+
+        }
+        else
+        {
+            my $exit_prefix=$self->job_dir() . '/exit';
+
+            print JOB <<"EOF";
+
+hosts=\`cat \$PBS_NODEFILE\`;
+counter=0
+while test \$counter -lt $count; do
+    for host in \$hosts; do
+        if test \$counter -lt $count; then
+            $remote_shell \$host "/bin/sh $cmd_script_name; echo \\\$? > $exit_prefix.\$counter" < $stdin &
+            counter=\`expr \$counter + 1\`
+        else
+            break
+        fi
+    done
+done
+wait
+
+counter=0
+exit_code=0
+while test \$counter -lt $count; do
+    /bin/touch $exit_prefix.\$counter;
+
+    read tmp_exit_code < $exit_prefix.\$counter
+    if [ \$exit_code = 0 -a \$tmp_exit_code != 0 ]; then
+        exit_code=\$tmp_exit_code
+    fi
+    counter=\`expr \$counter + 1\`
+done
+
+exit \$exit_code
+EOF
+        }
+    }
+    else
+    {
+        print JOB $description->executable(), " $args <",
+            $description->stdin(), "\n";
+    }
+    close(JOB);
+
+    $pbs_qsub_err_name = $self->job_dir() . '/scheduler_pbs_submit_stderr';
+    $errfile = "2>$pbs_qsub_err_name";
+
+    $self->nfssync( $pbs_job_script_name );
+    $self->nfssync( $pbs_qsub_err_name );
+    $self->nfssync( $description->stdout, 1 );
+    $self->nfssync( $description->stderr, 1 );
+    $self->log("submitting job -- $qsub < $pbs_job_script_name $errfile");
+    chomp($job_id = `$qsub < $pbs_job_script_name $errfile`);
+
+    if($? == 0)
+    {
+        $self->log("job submission successful, setting state to PENDING");
+        return {JOB_ID => $job_id,
+                JOB_STATE => Globus::GRAM::JobState::PENDING };
+    }
+    else
+    {
+        local(*ERR);
+        open(ERR, "<$pbs_qsub_err_name");
+        local $/;
+        my $stderr = <ERR>;
+        close(ERR);
+
+        $self->log("qsub returned $job_id");
+        $self->log("qsub stderr $stderr");
+
+        open(ERR, ">" . $description->stderr());
+        print ERR $stderr;
+        close(ERR);
+
+        $stderr =~ s/\n/\\n/g;
+
+        $self->respond({GT3_FAILURE_MESSAGE => $stderr });
+    }
+
+    return Globus::GRAM::Error::JOB_EXECUTION_FAILED();
+}
+
+sub poll
+{
+    my $self = shift;
+    my $description = $self->{JobDescription};
+    my $job_id = $description->jobid();
+    my $state;
+    my $status_line;
+    my $exit_code;
+
+    $self->log("polling job $job_id");
+
+    # Get job id from the full qstat output.
+    $_ = (grep(/job_state/, $self->pipe_out_cmd($qstat, '-f', $job_id)))[0];
+    # get the exit code of the qstat command.  for info search $CHILD_ERROR
+    # in perlvar documentation.
+    $exit_code = $? >> 8;
+
+    $self->log("qstat job_state line is: $_");
+
+    # return code 153 = "Unknown Job Id".
+    # verifying that the job is no longer there.
+    if($exit_code == 153)
+    {
+        $self->log("qstat rc is 153 == Unknown Job ID == DONE");
+        $state = Globus::GRAM::JobState::DONE;
+        $self->nfssync( $description->stdout() )
+            if $description->stdout() ne '';
+        $self->nfssync( $description->stderr() )
+            if $description->stderr() ne '';
+    }
+    else
+    {
+
+        # Get 3rd field (after = )
+        $_ = (split(/\s+/))[3];
+
+        if(/Q|W|T/)
+        {
+            $state = Globus::GRAM::JobState::PENDING;
+        }
+        elsif(/S|H/)
+        {
+            $state = Globus::GRAM::JobState::SUSPENDED
+        }
+        elsif(/R|E/)
+        {
+            $state = Globus::GRAM::JobState::ACTIVE;
+        }
+        else
+        {
+            # This else is reached by an unknown response from pbs.
+            # It could be that PBS was temporarily unavailable, but that it
+            # can recover and the submitted job is fine.
+            # So, we want the JM to ignore this poll and keep the same state
+            # as the previous state.  Returning an empty hash below will tell
+            # the JM to ignore the respose.
+            $self->log("qstat returned an unknown response.  Telling JM to ignore this poll");
+            return {};
+        }
+    }
+
+    return {JOB_STATE => $state};
+}
+
+sub cancel
+{
+    my $self = shift;
+    my $description = $self->{JobDescription};
+    my $job_id = $description->jobid();
+
+    $self->log("cancel job $job_id");
+
+    $self->fork_and_exec_cmd( $qdel, $job_id );
+
+    if($? == 0)
+    {
+        return { JOB_STATE => Globus::GRAM::JobState::FAILED }
+    }
+
+    return Globus::GRAM::Error::JOB_CANCEL_FAILED();
+}
+
+sub handle_prews_nodes {
+###############################################################################
+# TeraGrid -- prews node type/property and node name based selection support
+# 8/2004, 11/2005, JP Navarro <navarro@mcs.anl.gov>
+#
+# Support for the following RSL parameters:
+# 1) host_types [ host_xcount (nodes of each host_types) ] [ xcount (PPN) ]
+# 2) host_names                                            [ xcount (PPN) ]
+# 3)            [ host_xcount (nodes) ]                    [ xcount (PPN) ]
+#
+# TODO: normally count is used to compute total CPU time
+###############################################################################
+    my ($self, $description) = (shift, shift);
+    my @hosttypes = $description->hosttypes();
+    my @hostnames = $description->hostnames();
+    my @hostxcount = $description->hostxcount();
+    my @xcount = $description->xcount();
+    my ($this_hostxcount, $this_xcount, $this);
+    my $pbsnodes;
+    my $real_count; # Set to value that will supersede $description->count()
+
+    if(@hosttypes)
+    {
+        $self->log("host_types = " . scalar(@hosttypes));
+        foreach my $this_hosttype (@hosttypes)
+        {   
+            $self->log("host_type = " . $this_hosttype);
+            $this_hostxcount = shift @hostxcount;
+            $this_xcount = shift @xcount; 
+            $this = (($this_hostxcount) ? "$this_hostxcount:" : '1:') .
+                    $this_hosttype . 
+                    (($this_xcount) ? ":ppn=$this_xcount" : '');
+            $pbsnodes .= ($pbsnodes) ? '+' : '';
+            $pbsnodes .= $this;
+            $real_count += (($this_hostxcount) ? $this_hostxcount : 1) * (($this_xcount) ? $this_xcount : 1);
+        }
+        $real_count ||= 1; # initialize
+    }
+    elsif(@hostnames)
+    {
+        $self->log("host_names = " . scalar(@hostnames));
+        foreach my $this_hostname (@hostnames)
+        {
+            $self->log("host_name = " . $this_hostname);
+            $this_xcount = shift @xcount;
+            $this = $this_hostname .
+                    (($this_xcount) ? ":ppn=$this_xcount" : '');
+            $pbsnodes .= ($pbsnodes) ? '+' : '';
+            $pbsnodes .= $this;
+            $real_count += (($this_xcount) ? $this_xcount : 1);
+        }
+        $real_count ||= 1; # initialize
+    }
+    elsif(@hostxcount)
+    {
+        $self->log("host_xcount = " . scalar(@hostxcount));
+        foreach my $this_hostxcount (@hostxcount)
+        {
+            $self->log("host_xcount = " . $this_hostxcount);
+            $this_xcount = shift @xcount;
+            $this = $this_hostxcount .
+                    (($this_xcount) ? ":ppn=$this_xcount" : '');
+            $pbsnodes .= ($pbsnodes) ? '+' : '';
+            $pbsnodes .= $this;
+            $real_count += $this_hostxcount * (($this_xcount) ? $this_xcount : 1);
+        }
+    }
+    elsif(@xcount)
+    {
+        $self->log("xcount = " . scalar(@xcount));
+        foreach my $this_xcount (@xcount)
+        {
+            $self->log("xcount = " . $this_xcount);
+            $this = "1:ppn=$this_xcount";
+            $pbsnodes .= ($pbsnodes) ? '+' : '';
+            $pbsnodes .= $this;
+            $real_count += $this_xcount;
+        }
+    }
+    else
+    {
+        $real_count = 1;
+        $pbsnodes = '1';
+    }
+    $description->add('totalprocesses', $real_count);
+    $description->add('nodes', $pbsnodes);
+}
+
+1;

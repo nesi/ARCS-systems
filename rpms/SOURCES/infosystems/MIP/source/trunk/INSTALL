@@ -1,0 +1,42 @@
+To install MIP:
+
+
+	1) cd mip
+		cd into MIP installation directory
+
+	2) set VDT_LOCATION=/your/vdt/location/directory
+		set VDT_LOCATION variable
+
+	3) ./install_mip
+		execute install_mip
+
+	4) edit config/osg-conf.pl
+		set proper environment variables
+
+
+To configure MIP Remote
+
+	1) edit config/remote-conf.pl
+	   set appropriate variables
+
+	2) add to crontab the following entry:
+
+		*/5 * * * * /YOUR/MIP/DIRECTORY/mip -remote
+	
+		this will push information every 5 minutes
+
+To configure MIP Integrator
+
+	1) edit config/int-conf.pl
+	   set appropriate variables
+
+	2) edit config/int.pl
+	   set appropriate variables
+
+	3) execute the following:
+
+	   ./mip -int 2>/dev/null 1>/dev/null &
+
+	   (Currently we do not have service for MIP Integrator)
+		Alternatively you can redirect stdout/stdin to a log
+

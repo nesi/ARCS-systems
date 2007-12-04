@@ -1,0 +1,507 @@
+use Globus::GRAM::Error;
+use Globus::GRAM::JobState;
+use Globus::GRAM::JobManager;
+use Globus::Core::Paths;
+
+use Config;
+
+# NOTE: This package name must match the name of the .pm file!!
+package Globus::GRAM::JobManager::pbs;
+
+@ISA = qw(Globus::GRAM::JobManager);
+
+my ($mpirun, $mpiexec, $qsub, $qstat, $qdel, $cluster, $cpu_per_node, $remote_shell);
+
+BEGIN {
+	$mpiexec = 'no';
+	$mpirun = 'no';
+	$qsub = '/usr/bin/qsub';
+	$qstat = '/usr/bin/qstat';
+	$qdel = '/usr/bin/qdel';
+	$cluster = 1;
+	$cpu_per_node = 2;
+	$remote_shell = '/usr/bin/rsh';
+}
+
+sub myceil ($) {
+	my $x = shift;
+	( abs($x-int($x)) < 1E-12 ) ? $x : int($x < 0 ? $x : $x+1.0);
+}
+
+sub submit {
+	my $self = shift;
+	my $description = $self->{JobDescription};
+	my $status;
+	my $pbs_job_script;
+	my $pbs_job_script_name;
+	my $pbs_qsub_err_name ;
+	my $errfile = '';
+	my $job_id;
+	my $rsh_env;
+	my @arguments;
+	my $email_when = '';
+	my $cache_pgm = "$Globus::Core::Paths::bindir/globus-gass-cache";
+	my %library_vars;
+	my $pbs_parameters;
+	my $submit_host;
+	my @environment;
+
+	$self->log("Entering pbs submit");
+
+	# check jobtype
+	if(defined($description->jobtype())) {
+		if($description->jobtype !~ /^(mpi|single|multiple)$/) {
+			return Globus::GRAM::Error::JOBTYPE_NOT_SUPPORTED;
+		}
+	}
+
+	if( $description->directory eq '') {
+		return Globus::GRAM::Error::RSL_DIRECTORY();
+	}
+# this is potentially uncool if ~ is not the same everywhere
+	if ($description->directory() =~ m|^[^/]|) {
+		$description->add("directory",
+				$ENV{HOME} . '/' . $description->directory());
+	}
+
+	$self->nfssync( $description->executable() ) unless $description->executable() eq '';
+	$self->nfssync( $description->stdin() ) unless $description->stdin() eq '';
+
+	if( $description->executable eq '') {
+		return Globus::GRAM::Error::RSL_EXECUTABLE();
+	}
+	elsif( $description->stdin() eq '') {
+		return Globus::GRAM::Error::RSL_STDIN();
+	}
+
+# TODO: check if this is sane
+# UPDATE: apparently not according to Graham Jenkins
+	elsif(! -r $description->stdin()) {
+		return Globus::GRAM::Error::STDIN_NOT_FOUND();
+	}
+
+	$self->log("Determining job max time cpu from job description");
+	if(defined($description->max_cpu_time())) {
+		$cpu_time = $description->max_cpu_time();
+		$self->log("   using maxcputime of $cpu_time");
+	}
+	elsif(! $cluster && defined($description->max_time())) {
+		$cpu_time = $description->max_time();
+		$self->log("   using maxtime of $cpu_time");
+	}
+	else {
+		$cpu_time = 0;
+		$self->log('   using queue default');
+	}
+
+	$self->log("Determining job max wall time limit from job description");
+	if(defined($description->max_wall_time())) {
+		$wall_time = $description->max_wall_time();
+		$self->log("   using maxwalltime of $wall_time");
+	}
+	elsif($cluster && defined($description->max_time())) {
+		$wall_time = $description->max_time();
+		$self->log("   using maxtime of $wall_time");
+	}
+	else {
+		$wall_time = 0;
+		$self->log('   using queue default');
+	}
+
+
+	# decide whether to build a job script or use one supplied by the user
+	local(*JOB);
+
+# TODO: find out where this is set
+# UPDATE: somewhere in globus - not worth finding.	The important bit is that the first path is never taken (at least in all use cases tested).
+	if ($description->pbsjobscript() eq "yes") {
+		$pbs_job_script_name = $description->executable();
+		$self->log("will submit ".$pbs_job_script_name." directly to PBS");
+	}
+	else {
+		$pbs_job_script_name = $self->job_dir() . '/scheduler_pbs_job_script';
+		$self->log('Building job script: '.$pbs_job_script_name);
+		open( JOB, '>' . $pbs_job_script_name);
+		print JOB<<"EOF";
+#!/bin/sh -l
+# the -l is for modules, hopefully /etc/profile has the goods
+# note that we also set TERM=vanilla to hush some warnings
+# PBS batch job script built by Globus job manager
+EOF
+	}
+
+
+	# build up the pbs parameters to give to qsub
+# not allowed spaces in -S param
+#	push @job_params,(['-S', "'/bin/sh -l'"]);
+
+	chomp($submit_host = `/bin/hostname -s`);
+	push @job_params,(['-N', "Grid_$submit_host"]);
+
+	if($description->email_address() ne '') {
+		push @job_params,(['-M', '' . $description->email_address()]);
+	}
+	if($description->emailonabort() eq 'yes') {
+		$email_when .= 'a';
+	}
+	if($description->emailonexecution() eq 'yes') {
+		$email_when .= 'b';
+	}
+	if($description->emailontermination() eq 'yes') {
+		$email_when .= 'e';
+	}
+	if($email_when eq '') {
+		$email_when = 'n';
+	}
+
+	push @job_params,(['-m', $email_when]);
+
+	if($description->queue() ne '') {
+		push @job_params,(['-q', '' . $description->queue()]);
+	}
+	if($description->project() ne '') {
+		push @job_params,(['-P', '' . $description->project()]);
+#		print JOB '#PBS -W group_list=', $description->project(), "\n";
+	}
+
+	if($cpu_time != 0) {
+		if($description->jobtype() eq 'multiple') {
+			$total_cpu_time = $cpu_time * $description->count();
+		}
+		else {
+			$total_cpu_time = $cpu_time;
+		}
+
+		push @job_params,(['-l', 'pcput=' . $cpu_time . ':00']);
+		push @job_params,(['-l', 'cput=' . $total_cpu_time . ':00']);
+	}
+
+	if($wall_time != 0) {
+		push @job_params,(['-l', 'walltime=' . $wall_time . ':00']);
+	}
+
+	if($description->max_memory() != 0) {
+		if($description->jobtype() eq 'multiple') {
+			$max_memory = $description->max_memory() * $description->count;
+		}
+		else {
+			$max_memory = $description->max_memory();
+		}
+
+		push @job_params,(['-l', 'vmem=' . $max_memory . 'mb']);
+	}
+
+	push @job_params,(['-o', '' . $description->stdout()]);
+	push @job_params,(['-e', '' . $description->stderr()]);
+
+	if($description->host_count() != 0) {
+		my $n = $description->count();
+		my $m = myceil($description->count()/$description->host_count());
+
+		push @job_params,(['-l', 'ncpus='.$n.':'.$m]);
+	}
+	elsif($cluster && $cpu_per_node != 0) {
+		push @job_params,(['-l', 'ncpus=' . $description->count()]);
+	}
+
+
+##
+##	 ANU MOD
+##
+#	 if ($description->jobfs() != 0)
+#	 {
+#		 $pbs_parameters .= " -l jobfs=".$description->jobfs()."GB";
+#	 }
+#	 if ($description->software() ne "")
+#	 {
+#		 $pbs_parameters .= " -l software=".$description->software();
+#	 }
+#	 if ($description->other() ne "")
+#	 {
+#		 $pbs_parameters .= " -l other=".$description->other();
+#	 }
+
+	$rsh_env = '';
+
+	$library_vars{LD_LIBRARY_PATH} = 0;
+	if($Config{osname} eq 'irix') {
+		$library_vars{LD_LIBRARYN32_PATH} = 0;
+		$library_vars{LD_LIBRARY64_PATH} = 0;
+	}
+
+	# add some more environment variables
+	@environment = $description->environment();
+	push @environment,(
+			['USER_SCRATCH','/tmp/'.$description->project()."/".$ENV{'LOGNAME'}],
+			['NODE_SCRATCH','/tmp/'.$ENV{'LOGNAME'}],
+			['GLOBUS_USER_HOME',$ENV{'HOME'}],
+			['GLOBUS_USER_NAME',$ENV{'LOGNAME'}],
+			['GLOBUS_SCRATCH_DIR',$ENV{'HOME'}."/.globus/scratch"],
+# feeble attempt at making modules work without '-l'
+#			['ENV','/etc/profile'],
+# stops sh whinging about TERM not set (for '#!/bin/sh -l')
+			['TERM','vanilla']);
+
+	foreach my $tuple (@environment) {
+		if(!ref($tuple) || scalar(@$tuple) != 2) {
+			return Globus::GRAM::Error::RSL_ENVIRONMENT();
+		}
+		if(exists($library_vars{$tuple->[0]})) {
+			$tuple->[1] .= ":$library_string";
+			$library_vars{$tuple->[0]} = 1;
+		}
+
+		push(@new_env, $tuple->[0] . '="' . $tuple->[1] . '"');
+
+		$tuple->[0] =~ s/\\/\\\\/g;
+		$tuple->[0] =~ s/\$/\\\$/g;
+		$tuple->[0] =~ s/"/\\\"/g; #"
+		$tuple->[0] =~ s/`/\\\`/g; #`
+
+		$tuple->[1] =~ s/\\/\\\\/g;
+		$tuple->[1] =~ s/\$/\\\$/g;
+		$tuple->[1] =~ s/"/\\\"/g; #"
+		$tuple->[1] =~ s/`/\\\`/g; #`
+
+		$rsh_env .= 'export ' . $tuple->[0] . '="' . $tuple->[1] . "\"\n";
+	}
+
+	foreach (keys %library_vars) {
+		if($library_vars{$_} == 0) {
+			my $library_path = $description->library_path();
+			push(@new_env, $_ . '=' . $library_path);
+			$rsh_env .= "$_=$library_path;\n" . "export $_;\n";
+		}
+	}
+  
+	push @job_params,(['-v', @new_env]);
+
+	# finish off the job script
+	if ($description->pbsjobscript() ne "yes") {
+
+		# load up the job settings
+		foreach my $tuple (@job_params) {
+			print JOB "#PBS $tuple->[0] $tuple->[1]\n";
+		}
+
+		print JOB "${rsh_env}\n";
+
+		# reinstating some error detection
+		my $dir = '' . $description->directory();
+		my $err_val = Globus::GRAM::Error::BAD_DIRECTORY()->value();
+		print JOB <<EOF;
+
+# keep a copy
+#cp -f \$0 /tmp/globus-pbs.sh.\$\$
+
+if [ ! -d "$dir" ]; then
+	echo "Job directory ($dir) doesn't exist" \>&2
+fi
+cd $dir || { echo "Couldn't change to job directory ($dir)"; exit $err_val; }
+EOF
+
+		my $exe = '' . $description->executable();
+		$err_val = Globus::GRAM::Error::EXECUTABLE_NOT_FOUND()->value();
+		print JOB <<EOF;
+
+# used to do 'test -f' and 'test -x' but that doesn't account
+# for the module command (shell function)
+if ! type -t $exe &\>/dev/null; then
+	echo "Executable ($exe) not found" \>&2
+#	exit Globus::GRAM::Error::EXECUTABLE_NOT_FOUND()->value();
+	exit $err_val
+fi
+EOF
+
+		@arguments = $description->arguments();
+		
+		foreach(@arguments) {
+			if(ref($_)) {
+				return Globus::GRAM::Error::RSL_ARGUMENTS;
+			}
+		}
+		if($#arguments >= 0) {
+			foreach(@arguments) {
+				$self->log("Transforming argument \"$_\"\n");
+				$_ =~ s/\\/\\\\/g;
+				$_ =~ s/\$/\\\$/g;
+				$_ =~ s/"/\\\"/g; #"
+				$_ =~ s/`/\\\`/g; #`
+				$self->log("Transformed to \"$_\"\n");
+			
+				$args .= '"' . $_ . '" ';
+			}
+		}
+		else {
+			$args = '';
+		}
+
+# this is unnecessary
+#		if ($description->executable() =~ m|^[^/]|) {
+#			$description->add('executable', './' . $description->executable());
+#		}
+
+		if($description->jobtype() eq 'multiple' && !$cluster) {
+			for(my $i = 0; $i < $description->count(); $i++) {
+			print JOB $description->executable(), " $args <",
+				$description->stdin(), "&\n";
+			}
+			print JOB "wait\n";
+		}
+		elsif($description->jobtype() eq 'mpi' ||
+			  $description->jobtype() eq 'multiple') {
+			my $count = $description->count;
+			my $cmd_script_name ;
+			my $cmd_script ;
+			my $stdin = $description->stdin();
+			
+			$cmd_script_name = $self->job_dir() . '/scheduler_pbs_cmd_script';
+			
+			local(*CMD);
+			if ( open( CMD, ">$cmd_script_name" ) ) {
+				print CMD "#!/bin/bash\n";
+				print CMD 'cd ', $description->directory(), "\n";
+				print CMD "$rsh_env\n";
+				print CMD $description->executable(), " $args\n";
+				close(CMD);
+				chmod 0700, $cmd_script_name;
+			
+				$self->nfssync( $cmd_script_name );
+			} 
+			else {
+				# FIXME: what to do in error?
+				return Globus::GRAM::Error::TEMP_SCRIPT_FILE_FAILED();
+			}
+			
+			if ($description->jobtype() eq "mpi") {
+				print JOB "$mpirun -np " . $description->count();
+				print JOB " " . $description->executable() . " $args < " .
+						$description->stdin() . "\n";
+			}
+			else {
+				print JOB $description->executable(), " $args ", "\n";
+			}
+		}
+		else {
+			print JOB $description->executable(), " $args <", $description->stdin(), "\n";
+		}
+	  
+		print JOB <<EOF;
+RETVAL=\$?
+
+exit \$RETVAL
+EOF
+
+		close(JOB);
+	}
+
+	$pbs_qsub_err_name = $self->job_dir() . '/scheduler_pbs_submit_stderr';
+	$errfile = "2>$pbs_qsub_err_name";
+
+	$self->nfssync( $pbs_job_script_name );
+	$self->nfssync( $pbs_qsub_err_name );
+	$self->log("submitting job -- $qsub $pbs_parameters $pbs_job_script_name $errfile");
+	chomp($job_id = `$qsub $pbs_parameters $pbs_job_script_name $errfile`);
+
+	if($? == 0) {
+		$self->log("job submission successful, setting state to PENDING");
+		return {JOB_ID => $job_id,
+			JOB_STATE => Globus::GRAM::JobState::PENDING };
+	}
+	else {
+		local(*ERR);
+		open(ERR, "<$pbs_qsub_err_name");
+		local $/;
+		my $stderr = <ERR>;
+		close(ERR);
+
+		$self->log("qsub returned $job_id");
+		$self->log("qsub stderr $stderr");
+
+		open(ERR, ">" . $description->stderr());
+		print ERR $stderr;
+		close(ERR);
+
+		$stderr =~ s/\n/ /g;
+
+		$self->respond({GT3_FAILURE_MESSAGE => $stderr });
+	}
+
+	return Globus::GRAM::Error::JOB_EXECUTION_FAILED();
+}
+
+sub poll {
+	my $self = shift;
+	my $description = $self->{JobDescription};
+	my $job_id = $description->jobid();
+	my $state;
+	my $status_line;
+	my $exit_code;
+
+	$self->log("polling job $job_id");
+
+	# Get job id from the full qstat output.
+	$_ = (grep(/job_state/, $self->pipe_out_cmd($qstat, '-f', $job_id)))[0];
+	# get the exit code of the qstat command.  for info search $CHILD_ERROR
+	# in perlvar documentation.
+	$exit_code = $? >> 8;
+
+	$self->log("qstat job_state line is: $_");
+
+	# return code 153 = "Unknown Job Id".
+	# verifying that the job is no longer there.
+	if($exit_code == 153) {
+		$self->log("qstat rc is 153 == Unknown Job ID == DONE");
+		$state = Globus::GRAM::JobState::DONE;
+		$self->nfssync( $description->stdout() )
+		if $description->stdout() ne '';
+		$self->nfssync( $description->stderr() )
+		if $description->stderr() ne '';
+	}
+	else {
+
+		# Get 3rd field (after = )
+		$_ = (split(/\s+/))[3];
+
+		if(/Q|W|T/) {
+			$state = Globus::GRAM::JobState::PENDING;
+		}
+		elsif(/S|H/) {
+			$state = Globus::GRAM::JobState::SUSPENDED
+		}
+		elsif(/R|E/) {
+			$state = Globus::GRAM::JobState::ACTIVE;
+		}
+		else {
+			# This else is reached by an unknown response from pbs.
+			# It could be that PBS was temporarily unavailable, but that it
+			# can recover and the submitted job is fine.
+			# So, we want the JM to ignore this poll and keep the same state
+			# as the previous state.  Returning an empty hash below will tell
+			# the JM to ignore the respose.
+			$self->log("qstat returned an unknown response.  Telling JM to ignore this poll");
+			return {};
+		}
+	}
+
+	return {JOB_STATE => $state};
+}
+
+sub cancel {
+	my $self = shift;
+	my $description = $self->{JobDescription};
+	my $job_id = $description->jobid();
+
+	$self->log("cancel job $job_id");
+
+	$self->fork_and_exec_cmd( $qdel, $job_id );
+
+	if($? == 0) {
+		return { JOB_STATE => Globus::GRAM::JobState::FAILED }
+	}
+
+	return Globus::GRAM::Error::JOB_CANCEL_FAILED();
+}
+
+1;
+

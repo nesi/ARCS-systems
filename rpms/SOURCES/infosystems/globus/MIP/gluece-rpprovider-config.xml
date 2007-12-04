@@ -1,0 +1,18 @@
+<ns1:ResourcePropertyProviderConfigArray xsi:type="ns1:ResourcePropertyProviderConfigArray" xmlns:ns1="http://mds.globus.org/rpprovider/2005/08" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ns1:configArray xsi:type="ns1:resourcePropertyProviderConfig">
+		<ns1:resourcePropertyName xsi:type="xsd:QName" xmlns:glue="http://forge.cnaf.infn.it/glueschema/Spec/V12/R2">
+			glue:Site
+		</ns1:resourcePropertyName>
+		<ns1:resourcePropertyImpl xsi:type="xsd:string">
+			org.globus.mds.usefulrp.rpprovider.ArrayValueResourcePropertyProvider
+		</ns1:resourcePropertyImpl>
+		<ns1:resourcePropertyElementProducers xsi:type="ns1:resourcePropertyElementProducerConfig">
+			<ns1:className xsi:type="xsd:string">
+				org.globus.mds.usefulrp.rpprovider.producers.ExternalProcessElementProducer
+			</ns1:className>
+			<ns1:arguments xsi:type="xsd:string">libexec/mip-exec</ns1:arguments>
+			<ns1:period xsi:type="xsd:int">300</ns1:period>
+		</ns1:resourcePropertyElementProducers>
+	</ns1:configArray>
+</ns1:ResourcePropertyProviderConfigArray>
+

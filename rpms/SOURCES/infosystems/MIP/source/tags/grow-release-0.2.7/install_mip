@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+use strict;
+use Cwd;
+use lib::installer;
+# Copyright © 2005-2006 Grid Research and educatiOn group @ IoWa (GROW), The University of Iowa, IA. All rights reserved.
+# For more information please contact: GROW team, grow-tech@grow.uiowa.edu
+
+
+
+my $mipdir=getcwd;
+my $vdt_location=$ENV{VDT_LOCATION};
+my $defaultproducer='glue';
+my @pkgs=('osg','int','site');
+
+
+if (@ARGV < 1){
+   install_mip($mipdir, $vdt_location, $defaultproducer, @pkgs);
+   print "\n Please edit 'config/osg-conf.pl' and set additional parameters\n";
+}
+else{
+   install_pkg($ARGV[0]);
+}
+
+
+
+
+
+

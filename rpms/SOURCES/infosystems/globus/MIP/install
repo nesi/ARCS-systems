@@ -1,0 +1,64 @@
+#!/bin/sh
+
+function usage() {
+	cat <<-EOF
+		usage: $0 [-h] [-u] [-l globus_location]
+
+		-h	this message
+		-l	use globus_location as the root of your globus install (defaults to (\$GLOBUS_LOCATION)
+		-u	uninstall
+
+	EOF
+}
+
+
+BASE="$(dirname $0)"
+GLOBUS_TYPE="VDT"
+unset UNINSTALL
+
+while getopts "uvl:h" OPTION; do
+	case $OPTION in
+		h) usage; exit 0;;
+		u) UNINSTALL="-R";;
+		l) GLOBUS_LOCATION=$OPTARG;;
+		*) usage; exit 1;;
+	esac
+done
+
+[ -z "$GLOBUS_LOCATION" -o ! -d "$GLOBUS_LOCATION" ] && { echo "ERROR: invalid globus location"; usage; exit 1; }
+
+
+# list of files that get patched
+PATCHES="downstream.xml upstream.xml server-config.wsdd hierarchy.xml"
+PATCH_BASE="$GLOBUS_LOCATION/etc/globus_wsrf_mds_index"
+
+# patch files
+for i in $PATCHES; do
+	TARGET="$PATCH_BASE/$i"
+	PERMS=$(stat -c "%U:%G" $TARGET)
+	# if we're not uninstalling, make a backup
+	patch -s -N ${UNINSTALL:--b} -r /dev/null $TARGET $BASE/$GLOBUS_TYPE/$i.patch
+	# this is because patch doesn't honour our mask when writing the .req
+        # which is /dev/null, leaving it with mode 644!  uncool!
+	[ $? -ne 0 ] && chmod 666 /dev/null
+	chown $PERMS $TARGET
+done
+
+# copy other files in place
+if [ -z "$UNINSTALL" ]; then
+	if [ ! -f "$GLOBUS_LOCATION/libexec/mip-exec" ]; then
+		# mip-exec.sh does validation
+		# mip-exec.pl does not
+		cp $BASE/mip-exec.sh $GLOBUS_LOCATION/libexec/mip-exec
+	else
+		echo "mip-exec already in place"
+	fi
+
+	if [ ! -f "$PATCH_BASE/gluece-rpprovider-config.xml" ]; then
+		cp $BASE/gluece-rpprovider-config.xml $PATCH_BASE
+	else
+		echo "gluece-rpprovider-config.xml already in place"
+	fi
+fi
+
+

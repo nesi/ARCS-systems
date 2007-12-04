@@ -1,0 +1,83 @@
+This is a copy of the information on http://www.vpac.org/twiki/bin/view/Sandbox/SoftwareInformationProviderConfiguration.
+
+The software information provider provides MIP the details about all the software installed on a particular subcluster. 
+ 
+To allow a site to have multiple cluster and subclusters the software information provider uses a different configuration file for each cluster/subcluster combination. Each configuration file is named using the pattern 'cluster_subcluster_SIP.ini'. 
+
+To create a configuration for your system use the cluster and subcluster names you have defined in the MIP configuration 
+ 
+cd $MIP_DIR/config 
+cp default_sub1_SIP.ini clustername_subclustername_SIP.ini 
+
+
+To fully configure it is nessary to 
+1. define the sources 
+2. define the log file locations 
+3. (optional) create the local software definitions, and 
+4. test. 
+ 
+DEFINE THE SOURCES 
+ 
+--- To include the APAC Software map as a source for the software information  
+
+Uncomment the two lines under [Source1] and define your site ID e.g. 
+
+#[source1]
+#uri: http://nf.apac.edu.au/facilities/software/cgi-bin/softmap_xml_service.py?SITE=IVEC&HOST=@@subcluster@@
+#format: softwareMap
+
+ becomes 
+
+[source1]
+uri: http://nf.apac.edu.au/facilities/software/cgi-bin/softmap_xml_service.py?SITE=YOURSITEID&HOST=@@subcluster@@
+format: softwareMap
+
+--- To define the location of the local software xml definitions 
+ 
+The source locations are uri's. Partial uris are relative to the softwareInfoProvider.py script. 
+ e.g To move localSoftware.xml to /opt/globus/etc/MIP/ the config entry would change from 
+
+[source2]
+uri: file:localSoftware.xml
+format: APACGLUE1.2
+
+ to 
+
+[source2]
+uri: file:///opt/globus/etc/MIP/localSoftware.xml
+format: APACGLUE1.2   
+
+--- To add another source file 
+ 
+Copy the 3 lines of source2, rename it to source3 and update the details. You define can as as many source files as you wish. e.g. 
+[source2]
+uri: file:///opt/globus/etc/MIP/localSoftware.xml
+format: APACGLUE1.2   
+
+ becomes 
+
+[source3]
+uri: file:///opt/globus/etc/MIP/anotherLocalSoftware.xml
+format: APACGLUE1.2   
+
+CHANGE THE LOG FILE LOCATION 
+
+The log file is a file path and defined under the [log] section. Relative paths are relative to the softwareInfoProvider.py script. 
+
+Create a new local software definition (optional) 
+
+The file /usr/local/mip/modules/default/SubCluster/softwareInfoData/localSoftware.xml is the default source for the local software definitions. This can be used as a template. 
+
+There are two software package definitions in that file. 
+	 FullyDefinedSoftwarePackage: This contains every single element a package can have. There can be multiple instances of SoftwareExecutable? and VOView. 
+ 
+	MinimallyDefinedSoftwarePackage: This is the shortest definition that will be validated 
+ 
+TEST IF THE CONFIGURATION CHANGES ARE CORRECT 
+ 
+cd /usr/local/mip/modules/default/SubCluster 
+python softwareInfoProvider.py cluster subcluster ../../../config 
+
+If a stream of xml is produced the script has worked correctly. If there are any problems with the configuration there will be an error message describing the problem. 
+
+Please contact ronald@ivec.org if there is a problem you cannot solve.

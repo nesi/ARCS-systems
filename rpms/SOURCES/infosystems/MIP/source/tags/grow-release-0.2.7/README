@@ -1,0 +1,20 @@
+The Modular Information Provider (MIP) collects information using MIP modules 
+that can easily be created and grouped using MIP packages. MIP is designed to 
+automatically integrate, relate, and bind information from multiple MIP 
+instances using MIP Integrator. MIP provides straight-forward customization to 
+a specific grid or site.
+
+For more information on Modular Information Provider (MIP) including 
+information on how to build a module, package, or the design and implementation
+of MIP please visit:
+
+http://grow.uiowa.edu/research
+
+This website also lists the other research projects of:
+
+Grid Research and educatiOn group @ IoWa (GROW)
+grow-tech@grow.uiowa.edu
+
+Copyright © 2005-2006 Grid Research and educatiOn group @ IoWa (GROW), 
+                      University of Iowa, IA. All rights reserved.
+

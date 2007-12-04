@@ -1,0 +1,15 @@
+--- hierarchy.xml.orig	2007-02-01 09:41:17.000000000 +1000
++++ hierarchy.xml	2007-02-01 09:41:37.000000000 +1000
+@@ -4,11 +4,11 @@
+     will be registered to.
+ 
+     Set an upstream entry for each VO index that you wish to participate in.
+ -->
+ 
+-<!--    <upstream>https://vo-host:8443/wsrf/services/DefaultIndexService</upstream> -->
++    <upstream>https://ng2.sapac.edu.au:8443/wsrf/services/DefaultIndexService</upstream>
+ 
+ 
+ 
+ <!-- <downstream> elements specify remote index service which will be 
+      registered into the local index. You do not need to configure 
