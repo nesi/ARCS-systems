@@ -22,7 +22,7 @@ done
 
 function usage() {
 	cat <<-EOF
-		usage: $0 [-h] [-v] [-r] [-f config-file] [-c cache-url] [-l pretend-platform] [-p package-list] [-g gums-server]
+		usage: $0 [-h] [-v] [-r] [-f config-file] [-i install-dir] [-c cache-url] [-l pretend-platform] [-p package-list] [-g gums-server]
 
 		-h	print this help message
 		-v	verbose
