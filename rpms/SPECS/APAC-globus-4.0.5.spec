@@ -152,7 +152,7 @@ setenv GLOBUS_LOCATION "%{PREFIX}/globus"
 source \$GLOBUS_LOCATION/etc/globus-user-env.csh
 EOF
 
-
+find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/APAC-globus-4.0.5-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
