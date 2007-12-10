@@ -15,7 +15,7 @@ Name:           APAC-lxml
 URL:            http://codespeak.net/lxml
 Summary:        A Pythonic binding for the libxml2 and libxslt libraries
 Version:        svn_rev37576
-Release:        1
+Release:        2
 License:        BSD License and BSD-like
 Group:          Development/Libraries/Python
 Source:         %{modname}-%{version}.tar.bz2
@@ -59,4 +59,4 @@ python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INST
 
 %changelog
 * Wed Aug 22 2007 Ashley Wright
-- Merged Russell's branch
+- Merged Russell's branch (rel 2)
