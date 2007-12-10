@@ -21,7 +21,7 @@ sub install_mip{
 #   die "Please set VDT_LOCATION before installing MIP" if not -d "$vdt_location";
    createsource($mipdir,"$mipdir/config","$mipdir/modules",$defaultproducer,@pkgs);
    createmip($mipdir,"$mipdir/config",$vdt_location);
-   createlink("$mipdir/modules");
+#   createlink("$mipdir/modules");
 }
 sub createsource
 {  # creates the source.pl file
@@ -68,17 +68,17 @@ sub createmip
 	chmod 0755, "$mipdir/mip";
 }
 
-sub createlink
-{
-	my ($moduledir)=@_;
-	if (-e "$moduledir/apac_py") {
-		symlink("$moduledir/apac_py", "$moduledir/default") || die "ERROR: Cannot symlink to $moduledir/apac_py!\n";
-	}
-	else {
-		print "ERROR:  Cannot symlink default to apac_py. Try to install the apac_py module first before running
-	the install_mip script\n";
-	}
-}
+#sub createlink
+#{
+#	my ($moduledir)=@_;
+#	if (-e "$moduledir/apac_py") {
+#		symlink("$moduledir/apac_py", "$moduledir/default") || die "ERROR: Cannot symlink to $moduledir/apac_py!\n";
+#	}
+#	else {
+#		print "ERROR:  Cannot symlink default to apac_py. Try to install the apac_py module first before running
+#	the install_mip script\n";
+#	}
+#}
 
 ## install_pkg
 ##    Installs a MIP package to an existing MIP installation
