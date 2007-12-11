@@ -1,0 +1,30 @@
+diff -ruN SRB3_5_0.orig/Makefile.in SRB3_5_0/Makefile.in
+--- SRB3_5_0.orig/Makefile.in	2007-12-11 17:06:17.000000000 +0900
++++ SRB3_5_0/Makefile.in	2007-12-11 17:07:37.000000000 +0900
+@@ -679,16 +679,16 @@
+ endif
+ 
+ install:: $(TARGETS)
+-	-mkdir $(installDir);	\
+-	$(INSTALL) bin $(installDir);	\
+-	$(INSTALL) data $(installDir);	\
+-	chmod 755 $(installDir) $(installDir)/data $(installDir)/bin	\
+-	$(installDir)/bin/*; 	\
+-	chmod 644 $(installDir)/data/*; 	\
+-	chmod 755 $(installDir)/data/log; 	\
+-	chmod 600 $(installDir)/data/MdasConfig
+-	chmod 755 $(installDir)/data/lockDir $(installDir)/data/CVS
+-	chmod 755 $(installDir)/data/gridHttp
++	-mkdir $(DESTDIR)$(installDir);	\
++	$(INSTALL) bin $(DESTDIR)$(installDir);	\
++	$(INSTALL) data $(DESTDIR)$(installDir);	\
++	chmod 755 $(DESTDIR)$(installDir) $(DESTDIR)$(installDir)/data $(DESTDIR)$(installDir)/bin	\
++	$(DESTDIR)$(installDir)/bin/*; 	\
++	chmod 644 $(DESTDIR)$(installDir)/data/*; 	\
++	chmod 755 $(DESTDIR)$(installDir)/data/log; 	\
++	chmod 600 $(DESTDIR)$(installDir)/data/MdasConfig
++	chmod 755 $(DESTDIR)$(installDir)/data/lockDir $(DESTDIR)$(installDir)/data/CVS
++	chmod 755 $(DESTDIR)$(installDir)/data/gridHttp
+ 
+ clean:
+ 	rm -f $(TARGETS) $(SOBJS) $(MDAS_OBJ)	\
