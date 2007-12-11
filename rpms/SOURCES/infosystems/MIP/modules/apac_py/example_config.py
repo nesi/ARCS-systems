@@ -27,7 +27,7 @@
 ###############
 
 # changelog:
-# * APAC-mip-module-py-1.0.381-1, Gerson Galang, 11 Dec 2007
+# * APAC-mip-module-py-1.0.384-1, Gerson Galang, 11 Dec 2007
 #   - added support for publishing SRM information
 #   - added support publishing ComputeElement.GRAMVersion
 #   - an instance of 'protocols' which used to refer to SE.AccessProtocol is now access_protocols. 
