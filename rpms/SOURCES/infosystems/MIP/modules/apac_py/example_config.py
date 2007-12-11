@@ -26,6 +26,20 @@
 
 ###############
 
+# changelog:
+# * APAC-mip-module-py-1.0.381-1, Gerson Galang, 11 Dec 2007
+#   - added support for publishing SRM information
+#   - added support publishing ComputeElement.GRAMVersion
+#   - an instance of 'protocols' which used to refer to SE.AccessProtocol is now access_protocols. 
+#     SE.ControlProtocols can be published using control_protocols
+#   - default version of GridFTP protocol has been corrected
+#   - removed ANUPBS from list of LRMSTypes as it is not supported by GLUE Schema 1.2
+#   - ComputeElement.Status' default value is now Production
+# * version APAC-mip-module-py-1.0.374-1, Andrew Sharpe
+#   - initial release
+
+
+
 
 # package name : this name must be the same as in pkgs in source.pl
 # there is only one package per configuration file
@@ -85,11 +99,12 @@ computeElement.Status = 'Production'
 computeElement.JobManager = 'jobmanager-pbs'
 computeElement.HostName = 'ng2.example.apac.site'
 computeElement.GateKeeperPort = 8443
-computeElement.ContactString = 'ng2.hostname/jobmanager-pbs'
+computeElement.ContactString = 'ng2.hostname/jobmanager-pbs' # or if WSGRAM, https://ng2.hostname:8443/wsrf/services/ManagedJobFactoryService
 computeElement.DefaultSE = 'ngdata.example.apac.site'
 computeElement.ApplicationDir = 'UNAVAILABLE'
 computeElement.DataDir = cluster.TmpDir
-computeElement.LRMSType = 'Torque' # Torque|PBSPro|ANUPBS
+computeElement.LRMSType = 'Torque' # Torque|PBSPro|OpenPBS
+computeElement.GRAMVersion = '4.0.5'
 
 computeElement.qstat = '/usr/bin/qstat'
 computeElement.pbsnodes = '/usr/bin/pbsnodes'
