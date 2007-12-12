@@ -1,0 +1,111 @@
+#!/bin/sh
+
+function usage() {
+	cat <<-EOF
+		usage: $0 [-h] [-l globus_location] <install|uninstall>
+
+		-l	use globus_location as the root of your globus install (defaults to (\$GLOBUS_LOCATION)
+	EOF
+}
+
+function install() {
+	echo "installing mip-globus config files in place..."
+	BASE="$(dirname $0)"
+	GLOBUS_TYPE="VDT"
+
+	# list of files that needs to be updated
+	PATCHES="downstream.xml upstream.xml server-config.wsdd hierarchy.xml client-security-config.xml index-security-config.xml"
+	PATCH_BASE="$GLOBUS_LOCATION/etc/globus_wsrf_mds_index"
+
+	# update the MDS config files
+	for i in $PATCHES; do
+		TARGET="$PATCH_BASE/$i"
+		PERMS=$(stat -c "%U:%G" $PATCH_BASE)
+		if [  -f "$TARGET" ]; then
+			PERMS=$(stat -c "%U:%G" $TARGET)
+			# also backup the orig config file
+			echo "==> backing up $TARGET to $TARGET.orig"
+			echo cp $TARGET $TARGET.orig
+		fi
+
+		echo "==> installing $TARGET"
+		echo cp $BASE/$GLOBUS_TYPE/$i $TARGET
+
+		# this is because patch doesn't honour our mask when writing the .req
+		# which is /dev/null, leaving it with mode 644!  uncool!
+		#[ $? -ne 0 ] && chmod 666 /dev/null
+
+		echo chown $PERMS $TARGET
+	done
+
+	# copy other files in place
+	if [ -f "$GLOBUS_LOCATION/libexec/mip-exec" ]; then
+		echo "==> mip-exec already exists, saving it to mip-exec.orig"
+		echo cp $GLOBUS_LOCATION/libexec/mip-exec $GLOBUS_LOCATION/libexec/mip-exec.orig
+	fi
+
+	# mip-exec.sh does validation
+	# mip-exec.pl does not
+	echo "==> installing $GLOBUS_LOCATION/libexec/mip-exec"
+	echo cp $BASE/mip-exec.sh $GLOBUS_LOCATION/libexec/mip-exec
+
+	if [ -f "$PATCH_BASE/gluece-rpprovider-config.xml" ]; then
+		echo "==> gluece-rpprovider-config.xml already exists, saving it to gluece-rpprovider-config.xml.orig"
+		echo cp $PATCH_BASE/gluece-rpprovider-config.xml $PATCH_BASE/gluece-rpprovider-config.xml.orig
+	fi
+	
+	echo "==> installing $PATCH_BASE/gluece-rpprovider-config.xml"
+	echo cp $BASE/gluece-rpprovider-config.xml $PATCH_BASE	
+}
+
+
+function uninstall() {
+	echo "uninstalling mip-globus config files"
+	# list of files that needs to be restored
+	PATCHES="downstream.xml upstream.xml server-config.wsdd hierarchy.xml client-security-config.xml index-security-config.xml"
+	PATCH_BASE="$GLOBUS_LOCATION/etc/globus_wsrf_mds_index"
+
+	# update the MDS config files
+	for i in $PATCHES; do
+		TARGET="$PATCH_BASE/$i"
+		if [  -f "$TARGET.orig" ]; then
+			echo "==> redeploying $TARGET.orig"
+			echo mv $TARGET.orig $TARGET
+		else
+			echo "==> removing $TARGET"
+			echo rm $TARGET
+		fi
+	done
+	echo "==> removing $PATCH_BASE/gluece-rpprovider-config.xml"
+	echo rm $PATCH_BASE/gluece-rpprovider-config.xml
+	echo "==> removing $GLOBUS_LOCATION/libexec/mip-exec"
+	echo rm $GLOBUS_LOCATION/libexec/mip-exec
+}
+
+while getopts "l:h" OPTION; do
+        case $OPTION in
+               \?) usage; exit 0;;
+                l) GLOBUS_LOCATION=$OPTARG;;
+                *) usage; exit 1;;
+        esac
+done
+
+if [ "$OPTIND" -gt "$#" ]; then 
+	echo "You need to specify if you want to install or uninstall the mip globus config files!"
+	exit 2 
+fi
+
+shiftcount=`expr $OPTIND - 1`
+shift $shiftcount 
+COMMAND=$1
+
+if test "$COMMAND" = install
+then
+	install
+elif test "$COMMAND" = uninstall
+then
+	uninstall
+else
+	usage
+fi
+

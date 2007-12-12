@@ -1,0 +1,6 @@
+<securityConfig xmlns="http://www.globus.org">
+  <credential>
+    <cert-file value="/etc/grid-security/containercert.pem"/>
+    <key-file value="/etc/grid-security/containerkey.pem"/>
+  </credential>
+</securityConfig>
