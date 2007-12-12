@@ -1,0 +1,38 @@
+<ServiceGroupRegistrationParameters
+   xmlns="http://mds.globus.org/servicegroup/client" >
+
+
+   <!-- Specifies that the registration will be renewed every 600
+        seconds (= 10 minutes) -->
+   <RefreshIntervalSecs>600</RefreshIntervalSecs>
+
+   <SecurityDescriptorFile>etc/globus_wsrf_mds_index/client-security-config.xml</SecurityDescriptorFile>
+
+   <Content xsi:type="agg:AggregatorContent"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:agg="http://mds.globus.org/aggregator/types">
+
+      <agg:AggregatorConfig xsi:type="agg:AggregatorConfig">
+<!--
+         <agg:GetResourcePropertyPollType
+            xmlns:wssg= "http://docs.oasis-open.org/wsrf/2004/06/wsrf-WS-ServiceGroup-1.2-draft-01.xsd" >
+            <agg:PollIntervalMillis>600000</agg:PollIntervalMillis>
+
+            <agg:ResourcePropertyName>wssg:Entry</agg:ResourcePropertyName>
+
+         </agg:GetResourcePropertyPollType>
+-->
+         <agg:GetMultipleResourcePropertiesPollType
+                xmlns:wssg="http://docs.oasis-open.org/wsrf/2004/06/wsrf-WS-ServiceGroup-1.2-draft-01.xsd"
+                xmlns:glue="http://forge.cnaf.infn.it/glueschema/Spec/V12/R2">
+             <agg:ResourcePropertyNames>wssg:Entry</agg:ResourcePropertyNames>
+             <agg:ResourcePropertyNames>glue:Site</agg:ResourcePropertyNames>
+             <agg:PollIntervalMillis>600000</agg:PollIntervalMillis>
+         </agg:GetMultipleResourcePropertiesPollType>
+
+      </agg:AggregatorConfig>
+      <agg:AggregatorData/>
+   </Content>
+
+</ServiceGroupRegistrationParameters>
+
