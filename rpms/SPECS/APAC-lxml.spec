@@ -15,7 +15,7 @@ Name:           APAC-lxml
 URL:            http://codespeak.net/lxml
 Summary:        A Pythonic binding for the libxml2 and libxslt libraries
 Version:        svn_rev37576
-Release:        2
+Release:        3
 License:        BSD License and BSD-like
 Group:          Development/Libraries/Python
 Source:         %{modname}-%{version}.tar.bz2
@@ -47,7 +47,8 @@ python setup.py build
 
 %install
 rm -rf %{buildroot}
-mkdir -p $RPM_BUILD_ROOT/%{_prefix}/lib/python2.3/site-packages/
+pythonv=$(python -V 2>&1|cut -c8-10)
+mkdir -p $RPM_BUILD_ROOT/%{_prefix}/lib/python$pythonv/site-packages/
 python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 %clean
@@ -58,5 +59,7 @@ python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INST
 %doc doc CHANGES.txt CREDITS.txt LICENSES.txt README.txt TODO.txt
 
 %changelog
+* Fri Dec 14 2007 Gerson Galang
+- modified the way python site-packages lib directory is installed. the RPM will now check which version of python is installed and install the site-packages directory on its lib directory.  
 * Wed Aug 22 2007 Ashley Wright
 - Merged Russell's branch (rel 2)
