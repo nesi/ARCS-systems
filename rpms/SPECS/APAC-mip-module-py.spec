@@ -5,7 +5,7 @@
 Summary: The GridAustralia Modular Information Provider module
 Name: APAC-mip-module-py
 Version: 1.0.%{REVISION}
-Release: 1
+Release: 2
 License: ARCS
 Group: Applications/Internet
 Requires: APAC-mip, APAC-glue-schema, APAC-lxml
@@ -73,7 +73,10 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{PREFIX}/mip/modules/%{PKG_NAME}
 
+%config(noreplace) %{PREFIX}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoData
+
 %changelog
+* Thu Dec 13 2007 Gerson Galang
+- added softwareInfoData directory to the config list
 * Thu Dec 06 2007 Gerson Galang
 - new glue spec file based on andrew sharpe's spec file
-
