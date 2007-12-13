@@ -76,10 +76,19 @@ function uninstall() {
 			rm $TARGET
 		fi
 	done
-	echo "==> removing $PATCH_BASE/gluece-rpprovider-config.xml"
-	rm $PATCH_BASE/gluece-rpprovider-config.xml
-	echo "==> removing $GLOBUS_LOCATION/libexec/mip-exec"
-	rm $GLOBUS_LOCATION/libexec/mip-exec
+	if [ -f "$PATCH_BASE/gluece-rpprovider-config.xml.orig" ]; then
+		cp $PATCH_BASE/gluece-rpprovider-config.xml.orig $PATCH_BASE/gluece-rpprovider-config.xml
+	else
+		echo "==> removing $PATCH_BASE/gluece-rpprovider-config.xml"
+		rm $PATCH_BASE/gluece-rpprovider-config.xml
+	fi
+
+	if [ -f "$GLOBUS_LOCATION/libexec/mip-exec.orig" ]; then
+		cp $GLOBUS_LOCATION/libexec/mip-exec.orig $GLOBUS_LOCATION/libexec/mip-exec.orig
+	else
+		echo "==> removing $GLOBUS_LOCATION/libexec/mip-exec"
+		rm $GLOBUS_LOCATION/libexec/mip-exec
+	fi
 }
 
 while getopts "l:h" OPTION; do
