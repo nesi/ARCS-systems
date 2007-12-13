@@ -27,7 +27,7 @@ cp -a * $RPM_BUILD_ROOT%{PREFIX}/share
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(755,-,-)
+%defattr(755,root,root)
 %{PREFIX}/share
 
 %changelog

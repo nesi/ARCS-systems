@@ -36,7 +36,7 @@ cd %{PREFIX}/%{PKG_NAME}
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%defattr(-,-,-)
+%defattr(-,root,root)
 %{PREFIX}/%{PKG_NAME}
 
 %config %{PREFIX}/%{PKG_NAME}/config

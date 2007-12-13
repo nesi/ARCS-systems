@@ -25,8 +25,18 @@ cp -a * $RPM_BUILD_ROOT%{PREFIX}/mip/config/globus
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post
+cd %{PREFIX}/mip
+[ ! -n "$GLOBUS_LOCATION" ] &&  echo "==> GLOBUS_LOCATION not defined!"     && exit 2
+./config/globus/mip-globus-config -l /opt/vdt/globus install
+
+%preun
+cd %{PREFIX}/mip
+[ ! -n "$GLOBUS_LOCATION" ] &&  echo "==> GLOBUS_LOCATION not defined!"     && exit 2
+./config/globus/mip-globus-config -l /opt/vdt/globus uninstall
+
 %files
-%defattr(-,-,-)
+%defattr(-,root,root)
 %{PREFIX}/mip/config/globus
 
 
