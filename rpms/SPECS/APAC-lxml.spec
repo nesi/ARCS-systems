@@ -1,5 +1,5 @@
 #
-# spec file for package python-lxml (Version 1.1.2)
+# spec file for package python-lxml (Version 1.3.6)
 #
 # Copyright (c) 2007 SUSE LINUX Products GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
@@ -14,7 +14,7 @@ Name:           APAC-lxml
 %define modname lxml
 URL:            http://codespeak.net/lxml
 Summary:        A Pythonic binding for the libxml2 and libxslt libraries
-Version:        svn_rev37576
+Version:        svn_rev49755
 Release:        3
 License:        BSD License and BSD-like
 Group:          Development/Libraries/Python
@@ -47,7 +47,7 @@ python setup.py build
 
 %install
 rm -rf %{buildroot}
-pythonv=$(python -V 2>&1|cut -c8-10)
+pythonv=$(python -V 2>&1|cut -d' ' -f2|cut -d'.' -f1-2)
 mkdir -p $RPM_BUILD_ROOT/%{_prefix}/lib/python$pythonv/site-packages/
 python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
@@ -60,6 +60,7 @@ python setup.py install --prefix=%{_prefix} --root=$RPM_BUILD_ROOT --record=INST
 
 %changelog
 * Fri Dec 14 2007 Gerson Galang
-- modified the way python site-packages lib directory is installed. the RPM will now check which version of python is installed and install the site-packages directory on its lib directory.  
+- modified the way python site-packages lib directory is installed. the RPM will now check which version of python is installed and install the site-packages directory on its lib directory.
+- downloaded and lxml 1.3.6 from svn as the old one that ron used is not supported by the cheeseshop setuptools tool anymore.
 * Wed Aug 22 2007 Ashley Wright
 - Merged Russell's branch (rel 2)
