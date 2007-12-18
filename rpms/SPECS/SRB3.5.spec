@@ -85,7 +85,7 @@ SRB_NO_INCA	    If set to any value, INCA test user is not created. Default: not
 SRB_INCA_DN	    DN of the INCA test user. Default: /C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest
 
 %description server-update
-This package updates the server version 3.4.2 to version 3.5. To install this package, srb-server version 3.4.2 must be installed and the --replacefiles flag must be specified.
+This package updates the server version 3.4.2 to version 3.5.
 
 %prep
 %setup -q -n %{srbSrc}
@@ -362,6 +362,7 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 su srb -c "cd %{srbroot} && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && tar -cf bin-3.4.2.tar bin"
 
 %post server-update
+chown -R srb:srb %{srbroot}/bin
 su srb -c "cd %{srbroot} && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && sed s/3.4.2/3.5.0/g runsrb-3.4.2 > bin/runsrb"
 su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./runsrb"
 
