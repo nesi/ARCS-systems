@@ -20,7 +20,7 @@ License:        BSD License and BSD-like
 Group:          Development/Libraries/Python
 Source:         %{modname}-%{version}.tar.gz
 Requires:       libxml2 libxslt
-BuildRequires:  libxml2-devel libxslt-devel APAC-pyrex python-devel
+BuildRequires:  libxml2-devel libxslt-devel python-devel
 BuildRoot: /tmp/%{name}-buildroot
 
 %description
