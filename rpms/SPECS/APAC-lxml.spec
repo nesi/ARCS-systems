@@ -14,11 +14,11 @@ Name:           APAC-lxml
 %define modname lxml
 URL:            http://codespeak.net/lxml
 Summary:        A Pythonic binding for the libxml2 and libxslt libraries
-Version:        svn_rev49755
-Release:        3
+Version:        1.3.6
+Release:        1 
 License:        BSD License and BSD-like
 Group:          Development/Libraries/Python
-Source:         %{modname}-%{version}.tar.bz2
+Source:         %{modname}-%{version}.tar.gz
 Requires:       libxml2 libxslt
 BuildRequires:  libxml2-devel libxslt-devel APAC-pyrex python-devel
 BuildRoot: /tmp/%{name}-buildroot
