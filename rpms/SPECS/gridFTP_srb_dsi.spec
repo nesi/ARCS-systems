@@ -92,7 +92,7 @@ If you want to use to auto command execution feature,
 you will also have to add:
 srb_auto_executable <THE FULL PATH OF THE EXECUTABLE>
 srb_user_name <THE UNIX USER TO RUN THE EXECUTABLE>
-The grid-mapfile for the SRB DSI can be found at: %{GLOBUS_LOCATION}/sbin/globus-gridftp-server
+The grid-mapfile for the SRB DSI can be found at: /etc/grid-security/grid-mapfile.srb
 EOF
 
 %clean
