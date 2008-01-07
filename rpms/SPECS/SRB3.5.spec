@@ -162,18 +162,109 @@ fi
 /sbin/ldconfig
 
 %post server
+rm -f /etc/rc.d/init.d/srb
+cat <<-EOF > /etc/rc.d/init.d/srb
+#!/bin/bash
+#
+# srb        Starts SRB Server
+#
+#
+# chkconfig: 2345 99 01
+
+# Source function library.
+. /etc/init.d/functions
+
+# Local Configuration Parameters
+SRBUSER=srb
+SRBHOME=/usr/srb
+PGDATA=/var/lib/srb/mcat
+PGLOG=/var/lib/srb/mcat.log
+
+RETVAL=0
+umask 077
+[ -n "$NICELEVEL" ] && nice="nice -n $NICELEVEL"
+
+start() {
+       echo -n $"Starting postgres for SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "pg_ctl -D $PGDATA -l $PGLOG start"
+       RETVAL=$?
+       sleep 8
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STARTING POSTGRES"
+       else
+         echo "FAILED STARTING POSTGRES"
+         return $RETVAL
+       fi
+
+       echo -n $"Starting SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "cd $SRBHOME/bin; ./runsrb"
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STARTING SRB"
+       else
+         echo "FAILED STARTING SRB"
+       fi
+       return $RETVAL
+}
+stop() {
+       echo -n $"Stopping SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "cd $SRBHOME/bin; ./killsrb now"
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STOPPING SRB"
+       else
+         echo "FAILED STOPPING SRB"
+         return $RETVAL
+       fi
+       echo -n $"Stopping postgres for SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "pg_ctl -D $PGDATA -l $PGLOG stop"
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STOPPING POSTGRES"
+       else
+         echo "FAILED STOPPING POSTGRES"
+       fi
+       return $RETVAL
+}
+mystatus() {
+       status srbServer
+}
+restart() {
+       stop
+       start
+}
+
+case "$1" in
+ start)
+       start
+       ;;
+ stop)
+       stop
+       ;;
+ status)
+       mystatus
+       ;;
+ restart|reload)
+       restart
+       ;;
+ *)
+       echo $"Usage: $0 {start|stop|status|restart}"
+       exit 1
+esac
+
+exit $?
+EOF
+chmod a+x /etc/rc.d/init.d/srb
 if [ $1 = 1 ]; then
     /sbin/chkconfig --add srb
 fi
 /bin/chmod 0755 /var/lib/srb
 /bin/chmod 0750 /var/lib/srb/.srb
-
 if [ $1 = 0 ]; then
     /sbin/chkconfig --del srb
 fi
 
 %preun server
-
 su srb -mc "/usr/bin/pg_ctl -D %{srbHome}/mcat stop"
 
 %postun server
