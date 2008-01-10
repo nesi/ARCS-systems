@@ -2,6 +2,7 @@
 %define libmin 9
 %define librel 8
 %define librev g
+%define prefix /usr/local
 Release: 1
 
 %define openssldir /var/ssl
@@ -82,7 +83,7 @@ documentation and POD files from which the man pages were produced.
 
 %build 
 
-%define CONFIG_FLAGS -DSSL_ALLOW_ADH --prefix=/usr 
+%define CONFIG_FLAGS -DSSL_ALLOW_ADH --prefix=%{prefix} 
 
 perl util/perlpath.pl /usr/bin/perl
 
@@ -101,15 +102,15 @@ LD_LIBRARY_PATH=`pwd` make test
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make MANDIR=/usr/man INSTALL_PREFIX="$RPM_BUILD_ROOT" install
+make MANDIR=%{prefix}/man INSTALL_PREFIX="$RPM_BUILD_ROOT" install
 
 # Rename manpages
-for x in $RPM_BUILD_ROOT/usr/man/man*/* 
+for x in $RPM_BUILD_ROOT%{prefix}/man/man*/* 
         do mv ${x} ${x}ssl
 done
 
 # Make backwards-compatibility symlink to ssleay
-ln -sf /usr/bin/openssl $RPM_BUILD_ROOT/usr/bin/ssleay
+ln -sf %{prefix}/bin/openssl $RPM_BUILD_ROOT%{prefix}/bin/ssleay
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -118,12 +119,12 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(0644,root,root,0755)
 %doc CHANGES CHANGES.SSLeay LICENSE NEWS README
 
-%attr(0755,root,root) /usr/bin/*
-%attr(0755,root,root) /usr/lib/*.so*
-%attr(0755,root,root) /usr/lib/engines/*
-%attr(0755,root,root) /usr/lib/pkgconfig/*
+%attr(0755,root,root) %{prefix}/bin/*
+%attr(0755,root,root) %{prefix}/lib/*.so*
+%attr(0755,root,root) %{prefix}/lib/engines/*
+%attr(0755,root,root) %{prefix}/lib/pkgconfig/*
 %attr(0755,root,root) %{openssldir}/misc/*
-%attr(0644,root,root) /usr/man/man[157]/*
+%attr(0644,root,root) %{prefix}/man/man[157]/*
 
 %config %attr(0644,root,root) %{openssldir}/openssl.cnf 
 %dir %attr(0755,root,root) %{openssldir}/certs
@@ -135,9 +136,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(0644,root,root,0755)
 %doc CHANGES CHANGES.SSLeay LICENSE NEWS README
 
-%attr(0644,root,root) /usr/lib/*.a
-%attr(0644,root,root) /usr/include/openssl/*
-%attr(0644,root,root) /usr/man/man[3]/*
+%attr(0644,root,root) %{prefix}/lib/*.a
+%attr(0644,root,root) %{prefix}/include/openssl/*
+%attr(0644,root,root) %{prefix}/man/man[3]/*
 
 %files doc
 %defattr(0644,root,root,0755)
@@ -145,16 +146,18 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc
 
 %post
-ldconfig
+if ! grep -q %{prefix}/lib /etc/ld.so.conf; then
+        echo "%{prefix}/lib" >> /etc/ld.so.conf
+fi
+/sbin/ldconfig
 
 %postun
 ldconfig
 
 %changelog
 * Thu Jan 10 2008 Florian Goessmann <florian@ivec.org>
-- Fixed deprecated "Copyright" tag
-- added "/usr/lib/engines/*" to files
-- added "/usr/lib/pkgconfig/" to files
+- updated for 0.9.8g
+- changed intallation directory to /usr/local
 * Thu Mar 22 2001 Richard Levitte <richard@levitte.org>
 - Removed redundant subsection that re-installed libcrypto.a and libssl.a
   as well.  Also remove RSAref stuff completely, since it's not needed
@@ -212,4 +215,4 @@ ldconfig
 * Tue Jul 21 1998 Khimenko Victor <khim@sch57.msk.ru>
 - RPM is BuildRoot'ed
 * Tue Feb 10 1998 Khimenko Victor <khim@sch57.msk.ru>
-- all stuff is moved out of /usr/local
+- all stuff is moved out of %{prefix}/local

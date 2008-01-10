@@ -15,7 +15,7 @@
 %define no_gnome_askpass 1
 
 # Do we want to link against a static libcrypto? (1=yes 0=no)
-%define static_libcrypto 1
+%define static_libcrypto 0
 
 # Do we want smartcard support (1=yes 0=no)
 %define scard 0
@@ -77,7 +77,6 @@ Source0: openssh-%{version}.tar.gz
 Source1: http://www.jmknoble.net/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
 License: BSD
 Group: Applications/Internet
-Packager: Florian Goessmann <florian@ivec.org>
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Obsoletes: ssh
 %if %{build6x}
@@ -85,7 +84,7 @@ PreReq: initscripts >= 5.00
 %else
 PreReq: initscripts >= 5.20
 %endif
-BuildPreReq: perl, openssl-devel >= 0.9.8, tcp_wrappers
+BuildPreReq: perl, openssl-devel, tcp_wrappers
 BuildPreReq: /bin/login
 %if ! %{build6x}
 BuildPreReq: glibc-devel, pam
@@ -188,6 +187,7 @@ echo K5DIR=$K5DIR
 %endif
 
 %configure \
+	--with-ssl-dir=/usr/local/lib \
 	--sysconfdir=%{_sysconfdir}/ssh \
 	--libexecdir=%{_libexecdir}/openssh \
 	--datadir=%{_datadir}/openssh \
@@ -405,7 +405,6 @@ fi
 %changelog
 * Thu Jan 10 2008 Florian Goessmann <florian@ivec.org>
 - updated to 4.7p1
-- added minimum version requirement for openssl: 0.9.8
 
 * Mon Jun 2 2003 Damien Miller <djm@mindrot.org>
 - Remove noip6 option. This may be controlled at run-time in client config
