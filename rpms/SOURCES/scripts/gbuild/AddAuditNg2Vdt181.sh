@@ -1,7 +1,8 @@
 #!/bin/sh
-# AddAuditNg2Vdt161.sh APAC NG2 gateway Audit database installation.
+# AddAuditNg2Vdt181.sh APAC NG2 gateway Audit database installation.
 #		       Gerson Galang <gerson.galang@sapac.edu.au> and
 #		       Graham Jenkins <graham@vpac.org> Dec 2006, Rev 20070216
+#		       Youzhen Cheng <Youzhen.Cheng@ac3.edu.au>, Rev 20080114
 
 #
 # id-check, etc.
@@ -17,13 +18,29 @@ mysql </dev/null 2>&1|grep ERROR >/dev/null &&
 Pass="Audi"`perl -e 'print int(99999999*rand())'`
 Host=`host -t A $HOSTNAME | awk '{print $1}'`
 IpAd=`host -t A $HOSTNAME | awk '{print $NF}'`
-mysql <<EOF
+#mysql <<EOF
+#create database auditDatabase;
+#grant  USAGE ON *.* TO 'audit'@'localhost' IDENTIFIED BY '$Pass';
+#grant  ALL PRIVILEGES ON auditDatabase.* TO 'audit'@'localhost';
+#grant  USAGE ON *.* TO 'audit'@'$Host' IDENTIFIED BY '$Pass';
+#grant  ALL PRIVILEGES ON auditDatabase.* TO 'audit'@'$Host';
+#EOF
+
+# 2008-01-14, Youzhen, fixed multiple interface entry problem
+(
+cat <<EOF
 create database auditDatabase;
-grant  USAGE ON *.* TO 'audit'@'localhost' IDENTIFIED BY '$Pass';
-grant  ALL PRIVILEGES ON auditDatabase.* TO 'audit'@'localhost';
-grant  USAGE ON *.* TO 'audit'@'$Host' IDENTIFIED BY '$Pass';
-grant  ALL PRIVILEGES ON auditDatabase.* TO 'audit'@'$Host';
 EOF
+
+for each in localhost 127.0.0.1 $Host $IpAd
+do
+cat <<EOF
+grant  USAGE ON *.* TO 'audit'@'$each' IDENTIFIED BY '$Pass';
+grant  ALL PRIVILEGES ON auditDatabase.* TO 'audit'@'$each';
+EOF
+done
+) | mysql
+
 
 mysql auditDatabase < $GLOBUS_LOCATION/share/gram-service/gram_audit_schema_mysql.sql
 
