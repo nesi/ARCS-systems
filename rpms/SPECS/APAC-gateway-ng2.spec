@@ -1,7 +1,7 @@
 Summary: NG2 rpm to provide the basics for an APAC NG2 service
 Name: APAC-gateway-ng2
 Version: 1.1
-Release: 3
+Release: 4
 License: APAC
 Group: Applications/Internet
 Requires: APAC-gateway-crl-update, APAC-gateway-gridpulse, APAC-pacman, APAC-gateway-host-certificates, APAC-gateway-vdt-helper, inetd
