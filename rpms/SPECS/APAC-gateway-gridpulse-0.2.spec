@@ -3,7 +3,7 @@
 Summary: The APAC CA certificates and crl tool
 Name: APAC-gateway-gridpulse
 Version: 0.2
-Release: 5
+Release: 6
 Source: %{name}-%{version}.tgz
 License: GPL
 Group: Applications/Internet
