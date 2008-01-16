@@ -33,7 +33,7 @@ rm -rf $RPM_BUILD_ROOT
 %post
 # if the root crontab doesn't exist or doesn't contain gridpulse add it.
 if [ ! -e /var/spool/cron/root ] || ! grep -q %{PREFIX}/bin/gridpulse /var/spool/cron/root; then
-	echo "3,23,43 * * * * %{PREFIX}/bin/gridpulse grid_pulse@vpac.org >/dev/null 2>&1" >> /var/spool/cron/root
+	echo "3,23,43 * * * * %{PREFIX}/bin/gridpulse grid_pulse@gridaus.org.au >/dev/null 2>&1" >> /var/spool/cron/root
 /etc/init.d/crond status >> /dev/null
 	# if cron isn't running just start it
 	if [ "$?" -eq "3" ]
@@ -57,4 +57,6 @@ crontab -l | grep -v %{PREFIX}/bin/gridpulse | crontab
 %{PREFIX}/lib/gridpulse
 
 %changelog
+* Wed Jan 16 2008 Russell Sim
+- changed gridpulse email address
 
