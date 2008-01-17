@@ -155,6 +155,8 @@ rm -rf $RPM_BUILD_ROOT/%{srbroot}/MCAT/install.ora.pl
 %pre server
 if ! getent passwd srb >/dev/null 2>&1 ; then
     /usr/sbin/useradd -m -d /var/lib/srb -s /bin/bash -c "SRB Server" srb > /dev/null 2>&1 || :
+    echo "export LANG=en_US.iso88591" >> /var/lib/srb/.bashrc
+    echo "export LANG=en_US.iso88591" >> /var/lib/srb/.profile
 fi
 if ! grep -q %{srbroot}/lib /etc/ld.so.conf; then
         echo "%{srbroot}/lib" >> /etc/ld.so.conf
