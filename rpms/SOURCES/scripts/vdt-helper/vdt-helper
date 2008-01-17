@@ -41,7 +41,9 @@ unset DO_RANGE VERBOSE GUMS_SERVER
 
 INSTALL_ROOT=$(pwd)
 CACHE="http://vdt.cs.wisc.edu/vdt_161_cache"
-PLATFORM="linux-rhel-4"
+# the latest pacman (3.21) only allows -pretend-platform for a fresh install
+# so we should only set it if explicitly defined (ie, no default value)
+PLATFORM="${PLATFORM:+$PLATFORM}"
 PACKAGES="JDK-1.5,Globus-WS,Globus-WS-PBS-Setup,PRIMA-GT4"
 DO_RANGE=0
 
@@ -88,7 +90,7 @@ fi
 
 
 POST_SETUP="$INSTALL_ROOT/post-setup/apac"
-PLATFORM="-pretend-platform $PLATFORM"
+PLATFORM="${PLATFORM:+-pretend-platform $PLATFORM}"
 PACMAN="pacman $PLATFORM"
 
 # setup install directory
@@ -98,7 +100,11 @@ if [ -e "$INSTALL_ROOT" ]; then
 	read -p "$INSTALL_ROOT already exists, would you like to (c)ontinue, (d)elete or (a)bort? " ACTION
 
 	case $ACTION in
-		c);;
+		c)
+			# can't use -pretend-platform for second time
+			# run since 3.21
+			PACMAN="pacman $PLATFORM"
+		;;
 		d)
 			until [ -n "$REMOVE_VDT_INSTALL_ROOT" ]; do
 				read -p "Entering 'yes' will remove the contents of $INSTALL_ROOT.  Do you wish do continue: " REMOVE_VDT_INSTALL_ROOT
@@ -174,14 +180,22 @@ $PACMAN $PROXY -get $INSTALL_PACKAGES
 
 ## POST INSTALL
 
-# fix bug in pacman
-perl -pi -e 's/grep .sh\$/grep "\\\\.sh\$"/' $INSTALL_ROOT/setup.sh
+# fix bug in pacman (fixed in pacman 3.20)
+#perl -pi -e 's/grep .sh\$/grep "\\\\.sh\$"/' $INSTALL_ROOT/setup.sh
+
+# pacman only allows -pretend-platform for fresh install since 3.21
+# so we've got to disable it for future runs of pacman
+PACMAN="pacman"
 
 source $INSTALL_ROOT/setup.sh
 
-# TODO: make this test a function
-PACKAGE="Globus-WS-Container"
-if $PACMAN -d 0 -l $PACKAGE | grep -q "^\[\*\]"; then
+# this needs to be run in $INSTALL_ROOT
+function package_installed() {
+	local PACKAGE="$1"
+	$PACMAN -d 0 -l $PACKAGE | grep -q "^\[\*\]"
+}
+
+if package_installed Globus-WS-Container; then
 	echo "Making globus modifications"
 	perl -pi -e "s/WSC_PORT=9443/WSC_PORT=${GLOBUS_PORT:-8443}/" $INSTALL_ROOT/post-install/globus-ws
 
@@ -194,7 +208,7 @@ fi
 
 # if java 1.5 was installed - assume we'll use it
 # TODO: potentially make the changes in $INSTALL_ROOT/post-setup/apac.sh
-if echo $PACKAGES | grep -q JDK-1.5; then
+if package_installed JDK-1.5; then
 	echo "Making java 1.5 modifications"
 	for KEY in JAVA_HOME PATH MANPATH LD_LIBRARY_PATH; do
 		sed -ie "/^$KEY/ s/jdk1.4/jdk1.5/g" $INSTALL_ROOT/setup.sh
@@ -247,6 +261,10 @@ if [ $(id -u) -eq 0 ]; then
 #		getent passwd globus >&/dev/null && GLOBUS_USER="globus" || GLOBUS_USER="daemon"
 		# don't use this because it doesn't deal with LDAP, NIS etc
 #		GLOBUS_USER=$(grep -q ^globus /etc/passwd && echo globus || echo daemon)
+
+		if ! grep -q Defaults:$GLOBUS_USER /etc/sudoers; then
+			echo "Defaults:$GLOBUS_USER !requiretty" >> /etc/sudoers
+		fi
 
 		# TODO: the greps inside each branch of this if don't deal with an install in the same place using a different auth mechanism
 		if [ -f $INSTALL_ROOT/vdt/setup/configure_prima_gt4 ]; then
