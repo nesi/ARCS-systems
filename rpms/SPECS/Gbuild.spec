@@ -20,7 +20,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 mkdir -p $RPM_BUILD_ROOT/usr/local/lib/gridpulse
 
-cp -p * $RPM_BUILD_ROOT/usr/local/bin
+cp -p *.sh $RPM_BUILD_ROOT/usr/local/bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
