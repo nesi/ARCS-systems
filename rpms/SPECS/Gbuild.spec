@@ -1,29 +1,50 @@
-Summary:	APAC-specific build/update scripts for Grid machines
+Summary:	ARCS-specific build/update scripts for Grid Gateway machines
 Name:		Gbuild
-Version:	1.0.1
-Release:	23
-License:	GNU
+Version:	1.8
+Release:	1
+License:	GPL
 Group:		Grid/Deployment
-BuildRoot:	/home/graham/rpmbuild/redhat/BUILD/%{name}-buildroot
+BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildArch:	noarch
-Requires: 	logrotate perl mktemp smtpdaemon
+Prefix:		/usr/local
+Requires: 	perl
 
 %description
-Provides local scripts for use when building Grid machines at APAC sites.
+Provides local scripts for use when building Grid machines at ARCS sites. See: http://www.grid.apac.edu.au/repository/trac/systems/
+
+%prep
 
 %install
-%files
-%defattr(-,root,root)
-/
+cd ../SOURCES/scripts/gbuild
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/usr/local/bin
+mkdir -p $RPM_BUILD_ROOT/usr/local/lib/gridpulse
+
+cp -p * $RPM_BUILD_ROOT/usr/local/bin
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %post
-mkdir -p /usr/local/lib/gridpulse
-cat /usr/local/lib/gridpulse/system_packages.pulse 2>/dev/null | grep "^Gbuild$" >/dev/null ||
-  echo Gbuild >>/usr/local/lib/gridpulse/system_packages.pulse
+#if upgrade remove first
+if [ $1 -gt 1 ]; then
+	perl -ni -e "print unless /^%{name}/;" $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+fi
+echo %{name} >> $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
 
-%preun
-echo ".. executing pre-uninstall script with parameter: $1"
-[ "$1" -ge 1 ] && exit 0
-TF=`mktemp` || exit 1
-grep -v "^Gbuild$" </usr/local/lib/gridpulse/system_packages.pulse >$TF 2>/dev/null
-cp $TF /usr/local/lib/gridpulse/system_packages.pulse
+%postun
+# if its an uninstall
+if [ $1 -lt 1 ]; then
+	perl -ni -e "print unless /^%{name}/;" $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+fi
+
+%files
+%defattr(-,root,root)
+/usr/local/bin/
+/usr/local/lib/
+
+
+%changelog
+* Mon Jan 21 2008 Daniel Cox
+- fix spec file using APAC-gateway-gridpulse.spec as an example
+- change version to 1.8 indicating VDT1.8 build scripts

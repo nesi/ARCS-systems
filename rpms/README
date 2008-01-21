@@ -1,10 +1,7 @@
-README
+ARCS Systems Project
+http://www.grid.apac.edu.au/repository/trac/systems/
 
-Creating spec files
-http://www.grid.apac.edu.au/repository/trac/systems/wiki/Contrib/WritingSPEC
+Guide to making changes:
+http://www.grid.apac.edu.au/repository/trac/systems/wiki/Contrib/MakingChanges
 
-Building/Compiling
-http://www.grid.apac.edu.au/repository/trac/systems/wiki/Contrib/CompileRPMS
 
-Submitting Bugs
-http://www.grid.apac.edu.au/repository/trac/systems/wiki/Contrib/BugReports
