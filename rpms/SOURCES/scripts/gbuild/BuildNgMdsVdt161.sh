@@ -22,7 +22,7 @@ grep `hostname` /etc/hosts 2>/dev/null | grep -v "^#" | head -1 | awk '{
 # RPM's, PBS client
 echo "==> Installing Prerequisite and Useful RPMs"
 [ "`uname -i`" = x86_64 ] && Extras="glibc-devel.i386 glibc-devel.x86_64" || Extras=glibc-devel
-yum install vim-minimal dhclient openssh-clients Gpulse       \
+yum install vim-minimal dhclient openssh-clients        \
             vim-enhanced iptables ntp yp-tools mailx nss_ldap libXp   \
             tcsh openssh-server sudo lsof slocate bind-utils telnet   \
             gcc vixie-cron anacron crontabs diffutils tmpwatch \

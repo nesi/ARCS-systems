@@ -7,7 +7,7 @@ Group:		Grid/Deployment
 BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildArch:	noarch
 Prefix:		/usr/local
-Requires: 	perl
+Requires: 	perl Gpulse
 
 %description
 Provides local scripts for use when building Grid machines at ARCS sites. See: http://www.grid.apac.edu.au/repository/trac/systems/
@@ -48,3 +48,4 @@ fi
 * Mon Jan 21 2008 Daniel Cox
 - fix spec file using APAC-gateway-gridpulse.spec as an example
 - change version to 1.8 indicating VDT1.8 build scripts
+- require Gpulse so it can be removed from build scripts

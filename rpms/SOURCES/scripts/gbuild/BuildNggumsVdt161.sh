@@ -18,7 +18,7 @@ GUMS_USES_TOMCAT_55=y
 # RPM's
 echo "==> Installing Prerequisite and Useful RPMs"
 [ "`uname -i`" = x86_64 ] && Extras="glibc-devel.i386 glibc-devel.x86_64" || Extras=glibc-devel
-yum install Gpulse vim-minimal dhclient openssh-clients openssl097a   \
+yum install vim-minimal dhclient openssh-clients openssl097a   \
             vim-enhanced iptables ntp yp-tools mailx nss_ldap libXp   \
             tcsh openssh-server sudo lsof slocate bind-utils telnet   \
             gcc vixie-cron anacron crontabs diffutils xinetd tmpwatch \

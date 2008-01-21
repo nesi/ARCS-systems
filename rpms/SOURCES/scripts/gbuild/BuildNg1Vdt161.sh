@@ -19,7 +19,7 @@ VDTSETUP_INSTALL_CERTS=r
 # RPM's, PBS client
 echo "==> Installing Prerequisite and Useful RPMs"
 [ "`uname -i`" = x86_64 ] && Extras="glibc-devel.i386 glibc-devel.x86_64" || Extras=glibc-devel
-yum install Ggateway Gpulse vim-minimal dhclient openssh-clients libXp    \
+yum install Ggateway vim-minimal dhclient openssh-clients libXp    \
             vim-enhanced iptables ntp yp-tools mailx nss_ldap openssl097a \
             tcsh openssh-server sudo lsof slocate bind-utils telnet       \
             gcc vixie-cron anacron crontabs diffutils xinetd tmpwatch     \
