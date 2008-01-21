@@ -87,6 +87,9 @@ documentation and POD files from which the man pages were produced.
 
 perl util/perlpath.pl /usr/bin/perl
 
+%ifarch x86_64
+./Configure %{CONFIG_FLAGS} --openssldir=%{openssldir} linux-x86_64 shared
+%endif
 %ifarch i386 i486 i586 i686
 ./Configure %{CONFIG_FLAGS} --openssldir=%{openssldir} linux-elf shared
 %endif
@@ -132,6 +135,12 @@ rm -rf $RPM_BUILD_ROOT
 %dir %attr(0755,root,root) %{openssldir}/misc
 %dir %attr(0750,root,root) %{openssldir}/private
 
+%post
+if ! grep -q %{prefix}/lib /etc/ld.so.conf; then
+        echo "%{prefix}/lib" >> /etc/ld.so.conf
+fi
+/sbin/ldconfig
+
 %files devel
 %defattr(0644,root,root,0755)
 %doc CHANGES CHANGES.SSLeay LICENSE NEWS README
@@ -145,16 +154,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc CHANGES CHANGES.SSLeay LICENSE NEWS README
 %doc doc
 
-%post
-if ! grep -q %{prefix}/lib /etc/ld.so.conf; then
-        echo "%{prefix}/lib" >> /etc/ld.so.conf
-fi
-/sbin/ldconfig
-
 %postun
 ldconfig
 
 %changelog
+* Mon Jan 21 2008 Florian Goessmann <florian@ivec.org>
+- added support for 64bit Linux
 * Thu Jan 10 2008 Florian Goessmann <florian@ivec.org>
 - updated for 0.9.8g
 - changed intallation directory to /usr/local

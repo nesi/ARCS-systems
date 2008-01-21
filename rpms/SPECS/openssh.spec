@@ -64,6 +64,13 @@
 %define kerberos5 0
 %endif
 
+%define _prefix /usr/local
+%define _sysconfdir /etc
+%define _libexecdir /usr/local/libexec
+%define _datadir /usr/local
+%define _mandir %{_datadir}/man
+%define _sbindir %{_datadir}/sbin
+
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
 Name: openssh
 Version: %{ver}
@@ -74,7 +81,7 @@ Release: %{rel}
 %endif
 URL: http://www.openssh.com/portable.html
 Source0: openssh-%{version}.tar.gz
-Source1: http://www.jmknoble.net/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
+#Source1: http://www.jmknoble.net/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
@@ -186,11 +193,16 @@ K5DIR=`rpm -ql krb5-devel | grep include/krb5.h | sed 's,\/include\/krb5.h,,'`
 echo K5DIR=$K5DIR
 %endif
 
+export CPPFLAGS="-I/usr/local/include/openssl -I/usr/include -I/include"
+
 %configure \
-	--with-ssl-dir=/usr/local/lib \
-	--sysconfdir=%{_sysconfdir}/ssh \
-	--libexecdir=%{_libexecdir}/openssh \
-	--datadir=%{_datadir}/openssh \
+        --prefix=%{_datadir} \
+	--with-ssl-dir=%{_datadir}/lib \
+        --datadir=%{_datadir}/openssh \
+        --mandir=%{_mandir} \
+        --sbindir=%{_sbindir} \
+        --libexecdir=%{_libexecdir}/openssh \
+        --sysconfdir=%{_sysconfdir}/ssh \
 	--with-tcp-wrappers \
 	--with-rsh=%{_bindir}/rsh \
 	--with-default-path=/usr/local/bin:/bin:/usr/bin \
@@ -273,6 +285,7 @@ install -s contrib/gnome-ssh-askpass $RPM_BUILD_ROOT%{_libexecdir}/openssh/gnome
 
 %if ! %{scard}
 	 rm -f $RPM_BUILD_ROOT/usr/share/openssh/Ssh.bin
+	 rm -f $RPM_BUILD_ROOT/%{_datadir}/openssh/Ssh.bin
 %endif
 
 %if ! %{no_gnome_askpass}
@@ -320,6 +333,9 @@ fi
 	-g sshd -M -r sshd 2>/dev/null || :
 
 %post server
+cat /etc/rc.d/init.d/sshd | sed 's!/usr/bin!/usr/local/bin!' | sed 's!/usr/sbin!/usr/local/sbin!' > /etc/rc.d/init.d/sshd.new
+mv /etc/rc.d/init.d/sshd.new /etc/rc.d/init.d/sshd
+chmod u+x /etc/rc.d/init.d/sshd
 /sbin/chkconfig --add sshd
 
 %postun server
