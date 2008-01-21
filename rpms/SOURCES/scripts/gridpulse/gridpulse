@@ -109,7 +109,9 @@ for CERTIFICATE in $CERTDIR/*.0; do
 
 	if [ ! -e "$CRL" ]; then
 		echo "CRL not found"
-		STATUS="$BAD"
+		# discussed 21/1/08 - not found is OK
+		# current globus versions will correctly refuse when no CRL exists
+		#STATUS="$BAD"
 		continue;
 	fi
 
