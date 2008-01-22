@@ -1,7 +1,7 @@
 PREFIX=/usr/local
 
 dist:
-	tar czf ../../vdt-helper.tar.gz *
+	tar czf ../../vdt-helper.tar.gz ../vdt-helper/*
 install:
 	chmod +x vdt-helper
 	mkdir -p $(DESTDIR)/$(PREFIX)/share/doc/vdt-helper

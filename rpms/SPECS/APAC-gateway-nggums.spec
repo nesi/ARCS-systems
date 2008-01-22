@@ -17,10 +17,10 @@ tar zxf %_sourcedir/vdt-config.nggums.tar.gz
 
 %install
 mkdir -p $RPM_BUILD_ROOT/usr/local/etc
-cp %_builddir/vdt-config.nggums $RPM_BUILD_ROOT/usr/local/etc
+cp %_builddir/vdt-templates/vdt-config.nggums $RPM_BUILD_ROOT/usr/local/etc
 
 mkdir -p $RPM_BUILD_ROOT/usr/local/share/doc
-cp %_builddir/gbuild/gums.config $RPM_BUILD_ROOT/usr/local/share/doc
+cp %_builddir/vdt-templates/gums.config $RPM_BUILD_ROOT/usr/local/share/doc
 
 mkdir -p $RPM_BUILD_ROOT/etc/grid-security/http/
 ln -s /etc/grid-security/hostcert.pem $RPM_BUILD_ROOT/etc/grid-security/http/httpcert.pem
@@ -35,6 +35,8 @@ ln -s /etc/grid-security/hostkey.pem $RPM_BUILD_ROOT/etc/grid-security/http/http
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jan 22 2008 Russell Sim
+- changed to reflect default base path in tarball
 * Thu Jan 17 2008 Russell Sim
 - added symlinks required by vdt install of apache
 * Fri Nov 23 2007 Russell Sim

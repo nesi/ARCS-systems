@@ -17,7 +17,7 @@ tar zxf %_sourcedir/vdt-config.ng2.tar.gz
 
 %install
 mkdir -p $RPM_BUILD_ROOT/usr/local/etc
-install vdt-config.ng2 $RPM_BUILD_ROOT/usr/local/etc
+install vdt-templates/vdt-config.ng2 $RPM_BUILD_ROOT/usr/local/etc
 
 %files
 /usr/local/etc/vdt-config.ng2
@@ -26,6 +26,8 @@ install vdt-config.ng2 $RPM_BUILD_ROOT/usr/local/etc
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jan 22 2008 Russell Sim
+- changed to reflect default base path in tarball
 * Tue Nov 27 2007 Russell Sim
 - added requirement, inetd which is required for gridftp
 * Thu Sep 27 2007 Russell Sim

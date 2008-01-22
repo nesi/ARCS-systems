@@ -1,0 +1,11 @@
+== About ==
+
+Gridpulse is used by the Grid Australia project to help monitor status to grid gateway machines. It reports information via email back to a central server located at. http://goc.gridaus.org.au/
+
+== Install ==
+
+Gridpulse should be run using a scheduler like cron
+
+Example:
+3,23,43 * * * * /usr/local/bin/gridpulse grid_pulse@gridaus.org.au >/dev/null 2>&1
+

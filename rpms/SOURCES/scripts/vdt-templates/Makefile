@@ -1,5 +1,5 @@
 
 dist:
-	find . -name "vdt-config.ng2" -exec tar czf ../../{}.tar.gz {} \;
-	find . -name "vdt-config.ngdata" -exec tar czf ../../{}.tar.gz {} \;
-	tar czf ../../vdt-config.nggums.tar.gz vdt-config.nggums ../gbuild/gums.config 
+	tar czf ../../vdt-config.ng2.tar.gz ../vdt-templates/vdt-config.ng2
+	tar czf ../../vdt-config.ngdata.tar.gz ../vdt-templates/vdt-config.ngdata
+	tar chzf ../../vdt-config.nggums.tar.gz ../vdt-templates/vdt-config.nggums ../vdt-templates/gums.config 
