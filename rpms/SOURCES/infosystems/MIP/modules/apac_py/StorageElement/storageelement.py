@@ -54,19 +54,27 @@ if __name__ == '__main__':
 				free_index = 3
 				used_index = 2
 
+			# vlad's workaround to the max limit of int32
+			maxInt32 = 2147483647
 			# config file overrides this
 			if area.AvailableSpace is None:
 #				free_space = int(lines[-1].split()[3])
 				free_space = int(lines[-1].split()[free_index])
 				if free_space > 0:
-					area.AvailableSpace = free_space
+					if free_space <= maxInt32:
+						area.AvailableSpace = free_space
+					else:
+						area.AvailableSpace = maxInt32
 
 			# config file overrides this
 			if area.UsedSpace is None:
 #				used_space = int(lines[-1].split()[2])
 				used_space = int(lines[-1].split()[used_index])
 				if used_space > 0:
-					area.UsedSpace = used_space
+					if used_space <= maxInt32:
+						area.UsedSpace = used_space
+					else:
+						area.UsedSpace = maxInt32
 
 
 		if area.VirtualPath is not None:
