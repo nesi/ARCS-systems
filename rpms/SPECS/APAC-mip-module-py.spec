@@ -1,11 +1,11 @@
 %define PREFIX /usr/local
 %define PKG_NAME apac_py
-%define REVISION 384
+%define REVISION 434
 
 Summary: The GridAustralia Modular Information Provider module
 Name: APAC-mip-module-py
 Version: 1.0.%{REVISION}
-Release: 2
+Release: 3
 License: ARCS
 Group: Applications/Internet
 Requires: APAC-mip, APAC-glue-schema, APAC-lxml
@@ -76,6 +76,8 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{PREFIX}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoData
 
 %changelog
+* Wed Jan 23 2008 Gerson Galang
+- added Vlad's workaround to the max int32 limit issue with Available and UsedSpace attributes of the StorageElement
 * Thu Dec 13 2007 Gerson Galang
 - added softwareInfoData directory to the config list
 * Thu Dec 06 2007 Gerson Galang
