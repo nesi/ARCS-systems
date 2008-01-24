@@ -1,7 +1,6 @@
-TGZ=../../../mip.tar.gz
+TGZ=../../mip.tar.gz
 
 dist: $(TGZ)
 
 $(TGZ): *
-	cp -r ../source ../mip
-	tar czf $(TGZ) ../mip/*
+	tar czf $(TGZ) --exclude=.svn ../mip/*
