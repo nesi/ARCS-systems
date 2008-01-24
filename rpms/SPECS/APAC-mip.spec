@@ -1,36 +1,55 @@
 %define PKG_NAME mip
 
-Summary:	The Modular Information Provider modified for GridAustralia
+Summary:	The MIP modified for GridAustralia
 Name:		APAC-mip
 Version:	0.2.7
-Release:	3
+Release:	4
 Source:		mip.tar.gz
+# TODO: what was original MIP license? What are we allowed to specify it as?
 License:	Apache
 Group:		Applications/Internet
 BuildRoot:	%{_tmppath}/%{name}-buildroot
+BuildArch: 	noarch
 Prefix:		/usr/local
 Requires: 	perl
 Provides: 	perl(lib::functions), perl(lib::producers), perl(lib::utilityfunctions), perl(lib::installer)
-BuildArch: 	noarch
 
 %description
-The Modular Information Provider modified for GridAustralia usage
+The MIP (Modular Information Provider) modified for GridAustralia usage.
+
 
 %prep
 %setup -n mip
 
+
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{prefix}/%{PKG_NAME}
 rm Makefile
+mkdir -p $RPM_BUILD_ROOT%{prefix}/%{PKG_NAME}
 cp -a * $RPM_BUILD_ROOT%{prefix}/%{PKG_NAME}
 
-%post
-cd $RPM_INSTALL_PREFIX0/%{PKG_NAME}
-./install_mip
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+
+%post
+#if upgrade remove first
+if [ $1 -gt 1 ]; then
+	perl -ni -e "print unless /^%{name}/;" $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+fi
+echo %{name} >> $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+
+cd $RPM_INSTALL_PREFIX0/%{PKG_NAME}
+./install_mip
+
+
+%postun
+# if its an uninstall
+if [ $1 -lt 1 ]; then
+	perl -ni -e "print unless /^%{name}/;" $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+fi
+
 
 %files
 %defattr(-,root,root)
@@ -45,6 +64,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jan 25 2008 Daniel Cox
+- include in gridpulse checks
 * Thu Jan 24 2008 Gerson Galang
 - modified to reflect changes in the directory structure of all the packages inside the infosystems director
 y

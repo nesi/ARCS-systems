@@ -89,7 +89,6 @@ fi
 
 #
 # Wrapup
-[ -x  /usr/local/sbin/SecureMdsVdt161.sh ] && /usr/local/sbin/SecureMdsVdt161.sh Supress
 echo "==> Running: /opt/vdt/fetch-crl/share/doc/fetch-crl-2.6.2/fetch-crl.cron"
 cd /tmp &&
   nohup /opt/vdt/fetch-crl/share/doc/fetch-crl-2.6.2/fetch-crl.cron >/dev/null &

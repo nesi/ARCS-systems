@@ -1,31 +1,45 @@
 %define PKG_NAME apac_py
 %define REVISION 444
 
-Summary:	The GridAustralia Modular Information Provider module
+Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	4
-License:	ARCS
-Group:		Applications/Internet
-Prefix:		/usr/local
+Release:	5
 Source:		apac_py.tar.gz
-Requires:	APAC-mip, APAC-glue-schema, APAC-lxml
+License:	GPL
+Group:		Applications/Internet
 BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildArch:	noarch
+Prefix:		/usr/local
+Requires:	APAC-mip, APAC-glue-schema, APAC-lxml
 
 %description
-The GridAustralia Modular Information Provider module
+The GridAustralia MIP (Modular Information Provider) module
+
 
 %prep
 %setup -n apac_py
 
+
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{prefix}/mip/modules/%{PKG_NAME}
 rm Makefile
+mkdir -p $RPM_BUILD_ROOT%{prefix}/mip/modules/%{PKG_NAME}
 cp -a * $RPM_BUILD_ROOT%{prefix}/mip/modules/%{PKG_NAME}
 
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
 %post
+#if upgrade remove first
+if [ $1 -gt 1 ]; then
+	perl -ni -e "print unless /^%{name}/;" $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+fi
+echo %{name} >> $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+
+
 cd $RPM_INSTALL_PREFIX0/mip
 if [ ! -e "modules/default" ];
 then
@@ -64,8 +78,13 @@ cat <<-EOF > config/default.pl
 EOF
 fi
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+
+%postun
+# if its an uninstall
+if [ $1 -lt 1 ]; then
+	perl -ni -e "print unless /^%{name}/;" $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
+fi
+
 
 %files
 %defattr(-,root,root)
@@ -80,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Fri Jan 25 2008 Daniel Cox
+- include in gridpulse checks
 * Thu Jan 24 2008 Gerson Galang
 - modified to reflect changes in the directory structure of all the packages inside the infosystems directory
 * Wed Jan 23 2008 Gerson Galang

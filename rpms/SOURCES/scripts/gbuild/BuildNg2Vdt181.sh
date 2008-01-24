@@ -129,7 +129,6 @@ fi
 
 #
 # Wrapup
-[ -x  /usr/local/sbin/SecureMdsVdt161.sh ] && /usr/local/sbin/SecureMdsVdt161.sh Supress
 chkconfig --add pbs-logmaker; service pbs-logmaker start
 echo "==> Re-starting: xinetd"
 chkconfig --add xinetd; service xinetd start; service xinetd reload

@@ -1,5 +1,5 @@
-Summary: Globus configuration for the Modular Information Provider for APAC Grid usage
-Name: APAC-mip-globus
+Summary:	Globus configuration for the Modular Information Provider for APAC Grid usage
+Name:		APAC-mip-globus
 version:	0.1
 release:	3
 License:	GridAustralia
@@ -13,27 +13,33 @@ BuildArch:	noarch
 %description
 Globus configuration for the Modular Information Provider for GridAustralia
 
+
 %prep
 %setup -n globus-mip-config
 
+
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{prefix}/mip/config/globus
 rm Makefile
+mkdir -p $RPM_BUILD_ROOT%{prefix}/mip/config/globus
 cp -a * $RPM_BUILD_ROOT%{prefix}/mip/config/globus
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
 
 %post
 cd $RPM_INSTALL_PREFIX0/mip
 [ ! -n "$GLOBUS_LOCATION" ] &&  echo "==> GLOBUS_LOCATION not defined!"     && exit 2
 ./config/globus/mip-globus-config -l /opt/vdt/globus install
 
+
 %preun
 cd $RPM_INSTALL_PREFIX0/mip
 [ ! -n "$GLOBUS_LOCATION" ] &&  echo "==> GLOBUS_LOCATION not defined!"     && exit 2
 ./config/globus/mip-globus-config -l /opt/vdt/globus uninstall
+
 
 %files
 %defattr(-,root,root)

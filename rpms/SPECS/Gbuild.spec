@@ -1,7 +1,7 @@
 Summary:	ARCS-specific build/update scripts for Grid Gateway machines
 Name:		Gbuild
 Version:	1.8
-Release:	2
+Release:	3
 Source:		gbuild.tar.gz
 License:	GPL
 Group:		Grid/Deployment
@@ -53,6 +53,8 @@ fi
 
 
 %changelog
+* Fri Jan 25 2008 Daniel Cox
+- secure MDS is handled by mip-globus package
 * Mon Jan 22 2008 Daniel Cox
 - fix spec file using APAC-gateway-gridpulse.spec as an example
 - change version to 1.8 indicating VDT1.8 build scripts
