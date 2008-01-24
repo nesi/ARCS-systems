@@ -11,6 +11,8 @@ STATUS="OK"
 [ -z "$DESTINATION" ] && DISPOSITION="cat" || DISPOSITION="Mail -s \"$(hostname -f) Periodic System Check\" $DESTINATION"
 
 
+# TODO: package is relocatable, this should be fixed by %post
+#  OR imported from a config file set by %post
 LIBDIR="/usr/local/lib/gridpulse"
 CERTDIR="/etc/grid-security/certificates"
 
@@ -25,13 +27,25 @@ seconds() {
 for i in $LIBDIR/*; do
 	[ "$i" = "$LIBDIR/*" ] && break # nothing found
 
-	[ -x "$i" ] && $i || echo "skipping non executable $i" >&2
+	# extra output is sent to root by cron!
+	#[ -x "$i" ] && $i || echo "skipping non executable $i" >&2
+	[ -x "$i" ] && $i
 done
 
 # all lines in $LIBDIR/system_shorts.pulse
 cat $LIBDIR/system_shorts.pulse | while read CMD; do
 	OUTPUT="$(eval "$CMD")"
 	[ -n "$OUTPUT" ] && echo "Info: $OUTPUT"
+done
+
+# Raid information
+# TODO: check dmesg for a RAID, fail if no ipssend
+for Controller in `ipssend getversion 2>/dev/null |
+                   awk '/^ServeRAID Controller Number/ {print $NF}'` ; do
+  ipssend getconfig $Controller ld 2>/dev/null |
+    awk '/Status of logical drive/ {if($NF!~"OKY")exit 1}' && \
+    echo "Info: RAID (Controller $Controller) is: OK"   && continue
+    echo "Info: RAID (Controller $Controller) is: Not OK"; STATUS="$BAD"
 done
 
 
