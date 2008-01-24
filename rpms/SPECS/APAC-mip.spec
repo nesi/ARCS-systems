@@ -22,8 +22,8 @@ The Modular Information Provider modified for GridAustralia usage
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/%{PKG_NAME}
+rm Makefile
 cp -a * $RPM_BUILD_ROOT%{prefix}/%{PKG_NAME}
-
 
 %post
 cd $RPM_INSTALL_PREFIX0/%{PKG_NAME}
@@ -34,9 +34,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{prefix}/%{PKG_NAME}
-
 %config %{prefix}/%{PKG_NAME}/config
+%{prefix}/%{PKG_NAME}/INSTALL
+%{prefix}/%{PKG_NAME}/README
+%{prefix}/%{PKG_NAME}/install_mip
+%{prefix}/%{PKG_NAME}/mip
+%{prefix}/%{PKG_NAME}/*.pl
+%{prefix}/%{PKG_NAME}/lib
+%{prefix}/%{PKG_NAME}/modules
+
 
 %changelog
 * Thu Jan 24 2008 Gerson Galang

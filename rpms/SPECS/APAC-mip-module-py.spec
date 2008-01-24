@@ -22,6 +22,7 @@ The GridAustralia Modular Information Provider module
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/mip/modules/%{PKG_NAME}
+rm Makefile
 cp -a * $RPM_BUILD_ROOT%{prefix}/mip/modules/%{PKG_NAME}
 
 %post
@@ -68,9 +69,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{prefix}/mip/modules/%{PKG_NAME}
-
 %config(noreplace) %{prefix}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoData
+%{prefix}/mip/modules/%{PKG_NAME}/Cluster
+%{prefix}/mip/modules/%{PKG_NAME}/ComputingElement
+%{prefix}/mip/modules/%{PKG_NAME}/Site
+%{prefix}/mip/modules/%{PKG_NAME}/StorageElement
+%{prefix}/mip/modules/%{PKG_NAME}/SubCluster/subcluster.py
+%{prefix}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoProvider.py
+%{prefix}/mip/modules/%{PKG_NAME}/*.py
+%{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
 * Thu Jan 24 2008 Gerson Galang

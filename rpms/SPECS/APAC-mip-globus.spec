@@ -19,6 +19,7 @@ Globus configuration for the Modular Information Provider for GridAustralia
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/mip/config/globus
+rm Makefile
 cp -a * $RPM_BUILD_ROOT%{prefix}/mip/config/globus
 
 %clean

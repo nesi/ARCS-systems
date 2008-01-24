@@ -20,6 +20,7 @@ Installs the GLUE1.2 XML schema and GridAustralia GLUE1.2 XML schema extension
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/share
+rm Makefile
 cp -a * $RPM_BUILD_ROOT%{prefix}/share
 
 %clean
