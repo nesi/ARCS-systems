@@ -84,7 +84,7 @@ function uninstall() {
 	fi
 
 	if [ -f "$GLOBUS_LOCATION/libexec/mip-exec.orig" ]; then
-		cp $GLOBUS_LOCATION/libexec/mip-exec.orig $GLOBUS_LOCATION/libexec/mip-exec.orig
+		cp $GLOBUS_LOCATION/libexec/mip-exec.orig $GLOBUS_LOCATION/libexec/mip-exec
 	else
 		echo "==> removing $GLOBUS_LOCATION/libexec/mip-exec"
 		rm $GLOBUS_LOCATION/libexec/mip-exec

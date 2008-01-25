@@ -3,7 +3,7 @@
 Summary:	The MIP modified for GridAustralia
 Name:		APAC-mip
 Version:	0.2.7
-Release:	4
+Release:	5
 Source:		mip.tar.gz
 # TODO: what was original MIP license? What are we allowed to specify it as?
 License:	Apache
@@ -11,7 +11,7 @@ Group:		Applications/Internet
 BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildArch: 	noarch
 Prefix:		/usr/local
-Requires: 	perl
+Requires: 	perl APAC-gateway-gridpulse
 Provides: 	perl(lib::functions), perl(lib::producers), perl(lib::utilityfunctions), perl(lib::installer)
 
 %description

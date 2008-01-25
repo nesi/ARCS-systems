@@ -1,12 +1,12 @@
 Summary:	Globus configuration for the Modular Information Provider for APAC Grid usage
 Name:		APAC-mip-globus
 version:	0.1
-release:	3
+release:	5
 License:	GridAustralia
 Source:		globus-mip-config.tar.gz
 Prefix:		/usr/local
 Group:		Applications/Internet
-Requires:	APAC-mip, APAC-mip-module-py
+Requires:	APAC-gateway-gridpulse APAC-mip APAC-mip-module-py
 BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildArch:	noarch
 
