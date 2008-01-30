@@ -1,7 +1,7 @@
 Summary:	The ARCS health reporting tool.
 Name:		APAC-gateway-gridpulse
 Version:	0.2
-Release:	12
+Release:	13
 Source:		gridpulse.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -10,7 +10,7 @@ BuildArch:	noarch
 Prefix:		/usr/local
 Requires:	/usr/bin/Mail, smtpdaemon, vixie-cron, perl
 Provides:	Gpulse = 1.1
-Conflicts:	Gpulse < 1.1
+Obsoletes:	Gpulse < 1.1
 
 %description
 Installs the ARCS gridpulse script and cron entry to report on gateway health. Reports from all systems are collected by the GOC http://goc.grid.apac.edu.au/.
@@ -72,6 +72,8 @@ fi
 
 
 %changelog
+* Tue Jan 29 2008 Daniel Cox
+- use Obsoletes instead of Conflicts
 * Mon Jan 22 2008 Daniel Cox
 - make sure gridpulse runs on the Xen host with no errors
 - monitor free memory, RAID and NPTL status
