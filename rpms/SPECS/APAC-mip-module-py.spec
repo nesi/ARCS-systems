@@ -43,7 +43,7 @@ echo %{name} >> $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
 cd $RPM_INSTALL_PREFIX0/mip
 if [ ! -e "modules/default" ];
 then
-        ln -sf modules/apac_py modules/default
+        ln -sf apac_py modules/default
 fi
 if [ ! -f "config/apac_config.py" ];
 then
