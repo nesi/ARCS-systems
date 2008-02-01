@@ -4,7 +4,7 @@
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	5
+Release:	6
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -99,6 +99,8 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Fri Feb 1 2008 Gerson Galang
+- fix post install script to work for a fresh install
 * Fri Jan 25 2008 Daniel Cox
 - include in gridpulse checks
 * Thu Jan 24 2008 Gerson Galang
