@@ -207,10 +207,10 @@ def run_command(command):
 		from subprocess import Popen, PIPE
 		if type(command) == type(""):
 			stdout = Popen([command], stdout=PIPE).communicate()[0]
-			return [l.strip() for l in stdout.split("\n")]
+			return stdout.splitlines()
 		else:
 			stdout = Popen(command, stdout=PIPE).communicate()[0]
-			return [l.strip() for l in stdout.split("\n")]
+			return stdout.splitlines()
 
 	else:
 		if type(command) == type(""):

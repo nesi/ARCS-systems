@@ -21,6 +21,9 @@ def processNodeInfo(node_info, ce, filterArg):
 	except Exception, e:
 		sys.stderr.write("error running node filter: %s\n" % e)
 
+	if not 'state' in node_info:
+		return
+
 	if 'down' in node_info['state'] or 'offline' in node_info['state']:
 		return
 

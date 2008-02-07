@@ -254,39 +254,39 @@ accessProtocol.Capability = [ 'file transfer', 'other capability' ]
 # /STORAGE ELEMENT
 
 # ANOTHER STORAGE ELEMENT EXAMPLE FOR AN SRM ENABLED HOST
-storageElement = package.StorageElement['storage2'] = StorageElement()
+#storageElement = package.StorageElement['storage2'] = StorageElement()
 
 # the value of this field usually is the root directory of all the storage area locations
 # most of the time this directory will be mounted from another host and is made available
 # on the grid gateway host
-storageElement.RootDirectory = '/path/to/root/of/area/dir'
+#storageElement.RootDirectory = '/path/to/root/of/area/dir'
 
 # can be disk, tape, multidisk, or other
-storageElement.Architecture = 'tape'
+#storageElement.Architecture = 'tape'
 
 # STORAGE ELEMENT AREA
 # this name must be unique for each storage area in the storage element. It is not reference anywhere else.
 # see twiki page for further details on this section
-area = storageElement.areas['area1'] = StorageArea()
+#area = storageElement.areas['area1'] = StorageArea()
 
 # VirtualPath is the actual directory published for SRM enabled Storage Elements
-area.VirtualPath = '/pnfs/hostname/path/to/virtual/area'
+#area.VirtualPath = '/pnfs/hostname/path/to/virtual/area'
 # the Path attribute will be where the actual files will be stored so the 'du' or 'df' can
 # be run on it
-area.Path = '/path/to/area1'
-area.Type = 'permanent'
-area.ACL = [ '/VO1', '/VO2' ]
+#area.Path = '/path/to/area1'
+#area.Type = 'permanent'
+#area.ACL = [ '/VO1', '/VO2' ]
 # /STORAGE ELEMENT AREA
 
 # STORAGE ELEMENT CONTROL PROTOCOL
 # this name must be unique for each protocol in the storage element. It is not reference anywhere else.
 # see twiki page for further details on this section
-controlProtocol = storageElement.control_protocols['prot1'] = ControlProtocol()
+#controlProtocol = storageElement.control_protocols['prot1'] = ControlProtocol()
 
-controlProtocol.Type = 'srm'
-controlProtocol.Version = '2.1'
-controlProtocol.Endpoint = 'srm://srm.example.apac.site:8443'
-controlProtocol.Capability = [ 'file transfer', 'other capability' ]
+#controlProtocol.Type = 'srm'
+#controlProtocol.Version = '2.1'
+#controlProtocol.Endpoint = 'srm://srm.example.apac.site:8443'
+#controlProtocol.Capability = [ 'file transfer', 'other capability' ]
 # /STORAGE ELEMENT CONTROL PROTOCOL
 
 # /ANOTHER STORAGE ELEMENT EXAMPLE FOR AN SRM ENABLED HOST
