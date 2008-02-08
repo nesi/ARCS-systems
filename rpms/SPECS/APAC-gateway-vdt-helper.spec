@@ -4,7 +4,7 @@ Version: 0.2
 Release: 1
 License: APAC
 Group: Applications/Internet
-Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo, which
+Requires: /bin/sh, rpm, coreutils, grep, perl, sed, sudo, which, APAC-pacman
 Source: vdt-helper.tar.gz
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -29,6 +29,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc /usr/local/share/doc/vdt-helper/vdt-config.example
 
 %changelog
+* Fri Fed 08 2008 Russell Sim
+- Added missing pacman requirement
 * Tue Dec 18 2007 Russell Sim
 - Merged Andrew Sharpes VDT 181 patch
 * Fri Nov 23 2007 Russell Sim
