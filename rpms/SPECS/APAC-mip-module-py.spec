@@ -1,10 +1,10 @@
 %define PKG_NAME apac_py
-%define REVISION 444
+%define REVISION 458
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	6
+Release:	7
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -99,6 +99,10 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Mon Feb 18 2008 Gerson Galang
+- fixed the "df -k" with python 2.4/centos5 problem
+- fixed the problem with computing element not returning any info when the state attribute of the node
+- modified the example_config.py script so SRM host is not enabled by default
 * Fri Feb 1 2008 Gerson Galang
 - fix post install script to work for a fresh install
 * Fri Jan 25 2008 Daniel Cox

@@ -1,7 +1,7 @@
 Summary:	Globus configuration for the Modular Information Provider for APAC Grid usage
 Name:		APAC-mip-globus
 version:	0.1
-release:	5
+release:	6
 License:	GridAustralia
 Source:		globus-mip-config.tar.gz
 Prefix:		/usr/local
@@ -46,6 +46,8 @@ cd $RPM_INSTALL_PREFIX0/mip
 %{prefix}/mip/config/globus
 
 %changelog
+* Mon Feb 18 2008 Gerson Galang
+- modified the two upstream index services in hierarchy.xml
 * Thu Jan 24 2008 Gerson Galang
 - modified to reflect changes in the directory structure of all the packages inside the infosystems director
 y
