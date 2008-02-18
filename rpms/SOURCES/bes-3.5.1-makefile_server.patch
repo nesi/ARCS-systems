@@ -1,0 +1,51 @@
+diff -ruN bes-3.5.1.orig/server/besctl.in bes-3.5.1/server/besctl.in
+--- bes-3.5.1.orig/server/besctl.in	2007-03-31 05:32:46.000000000 +0800
++++ bes-3.5.1/server/besctl.in	2007-11-08 20:26:25.000000000 +0900
+@@ -59,7 +59,7 @@
+ 	exit 1
+     fi
+     echo "Starting the BES daemon"
+-    "${bindir}"/besdaemon $*
++    "${bindir}"/besdaemon -c ${sysconfdir}/bes/bes.conf $*
+     sleep 5
+     if [ -f "${localstatedir}"/run/bes.pid ]
+     then
+@@ -83,7 +83,7 @@
+ 	exit 1
+     fi
+     echo "Starting the BES daemon"
+-    "${bindir}"/besdaemon $*
++    "${bindir}"/besdaemon -c ${sysconfdir}/bes/bes.conf $*
+     sleep 5
+     if [ -f "${localstatedir}"/run/bes.pid ]
+     then
+diff -ruN bes-3.5.1.orig/server/Makefile.in bes-3.5.1/server/Makefile.in
+--- bes-3.5.1.orig/server/Makefile.in	2007-05-22 04:25:14.000000000 +0800
++++ bes-3.5.1/server/Makefile.in	2007-11-08 20:28:13.000000000 +0900
+@@ -216,7 +216,7 @@
+ kerberos_includes = @kerberos_includes@
+ libdir = @libdir@
+ libexecdir = @libexecdir@
+-localstatedir = @localstatedir@
++localstatedir = /var 
+ mandir = @mandir@
+ mkdir_p = @mkdir_p@
+ oldincludedir = @oldincludedir@
+@@ -226,7 +226,7 @@
+ program_transform_name = @program_transform_name@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+-sysconfdir = @sysconfdir@
++sysconfdir = /usr/local/etc/
+ target_alias = @target_alias@
+ AUTOMAKE_OPTIONS = foreign
+ AM_CPPFLAGS = -I$(top_srcdir)/ppt -I$(top_srcdir)/dispatch -I$(top_srcdir)/command
+@@ -245,7 +245,7 @@
+ 
+ beslistener_LDADD = $(SERVER_LIBS) $(openssl_libs)
+ besdaemon_SOURCES = daemon.cc BESServerUtils.cc BESServerUtils.h
+-besdaemon_CPPFLAGS = $(AM_CPPFLAGS) -DBES_BIN_DIR=\"${bindir}\" -DBES_STATE_DIR=\"${localstatedir}\"
++besdaemon_CPPFLAGS = $(AM_CPPFLAGS) -DBES_BIN_DIR=\"/usr/local/bin/\" -DBES_STATE_DIR=\"/var/\"
+ besdaemon_LDADD = $(SERVER_LIBS) $(openssl_libs)
+ SERVER_LIBS = -L../ppt -lbes_ppt -L../command -lbes_command -L../dispatch -lbes_dispatch
+ all: all-recursive

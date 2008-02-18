@@ -1,0 +1,12 @@
+diff -ruN netcdf_handler-3.7.6.orig/Makefile.in netcdf_handler-3.7.6/Makefile.in
+--- netcdf_handler-3.7.6.orig/Makefile.in	2007-03-14 05:18:14.000000000 +0900
++++ netcdf_handler-3.7.6/Makefile.in	2007-11-05 10:11:34.000000000 +0900
+@@ -978,7 +978,7 @@
+ # This makes sure that the handler modifies the bes  which confiure found
+ # even with distcheck is run.
+ @OPENDAPSERVER_TRUE@install-data-hook: configure-nc-data.sh
+-@OPENDAPSERVER_TRUE@	(bes_prefix=`bes-config --prefix` && \
++@OPENDAPSERVER_TRUE@	(bes_prefix=/usr/local && \
+ @OPENDAPSERVER_TRUE@	 ./configure-nc-data.sh $$bes_prefix/etc/bes/bes.conf $$bes_prefix/lib/bes)
+ 
+ ###########################################################################

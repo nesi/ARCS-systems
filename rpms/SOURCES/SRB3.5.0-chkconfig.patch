@@ -1,0 +1,10 @@
+--- SRB3_5_0/mk/RPM/srb.chkconfig	2005-07-22 06:20:21.000000000 +1000
++++ SRB3_5_0/mk/RPM/srb	2007-09-05 15:40:12.000000000 +1000
+@@ -4,6 +4,7 @@
+ #
+ #
+ # chkconfig: 2345 99 01
++# description: Starts and stops the SRB Server
+ 
+ # Source function library.
+ . /etc/init.d/functions
