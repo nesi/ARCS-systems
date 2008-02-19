@@ -1,7 +1,7 @@
 Summary:        OPeNDAP HDF4 Handler
 Name:           hdf4_handler
 Version:        3.7.5
-Release:        1.arcs 
+Release:        2.arcs 
 License:        LGPL
 Group:          Applications/Internet
 Source:         %{name}-%{version}.tar.gz
@@ -32,5 +32,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/*
 
 %changelog
+* Tue Feb 19 2008 Florian Goessmann <florian@ivec.org>
+- fixed spellling mistake in libgfortran dependency
 * Fri Feb 15 2008 Florian Goessmann <florian@ivec.org>
 - first release

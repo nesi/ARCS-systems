@@ -1,14 +1,14 @@
 Summary:        dap-server
 Name:           dap-server
 Version:        3.7.4
-Release:        1.arcs
+Release:        2.arcs
 License:        LGPL
 Group:          Applications/Internet
 Source:         %{name}-%{version}.tar.gz
 Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
 BuildPreReq:    make gcc gcc-c++ libdap bes
-Requires:       libdap bes perl-HTML-Parser
+Requires:       libdap bes perl-HTML-Parser tomcat5 tomcat5-webapps
 
 %description
 OPeNDAP front end server.
@@ -32,5 +32,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/*
 
 %changelog
+* Tue Feb 19 2008 Florian Goessmann <florian@ivec.org>
+- added dependency: tomcat5, tomcat5-webapps
 * Fri Feb 15 2008 Florian Goessmann <florian@ivec.org>
 - first release
