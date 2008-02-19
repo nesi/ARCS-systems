@@ -8,7 +8,7 @@ Source:         %{name}-%{version}.tar.gz
 Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
 BuildPreReq:    make gcc compat-gcc-34-g77 libdap HDF = 4.2r2
-Requires:       bes libdap libfortran
+Requires:       bes libdap libgfortran
 
 %description
 HDF4-handler for OPeNDAP to allow OPeNDAP to serve out HDF4 files.
