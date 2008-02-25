@@ -76,7 +76,12 @@ fi
 #
 # VDT Components .. 
 
-for Component in Globus-Client Globus-WS-Client GSIOpenSSH MyProxy UberFTP VOMS-Client; do
+components="Globus-Client Globus-WS-Client MyProxy UberFTP VOMS-Client"
+# At the moment GSIOpenSSH does not seem to work on Mac OS 10.5
+if [ `uname -s` != "Darwin" ]; then
+    components="$components GSIOpenSSH"
+fi
+for Component in $components; do
   echo "==> Checking/Installing: $Component"
   pacman $Platform $ProxyString -get $VDTMIRROR:$Component || echo "==> Failed!"
 done
