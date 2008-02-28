@@ -1,5 +1,5 @@
 %define ver 4.7p1
-%define rel 1.arcs
+%define rel 2.arcs
 
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
@@ -59,13 +59,23 @@
 %define rescue 0
 %{?build_rescue:%define rescue 1}
 
+# GSI Authentication (1=yes, 0=no)
+%define gsi 1
+%if %{gsi}
+%define kerberos5 0
+%endif
+
 # Turn off some stuff for resuce builds
 %if %{rescue}
 %define kerberos5 0
 %endif
 
 Summary: The OpenSSH implementation of SSH protocol versions 1 and 2.
+%if %{gsi}
+Name: gsiopenssh
+%else
 Name: openssh
+%endif
 Version: %{ver}
 %if %{rescue}
 Release: %{rel}rescue
@@ -75,10 +85,14 @@ Release: %{rel}
 URL: http://www.openssh.com/portable.html
 Source0: openssh-%{version}.tar.gz
 Source1: http://www.jmknoble.net/software/x11-ssh-askpass/x11-ssh-askpass-%{aversion}.tar.gz
+%if %{gsi}
+Patch0: openssh-%{version}-GSI.patch
+%endif
 License: BSD
 Group: Applications/Internet
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Obsoletes: ssh
+Provides: openssh
 %if %{build6x}
 PreReq: initscripts >= 5.00
 %else
@@ -101,12 +115,18 @@ BuildPreReq: pkgconfig
 BuildPreReq: krb5-devel
 BuildPreReq: krb5-libs
 %endif
+%if %{gsi}
+BuildRequires: globus-libraries
+%endif
 
 %package clients
 Summary: OpenSSH clients.
 Requires: openssh = %{version}-%{release}
 Group: Applications/Internet
 Obsoletes: ssh-clients
+%if %{gsi}
+Requires: globus-libraries
+%endif
 
 %package server
 Summary: The OpenSSH server daemon.
@@ -115,6 +135,9 @@ Obsoletes: ssh-server
 PreReq: openssh = %{version}-%{release}, chkconfig >= 0.9
 %if ! %{build6x}
 Requires: /etc/pam.d/system-auth
+%endif
+%if %{gsi}
+BuildRequires: globus-libraries
 %endif
 
 %package askpass
@@ -149,6 +172,9 @@ OpenSSH is a free version of SSH (Secure SHell), a program for logging
 into and executing commands on a remote machine. This package includes
 the clients necessary to make encrypted connections to SSH servers.
 You'll also need to install the openssh package on OpenSSH clients.
+%if %{gsi}
+This version has been patched to provide GSI Authentication.
+%endif
 
 %description server
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -156,6 +182,9 @@ into and executing commands on a remote machine. This package contains
 the secure shell daemon (sshd). The sshd daemon allows SSH clients to
 securely connect to your SSH server. You also need to have the openssh
 package installed.
+%if %{gsi}
+This version has been patched to provide GSI Authentication.
+%endif
 
 %description askpass
 OpenSSH is a free version of SSH (Secure SHell), a program for logging
@@ -171,9 +200,13 @@ environment.
 %prep
 
 %if ! %{no_x11_askpass}
-%setup -q -a 1
+%setup -q -a 1 -n openssh-%{version}
 %else
-%setup -q
+%setup -q -a 1 -n openssh-%{version}
+%endif
+
+%if %{gsi}
+%patch0 -p1
 %endif
 
 %build
@@ -187,7 +220,7 @@ echo K5DIR=$K5DIR
 %endif
 
 %configure \
-	--with-ssl-dir=/usr/local/lib \
+	--exec-prefix=/usr/local \
 	--sysconfdir=%{_sysconfdir}/ssh \
 	--libexecdir=%{_libexecdir}/openssh \
 	--datadir=%{_datadir}/openssh \
@@ -207,6 +240,10 @@ echo K5DIR=$K5DIR
 %endif
 %if %{kerberos5}
 	 --with-kerberos5=$K5DIR \
+%endif
+%if %{gsi}
+	--with-globus=/usr/globus \
+	--with-globus-flavor=gcc32dbg \
 %endif
 
 
@@ -337,6 +374,10 @@ fi
 %doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW README* RFC* TODO WARNING*
 %attr(0755,root,root) %{_bindir}/scp
 %attr(0644,root,root) %{_mandir}/man1/scp.1*
+%if %{gsi}
+%attr(0755,root,root) %{_bindir}/gsiscp
+%attr(0644,root,root) %{_mandir}/man1/gsiscp.1*
+%endif
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
@@ -355,6 +396,10 @@ fi
 %defattr(-,root,root)
 %attr(0755,root,root) %{_bindir}/ssh
 %attr(0644,root,root) %{_mandir}/man1/ssh.1*
+%if %{gsi}
+%attr(0755,root,root) %{_bindir}/gsissh
+%attr(0644,root,root) %{_mandir}/man1/gsissh.1*
+%endif
 %attr(0644,root,root) %{_mandir}/man5/ssh_config.5*
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/ssh/ssh_config
 %attr(-,root,root) %{_bindir}/slogin
@@ -368,6 +413,10 @@ fi
 %attr(0644,root,root) %{_mandir}/man1/ssh-add.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-keyscan.1*
 %attr(0644,root,root) %{_mandir}/man1/sftp.1*
+%if %{gsi}
+%attr(0755,root,root) %{_bindir}/gsisftp
+%attr(0644,root,root) %{_mandir}/man1/gsisftp.1*
+%endif
 %endif
 
 %if ! %{rescue}
@@ -403,6 +452,8 @@ fi
 %endif
 
 %changelog
+* Thu Feb 28 2008 Florian Goessmann <florian@ovec.org>
+- added conditional GSI authentication build
 * Wed Jan 30 2008 Florian Goessmann <florian@ivec.org>
 - change naming scheme according to ARCS standards
 

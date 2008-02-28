@@ -6,7 +6,7 @@
 Summary:        Parts of globus package for ARCS use
 Name:           globus
 Version:        %{major_version}.%{minor_version}
-Release:        1.arcs
+Release:        2.arcs
 Group:          Applications/Internet
 License:        Globus
 Source:         http://www-unix.globus.org/ftppub/gt4/%{major_version}/%{version}/installers/src/gt%{version}-all-source-installer.tar.bz2
@@ -48,6 +48,8 @@ find $GLOBUS_LOCATION > globusrun-ws.list
 
 $GLOBUS_LOCATION/sbin/gpt-postinstall
 
+make install
+
 %install
 GLOBUS_LOCATION=$RPM_BUILD_ROOT%{PREFIX}/globus
 
@@ -76,6 +78,8 @@ for i in $GLOBUS_LOCATION/libexec/*; do
   [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-bootstrap.sh" ]] && continue
   [[ $i =~ "$GLOBUS_LOCATION/libexec/gpt-bootstrap.sh" ]] && continue
   [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-build-env-gcc32dbg.sh" ]] && continue
+  [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-sh-tools-vars.sh" ]] && continue
+  [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-sh-tools.sh" ]] && continue
   rm -rf $i
 done
 
@@ -92,6 +96,7 @@ for i in $GLOBUS_LOCATION/bin/*; do
     [[ $i =~ "$GLOBUS_LOCATION/bin/globus-url-copy" ]] && continue
     [[ $i =~ "$GLOBUS_LOCATION/bin/gsis" ]] && continue
     [[ $i =~ "$GLOBUS_LOCATION/bin/globusrun-ws" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/globus-makefile-header" ]] && continue
     rm -rf $i
 done
 
@@ -141,7 +146,7 @@ ln -sf /etc/ssh $GLOBUS_LOCATION/etc/ssh
 # profile setup
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 
-find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-1.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
+find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-2.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -205,8 +210,19 @@ Provides the globus libraries
 %defattr(-,root,root)
 %{PREFIX}/globus/lib/*[!perl]
 %{PREFIX}/globus/libexec/globus-run-cmd
+%{PREFIX}/globus/libexec/globus-sh-tools.sh
+%{PREFIX}/globus/libexec/globus-sh-tools-vars.sh
 %dir %{PREFIX}/globus/libexec
 %{PREFIX}/globus/include
+%{PREFIX}/globus/bin/globus-makefile-header
+%{PREFIX}/globus/libexec/globus-bootstrap.sh
+%{PREFIX}/globus/libexec/gpt-bootstrap.sh
+%{PREFIX}/globus/share/*
+%{PREFIX}/globus/var/*
+%{PREFIX}/globus/lib/perl/*
+%{PREFIX}/globus/sbin/gpt*
+%{PREFIX}/globus/sbin/libtool-gcc32dbg
+%{PREFIX}/globus/libexec/globus-build-env-gcc32dbg.sh
 
 %post libraries
 if ! grep -q %{GLOBUS_LOCATION}/lib /etc/ld.so.conf; then
@@ -225,26 +241,26 @@ Provides the globus proxy-utils, ie grid-proxy-*
 %defattr(755,root,root)
 %{PREFIX}/globus/bin/grid-proxy-*
 
-%package prima-dependencies
-Group: Applications/System
-Summary: Files required to build PRIMA
-Requires: globus-gridftp-server
-%description prima-dependencies
-Files required to build PRIMA
+#%package prima-dependencies
+#Group: Applications/System
+#Summary: Files required to build PRIMA
+#Requires: globus-gridftp-server
+#%description prima-dependencies
+#Files required to build PRIMA
 
-%files prima-dependencies
-%defattr(755,root,root)
-%{PREFIX}/globus/libexec/globus-bootstrap.sh
-%{PREFIX}/globus/libexec/gpt-bootstrap.sh
-%{PREFIX}/globus/share/*
-%{PREFIX}/globus/var/*
+#%files prima-dependencies
+#%defattr(755,root,root)
+#%{PREFIX}/globus/libexec/globus-bootstrap.sh
+#%{PREFIX}/globus/libexec/gpt-bootstrap.sh
+#%{PREFIX}/globus/share/*
+#%{PREFIX}/globus/var/*
 #%{PREFIX}/globus/etc/gpt/*
 #%{PREFIX}/globus/etc/globus_core/*
 #%{PREFIX}/globus/etc/globus_packages/*
-%{PREFIX}/globus/lib/perl/*
-%{PREFIX}/globus/sbin/gpt*
-%{PREFIX}/globus/sbin/libtool-gcc32dbg
-%{PREFIX}/globus/libexec/globus-build-env-gcc32dbg.sh
+#%{PREFIX}/globus/lib/perl/*
+#%{PREFIX}/globus/sbin/gpt*
+#%{PREFIX}/globus/sbin/libtool-gcc32dbg
+#%{PREFIX}/globus/libexec/globus-build-env-gcc32dbg.sh
 
 
 %package gridftp-server
@@ -358,6 +374,9 @@ Myproxy clients
 %{PREFIX}/globus/bin/myproxy-*
 
 %changelog
+* Wed Feb 27 2008 Florian Goessmann <florian@ivec.org>
+- added globus-makefile-header to library package
+- moved prima dependencies into libraries
 * Tue Feb 12 2008 Florian Goessmann <florian@ivec.org>
 - added xinetd dependency for gridftp-server
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>

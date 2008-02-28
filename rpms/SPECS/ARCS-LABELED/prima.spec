@@ -5,14 +5,14 @@
 Summary:        PRIMA
 Name:           prima
 Version:        0.4
-Release:        1.arcs
+Release:        2.arcs
 License:        custom
 Group:          Applications/Internet
 Source:         osg-%{name}-%{version}.arcs.tar.gz
 Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
 BuildPreReq:    compat-gcc-34, globus-libraries, compat-gcc-34-c++
-Requires:       globus-libraries
+Requires:       globus-libraries, globus-gridftp-server
 
 %description
 PRIMA ( PRIvilege Management and Authorization) is a system which provides enhanced grid security.
@@ -49,7 +49,7 @@ sh arcs-prima-build.sh -i %{_tmppath}/%{name}-root/%{PRIMA_LOCATION} -g %{GLOBUS
 %install
 
 find $RPM_BUILD_ROOT/%{PRIMA_LOCATION}/lib -name '*la' -exec sh -c 'cat $1 | sed "s|%{_tmppath}/%{name}-root||g" > $1.bak && mv $1.bak $1' {} {} \; ;
-find $RPM_BUILD_ROOT/%{PRIMA_LOCATION}/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-1.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
+find $RPM_BUILD_ROOT/%{PRIMA_LOCATION}/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-2.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
 
 %post
 if ! grep -q %{PRIMA_LOCATION}/lib /etc/ld.so.conf; then
@@ -112,5 +112,7 @@ rm -rf $RPM_BUILD_ROOT
 %{PRIMA_LOCATION}/*
 
 %changelog
+* Thu Feb 28 2008 Florian Goessmann <florian@iec.org>
+- added gridftp-server dependency
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>
 - first release
