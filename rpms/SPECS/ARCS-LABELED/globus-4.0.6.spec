@@ -6,12 +6,12 @@
 Summary:        Parts of globus package for ARCS use
 Name:           globus
 Version:        %{major_version}.%{minor_version}
-Release:        2.arcs
+Release:        3.arcs
 Group:          Applications/Internet
 License:        Globus
 Source:         http://www-unix.globus.org/ftppub/gt4/%{major_version}/%{version}/installers/src/gt%{version}-all-source-installer.tar.bz2
 URL:            http://www-unix.globus.org
-Buildrequires:  compat-gcc-34, perl, ant
+Buildrequires:  compat-gcc-34, perl, ant, perl-XML-Parser
 BuildRoot:      /tmp/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -24,7 +24,8 @@ Parts of globus package for ARCS use
 # do incremental build so we can get file lists
 export GLOBUS_LOCATION=$RPM_BUILD_ROOT%{PREFIX}/globus
 export CC=/usr/bin/gcc34
-./configure --disable-webmds --disable-wstests --disable-tests --disable-wsc --disable-wscas --disable-rendezvous --enable-prewsmds --disable-rls --disable-wsjava --disable-wsmds --disable-wsdel --disable-wsrft --disable-wsgram --prefix=$GLOBUS_LOCATION
+./configure --disable-webmds --disable-wstests --disable-tests --disable-wsc --disable-wscas --disable-rendezvous --enable-prewsmds --disable-rls --disable-wsjava --disable-wsmds --disable-wsdel --disable-wsrft --prefix=$GLOBUS_LOCATION
+#./configure --disable-webmds --disable-wstests --disable-tests --disable-wsc --disable-wscas --disable-rendezvous --enable-prewsmds --disable-rls --disable-wsjava --disable-wsmds --disable-wsdel --disable-wsrft --disable-wsgram --prefix=$GLOBUS_LOCATION
 
 make globus-gsi
 
@@ -45,6 +46,11 @@ find $GLOBUS_LOCATION > gridftp.list
 make globus_globusrun_ws
 
 find $GLOBUS_LOCATION > globusrun-ws.list
+
+make wsgram
+
+find $GLOBUS_LOCATION > wsgram.list
+
 
 $GLOBUS_LOCATION/sbin/gpt-postinstall
 
@@ -146,7 +152,7 @@ ln -sf /etc/ssh $GLOBUS_LOCATION/etc/ssh
 # profile setup
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 
-find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-2.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
+find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-3.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -348,6 +354,25 @@ Provides the globus web services clients
 %defattr(755,root,root)
 %{PREFIX}/globus/bin/globusrun-ws
 
+%package wsgram
+Group: Applications/System
+Summary: Globus wsgram web service
+Requires: globus-ws-clients, perl-XML-Parser
+%description wsgram
+Provides the globus wsgram web service
+
+%files wsgram
+%defattr(755,root,root)
+%{PREFIX}/globus/client-config.wsdd
+%{PREFIX}/globus/container-log4j.properties
+%{PREFIX}/globus/log4j.properties
+%{PREFIX}/globus/tmp/globus_wsrf_rft/deploy-jndi-config.xml
+%{PREFIX}/globus/tmp/globus_wsrf_rft/globus_wsrf_rft.gar
+%{PREFIX}/globus/tmp/globus_wsrf_rft/lib/globus_wsrf_rft.jar
+%{PREFIX}/globus/tmp/gram-service/deploy-jndi-config-deploy.xml
+%{PREFIX}/globus/tmp/gram-service/etc/globus_gram_fs_map_config.xml
+%{PREFIX}/globus/tmp/gram-service/gram-service.gar
+%{PREFIX}/globus/tmp/gram-service/lib/gram-service.jar
 
 %package myproxy-server
 Group: Applications/System
