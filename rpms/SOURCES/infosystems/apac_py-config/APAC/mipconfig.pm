@@ -655,7 +655,7 @@ sub make_apac_config_py()
 			} #/foreach subcluster
 		} #/active cluster
 
-		if ( defined($clusref->{'storage'}) )
+		if ( (! defined($clusref->{'disabled'}) || $clusref->{'disabled'} < 1) && defined($clusref->{'storage'}) )
 		{
 			printf FH ("storageElement = package.StorageElement['%s'] = StorageElement()\n",
 				$clusref->{'storage'});
