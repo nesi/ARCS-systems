@@ -1,5 +1,5 @@
 Summary:	apac_py MIP module configuration
-Name:		APAC-mip-config
+Name:		APAC-mip-module-py-config
 version:	0.1
 release:	1
 License:	GridAustralia
