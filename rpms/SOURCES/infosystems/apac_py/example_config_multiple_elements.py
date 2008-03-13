@@ -76,7 +76,7 @@ computeElement = package.ComputingElement['compute1'] = ComputingElement()
 
 #computeElement.nodePropertyFilter = 'property'
 computeElement.Name = 'queue_name'
-computeElement.Status = 'Queueing'
+computeElement.Status = 'Production'
 computeElement.JobManager = 'jobmanager-pbs'
 computeElement.HostName = 'ng2.example.apac.site'
 computeElement.GateKeeperPort = 8443
@@ -84,7 +84,7 @@ computeElement.ContactString = 'ng2.hostname/jobmanager-pbs'
 computeElement.DefaultSE = 'ngdata.example.apac.site'
 computeElement.ApplicationDir = 'UNAVAILABLE'
 computeElement.DataDir = cluster.TmpDir
-computeElement.LRMSType = 'Torque' # Torque|PBSPro|ANUPBS
+computeElement.LRMSType = 'Torque' # Torque|PBSPro|OpenPBS (note: ANUPBS is considered as OpenPBS)
 
 computeElement.qstat = '/usr/bin/qstat'
 computeElement.pbsnodes = '/usr/bin/pbsnodes'
@@ -148,7 +148,7 @@ voview.ACL = [ '/VO1', '/VO2' ]
 
 #~ #computeElement.nodePropertyFilter = 'property'
 #~ computeElement.Name = 'queue_name'
-#~ computeElement.Status = 'Queueing'
+#~ computeElement.Status = 'Production'
 #~ computeElement.JobManager = 'jobmanager-pbs'
 #~ computeElement.HostName = 'ng2.example.apac.site'
 #~ computeElement.GateKeeperPort = 8443
@@ -156,7 +156,7 @@ voview.ACL = [ '/VO1', '/VO2' ]
 #~ computeElement.DefaultSE = 'ngdata.example.apac.site'
 #~ computeElement.ApplicationDir = 'UNAVAILABLE'
 #~ computeElement.DataDir = cluster.TmpDir
-#~ computeElement.LRMSType = 'Torque' # Torque|PBSPro|ANUPBS
+#~ computeElement.LRMSType = 'Torque' # Torque|PBSPro|OpenPBS (note: ANUPBS is considered as OpenPBS)
 
 #~ computeElement.qstat = '/usr/bin/qstat'
 #~ computeElement.pbsnodes = '/usr/bin/pbsnodes'
@@ -318,7 +318,7 @@ subcluster.OperatingSystem.File = '/usr/bin/lsb_release'
 
 #~ #computeElement.nodePropertyFilter = 'property'
 #~ computeElement.Name = 'queue_name'
-#~ computeElement.Status = 'Queueing'
+#~ computeElement.Status = 'Production'
 #~ computeElement.JobManager = 'jobmanager-pbs'
 #~ computeElement.HostName = 'ng2.example.apac.site'
 #~ computeElement.GateKeeperPort = 8443
@@ -326,7 +326,7 @@ subcluster.OperatingSystem.File = '/usr/bin/lsb_release'
 #~ computeElement.DefaultSE = 'ngdata.example.apac.site'
 #~ computeElement.ApplicationDir = 'UNAVAILABLE'
 #~ computeElement.DataDir = cluster.TmpDir
-#~ computeElement.LRMSType = 'Torque' # Torque|PBSPro|ANUPBS
+#~ computeElement.LRMSType = 'Torque' # Torque|PBSPro|OpenPBS (note: ANUPBS is considered as OpenPBS)
 
 #~ computeElement.qstat = '/usr/bin/qstat'
 #~ computeElement.pbsnodes = '/usr/bin/pbsnodes'
@@ -390,7 +390,7 @@ subcluster.OperatingSystem.File = '/usr/bin/lsb_release'
 
 #~ #computeElement.nodePropertyFilter = 'property'
 #~ computeElement.Name = 'queue_name'
-#~ computeElement.Status = 'Queueing'
+#~ computeElement.Status = 'Production'
 #~ computeElement.JobManager = 'jobmanager-pbs'
 #~ computeElement.HostName = 'ng2.example.apac.site'
 #~ computeElement.GateKeeperPort = 8443
@@ -572,7 +572,7 @@ area.ACL = [ '/VO3', '/VO4' ]
 
 # STORAGE ELEMENT PROTOCOL
 # this name must be unique for each protocol in the storage element. It is not reference anywhere else.
-accessProtocol = storageElement.protocols['prot1'] = AccessProtocol()
+accessProtocol = storageElement.access_protocols['prot1'] = AccessProtocol()
 
 accessProtocol.Type = 'gsiftp'
 accessProtocol.Version = '1.0.0'
@@ -583,7 +583,7 @@ accessProtocol.Capability = [ 'file transfer', 'other capability' ]
 #~ # SECOND STORAGE ELEMENT PROTOCOL
 #~ # to define another protocal uncomment these lines and fill in the text
 #~ # this name must be unique for each protocol in the storage element. It is not reference anywhere else.
-#~ accessProtocol = storageElement.protocols['prot1'] = AccessProtocol()
+#~ accessProtocol = storageElement.access_protocols['prot1'] = AccessProtocol()
 
 #~ accessProtocol.Type = 'gsiftp'
 #~ accessProtocol.Version = '1.0.0'
@@ -622,7 +622,7 @@ accessProtocol.Capability = [ 'file transfer', 'other capability' ]
 
 #~ # STORAGE ELEMENT PROTOCOL
 #~ # this name must be unique for each protocol in the storage element. It is not reference anywhere else.
-#~ accessProtocol = storageElement.protocols['prot1'] = AccessProtocol()
+#~ accessProtocol = storageElement.access_protocols['prot1'] = AccessProtocol()
 
 #~ accessProtocol.Type = 'gsiftp'
 #~ accessProtocol.Version = '1.0.0'
@@ -633,7 +633,7 @@ accessProtocol.Capability = [ 'file transfer', 'other capability' ]
 #~ # SECOND STORAGE ELEMENT PROTOCOL
 #~ # to define another protocal uncomment these lines and fill in the text
 #~ # this name must be unique for each protocol in the storage element. It is not reference anywhere else.
-#~ accessProtocol = storageElement.protocols['prot1'] = AccessProtocol()
+#~ accessProtocol = storageElement.access_protocols['prot1'] = AccessProtocol()
 
 #~ accessProtocol.Type = 'gsiftp'
 #~ accessProtocol.Version = '1.0.0'
