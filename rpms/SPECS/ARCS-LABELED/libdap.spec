@@ -1,6 +1,6 @@
 Summary:        libdap
 Name:           libdap
-Version:        3.7.8
+Version:        3.8.0
 Release:        1.arcs
 License:        LGPL
 Group:          Development/Libraries
@@ -31,6 +31,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 /usr/local/*
 
+
 %changelog
-* Fri Feb 15 2008 Florian Goessmann <florian@ivec.org>
-- first release
+* Mon Mar 17 2008 Florian Goessmann <florian@ivec.org>
+- changed for version 3.8.0

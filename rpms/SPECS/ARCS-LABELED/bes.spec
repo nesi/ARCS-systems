@@ -1,15 +1,15 @@
 Summary:        OPeNDAP Backend Server (Hyrax)
 Name:           bes
-Version:        3.5.1
+Version:        3.6.0
 Release:        1.arcs
 License:        LGPL
 Group:          Applications/Internet
 Source:         %{name}-%{version}.tar.gz
-Patch:          %{name}-%{version}-makefile_server.patch
+#Patch:          %{name}-%{version}-makefile_server.patch
 Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
-BuildPreReq:    make gcc gcc-c++ libdap
-Requires:       libdap
+BuildPreReq:    make gcc gcc-c++ libdap == 3.8.0
+Requires:       libdap == 3.8.0
 
 %description
 OPeNDAP Backend Server (Hyrax)
@@ -17,7 +17,7 @@ OPeNDAP Backend Server (Hyrax)
 %prep
 %setup -q
 
-%patch -p1 -b .makefile_server
+#%patch -p1 -b .makefile_server
 
 %build
 export CFLAGS='-I/usr/local/include/libdap'
@@ -62,5 +62,6 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/*
 
 %changelog
-* Fri Feb 15 2008 Florian Goessmann <florian@ivec.org>
-- first release
+* Mon Mar 17 2008 Florian Goessmann <florian@ivec.org>
+- changed for version 3.6.0
+

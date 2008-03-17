@@ -1,11 +1,11 @@
 Summary:        OPeNDAP netCDF Handler
 Name:           netcdf_handler
-Version:        3.7.6
+Version:        3.7.9
 Release:        1.arcs
 License:        LGPL
 Group:          Development/Libraries
 Source:         %{name}-%{version}.tar.gz
-Patch:          netcdf_handler-3.7.6-makefile.patch 
+#Patch:          netcdf_handler-3.7.6-makefile.patch 
 Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
 BuildPreReq:    make gcc compat-gcc-34-g77 libdap netcdf
@@ -16,7 +16,7 @@ netCDF-handler for OPeNDAP. This allows an OPeNDAP server to serve out netCDF fi
 
 %prep
 %setup -q
-%patch0 -p1 -b .makefile
+#%patch0 -p1 -b .makefile
 
 %build
 export LDFLAGS='-L/usr/lib/gcc/i386-redhat-linux/4.1.1/ -lgfortran'
@@ -35,5 +35,5 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/*
 
 %changelog
-* Fri Feb 15 2008 Florian Goessmann <florian@ivec.org>
-- first release
+* Mon Mar 17 2008 Florian Goessmann <florian@ivec.org>
+- changed for version 3.7.9

@@ -36,7 +36,3 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 /usr/local/*
-
-%changelog
-* Fri Feb 15 2008 Florian Goessmann <florian@ivec.org>
-- first release
