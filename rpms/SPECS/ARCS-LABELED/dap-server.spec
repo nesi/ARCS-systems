@@ -8,7 +8,7 @@ Source:         %{name}-%{version}.tar.gz
 Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
 BuildPreReq:    make gcc gcc-c++ libdap bes == 3.6.0
-Requires:       libdap bes == 3.6.0 perl-HTML-Parser
+Requires:       libdap bes == 3.6.0 perl-HTML-Parser tomcat5 tomcat5-webapps
 
 %description
 OPeNDAP front end server.
