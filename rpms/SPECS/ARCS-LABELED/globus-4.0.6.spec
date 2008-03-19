@@ -6,7 +6,7 @@
 Summary:        Parts of globus package for ARCS use
 Name:           globus
 Version:        %{major_version}.%{minor_version}
-Release:        3.arcs
+Release:        4.arcs
 Group:          Applications/Internet
 License:        Globus
 Source:         http://www-unix.globus.org/ftppub/gt4/%{major_version}/%{version}/installers/src/gt%{version}-all-source-installer.tar.bz2
@@ -24,7 +24,7 @@ Parts of globus package for ARCS use
 # do incremental build so we can get file lists
 export GLOBUS_LOCATION=$RPM_BUILD_ROOT%{PREFIX}/globus
 export CC=/usr/bin/gcc34
-./configure --disable-webmds --disable-wstests --disable-tests --disable-wsc --disable-wscas --disable-rendezvous --enable-prewsmds --disable-rls --disable-wsjava --disable-wsmds --disable-wsdel --disable-wsrft --prefix=$GLOBUS_LOCATION
+./configure --disable-webmds --disable-wstests --disable-tests --disable-wsc --disable-wscas --disable-rendezvous --enable-prewsmds --disable-wsjava --disable-wsmds --disable-wsdel --disable-wsrft --prefix=$GLOBUS_LOCATION
 #./configure --disable-webmds --disable-wstests --disable-tests --disable-wsc --disable-wscas --disable-rendezvous --enable-prewsmds --disable-rls --disable-wsjava --disable-wsmds --disable-wsdel --disable-wsrft --disable-wsgram --prefix=$GLOBUS_LOCATION
 
 make globus-gsi
@@ -42,6 +42,10 @@ find $GLOBUS_LOCATION > gsi-openssh.list
 make gridftp
 
 find $GLOBUS_LOCATION > gridftp.list
+
+make rls
+
+find $GLOBUS_LOCATION > rls.list
 
 make globus_globusrun_ws
 
@@ -72,6 +76,8 @@ mv -f $GLOBUS_LOCATION/share/myproxy/myproxy-server.config $GLOBUS_LOCATION/etc
 
 # unwanted cruft on a large scale
 for i in doc endorsed man setup test lib/*.jar; do
+    [[ $i =~ "odbc" ]] && continue
+    [[ $i =~ "rls" ]] && continue
     rm -rf $GLOBUS_LOCATION/$i
 done
 
@@ -84,8 +90,14 @@ for i in $GLOBUS_LOCATION/libexec/*; do
   [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-bootstrap.sh" ]] && continue
   [[ $i =~ "$GLOBUS_LOCATION/libexec/gpt-bootstrap.sh" ]] && continue
   [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-build-env-gcc32dbg.sh" ]] && continue
+  [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-build-env-gcc32dbgpthr.sh" ]] && continue
   [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-sh-tools-vars.sh" ]] && continue
   [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-sh-tools.sh" ]] && continue
+  [[ $i =~ "$GLOBUS_LOCATION/libexec/globus-rls-reporter" ]] && continue
+  [[ $i =~ "$GLOBUS_LOCATION/libexec/aggrexec/aggregator-exec-test.sh" ]] && continue
+  [[ $i =~ "$GLOBUS_LOCATION/libexec/aggrexec/globus-rls-aggregatorsource.pl" ]] && continue
+  #[[ $i =~ "$GLOBUS_LOCATION/libexec/gcc32dbgpthr/shared/globus-rls-reporter" ]] && continue
+  #[[ $i =~ "$GLOBUS_LOCATION/libexec/aggrexec" ]] && continue
   rm -rf $i
 done
 
@@ -103,6 +115,13 @@ for i in $GLOBUS_LOCATION/bin/*; do
     [[ $i =~ "$GLOBUS_LOCATION/bin/gsis" ]] && continue
     [[ $i =~ "$GLOBUS_LOCATION/bin/globusrun-ws" ]] && continue
     [[ $i == "$GLOBUS_LOCATION/bin/globus-makefile-header" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/sqlite3" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/iodbctest" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/globus-rls-server" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/globus-rls-cli" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/globus-rls-admin" ]] && continue
+    [[ $i == "$GLOBUS_LOCATION/bin/iodbc-config" ]] && continue
+    #[[ $i =~ "$GLOBUS_LOCATION/bin/gcc32dbgpthr" ]] && continue
     rm -rf $i
 done
 
@@ -152,7 +171,7 @@ ln -sf /etc/ssh $GLOBUS_LOCATION/etc/ssh
 # profile setup
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 
-find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-3.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
+find $RPM_BUILD_ROOT/usr/globus/lib -name '*la' -exec sh -c 'cat $1 | sed "s|/tmp/globus-4.0.6-4.arcs-buildroot||g" > $1.bak && mv $1.bak $1' {} {} \; ;
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -229,6 +248,7 @@ Provides the globus libraries
 %{PREFIX}/globus/sbin/gpt*
 %{PREFIX}/globus/sbin/libtool-gcc32dbg
 %{PREFIX}/globus/libexec/globus-build-env-gcc32dbg.sh
+%{PREFIX}/globus/libexec/globus-build-env-gcc32dbgpthr.sh
 
 %post libraries
 if ! grep -q %{GLOBUS_LOCATION}/lib /etc/ld.so.conf; then
@@ -398,7 +418,53 @@ Myproxy clients
 %defattr(755,root,root)
 %{PREFIX}/globus/bin/myproxy-*
 
+%package rls
+Group: Applications/System
+Summary: Replica Location Service
+Requires: globus-libraries, globus-config, globus-proxy-utils
+%description rls
+Replica Location Service
+
+%files rls
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/CA.pl
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/CA.sh
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/c_rehash
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/der_chop
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-domainname
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-hostname
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-makefile-header
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-makefile-header.gpt1
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-rls-admin
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-rls-cli
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-rls-server
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-sh-exec
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-url-copy
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-version
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-cert-info
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-cert-request
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-change-pass-phrase
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-default-ca
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-proxy-destroy
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-proxy-info
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-proxy-init
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/iodbc-config
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/iodbctest
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/openssl
+#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/sqlite3
+%{PREFIX}/globus/bin/globus-rls-admin
+%{PREFIX}/globus/bin/globus-rls-cli
+%{PREFIX}/globus/bin/globus-rls-server
+%{PREFIX}/globus/bin/iodbc-config
+%{PREFIX}/globus/bin/iodbctest
+%{PREFIX}/globus/bin/sqlite3
+#%{PREFIX}/globus/libexec/aggrexec/aggregator-exec-test.sh
+#%{PREFIX}/globus/libexec/aggrexec/gcc32dbgpthr/shared/globus-rls-aggregatorsource.pl
+#%{PREFIX}/globus/libexec/aggrexec/globus-rls-aggregatorsource.pl
+%{PREFIX}/globus/libexec/globus-rls-reporter
+
 %changelog
+* Tue Mar 18 2008 Florian Goessmann <florian@ivec.org>
+- added package for globus rls
 * Wed Feb 27 2008 Florian Goessmann <florian@ivec.org>
 - added globus-makefile-header to library package
 - moved prima dependencies into libraries
