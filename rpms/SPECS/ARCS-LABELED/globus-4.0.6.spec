@@ -75,9 +75,8 @@ mv -f $GLOBUS_LOCATION/bin/ssh.d/sftp $GLOBUS_LOCATION/bin/gsisftp
 mv -f $GLOBUS_LOCATION/share/myproxy/myproxy-server.config $GLOBUS_LOCATION/etc
 
 # unwanted cruft on a large scale
-for i in doc endorsed man setup test lib/*.jar; do
-    [[ $i =~ "odbc" ]] && continue
-    [[ $i =~ "rls" ]] && continue
+# don't remove setup -> needed by rls
+for i in doc endorsed man test lib/*.jar; do
     rm -rf $GLOBUS_LOCATION/$i
 done
 
@@ -267,28 +266,6 @@ Provides the globus proxy-utils, ie grid-proxy-*
 %defattr(755,root,root)
 %{PREFIX}/globus/bin/grid-proxy-*
 
-#%package prima-dependencies
-#Group: Applications/System
-#Summary: Files required to build PRIMA
-#Requires: globus-gridftp-server
-#%description prima-dependencies
-#Files required to build PRIMA
-
-#%files prima-dependencies
-#%defattr(755,root,root)
-#%{PREFIX}/globus/libexec/globus-bootstrap.sh
-#%{PREFIX}/globus/libexec/gpt-bootstrap.sh
-#%{PREFIX}/globus/share/*
-#%{PREFIX}/globus/var/*
-#%{PREFIX}/globus/etc/gpt/*
-#%{PREFIX}/globus/etc/globus_core/*
-#%{PREFIX}/globus/etc/globus_packages/*
-#%{PREFIX}/globus/lib/perl/*
-#%{PREFIX}/globus/sbin/gpt*
-#%{PREFIX}/globus/sbin/libtool-gcc32dbg
-#%{PREFIX}/globus/libexec/globus-build-env-gcc32dbg.sh
-
-
 %package gridftp-server
 Group: Applications/System
 Summary: Globus gridftp server
@@ -426,31 +403,6 @@ Requires: globus-libraries, globus-config, globus-proxy-utils
 Replica Location Service
 
 %files rls
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/CA.pl
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/CA.sh
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/c_rehash
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/der_chop
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-domainname
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-hostname
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-makefile-header
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-makefile-header.gpt1
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-rls-admin
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-rls-cli
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-rls-server
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-sh-exec
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-url-copy
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/globus-version
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-cert-info
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-cert-request
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-change-pass-phrase
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-default-ca
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-proxy-destroy
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-proxy-info
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/grid-proxy-init
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/iodbc-config
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/iodbctest
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/openssl
-#%{PREFIX}/globus/bin/gcc32dbgpthr/shared/sqlite3
 %{PREFIX}/globus/bin/globus-rls-admin
 %{PREFIX}/globus/bin/globus-rls-cli
 %{PREFIX}/globus/bin/globus-rls-server
@@ -461,6 +413,7 @@ Replica Location Service
 #%{PREFIX}/globus/libexec/aggrexec/gcc32dbgpthr/shared/globus-rls-aggregatorsource.pl
 #%{PREFIX}/globus/libexec/aggrexec/globus-rls-aggregatorsource.pl
 %{PREFIX}/globus/libexec/globus-rls-reporter
+%{PREFIX}/globus/setup/*
 
 %changelog
 * Tue Mar 18 2008 Florian Goessmann <florian@ivec.org>
