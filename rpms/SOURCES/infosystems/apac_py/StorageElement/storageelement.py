@@ -82,7 +82,7 @@ if __name__ == '__main__':
 		else:
 			print "\t<Path>%s</Path>" % area.Path
 
-		for key in ['Type', 'AvailableSpace']:
+		for key in ['Type', 'AvailableSpace', 'UsedSpace']:
 #			if lib.contains(area, key):
 			if area.__dict__[key] is not None:
 				print "\t<%s>%s</%s>" % (key, area.__dict__[key], key)
