@@ -1,10 +1,10 @@
 %define PKG_NAME apac_py
-%define REVISION 458
+%define REVISION 482
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	7
+Release:	8
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -99,6 +99,8 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Wed Mar 26 2008 Gerson Galang
+- fixed the problem with UsedSpace in storage area not being published
 * Mon Feb 18 2008 Gerson Galang
 - fixed the "df -k" with python 2.4/centos5 problem
 - fixed the problem with computing element not returning any info when the state attribute of the node
