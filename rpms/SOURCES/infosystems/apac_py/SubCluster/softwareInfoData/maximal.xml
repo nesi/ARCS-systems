@@ -1,6 +1,6 @@
-<SoftwarePackages xmlns:glue="http://forge.cnaf.infn.it/glueschema/Spec/V12/R2" xmlns:apac="http://www.sapac.edu.au/apacglueschema/Spec/V12/R1" xmlns="http://www.ivec.org/softwareSubSchema/Spec/V12/R1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivec.org/softwareSubSchema/Spec/V12/R1 APACSoftwareSubSchema.xsd">
+<SoftwarePackages xmlns:glue="http://forge.cnaf.infn.it/glueschema/Spec/V12/R2" xmlns:apac="http://www.sapac.edu.au/apacglueschema/Spec/V12/R2" xmlns="http://www.ivec.org/softwareSubSchema/Spec/V12/R2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.ivec.org/softwareSubSchema/Spec/V12/R2 APACSoftwareSubSchema.xsd">
 
-	<apac:SoftwarePackage LocalID="LocalID" xmlns="http://grid.apac.edu.au/glueschema/Spec/V12/R1">
+	<apac:SoftwarePackage LocalID="LocalID" xmlns="http://grid.apac.edu.au/glueschema/Spec/V12/R2">
 		<apac:Name>Name</apac:Name>
 		<apac:Version>Version</apac:Version>
 		<apac:Path>Path</apac:Path>
@@ -9,6 +9,8 @@
 		<apac:SerialAvail>true</apac:SerialAvail>
 		<apac:ParallelAvail>true</apac:ParallelAvail>           
 		<apac:ParallelMaxCPUs>0</apac:ParallelMaxCPUs>
+		<apac:SupportedParallelType>parallel-type</apac:SupportedParallelType>
+		<apac:LicenseType>opensource</apac:LicenseType>
 		<apac:TotalCPUSeats>0</apac:TotalCPUSeats>
 		<apac:FreeCPUSeats>0</apac:FreeCPUSeats>
 		<apac:TotalJobSeats>0</apac:TotalJobSeats>
@@ -35,6 +37,7 @@
 			<apac:SerialAvail>true</apac:SerialAvail>
 			<apac:ParallelAvail>true</apac:ParallelAvail>
 			<apac:ParallelMaxCPUs>0</apac:ParallelMaxCPUs>
+			<apac:ParallelType>parallel-type</apac:ParallelType>
 		</apac:SoftwareExecutable>
 		<apac:Data>
 			<apac:Key>Name</apac:Key>

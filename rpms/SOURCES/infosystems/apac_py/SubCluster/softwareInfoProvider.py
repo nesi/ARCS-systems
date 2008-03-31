@@ -367,13 +367,13 @@ if __name__ == '__main__':
 		logger = Log(actionDef[1])
 		action = logger.message
 
-	formatToXSLMap = { 	'softwareMap' : os.path.join(dataLocation,'software_map.xsl'), 
+	formatToXSLMap = { 	'softwareMap' : os.path.join(dataLocation,'software_map_2.xsl'), 
 						'APACGLUE' : None,
 						'APACGLUE1.2' : None,
 					}
 	blankXML = os.path.join(dataLocation, 'minimal.xml')
 	fullXML = os.path.join(dataLocation,'maximal.xml')
-	schema = os.path.join(APACSchemaLocation,"APACSoftwareSubSchema.xsd")
+	schema = os.path.join(APACSchemaLocation,"APACSoftwareSubSchemaR2.xsd")
 
 	sources = cr.getSourceNames(subClusterName, action)
 

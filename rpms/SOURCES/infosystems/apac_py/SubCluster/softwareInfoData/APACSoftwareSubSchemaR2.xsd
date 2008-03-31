@@ -6,12 +6,12 @@
 <!-- License: see LICENSE file for EGEE Middleware      -->
 <!-- Revision number: 1 date: 9 Jan 2007                -->
 
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.ivec.org/softwareSubSchema/Spec/V12/R1" xmlns:apac="http://grid.apac.edu.au/glueschema/Spec/V12/R1" targetNamespace="http://www.ivec.org/softwareSubSchema/Spec/V12/R1" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.ivec.org/softwareSubSchema/Spec/V12/R2" xmlns:apac="http://grid.apac.edu.au/glueschema/Spec/V12/R2" xmlns:glue="http://forge.cnaf.infn.it/glueschema/Spec/V12/R2" targetNamespace="http://www.ivec.org/softwareSubSchema/Spec/V12/R2" elementFormDefault="qualified">
 	<!-- Lets include the original (official) GLUE 1.2 schema, modified to use a SubClusterType -->
 	<!-- Now lets define the SoftwarePackage type. -->
-	<!--<xs:include schemaLocation="APACGLUESchema12R1.xsd"/>-->
-	<xs:import namespace="http://grid.apac.edu.au/glueschema/Spec/V12/R1" schemaLocation="file:///usr/local/share/APACGLUESchema12R1.xsd"/>
-	
+	<!--<xs:include schemaLocation="APACGLUESchema12R2.xsd"/>-->
+	<xs:import namespace="http://grid.apac.edu.au/glueschema/Spec/V12/R2" schemaLocation="file:///usr/local/share/APACGLUESchema12R2.xsd"/>
+        <xs:import namespace="http://forge.cnaf.infn.it/glueschema/Spec/V12/R2" schemaLocation="file:///usr/local/share/GLUESchema12R2.xsd"/>
 	<xs:complexType name="SoftwarePackagesType">
 		<xs:sequence>
 			<xs:element ref="apac:SoftwarePackage" minOccurs="0" maxOccurs="unbounded"/>
