@@ -1,7 +1,7 @@
 Summary:        OPeNDAP  Meta Package
 Name:           OPeNDAP
 Version:        0
-Release:        1.arcs
+Release:        2.arcs
 License:        custom
 Group:          Applications/Internet
 Packager:       Florian Goessmann <florian@ivec.org>
@@ -23,7 +23,7 @@ sed 's|/var/tmp/bes-root||g' /usr/local/etc/bes/bes.conf.bak > /usr/local/etc/be
 rm /usr/local/etc/bes/bes.conf.bak
 
 mv /usr/local/etc/bes/bes.conf /usr/local/etc/bes/bes.conf.bak
-sed '/^BES.modules=/ s/=[a-z,]*/=dap,cmd,www,nc,h4/g' /usr/local/etc/bes/bes.conf.bak > /usr/local/etc/bes/bes.conf
+sed '/^BES.modules=/ s/=[a-z,0-9]*/=dap,cmd,www,nc,h4/g' /usr/local/etc/bes/bes.conf.bak > /usr/local/etc/bes/bes.conf
 rm /usr/local/etc/bes/bes.conf.bak
 
 mv /usr/local/etc/bes/bes.conf /usr/local/etc/bes/bes.conf.bak
@@ -40,4 +40,5 @@ rm -rf $RPM_BUILD_ROOT
 %files
 
 %changelog
-
+* Tue Apr 1 2008 Florian Goessmann <florian@ivec.org>
+- fixed bug in post install
