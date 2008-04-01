@@ -1,17 +1,18 @@
 %define PKG_NAME apac_py
-%define REVISION 482
+%define REVISION 484
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	8
+Release:	9
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
 BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildArch:	noarch
 Prefix:		/usr/local
-Requires:	APAC-mip, APAC-glue-schema, APAC-lxml
+Requires:	APAC-mip, APAC-glue-schema, python-lxml
+Conflicts:	APAC-lxml
 
 %description
 The GridAustralia MIP (Modular Information Provider) module
@@ -99,6 +100,9 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Tue Apr 1 2008  Gerson Galang
+- replaced the APAC-lxml dependency with the python-lxml dependency
+- modified version of the SIP which supports latest changes to the APAC software map
 * Wed Mar 26 2008 Gerson Galang
 - fixed the problem with UsedSpace in storage area not being published
 * Mon Feb 18 2008 Gerson Galang
