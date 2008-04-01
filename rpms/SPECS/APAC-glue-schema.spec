@@ -3,7 +3,7 @@
 Summary:	The GLUE schema and GridAustralia extensions
 Name:		APAC-glue-schema
 Version:	0.1
-Release:	4
+Release:	5
 Source:		glue-schema.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -36,6 +36,8 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/share
 
 %changelog
+* Mon Mar 31 2008 Gerson Galang
+- included the 2nd rev of the APACGLUESchemaV12 which supports fields recently added to the APAC software map
 * Thu Jan 24 2008 Gerson Galang
 - modified to reflect changes in the directory structure of all the packages inside the infosystems director
 y
