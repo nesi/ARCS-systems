@@ -1,7 +1,7 @@
 Summary:	The ARCS health reporting tool.
 Name:		APAC-gateway-gridpulse
-Version:	0.2
-Release:	12
+Version:	0.3
+Release:	1
 Source:		gridpulse.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -74,6 +74,9 @@ fi
 
 
 %changelog
+* Mon Mar 17 2008 Darran Carey
+- Added checks for certificates that will expire within a specified 
+- number of days
 * Wed Jan 30 2008 Daniel Cox
 - revert yesterday's change - Conflicts is safer for the old Gpulse
 * Tue Jan 29 2008 Daniel Cox

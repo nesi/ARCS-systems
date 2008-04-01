@@ -2,6 +2,26 @@
 
 source /etc/profile
 
+#
+# Add certificates to check for expiration here.
+#
+# Modify CERTS_TO_CHECK and CERT_WARN_DAYS to
+# suit your site.
+#
+# CERTS_TO_CHECK is a space-separated string of
+# certificates to check. Example:
+#
+# HOST_CERT="/etc/grid-security/hostcert.pem"
+# HTTP_CERT="/etc/grid-security/http/httpcert.pem"
+# CERTS_TO_CHECK="${HOST_CERT} ${HTTP_CERT}"
+# 
+HOST_CERT="/etc/grid-security/hostcert.pem"
+CERTS_TO_CHECK="${HOST_CERT}"
+CERT_WARN_DAYS=30
+
+SECONDS_PER_DAY=86400
+CERT_WARN_SECONDS="$(expr ${CERT_WARN_DAYS} "*" ${SECONDS_PER_DAY})"
+
 DESTINATION="$1"
 BAD="Not OK"
 
@@ -150,6 +170,41 @@ for CERTIFICATE in $CERTDIR/*.0; do
 	esac
 done
 
+# check for soon to expire certificates
+if [ ! -z "${CERTS_TO_CHECK}" ]; then
+	CERT_STATUS="OK"
+	for CERTIFICATE in ${CERTS_TO_CHECK}; do
+		# Check that certificate exists
+		if [ ! -f "${CERTIFICATE}" ]; then
+			echo "Certificate ${CERTIFICATE} not found."
+			continue
+		fi
+		END_DATE="$(openssl x509 -in ${CERTIFICATE} -enddate -noout 2>/dev/null)"
+		# Is this a valid certificate file?
+		if [ $? != 0 ]; then
+			echo "Certificate ${CERTIFICATE} is invalid."
+			continue
+		fi
+		EXPIRY_DATE="$(echo ${END_DATE} | awk -F= '{print $2}')"
+		NOW="$(date -u)"
+		VALID_FOR="$(expr `seconds "${EXPIRY_DATE}"` - `seconds "${NOW}"`)" 
+		# Has the certificate already expired?
+		if [ ${VALID_FOR} -le 0 ]; then
+			echo "Certificate ${CERTIFICATE} has expired."
+			STATUS="${BAD}"
+			CERT_STATUS="${BAD}"
+			continue
+		fi
+		# Will the certificate expire within CERT_WARN_DAYS days?
+		if [ ${VALID_FOR} -lt ${CERT_WARN_SECONDS} ]; then
+			echo "Certificate ${CERTIFICATE} will expire within ${CERT_WARN_DAYS} days."
+			STATUS="${BAD}"
+			CERT_STATUS="${BAD}"
+			continue
+		fi
+	done
+fi
+
 # check services
 IGNORE_SERVICES="iptables anacron"
 for SERVICE in $(chkconfig --list | awk "! /${IGNORE_SERVICES/ /|}/ && \$5 == \"3:on\" {print \$1}"); do
@@ -166,4 +221,3 @@ echo "Summary: $(uname -n) is $STATUS"
 
 #[ "$DISPOSITION" = "cat" ] || perl -e 'sleep int(180*rand())'
 ) | eval $DISPOSITION
-
