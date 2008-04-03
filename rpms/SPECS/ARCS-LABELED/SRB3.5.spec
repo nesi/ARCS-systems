@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        1.arcs
+Release:        2.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -149,6 +149,97 @@ rm -rf $RPM_BUILD_ROOT/var/lib/srb/.srb/CVS
 rm -rf $RPM_BUILD_ROOT/%{srbroot}/MCAT/install.pl
 rm -rf $RPM_BUILD_ROOT/%{srbroot}/MCAT/install.ora.pl
 
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d/
+echo '#!/bin/bash
+#
+# srb        Starts SRB Server
+#
+#
+# chkconfig: 2345 99 01
+
+# Source function library.
+. /etc/init.d/functions
+
+# Local Configuration Parameters
+SRBUSER=srb
+SRBHOME=/usr/srb
+PGDATA=/var/lib/srb/mcat
+PGLOG=/var/lib/srb/mcat.log
+
+RETVAL=0
+umask 077
+[ -n "$NICELEVEL" ] && nice="nice -n $NICELEVEL"
+
+start() {
+       echo -n $"Starting postgres for SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "pg_ctl -D $PGDATA -l $PGLOG start"
+       RETVAL=$?
+       sleep 8
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STARTING POSTGRES"
+       else
+         echo "FAILED STARTING POSTGRES"
+         return $RETVAL
+       fi
+
+       echo -n $"Starting SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "cd $SRBHOME/bin; ./runsrb"
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STARTING SRB"
+       else
+         echo "FAILED STARTING SRB"
+       fi
+       return $RETVAL
+}
+stop() {
+       echo -n $"Stopping SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "cd $SRBHOME/bin; ./killsrb now"
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STOPPING SRB"
+       else
+         echo "FAILED STOPPING SRB"
+         return $RETVAL
+       fi
+       echo -n $"Stopping postgres for SRB: "
+       runuser -s /bin/bash - $SRBUSER -c "pg_ctl -D $PGDATA -l $PGLOG stop"
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+         echo "SUCCESS STOPPING POSTGRES"
+       else
+         echo "FAILED STOPPING POSTGRES"
+       fi
+       return $RETVAL
+}
+mystatus() {
+       status srbServer
+}
+restart() {
+       stop
+       start
+}
+
+case "$1" in
+ start)
+       start
+       ;;
+ stop)
+       stop
+       ;;
+ status)
+       mystatus
+       ;;
+ restart|reload)
+       restart
+       ;;
+ *)
+       echo $"Usage: $0 {start|stop|status|restart}"
+       exit 1
+esac
+
+exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
+
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
@@ -194,6 +285,9 @@ fi
 
 
 ################### server config ##############################################
+%pre install
+rm -rf /etc/rc.d/init.d/srb
+
 %post install
 
 export HOSTNAME=`uname -n`
@@ -358,100 +452,8 @@ it is most likely ok.
 ---------------------------------------------------
 EOF
 
-rm -f /etc/rc.d/init.d/srb
-cat <<-EOF > /etc/rc.d/init.d/srb
-#!/bin/bash
-#
-# srb        Starts SRB Server
-#
-#
-# chkconfig: 2345 99 01
-
-# Source function library.
-. /etc/init.d/functions
-
-# Local Configuration Parameters
-SRBUSER=srb
-SRBHOME=/usr/srb
-PGDATA=/var/lib/srb/mcat
-PGLOG=/var/lib/srb/mcat.log
-
-RETVAL=0
-umask 077
-[ -n "$NICELEVEL" ] && nice="nice -n $NICELEVEL"
-
-start() {
-       echo -n $"Starting postgres for SRB: "
-       runuser -s /bin/bash - $SRBUSER -c "pg_ctl -D $PGDATA -l $PGLOG start"
-       RETVAL=$?
-       sleep 8
-       if [ $RETVAL -eq 0 ]; then
-         echo "SUCCESS STARTING POSTGRES"
-       else
-         echo "FAILED STARTING POSTGRES"
-         return $RETVAL
-       fi
-
-       echo -n $"Starting SRB: "
-       runuser -s /bin/bash - $SRBUSER -c "cd $SRBHOME/bin; ./runsrb"
-       RETVAL=$?
-       if [ $RETVAL -eq 0 ]; then
-         echo "SUCCESS STARTING SRB"
-       else
-         echo "FAILED STARTING SRB"
-       fi
-       return $RETVAL
-}
-stop() {
-       echo -n $"Stopping SRB: "
-       runuser -s /bin/bash - $SRBUSER -c "cd $SRBHOME/bin; ./killsrb now"
-       RETVAL=$?
-       if [ $RETVAL -eq 0 ]; then
-         echo "SUCCESS STOPPING SRB"
-       else
-         echo "FAILED STOPPING SRB"
-         return $RETVAL
-       fi
-       echo -n $"Stopping postgres for SRB: "
-       runuser -s /bin/bash - $SRBUSER -c "pg_ctl -D $PGDATA -l $PGLOG stop"
-       RETVAL=$?
-       if [ $RETVAL -eq 0 ]; then
-         echo "SUCCESS STOPPING POSTGRES"
-       else
-         echo "FAILED STOPPING POSTGRES"
-       fi
-       return $RETVAL
-}
-mystatus() {
-       status srbServer
-}
-restart() {
-       stop
-       start
-}
-
-case "$1" in
- start)
-       start
-       ;;
- stop)
-       stop
-       ;;
- status)
-       mystatus
-       ;;
- restart|reload)
-       restart
-       ;;
- *)
-       echo $"Usage: $0 {start|stop|status|restart}"
-       exit 1
-esac
-
-exit $?
-EOF
-
 %files install
+%attr(0755,root,root) /etc/rc.d/init.d/srb
 ################### end server config ##############################################
 
 %pre server-update
@@ -481,6 +483,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Wed Apr 3  2008 Florian Goessmann <florian@ivec.org>
+- fixed a problem with the creation of the init script
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>
 - added changelog
 - now depends on the SRB enabled package of gridFTP
