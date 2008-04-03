@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        3.arcs
+Release:        4.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -407,6 +407,7 @@ chown srb:srb $SRB_VAULT
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestResource '$SRB_RESOURCE' 'unix file system' '$SRB_LOCATION' '$SRB_VAULT/?USER.?DOMAIN/?SPLITPATH/?PATH?DATANAME.?RANDOM.?TIMESEC' permanent 0"
 
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
+su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
 
 # run twice as well
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
@@ -486,6 +487,7 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 * Wed Apr 3  2008 Florian Goessmann <florian@ivec.org>
 - fixed a problem with the creation of the init script
 - enabled GridHTTPD
+- fixed a problem with demozone not being correctly changed to new zone
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>
 - added changelog
 - now depends on the SRB enabled package of gridFTP
