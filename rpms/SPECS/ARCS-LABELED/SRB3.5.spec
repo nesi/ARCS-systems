@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        2.arcs
+Release:        3.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -97,7 +97,7 @@ This package updates the server version 3.4.2 to version 3.5.
 export GLOBUS_LOCATION=%{globuslocation}
 export LD_LIBRARY_PATH=$GLOBUS_LOCATION/lib
 export CFLAGS="-I$GLOBUS_LOCATION/include -I$GLOBUS_LOCATION/include/gcc32dbg -I$GLOBUS_LOCATION/include/gcc32dbgpthr"
-%configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr
+%configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr --enable-httpd=8080
 make DBMS_INCLUDE="-I%{srbroot}/include -DPSQMCAT" DBMS_LIB="-L%{srbroot}/lib -lpsqlodbc"
 
 cd MCAT
@@ -485,6 +485,7 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %changelog
 * Wed Apr 3  2008 Florian Goessmann <florian@ivec.org>
 - fixed a problem with the creation of the init script
+- enabled GridHTTPD
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>
 - added changelog
 - now depends on the SRB enabled package of gridFTP
