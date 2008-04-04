@@ -1,5 +1,5 @@
-%define ver 4.7p1
-%define rel 2.arcs
+%define ver 5.0p1
+%define rel 1.arcs
 
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
@@ -117,6 +117,7 @@ BuildPreReq: krb5-libs
 %endif
 %if %{gsi}
 BuildRequires: globus-libraries
+Obsoletes: openssh
 %endif
 
 %package clients
@@ -126,6 +127,7 @@ Group: Applications/Internet
 Obsoletes: ssh-clients
 %if %{gsi}
 Requires: globus-libraries
+Obsoletes: openssh-clients
 %endif
 
 %package server
@@ -138,6 +140,7 @@ Requires: /etc/pam.d/system-auth
 %endif
 %if %{gsi}
 BuildRequires: globus-libraries
+Obsoletes: openssh-server
 %endif
 
 %package askpass
@@ -452,8 +455,13 @@ fi
 %endif
 
 %changelog
+* Fri Apr 4  2008 Florian Goessmann <florian@ivec.org>
+- updated for version 5.0p1
+- added Obsoletes drirectives in case of GSI authentication
+
 * Thu Feb 28 2008 Florian Goessmann <florian@ovec.org>
 - added conditional GSI authentication build
+
 * Wed Jan 30 2008 Florian Goessmann <florian@ivec.org>
 - change naming scheme according to ARCS standards
 
