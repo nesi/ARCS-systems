@@ -1,5 +1,5 @@
 %define ver 5.0p1
-%define rel 1.arcs
+%define rel 2.arcs
 
 # OpenSSH privilege separation requires a user & group ID
 %define sshd_uid    74
@@ -361,6 +361,7 @@ fi
 
 %post server
 /sbin/chkconfig --add sshd
+/sbin/chkconfig --level 345 sshd on
 
 %postun server
 /sbin/service sshd condrestart > /dev/null 2>&1 || :
@@ -375,12 +376,6 @@ fi
 %files
 %defattr(-,root,root)
 %doc CREDITS ChangeLog INSTALL LICENCE OVERVIEW README* RFC* TODO WARNING*
-%attr(0755,root,root) %{_bindir}/scp
-%attr(0644,root,root) %{_mandir}/man1/scp.1*
-%if %{gsi}
-%attr(0755,root,root) %{_bindir}/gsiscp
-%attr(0644,root,root) %{_mandir}/man1/gsiscp.1*
-%endif
 %attr(0755,root,root) %dir %{_sysconfdir}/ssh
 %attr(0600,root,root) %config(noreplace) %{_sysconfdir}/ssh/moduli
 %if ! %{rescue}
@@ -416,6 +411,12 @@ fi
 %attr(0644,root,root) %{_mandir}/man1/ssh-add.1*
 %attr(0644,root,root) %{_mandir}/man1/ssh-keyscan.1*
 %attr(0644,root,root) %{_mandir}/man1/sftp.1*
+%attr(0755,root,root) %{_bindir}/scp
+%attr(0644,root,root) %{_mandir}/man1/scp.1*
+%if %{gsi}
+%attr(0755,root,root) %{_bindir}/gsiscp
+%attr(0644,root,root) %{_mandir}/man1/gsiscp.1*
+%endif
 %if %{gsi}
 %attr(0755,root,root) %{_bindir}/gsisftp
 %attr(0644,root,root) %{_mandir}/man1/gsisftp.1*
@@ -455,6 +456,9 @@ fi
 %endif
 
 %changelog
+* Tue Apr 8  2008 Florian Goessmann <florian@ivec.org>
+- moved files related to scp to clients, where they belong
+
 * Fri Apr 4  2008 Florian Goessmann <florian@ivec.org>
 - updated for version 5.0p1
 - added Obsoletes drirectives in case of GSI authentication
