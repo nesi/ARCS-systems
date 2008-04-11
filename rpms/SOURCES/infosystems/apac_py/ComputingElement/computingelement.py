@@ -230,8 +230,11 @@ if __name__ == '__main__':
 									view.WaitingJobs += 1
 
 					view.FreeJobSlots = ce.FreeCPUs
-					if ce.MaxTotalJobsPerUser and ce.FreeCPUs > ce.MaxTotalJobsPerUser - view.TotalJobs:
-						view.FreeJobSlots = ce.MaxTotalJobsPerUser - view.TotalJobs
+					# voview's freejob slots should be maxtotaljobsperuser - running jobs (not totaljobs)
+					#if ce.MaxTotalJobsPerUser and ce.FreeCPUs > ce.MaxTotalJobsPerUser - view.TotalJobs:
+					#	view.FreeJobSlots = ce.MaxTotalJobsPerUser - view.TotalJobs
+					if ce.MaxTotalJobsPerUser and ce.FreeCPUs > ce.MaxTotalJobsPerUser - view.RunningJobs:
+						view.FreeJobSlots = ce.MaxTotalJobsPerUser - view.RunningJobs
 
 # TODO: in pbs.pl $jobs{MaxTotalJobsPerUser} is always undefined!
 #					$jobs{FreeJobSlots}=$queues{$myqueue}{MaxTotalJobsPerUser}-$jobs{TotalJobs} if defined $jobs{MaxTotalJobsPerUser} and defined $jobs{TotalJobs};
