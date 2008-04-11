@@ -1,10 +1,10 @@
 %define PKG_NAME apac_py
-%define REVISION 484
+%define REVISION 502
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	9
+Release:	10
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -100,6 +100,8 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Fri Apr 11 2008 Gerson Galang
+- fixed the problem with VOView.FreeJobSlots outputting a negative value
 * Tue Apr 1 2008  Gerson Galang
 - replaced the APAC-lxml dependency with the python-lxml dependency
 - modified version of the SIP which supports latest changes to the APAC software map
