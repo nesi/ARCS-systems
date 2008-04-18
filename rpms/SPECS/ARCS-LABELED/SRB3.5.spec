@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        4.arcs
+Release:        5.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -407,11 +407,14 @@ chown srb:srb $SRB_VAULT
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestResource '$SRB_RESOURCE' 'unix file system' '$SRB_LOCATION' '$SRB_VAULT/?USER.?DOMAIN/?SPLITPATH/?PATH?DATANAME.?RANDOM.?TIMESEC' permanent 0"
 
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
+#su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
 
 # run twice as well
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
 su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
+
+# create SDSC ticketuser -> broken in 3.5 as it doesn't exist by default but nothing works without it
+su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Singestuser ticketuser ansdkjqw sdsc public '' '' '' ENCRYPT1 ''"
 
 # Setup inca test user
 
@@ -484,6 +487,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Fri Apr 18 2008 Florian Goessmann <florian@ivec.org>
+- added creation of ticketuser
 * Wed Apr 3  2008 Florian Goessmann <florian@ivec.org>
 - fixed a problem with the creation of the init script
 - enabled GridHTTPD
