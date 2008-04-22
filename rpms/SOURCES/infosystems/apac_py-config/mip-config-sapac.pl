@@ -60,14 +60,14 @@ chomp($site_domain = `hostname -d`);
 		'architecture' => 'disk',
 		'access_protocols' => {
 			'gsiftp1' => {
-				type => 'gridftp',
+				type => 'gsiftp',
 				gridftp_server => 'ngdata.' . $site_domain,
 				gridftp_version => '2.3',
 			},
 
 # comment out 'gsiftp2' block if you don't have gridftp on ng2
 			'gsiftp2' => {
-				type => 'gridftp',
+				type => 'gsiftp',
 				gridftp_server => 'ng2.' . $site_domain,
 				gridftp_version => '2.3',
 			},
@@ -98,13 +98,66 @@ chomp($site_domain = `hostname -d`);
 		'user' => 'grid-test',				# local account mapped
 		'datadir' => '/data/grid/grid-test'	# nfs mounted directory
 	},
-
+	'/ARCS/GTest' => {
+		'luid' => 'arcs.grid.test.vo',
+		'user' => 'grid-test',
+		'datadir' => '/data/grid/grid-test'
+	},
 	'/APACGrid/NGAdmin' => {
 		'luid' => 'grid.admin.vo',
 		'user' => 'grid-admin',
 		'datadir' => '/data/grid/grid-admin'
 	},
-
+	'/ARCS/NGAdmin' => {
+		'luid' => 'arcs.grid.admin.vo',
+		'user' => 'grid-admin',
+		'datadir' => '/data/grid/grid-admin'
+	},
+	'/APACGrid/datatest' => {
+		'luid' => 'grid.datatest.vo',
+		'user' => 'grid-test',
+		'datadir' => '/data/grid/grid-test'
+	},
+	'/ARCS/datatest' => {
+		'luid' => 'arcs.grid.datatest.vo',
+		'user' => 'grid-test',
+		'datadir' => '/data/grid/grid-test'
+	},
+	'/APACGrid/SAPAC' => {
+		'luid' => 'grid.sapac.vo',
+		'user' => 'grid-sapac',
+		'datadir' => '/data/grid/grid-sapac'
+	},
+	'/ARCS/SAPAC' => {
+		'luid' => 'arcs.grid.sapac.vo',
+		'user' => 'grid-sapac',
+		'datadir' => '/data/grid/grid-sapac'
+	},
+	'/APACGrid/Bio' => {
+                'luid' => 'grid.bio.vo',
+                'user' => 'grid-bio',
+                'datadir' => '/data/grid/grid-bio'
+        },
+        '/ARCS/Bio' => {
+                'luid' => 'arcs.grid.bio.vo',
+                'user' => 'grid-bio',
+                'datadir' => '/data/grid/grid-bio'
+	},
+	'/APACGrid/AusBelle' => {
+		'luid' => 'grid.ausbelle.vo',
+		'user' => 'grid-belle',
+		'datadir' => '/data/grid/grid-belle'
+	},
+	'/ARCS/AusBelle' => {
+		'luid' => 'arcs.grid.ausbelle.vo',
+		'user' => 'grid-belle',
+		'datadir' => '/data/grid/grid-belle'
+	},
+	'/gin.ggf.org' => {
+		'luid' => 'grid.gin.vo',
+		'user' => 'grid-gin',
+		'datadir' => '/data/grid/grid-gin'
+	},
 );
 
 #
@@ -157,11 +210,22 @@ chomp($site_domain = `hostname -d`);
 		# job_manager will be 'PBS' if queue_system_type is Torque, PBSPro, OpenPBS
 		'job_manager' => 'PBS',
 		'default_vos' => [
+					'/gin.ggf.org',
+					'/ARCS/GTest',
+					'/ARCS/NGAdmin',
+					'/ARCS/Bio',
+					'/ARCS/SAPAC',
+					'/ARCS/datatest',
+					'/ARCS/AusBelle',
 					'/APACGrid/GTest',
 					'/APACGrid/NGAdmin',
+					'/APACGrid/Bio',
+					'/APACGrid/SAPAC',
+					'/APACGrid/datatest',
+					'/APACGrid/AusBelle',
 				],
 		'queues'     => {
-			'seq@hydra' => { },							# vos in default_vos
+			'seq' => { },							# vos in default_vos
 #			'short' => { },
 #			'checkable' => { },
 #			'single' => { },
@@ -292,7 +356,7 @@ chomp($gateway_hostname = `hostname -f`);
 
 %gateway_info = (
 	'fqdn' => $gateway_hostname,
-	# 'fqdn'    => 'ng2.' . $site_domain;
+	#'fqdn'    => 'ng2.' . $site_domain;
 	'qstat'     => '/usr/local/bin/qstat',
 	'pbsnodes'  => '/usr/local/bin/pbsnodes',
 	'globus_version'  => '4.0.5'

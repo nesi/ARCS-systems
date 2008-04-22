@@ -60,14 +60,14 @@ chomp($site_domain = `hostname -d`);
 		'architecture' => 'disk',
 		'access_protocols' => {
 			'gsiftp1' => {
-				type => 'gridftp',
+				type => 'gsiftp',
 				gridftp_server => 'ngdata.' . $site_domain,
 				gridftp_version => '2.3',
 			},
 
 # comment out 'gsiftp2' block if you don't have gridftp on ng2
 			'gsiftp2' => {
-				type => 'gridftp',
+				type => 'gsiftp',
 				gridftp_server => 'ng2.' . $site_domain,
 				gridftp_version => '2.3',
 			},
