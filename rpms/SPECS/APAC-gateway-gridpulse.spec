@@ -46,7 +46,7 @@ echo %{name} >> $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
 
 # if the root crontab doesn't exist or doesn't contain gridpulse add it.
 if [ ! -e /var/spool/cron/root ] || ! grep -q $RPM_INSTALL_PREFIX0/bin/gridpulse /var/spool/cron/root; then
-	echo "3,23,43 * * * * $RPM_INSTALL_PREFIX0/bin/gridpulse grid_pulse@gridaus.org.au >/dev/null 2>&1" >> /var/spool/cron/root
+	echo "3,23,43 * * * * $RPM_INSTALL_PREFIX0/bin/gridpulse grid_pulse@arcs.org.au >/dev/null 2>&1" >> /var/spool/cron/root
 /etc/init.d/crond status >> /dev/null
 	# if cron isn't running just start it
 	if [ "$?" -eq "3" ]
@@ -74,9 +74,10 @@ fi
 
 
 %changelog
+* Tue Apr 22 2008 Daniel Cox
+- use grid_pulse@arcs.org.au
 * Mon Mar 17 2008 Darran Carey
-- Added checks for certificates that will expire within a specified 
-- number of days
+- Added checks for certificates that will expire within a specified number of days
 * Wed Jan 30 2008 Daniel Cox
 - revert yesterday's change - Conflicts is safer for the old Gpulse
 * Tue Jan 29 2008 Daniel Cox
