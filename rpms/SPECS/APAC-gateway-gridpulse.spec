@@ -1,7 +1,7 @@
 Summary:	The ARCS health reporting tool.
 Name:		APAC-gateway-gridpulse
 Version:	0.3
-Release:	1
+Release:	2
 Source:		gridpulse.tar.gz
 License:	GPL
 Group:		Applications/Internet
