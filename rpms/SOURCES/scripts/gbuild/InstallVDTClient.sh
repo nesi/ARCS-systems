@@ -4,6 +4,13 @@
 # 
 # Installation of VDT client components without root privileges.
 #
+# Changes:
+# 30/04/2008 Daniel 
+# - change APAC to ARCS
+# - use Pacman 3.21 (fix pretend platform)
+# - use projects.arcs.org.au
+# - certificate updates
+#
 
 # get the installation directory
 [ -n "$VDT_LOCATION" ] || VDT_LOCATION=$PWD/vdt
@@ -27,8 +34,9 @@ VDTSETUP_EDG_CRL_UPDATE=y    VDTSETUP_CA_CERT_UPDATER=y
 
 #
 # Pacman, port-range adjustment, VDT-Setup adjustment
+SETTINGS=ARCS01.sh
 mkdir -p $VDT_LOCATION/post-setup; cd $VDT_LOCATION
-if [ ! -f $VDT_LOCATION/post-setup/APAC01.sh ] ; then
+if [ ! -f $VDT_LOCATION/post-setup/$SETTINGS ] ; then
   until [ -n "$GLOBUS_TCP_PORT_RANGE" ]; do
     GLOBUS_TCP_PORT_RANGE="40000,41000"
     echo -n "==> Please enter GLOBUS_TCP_PORT_RANGE [ $GLOBUS_TCP_PORT_RANGE ]: " 
@@ -38,25 +46,26 @@ if [ ! -f $VDT_LOCATION/post-setup/APAC01.sh ] ; then
     fi
     echo "$GLOBUS_TCP_PORT_RANGE" | egrep -q "^[[:digit:]]+,[[:digit:]]+$" || unset TcpRange
   done
-  echo "export GLOBUS_TCP_PORT_RANGE=$GLOBUS_TCP_PORT_RANGE"      > $VDT_LOCATION/post-setup/APAC01.sh
-  echo "export MYPROXY_SERVER=myproxy.apac.edu.au"  >> $VDT_LOCATION/post-setup/APAC01.sh
-  chmod a+xr $VDT_LOCATION/post-setup/APAC01.sh
-  echo "==> Created: $VDT_LOCATION/post-setup/APAC01.sh"
+  echo "export GLOBUS_TCP_PORT_RANGE=$GLOBUS_TCP_PORT_RANGE"      > $VDT_LOCATION/post-setup/$SETTINGS
+  echo "export MYPROXY_SERVER=myproxy.arcs.org.au"  >> $VDT_LOCATION/post-setup/$SETTINGS
+  chmod a+xr $VDT_LOCATION/post-setup/$SETTINGS
+  echo "==> Created: $VDT_LOCATION/post-setup/$SETTINGS"
 fi
 
-PACMAN=pacman-3.20
+PACMAN=pacman-3.21
+PACMANSRC=http://projects.arcs.org.au/svn/systems/trunk/rpms/SOURCES/$PACMAN.tar.gz
 # TODO: download from APAC repository instead?
 #  http://www.grid.apac.edu.au/repository/trac/systems/browser/gateway/rpms/SOURCES
 if [ ! -d $PACMAN ]; then
   echo "==> Installing Pacman!"
   which wget > /dev/null || ( echo "wget not in path!" && exit 1 )
-  wget http://physics.bu.edu/pacman/sample_cache/tarballs/$PACMAN.tar.gz &&
+  wget $PACMANSRC &&
   tar xzf $PACMAN.tar.gz && echo "==> Done!" || echo "==> Failed!"
 fi
 cd $PACMAN && source setup.sh && cd ..
 
 # set up Pacman settings.
-VDTMIRROR=http://www.grid.apac.edu.au/repository/mirror/vdt/vdt_181_cache
+VDTMIRROR=http://projects.arcs.org.au/mirror/vdt/vdt_181_cache
 [ -n "$http_proxy" ] && ProxyString="-http-proxy $http_proxy" &&echo "==> Using Proxy: $http_proxy"
 
 # set up platform.  More special cases need to be added here.
@@ -82,6 +91,12 @@ if [ `uname -s` != "Darwin" ]; then
     components="$components GSIOpenSSH"
 fi
 for Component in $components; do
+
+  # Pacman 3.21 complains about -pretend-platform when installation exists
+  # ie. after first component is installed!
+  [ -f o..pacman..o/platform ] && unset Platform
+
   echo "==> Checking/Installing: $Component"
   pacman $Platform $ProxyString -get $VDTMIRROR:$Component || echo "==> Failed!"
 done
+pacman $Platform $ProxyString -update CA-Certificates
