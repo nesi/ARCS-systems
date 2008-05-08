@@ -1,0 +1,3425 @@
+diff -ruN old/SRB3_5_0/data/shibConfig new/SRB3_5_0/data/shibConfig
+--- old/SRB3_5_0/data/shibConfig	1970-01-01 10:00:00.000000000 +1000
++++ new/SRB3_5_0/data/shibConfig	2008-01-10 14:35:35.000000000 +1000
+@@ -0,0 +1,12 @@
++# The full path to the dn to user/domain script
++dnToUserDomainScript=/home/srb/testDnToUserDomain.sh
++# The full path to the add user script
++addUserScript=/home/srb/testAddUser.sh
++# The full path to the add group script
++addGroupScript=/home/srb/testAddGroup.sh
++# The full path to the add domain script
++addDomainScript=/home/srb/testAddDomain.sh
++# The OID of the certificate extension
++shibCertOid=1.2.3.4.5.6.7.8.9
++# The group separator in the certificate extension
++shibGroupSeparator=;          
+diff -ruN old/SRB3_5_0/errMsg/input/errDesc.in new/SRB3_5_0/errMsg/input/errDesc.in
+--- old/SRB3_5_0/errMsg/input/errDesc.in	2007-02-15 10:10:28.000000000 +1000
++++ new/SRB3_5_0/errMsg/input/errDesc.in	2008-01-10 14:35:35.000000000 +1000
+@@ -1479,6 +1479,33 @@
+         "", ""}
+ {-6027, GRIDFTP_BAD_INPUT_URL_ERR,       "GRIDFTP_BAD_INPUT_URL_ERR",
+         "", ""}
++{-7000, SHIB_MAPPING_NAME_NOT_FOUND, "The Shib mapping name was not found", "", ""}
++{-7001, USER_IN_SHIB_MAPPING_ALREADY, "The user is already in the Shib mapping", "", ""}
++{-7002, USER_NOT_IN_SHIB_MAPPING, "The user is not in the Shib mapping", "", ""}
++{-7003, GROUP_IN_SHIB_MAPPING_ALREADY, "The group is already in the Shib mapping", "", ""}
++{-7004, GROUP_NOT_IN_SHIB_MAPPING, "The group is not in the Shib mapping", "", ""}
++{-7005, NO_USERS_FOUND_FOR_SHIB_MAPPING, "No users were found for the given Shib mapping", "" , ""}
++{-7006, NO_GROUPS_FOUND_FOR_SHIB_MAPPING, "No groups were found for the given Shib mapping", "" , ""}
++{-7007, NO_SHIB_MAPPINGS_FOUND_FOR_USER, "No Shib mappings were found for the given user", "", ""}
++{-7008, NO_SHIB_MAPPINGS_FOUND_FOR_GROUP, "No Shib mappings were found for the given group", "", ""}
++{-7100, "DN_TO_USER_DOMAIN_SCRIPT_NO_ENTRY", "There is no dnToUserDomainScript entry in the configuration file", "", ""}
++{-7101, "DN_TO_USER_DOMAIN_SCRIPT_NOT_FOUND", "The dnToUserDomainScript file does not exist", "", ""}
++{-7102, "DN_TO_USER_DOMAIN_SCRIPT_NOT_EXECUTABLE", "The dnToUserDomainScript file is not executable", "", ""}
++{-7103, "DN_TO_USER_DOMAIN_SCRIPT_BAD_OUTPUT", "The output of the dnToUserDomainScript was not of the format 'user@domain'", "", ""}
++{-7110, "ADD_USER_SCRIPT_NO_ENTRY", "There is no addUserScript entry in the configuration file", "", ""}
++{-7111, "ADD_USER_SCRIPT_NOT_FOUND", "The addUserScript file does not exist", "", ""}
++{-7112, "ADD_USER_SCRIPT_NOT_EXECUTABLE", "The addUserScript is not executable", "", ""}
++{-7113, "ADD_USER_SCRIPT_USER_MISMATCH", "The user name provided does not match the user name derived from the dnToUserDomainScript", "", ""}
++{-7114, "ADD_USER_SCRIPT_DOMAIN_MISMATCH", "The domain name provided does not match the domain name derived from the dnToUserDomainScript", "", ""}
++{-7115, "ADD_USER_SCRIPT_USER_AND_DOMAIN_MISMATCH", "The user and domain names provided do not match the user and domain names derived from the dnToUserDomainScript", "", ""}
++{-7116, "ADD_USER_SCRIPT_DID_NOT_ADD_USER", "The added user was not found after the running of the addUserScript", "", ""}
++{-7120, "ADD_GROUP_SCRIPT_NO_ENTRY", "There is no addGroupScript entry in the configuration file", "", ""}
++{-7121, "ADD_GROUP_SCRIPT_NOT_FOUND", "The addGroupScript file does not exist", "", ""}
++{-7122, "ADD_GROUP_SCRIPT_NOT_EXECUTABLE", "The addGroupScript file is not executable", "", ""}
++{-7123, "ADD_GROUP_SCRIPT_DID_NOT_ADD_GROUP", "The added group was not found after the running of the addGroupScript", "", ""}
++{-7130, "ADD_DOMAIN_SCRIPT_NO_ENTRY", "There is no addDomainScript entry in the configuration file", "", ""}
++{-7131, "ADD_DOMAIN_SCRIPT_NOT_FOUND", "The addDomainScript does not exist", "", ""}
++{-7132, "ADD_DOMAIN_SCRIPT_NOT_EXECUTABLE", "The addDomainScript is not executable", "", ""}
+ {-999999, DONT_SEND_RETURN,       "DONT_SEND_RETURN",
+         "", ""}
+ {-9999999, EXIT_WHEN_DONE,       "EXIT_WHEN_DONE",
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.cleanup.db2 new/SRB3_5_0/MCAT/data/catalog.cleanup.db2
+--- old/SRB3_5_0/MCAT/data/catalog.cleanup.db2	2006-04-14 10:02:56.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.cleanup.db2	2008-01-10 14:35:35.000000000 +1000
+@@ -15,6 +15,10 @@
+ drop table MDAS_CD_USER ;
+ drop table MDAS_AU_INFO  ;
+ drop table MDAS_AU_GROUP  ;
++drop table MDAS_AU_SHIB_GROUP  ;
++drop table MDAS_CD_SHIB_MAPPING ;
++drop table MDAS_AU_SHIB_MAPPING_GROUP ;
++drop table MDAS_AU_SHIB_MAPPING_USER ;
+ drop table MDAS_AU_DOMN  ;
+ drop table MDAS_AU_AUTH_KEY  ;
+ drop table MDAS_AU_AUTH_MAP  ;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.cleanup.inf.sql new/SRB3_5_0/MCAT/data/catalog.cleanup.inf.sql
+--- old/SRB3_5_0/MCAT/data/catalog.cleanup.inf.sql	2006-04-14 10:02:56.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.cleanup.inf.sql	2008-01-10 14:35:35.000000000 +1000
+@@ -40,6 +40,10 @@
+ drop table MDAS_AD_GUID;
+ drop table MDAS_AU_INFO;
+ drop table MDAS_AU_GROUP;
++drop table MDAS_AU_SHIB_GROUP;
++drop table MDAS_CD_SHIB_MAPPING;
++drop table MDAS_AU_SHIB_MAPPING_GROUP;
++drop table MDAS_AU_SHIB_MAPPING_USER;
+ drop table MDAS_AU_DOMN;
+ drop table MDAS_AU_AUTH_KEY;
+ drop table MDAS_AU_AUTH_MAP;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.cleanup.mys new/SRB3_5_0/MCAT/data/catalog.cleanup.mys
+--- old/SRB3_5_0/MCAT/data/catalog.cleanup.mys	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.cleanup.mys	2008-01-10 14:35:35.000000000 +1000
+@@ -188,6 +188,10 @@
+ DROP TABLE MDAS_AD_GUID;
+ DROP TABLE MDAS_AU_INFO;
+ DROP TABLE MDAS_AU_GROUP;
++DROP TABLE MDAS_AU_SHIB_GROUP;
++DROP TABLE MDAS_CD_SHIB_MAPPING;
++DROP TABLE MDAS_AU_SHIB_MAPPING_GROUP;
++DROP TABLE MDAS_AU_SHIB_MAPPING_USER;
+ DROP TABLE MDAS_AU_DOMN;
+ DROP TABLE MDAS_AU_AUTH_KEY;
+ DROP TABLE MDAS_AU_AUTH_MAP;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.cleanup.ora new/SRB3_5_0/MCAT/data/catalog.cleanup.ora
+--- old/SRB3_5_0/MCAT/data/catalog.cleanup.ora	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.cleanup.ora	2008-01-10 14:35:35.000000000 +1000
+@@ -40,6 +40,10 @@
+ drop table MDAS_AD_GUID;
+ drop table MDAS_AU_INFO;
+ drop table MDAS_AU_GROUP;
++drop table MDAS_AU_SHIB_GROUP;
++drop table MDAS_CD_SHIB_MAPPING;
++drop table MDAS_AU_SHIB_MAPPING_GROUP;
++drop table MDAS_AU_SHIB_MAPPING_USER;
+ drop table MDAS_AU_DOMN;
+ drop table MDAS_AU_AUTH_KEY;
+ drop table MDAS_AU_AUTH_MAP;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.cleanup.psg new/SRB3_5_0/MCAT/data/catalog.cleanup.psg
+--- old/SRB3_5_0/MCAT/data/catalog.cleanup.psg	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.cleanup.psg	2008-01-10 14:35:35.000000000 +1000
+@@ -40,6 +40,10 @@
+ drop table MDAS_AD_GUID;
+ drop table MDAS_AU_INFO;
+ drop table MDAS_AU_GROUP;
++drop table MDAS_AU_SHIB_GROUP;
++drop table MDAS_CD_SHIB_MAPPING;
++drop table MDAS_AU_SHIB_MAPPING_GROUP;
++drop table MDAS_AU_SHIB_MAPPING_USER;
+ drop table MDAS_AU_DOMN;
+ drop table MDAS_AU_AUTH_KEY;
+ drop table MDAS_AU_AUTH_MAP;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.cleanup.syb new/SRB3_5_0/MCAT/data/catalog.cleanup.syb
+--- old/SRB3_5_0/MCAT/data/catalog.cleanup.syb	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.cleanup.syb	2008-01-10 14:35:35.000000000 +1000
+@@ -38,6 +38,10 @@
+ drop table MDAS_AD_REPL;
+ drop table MDAS_AU_INFO;
+ drop table MDAS_AU_GROUP;
++drop table MDAS_AU_SHIB_GROUP;
++drop table MDAS_CD_SHIB_MAPPING;
++drop table MDAS_AU_SHIB_MAPPING_GROUP;
++drop table MDAS_AU_SHIB_MAPPING_USER;
+ drop table MDAS_AU_DOMN;
+ drop table MDAS_AU_AUTH_KEY;
+ drop table MDAS_AU_AUTH_MAP;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.grant.ora new/SRB3_5_0/MCAT/data/catalog.grant.ora
+--- old/SRB3_5_0/MCAT/data/catalog.grant.ora	2002-12-18 11:31:40.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.grant.ora	2008-01-10 14:35:35.000000000 +1000
+@@ -12,6 +12,10 @@
+ grant all on MDAS_AD_REPL to  srb with grant option;
+ grant all on MDAS_AU_INFO to  srb with grant option;
+ grant all on MDAS_AU_GROUP to  srb with grant option;
++grant all on MDAS_AU_SHIB_GROUP to  srb with grant option;
++grant all on MDAS_CD_SHIB_MAPPING to  srb with grant option;
++grant all on MDAS_AU_SHIB_MAPPING_GROUP to  srb with grant option;
++grant all on MDAS_AU_SHIB_MAPPING_USER to  srb with grant option;
+ grant all on MDAS_AU_DOMN to  srb with grant option;
+ grant all on MDAS_AU_AUTH_KEY to  srb with grant option;
+ grant all on MDAS_AU_AUDIT to  srb with grant option;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.index.db2 new/SRB3_5_0/MCAT/data/catalog.index.db2
+--- old/SRB3_5_0/MCAT/data/catalog.index.db2	2004-12-23 05:37:42.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.index.db2	2008-01-10 14:35:35.000000000 +1000
+@@ -42,8 +42,12 @@
+        on MDAS_CD_USER (user_name) ;
+ create index mdas_au_grp_2moid
+        on MDAS_AU_GROUP (group_user_id) ;
++create index mdas_au_shib_grp_2moid
++       on MDAS_AU_SHIB_GROUP (group_user_id) ;
+ create index mdas_au_grp_3moid
+        on MDAS_AU_GROUP (group_user_id, user_id) ;
++create index mdas_au_shib_grp_3moid
++       on MDAS_AU_SHIB_GROUP (group_user_id, user_id) ;
+ create index mdas_ad_colinx_col on mdas_ad_coll_index (INDEXED_DATCOLL_ID) ;
+ create index mdas_ad_colinx_dat on mdas_ad_coll_index (DATA_ID_OF_INDEX) ;
+ create index mdas_ad_rep_pat  on MDAS_AD_REPL (path_name)  ;
+@@ -57,6 +61,8 @@
+ 
+ create index mdas_au_grp_moid
+        on MDAS_AU_GROUP (user_id) ;
++create index mdas_au_shib_grp_moid
++       on MDAS_AU_SHIB_GROUP (user_id) ;
+ 
+ create index mdas_audit_did
+        on MDAS_AUDIT (dataid) ;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.index.ora new/SRB3_5_0/MCAT/data/catalog.index.ora
+--- old/SRB3_5_0/MCAT/data/catalog.index.ora	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.index.ora	2008-01-10 14:35:35.000000000 +1000
+@@ -42,8 +42,12 @@
+        on MDAS_CD_USER (user_name) NOLOGGING TABLESPACE MCAT_IDX1;
+ create index mdas_au_grp_2moid
+        on MDAS_AU_GROUP (group_user_id) NOLOGGING TABLESPACE MCAT_IDX1;
++create index mdas_au_shib_grp_2moid
++       on MDAS_AU_SHIB_GROUP (group_user_id) NOLOGGING TABLESPACE MCAT_IDX1;
+ create index mdas_au_grp_3moid
+        on MDAS_AU_GROUP (group_user_id, user_id) NOLOGGING TABLESPACE MCAT_IDX1;
++create index mdas_au_shib_grp_3moid
++       on MDAS_AU_SHIB_GROUP (group_user_id, user_id) NOLOGGING TABLESPACE MCAT_IDX1;
+ create index mdas_ad_colinx_col on mdas_ad_coll_index (INDEXED_DATCOLL_ID) NOLOGGING TABLESPACE MCAT_IDX1;
+ create index mdas_ad_colinx_dat on mdas_ad_coll_index (DATA_ID_OF_INDEX) NOLOGGING TABLESPACE MCAT_IDX1;
+ create index mdas_ad_rep_pat  on MDAS_AD_REPL (path_name)  NOLOGGING TABLESPACE MCAT_IDX1;
+@@ -58,6 +62,8 @@
+ 
+ create index mdas_au_grp_moid
+        on MDAS_AU_GROUP (user_id) NOLOGGING TABLESPACE MCAT_IDX1;
++create index mdas_au_shib_grp_moid
++       on MDAS_AU_SHIB_GROUP (user_id) NOLOGGING TABLESPACE MCAT_IDX1;
+ 
+ create index mdas_audit_did
+        on MDAS_AUDIT (dataid) NOLOGGING TABLESPACE MCAT_IDX1;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.index.psg new/SRB3_5_0/MCAT/data/catalog.index.psg
+--- old/SRB3_5_0/MCAT/data/catalog.index.psg	2004-12-23 05:37:42.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.index.psg	2008-01-10 14:35:35.000000000 +1000
+@@ -42,8 +42,12 @@
+        on MDAS_CD_USER (user_name) ;
+ create index mdas_au_grp_2moid
+        on MDAS_AU_GROUP (group_user_id) ;
++create index mdas_au_shib_grp_2moid
++       on MDAS_AU_SHIB_GROUP (group_user_id) ;
+ create index mdas_au_grp_3moid
+        on MDAS_AU_GROUP (group_user_id, user_id) ;
++create index mdas_au_shib_grp_3moid
++       on MDAS_AU_SHIB_GROUP (group_user_id, user_id) ;
+ create index mdas_ad_colinx_col on mdas_ad_coll_index (INDEXED_DATCOLL_ID) ;
+ create index mdas_ad_colinx_dat on mdas_ad_coll_index (DATA_ID_OF_INDEX) ;
+ create index mdas_ad_rep_pat  on MDAS_AD_REPL (path_name)  ;
+@@ -57,6 +61,8 @@
+ 
+ create index mdas_au_grp_moid
+        on MDAS_AU_GROUP (user_id) ;
++create index mdas_au_shib_grp_moid
++       on MDAS_AU_SHIB_GROUP (user_id) ;
+ 
+ create index mdas_audit_did
+        on MDAS_AUDIT (dataid) ;
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.install.db2 new/SRB3_5_0/MCAT/data/catalog.install.db2
+--- old/SRB3_5_0/MCAT/data/catalog.install.db2	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.install.db2	2008-01-10 14:35:35.000000000 +1000
+@@ -176,6 +176,27 @@
+          group_user_id integer not null 	     
+ 	)  ;
+ 
++create table MDAS_AU_SHIB_GROUP
++        (user_id integer  not null,		     
++         group_user_id integer not null,
++         ref_count integer not null 	     
++	)  ;
++
++create table MDAS_CD_SHIB_MAPPING
++        (mapping_id integer not null,
++         mapping_name varchar(250) not null
++    )  ;
++
++create table MDAS_AU_SHIB_MAPPING_GROUP
++        (mapping_id integer not null,
++         group_user_id integer not null
++    )  ;
++
++create table MDAS_AU_SHIB_MAPPING_USER
++        (mapping_id integer not null,
++         user_id integer not null
++    )  ;
++
+ create table MDAS_AU_DOMN
+         (user_id integer  not null,		     
+ 	 domain_id varchar(250)  not null		     
+@@ -995,7 +1016,7 @@
+ insert into MDAS_COUNTER values ('TABLE_ID', 1000);
+ insert into MDAS_COUNTER values ('ATTRIBUTE_ID', 1000);
+ insert into MDAS_COUNTER values ('COLLECTION_ID', 11111);
+-
++insert into MDAS_COUNTER values ('MAPPING_ID', 100);
+ 
+ insert into MDAS_TD_DOMN values ('0001','gen-lvl1');
+ insert into MDAS_TD_DOMN values ('0001.0001','gen-lvl2');
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.install.inf.sql new/SRB3_5_0/MCAT/data/catalog.install.inf.sql
+--- old/SRB3_5_0/MCAT/data/catalog.install.inf.sql	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.install.inf.sql	2008-01-10 14:35:35.000000000 +1000
+@@ -179,6 +179,27 @@
+          group_user_id integer not null 	     
+ 	) ;
+ 
++create table MDAS_AU_SHIB_GROUP
++        (user_id integer  not null,		     
++         group_user_id integer not null,
++         ref_count integer not null
++	) ;
++
++create table MDAS_CD_SHIB_MAPPING
++        (mapping_id integer not null,
++         mapping_name varchar(250) not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_GROUP
++        (mapping_id integer not null,
++         group_user_id integer not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_USER
++        (mapping_id integer not null,
++         user_id integer not null
++    ) ;
++
+ create table MDAS_AU_DOMN
+         (user_id integer  not null,		     
+ 	 domain_id varchar(250)  not null		     
+@@ -998,6 +1019,7 @@
+ insert into MDAS_COUNTER values ('TABLE_ID', 1000);
+ insert into MDAS_COUNTER values ('ATTRIBUTE_ID', 1000);
+ insert into MDAS_COUNTER values ('COLLECTION_ID', 11111);
++insert into MDAS_COUNTER values ('MAPPING_ID', 100);
+ 
+ insert into MDAS_TD_DOMN values ('0001','gen-lvl1');
+ insert into MDAS_TD_DOMN values ('0001.0001','gen-lvl2');
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.install.mys new/SRB3_5_0/MCAT/data/catalog.install.mys
+--- old/SRB3_5_0/MCAT/data/catalog.install.mys	2006-05-06 13:03:54.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.install.mys	2008-01-10 14:35:35.000000000 +1000
+@@ -186,6 +186,27 @@
+          group_user_id integer not null 	     
+ 	) ;
+ 
++create table MDAS_AU_SHIB_GROUP
++        (user_id integer  not null,		     
++         group_user_id integer not null,
++         ref_count integer not null
++	) ;
++
++create table MDAS_CD_SHIB_MAPPING
++        (mapping_id integer not null,
++         mapping_name varchar(250) not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_GROUP
++        (mapping_id integer not null,
++         group_user_id integer not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_USER
++        (mapping_id integer not null,
++         user_id integer not null
++    ) ;
++
+ create table MDAS_AU_DOMN
+         (user_id integer  not null,		     
+ 	 domain_id varchar(250)  not null		     
+@@ -2193,6 +2214,7 @@
+ insert into MDAS_COUNTER values ('TABLE_ID', 1000);
+ insert into MDAS_COUNTER values ('ATTRIBUTE_ID', 1000);
+ insert into MDAS_COUNTER values ('COLLECTION_ID', 11111);
++insert into MDAS_COUNTER values ('MAPPING_ID', 100);
+ 
+ insert into MDAS_TD_DOMN values ('0001','gen-lvl1');
+ insert into MDAS_TD_DOMN values ('0001.0001','gen-lvl2');
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.install.ora new/SRB3_5_0/MCAT/data/catalog.install.ora
+--- old/SRB3_5_0/MCAT/data/catalog.install.ora	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.install.ora	2008-01-10 14:35:35.000000000 +1000
+@@ -176,6 +176,27 @@
+          group_user_id integer not null 	     
+ 	) ;
+ 
++create table MDAS_AU_SHIB_GROUP
++        (user_id integer  not null,		     
++         group_user_id integer not null,
++         ref_count integer not null
++	) ;
++
++create table MDAS_CD_SHIB_MAPPING
++        (mapping_id integer not null,
++         mapping_name varchar(250) not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_GROUP
++        (mapping_id integer not null,
++         group_user_id integer not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_USER
++        (mapping_id integer not null,
++         user_id integer not null
++    ) ;
++
+ create table MDAS_AU_DOMN
+         (user_id integer  not null,		     
+ 	 domain_id varchar(250)  not null		     
+@@ -1007,6 +1028,7 @@
+ insert into MDAS_COUNTER values ('TABLE_ID', 1000);
+ insert into MDAS_COUNTER values ('ATTRIBUTE_ID', 1000);
+ insert into MDAS_COUNTER values ('COLLECTION_ID', 11111);
++insert into MDAS_COUNTER values ('MAPPING_ID', 100);
+ 
+ insert into MDAS_TD_DOMN values ('0001','gen-lvl1');
+ insert into MDAS_TD_DOMN values ('0001.0001','gen-lvl2');
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.install.psg new/SRB3_5_0/MCAT/data/catalog.install.psg
+--- old/SRB3_5_0/MCAT/data/catalog.install.psg	2007-02-16 09:42:06.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.install.psg	2008-01-10 14:35:35.000000000 +1000
+@@ -179,6 +179,27 @@
+          group_user_id integer not null 	     
+ 	) without oids;
+ 
++create table MDAS_AU_SHIB_GROUP
++        (user_id integer  not null,		     
++         group_user_id integer not null,
++         ref_count integer not null
++	) without oids;
++
++create table MDAS_CD_SHIB_MAPPING
++		(mapping_id integer not null,
++		 mapping_name varchar(250) not null
++	) without oids;
++
++create table MDAS_AU_SHIB_MAPPING_GROUP
++		(mapping_id integer not null,
++		 group_user_id integer not null
++	) without oids;
++
++create table MDAS_AU_SHIB_MAPPING_USER
++		(mapping_id integer not null,
++		 user_id integer not null
++	) without oids;
++
+ create table MDAS_AU_DOMN
+         (user_id integer  not null,		     
+ 	 domain_id varchar(250)  not null		     
+@@ -1001,6 +1022,7 @@
+ insert into MDAS_COUNTER values ('TABLE_ID', 1000);
+ insert into MDAS_COUNTER values ('ATTRIBUTE_ID', 1000);
+ insert into MDAS_COUNTER values ('COLLECTION_ID', 11111);
++insert into MDAS_COUNTER values ('MAPPING_ID', 100);
+ 
+ insert into MDAS_TD_DOMN values ('0001','gen-lvl1');
+ insert into MDAS_TD_DOMN values ('0001.0001','gen-lvl2');
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.install.syb new/SRB3_5_0/MCAT/data/catalog.install.syb
+--- old/SRB3_5_0/MCAT/data/catalog.install.syb	2006-04-14 10:02:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.install.syb	2008-01-10 14:35:35.000000000 +1000
+@@ -179,6 +179,27 @@
+          group_user_id integer not null 	     
+ 	)  ;
+ 
++create table MDAS_AU_SHIB_GROUP
++        (user_id integer  not null,		     
++         group_user_id integer not null,
++         ref_count integer not null
++	)  ;
++
++create table MDAS_CD_SHIB_MAPPING
++        (mapping_id integer not null,
++         mapping_name varchar(250) not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_GROUP
++        (mapping_id integer not null,
++         group_user_id integer not null
++    ) ;
++
++create table MDAS_AU_SHIB_MAPPING_USER
++        (mapping_id integer not null,
++         user_id integer not null
++    ) ;
++
+ create table MDAS_AU_DOMN
+         (user_id integer  not null,		     
+ 	 domain_id varchar(250)  not null		     
+@@ -997,6 +1018,7 @@
+ insert into MDAS_COUNTER values ('TABLE_ID', 1000);
+ insert into MDAS_COUNTER values ('ATTRIBUTE_ID', 1000);
+ insert into MDAS_COUNTER values ('COLLECTION_ID', 11111);
++insert into MDAS_COUNTER values ('MAPPING_ID', 100);
+ 
+ insert into MDAS_TD_DOMN values ('0001','gen-lvl1');
+ insert into MDAS_TD_DOMN values ('0001.0001','gen-lvl2');
+diff -ruN old/SRB3_5_0/MCAT/data/catalog.revoke.ora new/SRB3_5_0/MCAT/data/catalog.revoke.ora
+--- old/SRB3_5_0/MCAT/data/catalog.revoke.ora	2002-12-18 11:31:40.000000000 +1000
++++ new/SRB3_5_0/MCAT/data/catalog.revoke.ora	2008-01-10 14:35:35.000000000 +1000
+@@ -12,6 +12,10 @@
+ revoke all on MDAS_AD_REPL from sekar;
+ revoke all on MDAS_AU_INFO from sekar;
+ revoke all on MDAS_AU_GROUP from sekar;
++revoke all on MDAS_AU_SHIB_GROUP from sekar;
++revoke all on MDAS_CD_SHIB_MAPPING from sekar;
++revoke all on MDAS_AU_SHIB_MAPPING_GROUP frpm sekar;
++revoke all on MDAS_AU_SHIB_MAPPING_USER from sekar;
+ revoke all on MDAS_AU_DOMN from sekar;
+ revoke all on MDAS_AU_AUTH_KEY from sekar;
+ revoke all on MDAS_AU_AUDIT from sekar;
+@@ -155,6 +159,10 @@
+ grant select on MDAS_AD_REPL to sekar;
+ grant select on MDAS_AU_INFO to sekar;
+ grant select on MDAS_AU_GROUP to sekar;
++grant select on MDAS_AU_SHIB_GROUP to sekar;
++grant select on MDAS_CD_SHIB_MAPPING to sekar;
++grant select on MDAS_AU_SHIB_MAPPING_GROUP to sekar;
++grant select on MDAS_AU_SHIB_MAPPING_USER to sekar;
+ grant select on MDAS_AU_DOMN to sekar;
+ grant select on MDAS_AU_AUTH_KEY to sekar;
+ grant select on MDAS_AU_AUDIT to sekar;
+diff -ruN old/SRB3_5_0/MCAT/Makefile.in new/SRB3_5_0/MCAT/Makefile.in
+--- old/SRB3_5_0/MCAT/Makefile.in	2005-07-07 07:00:57.000000000 +1000
++++ new/SRB3_5_0/MCAT/Makefile.in	2008-01-10 14:35:35.000000000 +1000
+@@ -4,9 +4,9 @@
+ include ../mk/mk.common
+ 
+ TESTTARGETS = bin/test_srb_mdas_create_collections bin/test_srb_mdas_audit  bin/test_srb_mdas_get  bin/test_srb_mdas_all  bin/test_srb_mdas_get_rsrc bin/test_srb_mdas_get_collections bin/test_srb_mdas_auth  bin/test_srb_mdas_dir bin/test_srb_mdas_mod  bin/test_srb_mdas_modc bin/test_srb_mdas_modu bin/test_srb_mdas_create bin/test_srb_mdas_create_ugroup bin/test_srb_mdas_create_user bin/test_srb_mdas_move bin/test_srb_mdas_copy bin/test_srb_mdas_bload bin/test_srb_mdas_create_collection_path bin/test_srb_mdas_modr bin/test_srb_mdas_compound_obj
+-UTILTARGETS = bin/ingestResource bin/ingestLocation bin/ingestUser bin/ingestUsergroup bin/ingestCollection bin/ingestLogicalResource  bin/addLogicalResource bin/modifyUser bin/modifyResource   bin/ingestUserIntoGroup  bin/changeValue bin/deleteValue  bin/ingestToken bin/makeCompoundResource
++UTILTARGETS = bin/ingestResource bin/ingestLocation bin/ingestUser bin/ingestUsergroup bin/ingestCollection bin/ingestLogicalResource  bin/addLogicalResource bin/modifyUser bin/modifyResource   bin/ingestUserIntoGroup  bin/changeValue bin/deleteValue  bin/ingestToken bin/makeCompoundResource bin/modifyShibMapping
+ 
+-OBJTARGETS = bin/ingestToken.o bin/ingestResource.o bin/ingestLocation.o  bin/ingestUser.o bin/ingestUsergroup.o  bin/ingestCollection.o bin/ingestLogicalResource.o  bin/addLogicalResource.o  bin/modifyUser.o bin/modifyResource.o  bin/ingestUserIntoGroup.o bin/mcatUtilLib.o bin/deleteValue.o bin/changeValue.o bin/makeCompoundResource.o
++OBJTARGETS = bin/ingestToken.o bin/ingestResource.o bin/ingestLocation.o  bin/ingestUser.o bin/ingestUsergroup.o  bin/ingestCollection.o bin/ingestLogicalResource.o  bin/addLogicalResource.o  bin/modifyUser.o bin/modifyResource.o  bin/ingestUserIntoGroup.o bin/mcatUtilLib.o bin/deleteValue.o bin/changeValue.o bin/makeCompoundResource.o bin/modifyShibMapping.o
+ 
+ DBMS_LIB+=  -lc
+ 
+@@ -95,6 +95,12 @@
+ bin/modifyUser: bin/modifyUser.o $(MS_OBJS) 
+ 	$(CC) -o bin/modifyUser  bin/modifyUser.o  $(MS_OBJS) $(DBMS_INCLUDE) $(DBMS_LIB)
+  
++bin/modifyShibMapping.o: utilities/modifyShibMapping.c
++	$(CC) -c -o  bin/modifyShibMapping.o utilities/modifyShibMapping.c $(SRB_INCLUDE) 
++ 
++bin/modifyShibMapping: bin/modifyShibMapping.o $(MS_OBJS) 
++	$(CC) -o bin/modifyShibMapping  bin/modifyShibMapping.o  $(MS_OBJS) $(DBMS_INCLUDE) $(DBMS_LIB)
++ 
+ bin/modifyResource.o: utilities/modifyResource.c
+ 	$(CC) -c -o  bin/modifyResource.o utilities/modifyResource.c $(SRB_INCLUDE) 
+  
+diff -ruN old/SRB3_5_0/MCAT/utilities/mcatUtilLib.c new/SRB3_5_0/MCAT/utilities/mcatUtilLib.c
+--- old/SRB3_5_0/MCAT/utilities/mcatUtilLib.c	2004-01-21 11:44:22.000000000 +1000
++++ new/SRB3_5_0/MCAT/utilities/mcatUtilLib.c	2008-01-10 14:35:35.000000000 +1000
+@@ -214,6 +214,11 @@
+   char userName[MAX_TOKEN], domainName[MAX_TOKEN];
+   char *tmpPtr;
+ 
++  char atname[ID_LIMIT][MAX_TOKEN];
++  char atvalue[ID_LIMIT][MAX_TOKEN];
++  int mappings[MAX_TOKEN];
++  int num_mappings;
++	
+ 
+   int idType = 0; /* 0=int, 1 = string */
+   int chkIdCnt = 0;
+@@ -345,7 +350,11 @@
+       strcpy(attrNameDelId[17],"coll_owner");
+       strcpy(tabNameDelId[18],"MDAS_CD_USER");
+       strcpy(attrNameDelId[18],"user_id");
+-      delIdCnt = 19;
++      strcpy(tabNameDelId[19],"MDAS_AU_SHIB_GROUP");
++      strcpy(attrNameDelId[19],"user_id");
++      strcpy(tabNameDelId[20],"MDAS_AU_SHIB_MAPPING_USER");
++      strcpy(attrNameDelId[20],"user_id");
++      delIdCnt = 21;
+       delNameCnt = 0; 
+       break;
+     case USER_GROUP_NAME:
+@@ -383,7 +392,7 @@
+       strcpy(attrNameDelId[9],"user_id");
+       strcpy(tabNameDelId[10],"MDAS_AD_ACCS");
+       strcpy(attrNameDelId[10],"user_id");
+-      strcpy(tabNameDelId[11],"MDAS_GRP_ACCS");
++      strcpy(tabNameDelId[11],"MDAS_AD_GRP_ACCS");
+       strcpy(attrNameDelId[11],"user_id");
+       strcpy(tabNameDelId[12],"MDAS_AD_AUDIT");
+       strcpy(attrNameDelId[12],"user_id");
+@@ -401,7 +410,13 @@
+       strcpy(attrNameDelId[18],"coll_owner");
+       strcpy(tabNameDelId[19],"MDAS_CD_USER");
+       strcpy(attrNameDelId[19],"user_id");
+-      delIdCnt = 20;
++      strcpy(tabNameDelId[20],"MDAS_AU_SHIB_GROUP");
++      strcpy(attrNameDelId[20],"user_id");
++      strcpy(tabNameDelId[21],"MDAS_AU_SHIB_GROUP");
++      strcpy(attrNameDelId[21],"group_user_id");
++      strcpy(tabNameDelId[22],"MDAS_AU_SHIB_MAPPING_USER");
++      strcpy(attrNameDelId[22],"user_id");
++      delIdCnt = 23;
+       delNameCnt = 0; 
+       break;
+     case DOMAIN_NAME:
+@@ -602,6 +617,32 @@
+       return(res);
+     }
+   }
++	if (valueType == USER_GROUP_NAME) {
++		sprintf(sqlq, "SELECT mapping_id FROM %sMDAS_AU_SHIB_MAPPING_GROUP WHERE group_user_id = %i AND mapping_id NOT IN (SELECT mapping_id FROM %sMDAS_AU_SHIB_MAPPING_GROUP WHERE group_user_id != %i)", MDASSCHEMENAME, idInt, MDASSCHEMENAME, idInt);
++		res = get_itype_list_from_query(mappings, &num_mappings, sqlq);
++
++		if (num_mappings != 0) {
++			sprintf(atname[0], "%s", "mapping_id");
++			for (i = 0; i < num_mappings; i++) {
++				sprintf(atvalue[0], "%i", mappings[i]);
++				res = deleteFromTable(atname, atvalue, "MDAS_AU_SHIB_MAPPING_GROUP", 1);	
++				if (res != 0)
++					return MDAS_AU_GROUP_DELETION_ERROR;		
++				res = deleteFromTable(atname, atvalue, "MDAS_AU_SHIB_MAPPING_USER", 1);	
++				if (res != 0)
++					return MDAS_AU_GROUP_DELETION_ERROR;		
++				res = deleteFromTable(atname, atvalue, "MDAS_CD_SHIB_MAPPING", 1);	
++				if (res != 0)
++					return MDAS_AU_GROUP_DELETION_ERROR;					
++			}			
++		} 
++
++		sprintf(atname[0], "%s", "group_user_id");
++		sprintf(atvalue[0], "%i", idInt);
++		res = deleteFromTable(atname, atvalue, "MDAS_AU_SHIB_MAPPING_GROUP", 1);	
++		if (res != 0)
++			return MDAS_AU_GROUP_DELETION_ERROR;				
++  	}
+   return(MDAS_SUCCESS);
+ }
+ 
+diff -ruN old/SRB3_5_0/MCAT/utilities/modifyShibMapping.c new/SRB3_5_0/MCAT/utilities/modifyShibMapping.c
+--- old/SRB3_5_0/MCAT/utilities/modifyShibMapping.c	1970-01-01 10:00:00.000000000 +1000
++++ new/SRB3_5_0/MCAT/utilities/modifyShibMapping.c	2008-01-10 14:35:35.000000000 +1000
+@@ -0,0 +1,104 @@
++/**************************************************************************
++Copyright Notice
++All Rights Reserved
++Please refer to files in COPYRIGHT directory under the SRB software directory 
++for copyright, usage, liability and license information.
++Please read these files before using,modifying or distributing SRB software.
++**************************************************************************/
++
++#include "mdasC_db2_externs.h"
++#include "mdasGlobalsExtern.h"
++#include "mdasPrototypes.h"
++#include "srbC_mdas_externs.h"
++#include "mcatAdmin.h"
++
++extern char *clGetUserName(), *clGetDomainName();
++
++usage(){
++      printf("Usage: modifyShibMapping <operationType> <value1> [<value 2>]\n");
++      printf("OperationType supported are: addToMapping, delFromMapping, delShibMapping\n");
++
++}
++
++main(int argc,
++        char* argv[])
++{  
++  char temp1[MAX_TOKEN];
++  char collname[MAX_TOKEN];
++  int i;
++  char *userName, *domainName;
++  char clErrorMsg[MAX_TOKEN];
++
++  if (argc != 3 && argc != 4)    {
++    usage();
++    exit(-1);
++  }
++
++  userName = clGetUserName(NULL,clErrorMsg);
++  if (userName == NULL) {
++    fprintf (stderr, 
++	     "Unable to get the registrar's userName. Please configure the .MdasEnv file\n");
++    exit(-1);
++  }
++
++  domainName = clGetDomainName(NULL,clErrorMsg);
++  if (domainName == NULL) {
++    fprintf (stderr, 
++	     "Unable to get the registrar's domainName. Please configure the .MdasEnv file\n");
++    exit(-1);
++  }
++  
++  i = open_db2_interaction(MDAS_CATALOG);
++  if (i != 0) {
++    printf("Opening Error:%i\n",i);
++    exit(-1);
++  }
++    
++    ClientUser = (userInfo *) malloc (sizeof (userInfo));
++    ClientUser->privUserFlag = 1;
++  
++  if (!strcmp(argv[1],"addToMapping")) {
++    i =  modify_shib_mapping(0 , userName, domainName, argv[2], argv[3], U_INSERT_SHIB_MAPPING_GROUP);
++    if (i != 0)
++      {
++	printf("modifyShibMapping addToMapping  Error: %i\n",i);
++	close_db2_interaction(MDAS_CAT_ROLLBACK);
++	exit(-1);
++      }
++    close_db2_interaction(MDAS_CAT_COMMIT);
++    exit(0);
++  }
++  else if(!strcmp(argv[1],"delFromMapping")) {
++    i =  modify_shib_mapping(0 , userName, domainName, argv[2], argv[3], U_DELETE_SHIB_MAPPING_GROUP);
++    if (i != 0)
++      {
++	printf("modifyShibMapping delFromMapping Error: %i\n",i);
++	close_db2_interaction(MDAS_CAT_ROLLBACK);
++	exit(-1);
++      }
++    close_db2_interaction(MDAS_CAT_COMMIT);
++    exit(0);
++  } else if (!strcmp(argv[1],"delShibMapping")) {
++    i =  modify_shib_mapping(0 , userName, domainName, argv[2], NULL, U_DELETE_SHIB_MAPPING_GROUPS);
++    if (i != 0)
++      {
++	printf("modifyShibMapping delShibMapping Error: %i\n",i);
++	close_db2_interaction(MDAS_CAT_ROLLBACK);
++	exit(-1);
++      }
++    close_db2_interaction(MDAS_CAT_COMMIT);
++    exit(0);
++  }
++  else {
++    usage();
++    exit(-1);
++    }
++}
++
++
++  
++      
++        
++     
++
++
+diff -ruN old/SRB3_5_0/MCAT/utilities/modifyUser.c new/SRB3_5_0/MCAT/utilities/modifyUser.c
+--- old/SRB3_5_0/MCAT/utilities/modifyUser.c	2004-10-07 08:53:30.000000000 +1000
++++ new/SRB3_5_0/MCAT/utilities/modifyUser.c	2008-01-10 14:35:35.000000000 +1000
+@@ -16,7 +16,7 @@
+ 
+ usage(){
+       printf("Usage: modifyUser  <operationType> <UserName> <UserDomain> <value1> [<value2>]\n");
+-      printf("OperationType supported are: insertAuthMap and changePassword\n");
++      printf("OperationType supported are: insertAuthMap, addToMapping, delFromMapping and changePassword\n");
+ 
+ }
+ main(int argc,
+@@ -89,6 +89,30 @@
+       }
+     close_db2_interaction(MDAS_CAT_COMMIT);
+     exit(0);
++  } else if (!strcmp(argv[1],"addToMapping")) {
++    sprintf(clientUser,"%s@%s",argv[2],argv[3]);
++    i =  modify_user_info(0 , userName, clientUser, argv[4],
++			  U_INSERT_SHIB_MAPPING_USER, userAuth, domainName);
++    if (i != 0)
++      {
++	printf("modifyUser addToMapping Error: %i\n",i);
++	close_db2_interaction(MDAS_CAT_ROLLBACK);
++	exit(-1);
++      }
++    close_db2_interaction(MDAS_CAT_COMMIT);
++    exit(0);
++  } else if (!strcmp(argv[1],"delFromMapping")) {
++    sprintf(clientUser,"%s@%s",argv[2],argv[3]);
++    i =  modify_user_info(0 , userName, clientUser, argv[4],
++			  U_DELETE_SHIB_MAPPING_USER, userAuth, domainName);
++    if (i != 0)
++      {
++	printf("modifyUser delFromMapping Error: %i\n",i);
++	close_db2_interaction(MDAS_CAT_ROLLBACK);
++	exit(-1);
++      }
++    close_db2_interaction(MDAS_CAT_COMMIT);
++    exit(0);
+   }
+   else {
+     usage();
+diff -ruN old/SRB3_5_0/src/back/distrib.c new/SRB3_5_0/src/back/distrib.c
+--- old/SRB3_5_0/src/back/distrib.c	2006-07-06 05:25:01.000000000 +1000
++++ new/SRB3_5_0/src/back/distrib.c	2008-01-10 14:35:35.000000000 +1000
+@@ -2239,3 +2239,55 @@
+     return status;
+ }
+ 
++int
++remoteModifyShibMapping(int catType, char *dataValue1, char *dataValue2, int actionType, struct hostElement *hostTabPtr)
++{
++    int status;
++
++    if (hostTabPtr == NULL) {
++        elog (NOTICE, "remoteModifyShibMapping: Invalid hostTabPtr");
++        return SYS_ERR_HOST_ADDR;
++    }
++
++    if (remoteConnect (hostTabPtr) < 0) {
++        return SYS_ERR_REMOTE_CONN;
++    }
++
++    /* Do a client call to the remote host */
++
++    status = srbModifyShibMapping (hostTabPtr->conn, catType, dataValue1, dataValue2, actionType);
++
++    if (status < 0) {       /* Failure */
++        elog (NOTICE, "remoteModifyShibMapping failed: %s",
++          clErrorMessage(hostTabPtr->conn));
++    }
++
++    return (status);
++}
++
++int
++remoteQueryShibMapping(int catType, char* queryValue, char* queryResult, int queryType, struct hostElement *hostTabPtr) {
++
++    int status;
++
++    if (hostTabPtr == NULL) {
++        elog (NOTICE, "remoteQueryShibMapping: Invalid hostTabPtr");
++        return SYS_ERR_HOST_ADDR;
++    }
++
++    if (remoteConnect (hostTabPtr) < 0) {
++        return SYS_ERR_REMOTE_CONN;
++    }
++
++    /* Do a client call to the remote host */
++
++    status = srbQueryShibMapping (hostTabPtr->conn, catType, queryValue, queryResult, queryType);
++
++    if (status < 0) {       /* Failure */
++        elog (NOTICE, "remoteQueryShibMapping failed: %s",
++          clErrorMessage(hostTabPtr->conn));
++    }
++
++    return (status);
++}
++
+diff -ruN old/SRB3_5_0/src/back/objMcatAdminFunct.c new/SRB3_5_0/src/back/objMcatAdminFunct.c
+--- old/SRB3_5_0/src/back/objMcatAdminFunct.c	2005-09-07 09:53:00.000000000 +1000
++++ new/SRB3_5_0/src/back/objMcatAdminFunct.c	2008-01-10 14:35:35.000000000 +1000
+@@ -258,6 +258,123 @@
+ }
+ 
+ int
++svrModifyShibMapping(int catType, struct varlena *vDataValue1, struct varlena *vDataValue2, int actionType)
++{
++	char *dataValue1;
++	char *dataValue2;
++	int status;
++
++    if (TicketUserFlag) {
++        elog (NOTICE, "Illegal operation for a ticket user");
++        return (ILLEGAL_OPR_TICKET_USER);
++    }
++
++	dataValue1 = varToStr (vDataValue1);
++	dataValue2 = varToStr (vDataValue2);
++
++	status = _svrModifyShibMapping(catType, dataValue1, dataValue2, actionType);
++
++	free(dataValue1);
++	free(dataValue2);
++
++	return status;
++}
++
++int
++_svrModifyShibMapping(int catType, char *dataValue1, char *dataValue2, int actionType)
++{
++    int retVal;
++    int remoteFlag;
++    struct hostElement  *hostTabPtr;
++
++    if (ClientUser->privUserFlag != 1) {
++        elog (NOTICE,"svrModifyShibMapping: User has no privilege for this operation");
++    	return (AUTH_ERR_PROXY_NOPRIV);
++    }
++
++    remoteFlag = getAndConnMcatHost (MASTER_CAT, NULL, &hostTabPtr);
++
++    if (remoteFlag < 0) {
++	retVal = remoteFlag;
++    } else if (remoteFlag == LOCAL_HOST) {      /* Can talk to mdas */
++#ifdef SRB_MDAS
++        retVal = modify_shib_mapping (catType, ClientUser->userName, ClientUser->domainName, dataValue1, dataValue2, actionType);
++		if (retVal == 0)
++            commit_db2_interaction (MDAS_CAT_COMMIT);
++#endif
++    } else {
++        retVal = remoteModifyShibMapping (catType, dataValue1, dataValue2, actionType, hostTabPtr);
++    }
++
++    return retVal;
++}
++
++struct varlena *
++svrQueryShibMapping(int catType, struct varlena *vQueryValue, int queryType) 
++{
++    struct varlena *retval;
++    int status;
++    char *queryValue;
++    char queryResult[MAX_TOKEN];
++
++    if (TicketUserFlag) {
++        elog (NOTICE, "Illegal operation for a ticket user");
++        retval = (struct varlena *)malloc(VAROUTHDRSZ);
++        VARSIZE(retval) = VAROUTHDRSZ;
++        VAROUTSTAT(retval) = htonl (ILLEGAL_OPR_TICKET_USER);
++        return retval;
++    }
++
++    queryValue = varToStr (vQueryValue);
++
++    status = _svrQueryShibMapping(catType, queryValue, queryResult, queryType);
++
++    if (status == 0) {
++		retval = (struct varlena *) malloc(VAROUTHDRSZ + strlen(queryResult));
++		VARSIZE(retval) = VAROUTHDRSZ + strlen(queryResult);
++		VAROUTSTAT(retval) = htonl (status);
++		strcpy(VAROUTDATA(retval), queryResult);
++        free(queryResult);
++    } else {
++    	elog (NOTICE, "svrQueryShibMapping:  failed. Status = %d", status);
++        retval = (struct varlena *)malloc(VAROUTHDRSZ);
++        VARSIZE(retval) = VAROUTHDRSZ;
++        VAROUTSTAT(retval) = htonl (status);
++        if (queryResult != NULL)
++            free(queryResult);
++    }
++
++    return retval;
++}
++
++int 
++_svrQueryShibMapping(int catType, char* queryValue, char* queryResult, int queryType)
++{
++    int retVal;
++    int remoteFlag;
++    struct hostElement  *hostTabPtr;
++
++    if (ClientUser->privUserFlag != 1) {
++        elog (NOTICE,"svrQueryShibMapping: User has no privilege for this operation");
++        return (AUTH_ERR_PROXY_NOPRIV);
++    }
++
++    remoteFlag = getAndConnMcatHost (MASTER_CAT, NULL, &hostTabPtr);
++
++    if (remoteFlag < 0) {
++        retVal = remoteFlag;
++    } else if (remoteFlag == LOCAL_HOST) {      /* Can talk to mdas */
++#ifdef SRB_MDAS
++        retVal = query_shib_mapping (catType, ClientUser->userName, ClientUser->domainName, queryValue, queryResult, queryType);
++#endif
++    } else {
++        retVal = remoteQueryShibMapping (catType, queryValue, queryResult, queryType, hostTabPtr);
++    }
++
++    return retVal;
++}
++
++int
+ svrObjAudit (int catType, struct varlena *vUserName, struct varlena *vObjID,
+ struct varlena *vCollectionName, struct varlena *vDataPath, 
+ struct varlena *vResourceName, struct varlena *vAccessMode, 
+diff -ruN old/SRB3_5_0/src/back/objMcatOprFunct.c new/SRB3_5_0/src/back/objMcatOprFunct.c
+--- old/SRB3_5_0/src/back/objMcatOprFunct.c	2007-05-01 10:54:20.000000000 +1000
++++ new/SRB3_5_0/src/back/objMcatOprFunct.c	2008-01-10 14:35:35.000000000 +1000
+@@ -3413,10 +3413,18 @@
+      &myresult, DEF_NUM_ROWS);
+ 
+     if (status < 0) {
+-        retVal = (struct varlena *)malloc(VAROUTHDRSZ);
+-        VARSIZE(retVal) = VAROUTHDRSZ;
+-        VAROUTSTAT(retVal) = htonl (status);
+-	return (retVal);
++
++		status = runAddUserScript(LocalMcat->serverAuthInfo->shibInfo.dnToUserDomainScript, LocalMcat->serverAuthInfo->shibInfo.addUserScript, LocalMcat->serverAuthInfo->shibInfo.addDomainScript, userDn);
++
++		if(status == 0)
++	    	status = queryDataInfo (catType, NULL, selval, (char (*) [MAX_TOKEN]) qval, &myresult, DEF_NUM_ROWS);
++
++		if(status < 0) {
++        	retVal = (struct varlena *)malloc(VAROUTHDRSZ);
++    	    VARSIZE(retVal) = VAROUTHDRSZ;
++	        VAROUTSTAT(retVal) = htonl (status);
++			return (retVal);
++		}
+     }
+ 
+     userName = (char *)get_from_result_struct(
+diff -ruN old/SRB3_5_0/src/back/srbServer.c new/SRB3_5_0/src/back/srbServer.c
+--- old/SRB3_5_0/src/back/srbServer.c	2006-06-23 04:34:26.000000000 +1000
++++ new/SRB3_5_0/src/back/srbServer.c	2008-01-10 14:35:35.000000000 +1000
+@@ -32,6 +32,7 @@
+     exitSrbServer (srbServerMain(argc, argv));
+ }
+  
++int processCommand (svrComm_t *myComm, int flagQ, char firstchar);
+ /*
+  * srbServerMain - The srbServer main loop.
+  *
+@@ -76,7 +77,8 @@
+     int lsock = -1;
+     int sFlag = 0;
+     struct hostElement  *hostTabPtr;
+-
++    int newUser = 0;
++    int authSchemeInx;
+ 
+ #ifdef INSTRON
+     int myPid = getpid();
+@@ -533,9 +535,16 @@
+         return INIT_IN_PROGRESS;
+     }
+ 
+-    status = procStartupMsg (&myPort, &sp);
++    status = procStartupMsg (&myPort, &sp, 1);
++
++    authSchemeInx = svrGetAuthScheme (CLIENT_MODE);
++    if(status == USER_NAME_NOT_FOUND && (authSchemeInx == GSI_AUTH_INX || authSchemeInx == GSI_SECURE_COMM_INX)) {
++	newUser = 1;
++	status = 0;
++    }
+ 
+     if (status < 0) {
++
+ #ifdef _WIN32
+         elog(FATAL,"srbServerMain: procStartupMsg error, status=%d\n",status);
+ #else
+@@ -559,6 +568,7 @@
+         return INIT_IN_PROGRESS;
+     }
+ 
++
+     status = chkAllowedUser (allowedUserHead, ClientUser->userName,
+      ClientUser->domainName);
+     if (status <= 0) {
+@@ -664,8 +674,12 @@
+ 
+     /* Check the client Authentication */
+ 
+-    status = svrCheckAuth (portFd, getenv ("proxyUserName"), 
+-     getenv ("proxyDomainName"), getenv ("proxyMcatZone"));
++	if(newUser != 1)
++		status = svrCheckAuth (portFd, getenv ("proxyUserName"), getenv ("proxyDomainName"), getenv ("proxyMcatZone"));
++	else {
++		status = addNewUser(portFd, myComm, flagQ);
++    		svrSendStatus (portFd, status);
++	}
+ 
+ #ifdef INSTRON
+ #if defined(PORTNAME_solaris)
+@@ -685,12 +699,444 @@
+ 	exitSrbServer(INIT_IN_PROGRESS);
+     }
+ 
++    getShibInfo(portFd);
++
+     status = recvAndProcCommand (myComm, flagQ);
++
+     exitSrbServer (status);
++
+     return (status);
+ 
+ }
+ 
++int checkExistsAndRunnable(char *script) {
++	struct stat sb;
++
++    if(stat(script, &sb) == -1) {
++        return UNIX_ENOENT;
++    }
++
++    if((sb.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) == 0) {
++        return UNIX_EACCES;
++    }
++
++	return 0;
++}
++
++int runDnToUserDomainScript(char *script, char* dn, char** userName, char** domainName) {
++	int ret;
++	char cmd[MAX_TOKEN];
++	FILE *pipe;
++	char data[MAX_TOKEN * 2];
++	char *tmp;
++
++	ret = checkExistsAndRunnable(script);
++	if(ret == UNIX_ENOENT)
++		return DN_TO_USER_DOMAIN_SCRIPT_NOT_FOUND;
++	if(ret == UNIX_EACCES)
++		return DN_TO_USER_DOMAIN_SCRIPT_NOT_EXECUTABLE;
++
++	sprintf(cmd, "%s '%s'", script, dn);
++
++	pipe = popen(cmd, "r");
++	if(pipe == NULL)
++		return -1;
++
++	fscanf(pipe, "%s", data);
++	pclose(pipe);
++	
++	tmp = strstr(data, "@");
++	if(tmp == NULL)
++		return DN_TO_USER_DOMAIN_SCRIPT_BAD_OUTPUT;
++
++	*tmp = '\0';
++	tmp++;
++
++	*userName = (char*) malloc((strlen(data) + 1) * sizeof(char));
++	strcpy(*userName, data);
++
++	*domainName = (char*) malloc((strlen(tmp) + 1) * sizeof(char));
++	strcpy(*domainName, tmp);
++
++	return ret;
++}
++
++int runAddDomainScript(char *addDomainScript, char* domain) {
++	int ret;
++	char cmd[MAX_TOKEN];
++
++	ret = checkExistsAndRunnable(addDomainScript);
++	if(ret == UNIX_ENOENT)
++		return ADD_DOMAIN_SCRIPT_NOT_FOUND;
++	if(ret == UNIX_EACCES)
++		return ADD_DOMAIN_SCRIPT_NOT_EXECUTABLE;
++	
++	if(ret == 0) {
++		sprintf(cmd, "%s '%s'", addDomainScript, domain);
++		ret = system(cmd);
++	}
++
++	return ret;
++}
++
++int runAddUserScript(char* dnToUserDomainScript, char *addUserScript, char *addDomainScript, char *dn) {
++	int ret;
++	char cmd[MAX_TOKEN];
++	char *user, *domain;
++
++	ret = checkExistsAndRunnable(addUserScript);
++	if(ret == UNIX_ENOENT)
++		return ADD_USER_SCRIPT_NOT_FOUND;
++	if(ret == UNIX_EACCES)
++		return ADD_USER_SCRIPT_NOT_EXECUTABLE;
++
++	ret = runDnToUserDomainScript(dnToUserDomainScript, dn, &user, &domain);
++	if(ret < 0)
++		return ret;
++
++	ret = runAddDomainScript(addDomainScript, domain);
++
++	if(ret >= 0) {
++		sprintf(cmd, "%s '%s' '%s' '%s'", addUserScript, user, domain, dn);
++		ret = system(cmd);
++	}
++
++	free(user);
++	free(domain);
++
++	return ret;
++}
++
++int runAddUserScriptWithCheck(char* dnToUserDomainScript, char *addUserScript, char *addDomainScript, char* dn, char *userName, char *domainName) {
++	int ret;
++	char cmd[MAX_TOKEN];
++	char *user, *domain;
++
++	ret = checkExistsAndRunnable(addUserScript);
++	if(ret == UNIX_ENOENT)
++		return ADD_USER_SCRIPT_NOT_FOUND;
++	if(ret == UNIX_EACCES)
++		return ADD_USER_SCRIPT_NOT_EXECUTABLE;
++
++	ret = runDnToUserDomainScript(dnToUserDomainScript, dn, &user, &domain);
++	if(ret < 0)
++		return ret;
++
++	if(strcmp(user, userName) != 0 && strcmp(domain, domainName) != 0)
++		ret = ADD_USER_SCRIPT_USER_AND_DOMAIN_MISMATCH;
++	else if(strcmp(user, userName) != 0)
++		ret = ADD_USER_SCRIPT_USER_MISMATCH;
++	else if(strcmp(domain, domainName) != 0) 
++		ret = ADD_USER_SCRIPT_DOMAIN_MISMATCH;
++
++	if(ret >= 0)
++		ret = runAddDomainScript(addDomainScript, domain);
++
++	if(ret >= 0) {
++		sprintf(cmd, "%s '%s' '%s' '%s'", addUserScript, user, domain, dn);
++		ret = system(cmd);
++	}
++
++	free(user);
++	free(domain);
++
++	return ret;
++}
++
++int runAddGroupScript(char *script, char *groupName, char *userName) {
++	int ret;
++	char cmd[MAX_TOKEN];
++
++	ret = checkExistsAndRunnable(script);
++	if(ret == UNIX_ENOENT)
++		return ADD_GROUP_SCRIPT_NOT_FOUND;
++	if(ret == UNIX_EACCES)
++		return ADD_GROUP_SCRIPT_NOT_EXECUTABLE;
++	
++	if(ret == 0) {
++		sprintf(cmd, "%s '%s' '%s'", script, groupName, userName);
++		ret = system(cmd);
++	}
++
++	return ret;
++}
++
++int addNewUser(int sock) {
++	int status;
++	char *myHost, *myPort, *clientDn;
++	struct hostElement *hostTabPtr;
++
++	myHost = malloc (MAX_TOKEN);
++	if (myHost == NULL) {
++		elog (NOTICE, "initSrbHost: malloc error");
++		return UNIX_ENOMEM;
++	}
++    
++	if ((status = gethostname (myHost, MAX_TOKEN)) != 0) {
++        	elog (NOTICE, "initSrbHost: gethostname error"); 
++		free(myHost);
++		return status;
++	}
++    
++#ifdef STK_SERVER
++	myPort = getenv("stkPort");
++#else
++	myPort = getenv("srbPort");
++#endif
++
++	status = chkHost(myHost, myPort, &hostTabPtr);
++	free(myHost);
++
++	if(hostTabPtr->serverAuthInfo->shibInfo.dnToUserDomainScript == NULL)
++		return (DN_TO_USER_DOMAIN_SCRIPT_NO_ENTRY);
++	if(hostTabPtr->serverAuthInfo->shibInfo.addUserScript == NULL)
++		return (ADD_USER_SCRIPT_NO_ENTRY);
++	if(hostTabPtr->serverAuthInfo->shibInfo.addDomainScript == NULL)
++		return (ADD_DOMAIN_SCRIPT_NO_ENTRY);
++
++	status = getClientDn(sock, &clientDn);
++	if(status != 0 || clientDn == NULL) {
++		if(clientDn != NULL)
++			free(clientDn);
++		return status;
++	}
++	status = runAddUserScriptWithCheck(hostTabPtr->serverAuthInfo->shibInfo.dnToUserDomainScript, hostTabPtr->serverAuthInfo->shibInfo.addUserScript, hostTabPtr->serverAuthInfo->shibInfo.addDomainScript, clientDn, ClientUser->userName, ClientUser->domainName);
++	if(status != 0) {
++		if(clientDn != NULL)
++			free(clientDn);
++		return status;
++	}
++	status = checkClientDnInMcat(sock, ClientUser->userName, ClientUser->domainName, clientDn);	
++	if(status != 0) {
++		if(clientDn != NULL)
++			free(clientDn);
++		return (ADD_USER_SCRIPT_DID_NOT_ADD_USER);
++	}
++	if(clientDn != NULL)
++		free(clientDn);
++
++	return status;
++}
++
++int getShibInfo(int sock) {
++	int status;
++	char *myHost, *myPort, *clientDn;
++	struct hostElement *hostTabPtr;
++	char *data;
++
++	myHost = malloc (MAX_TOKEN);
++	if (myHost == NULL) {
++		elog (NOTICE, "initSrbHost: malloc error");
++		return UNIX_ENOMEM;
++	}
++    
++	if ((status = gethostname (myHost, MAX_TOKEN)) != 0) {
++        	elog (NOTICE, "initSrbHost: gethostname error"); 
++		free(myHost);
++		return status;
++	}
++    
++#ifdef STK_SERVER
++	myPort = getenv("stkPort");
++#else
++	myPort = getenv("srbPort");
++#endif
++
++	status = chkHost(myHost, myPort, &hostTabPtr);
++	free(myHost);
++
++	if(status < 0) {
++		fprintf(stderr, "Unable to obtain host data structure for this host\n");
++		return status;
++	}
++
++	status = deleteOldShibGroups(MASTER_CAT, ClientUser->userName, ClientUser->domainName);
++	if(status < 0) {
++		fprintf(stderr, "Unable to delete old shibboleth groups\n");
++		return status;
++	}
++
++	if(hostTabPtr->serverAuthInfo->shibInfo.shibCertOid != NULL && hostTabPtr->serverAuthInfo->shibInfo.shibGroupSeparator != NULL) {
++		status = getShibGroupString(sock, hostTabPtr->serverAuthInfo->shibInfo.shibCertOid, &data);
++		if(status < 0) {
++			fprintf(stderr, "Unable to get data for new shibboleth groups\n");
++			return status;
++		}
++		if(data != NULL) {
++			status = addNewShibGroups(MASTER_CAT, ClientUser->userName, ClientUser->domainName, data, hostTabPtr->serverAuthInfo->shibInfo.shibGroupSeparator, hostTabPtr->serverAuthInfo->shibInfo.addGroupScript);
++			free(data);
++			if(status < 0) {
++				fprintf(stderr, "Unable to add new shibboleth groups\n");
++				return status;
++			}
++		} else {
++			fprintf(stderr, "No groupString found in certificate\n");
++		}
++	}
++
++	return status;
++}
++
++int deleteOldShibGroups(int catType, char *userName, char* domainName) {
++	char tmp[MAX_TOKEN], result[MAX_TOKEN];
++	char* scan;
++	char* name;
++	int remoteFlag, status, oldPriv;
++	struct hostElement *hostTabPtr;
++
++	//result = (char*) malloc(MAX_TOKEN * sizeof(char));
++
++	remoteFlag = getAndConnMcatHost(MASTER_CAT, NULL, &hostTabPtr);
++	if(remoteFlag < 0) {
++		status = remoteFlag;
++	} else if(remoteFlag == LOCAL_HOST) {
++		status = query_shib_mapping(catType, ClientUser->userName, ClientUser->domainName, userName, result, U_QUERY_SHIB_MAPPINGS_FROM_USER);
++	} else {
++		status = remoteQueryShibMapping(catType, userName, result, U_QUERY_SHIB_MAPPINGS_FROM_USER, hostTabPtr);
++	}
++
++	if(status >= 0 && strlen(result) > 0) {
++		name = (char*) malloc((strlen(userName) + strlen(domainName) + 2) * sizeof(char));
++
++		scan = result;
++		
++		//DEBUG INFO only
++		fprintf(stderr, "Deleting old shib mappings for user %s - ", userName);
++
++		while(sscanf(scan, "%s\n", tmp) != EOF) {
++			//DEBUG INFO only
++			fprintf(stderr, "%s ", tmp);
++		
++			oldPriv = ClientUser->privUserFlag;
++			ClientUser->privUserFlag = 1;
++			sprintf(name, "%s@%s", userName, domainName);
++
++			if(remoteFlag == LOCAL_HOST) {
++				modify_user_info(catType, ClientUser->userName, name, tmp, U_DELETE_SHIB_MAPPING_USER, ClientUser->userAuth, ClientUser->domainName);
++			} else {
++				srbModifyUser(hostTabPtr->conn, catType, name, tmp, U_DELETE_SHIB_MAPPING_USER);
++			}		
++
++			ClientUser->privUserFlag = oldPriv;
++
++			scan += strlen(tmp) + 1;
++		}
++
++		//DEBUG INFO only
++		fprintf(stderr, "\n");
++
++		free(name);
++	}
++
++	//free(result);
++
++	return status;
++}
++
++int addNewShibGroups(int catType, char* userName, char* domainName, char* data, char* groupSeparator, char *addGroupScript) {
++	char tmp[MAX_TOKEN], result[MAX_TOKEN];
++	char *scan, *next;
++	int gsLen = strlen(groupSeparator);
++	char* name;
++	int status, remoteFlag, oldPriv;
++	struct hostElement *hostTabPtr;
++
++	if(addGroupScript == NULL)
++		return ADD_GROUP_SCRIPT_NO_ENTRY;
++
++	remoteFlag = getAndConnMcatHost(MASTER_CAT, NULL, &hostTabPtr);
++	if(remoteFlag < 0)
++		return remoteFlag;
++
++	name = (char*) malloc((strlen(userName) + strlen(domainName) + 2) * sizeof(char));
++
++	//result = (char*) malloc(MAX_TOKEN * sizeof(char));
++
++	//DEBUG INFO only
++	fprintf(stderr, "Adding new shib mappings for user %s - ", userName);
++
++	scan = data;
++	while(*scan != '\0') {
++		if(strncmp(scan, groupSeparator, gsLen) == 0)
++			scan += gsLen;
++		else {
++			next = strstr(scan, groupSeparator);
++			if(next != NULL) {
++				strncpy(tmp, scan, next - scan);
++				tmp[next - scan] = '\0';
++			} else {
++				strcpy(tmp, scan);
++			}
++
++			//DEBUG INFO ONLY
++			fprintf(stderr, "%s ", tmp);			
++			
++			oldPriv = ClientUser->privUserFlag;
++			ClientUser->privUserFlag = 1;
++			sprintf(name, "%s@%s", userName, domainName);
++		
++			result[0] = 0;
++
++			if(remoteFlag == LOCAL_HOST) {
++				status = query_shib_mapping(catType, ClientUser->userName, ClientUser->domainName, tmp, result, U_QUERY_GROUPS_FROM_SHIB_MAPPING);
++				if(status != 0 || strlen(result) == 0) {
++						status = runAddGroupScript(addGroupScript, tmp, userName);
++						if(status == 0)	{
++							status = query_shib_mapping(catType, ClientUser->userName, ClientUser->domainName, tmp, result, U_QUERY_GROUPS_FROM_SHIB_MAPPING);
++							if(status != 0 || strlen(result) == 0) {
++								fprintf(stderr, "The group %s was not found after the addGroupScript %s was run\n", tmp, addGroupScript);
++								//free(result);
++								free(name);
++								return ADD_GROUP_SCRIPT_DID_NOT_ADD_GROUP;
++							}
++						} else {
++							fprintf(stderr, "Error running addGroupScript %s: %d\n", addGroupScript, status);
++							//free(result);
++							free(name);
++							return status;
++						}
++				} 
++				if(status == 0 && strlen(result) != 0)
++					modify_user_info(catType, ClientUser->userName, name, tmp, U_INSERT_SHIB_MAPPING_USER, ClientUser->userAuth, ClientUser->domainName);
++			} else {
++				status = remoteQueryShibMapping(catType, tmp, result, U_QUERY_GROUPS_FROM_SHIB_MAPPING, hostTabPtr);
++				if(status != 0 || strlen(result) == 0) {
++						status = runAddGroupScript(addGroupScript, tmp, userName);
++						if(status != 0)	{
++							status = remoteQueryShibMapping(catType, tmp, result, U_QUERY_GROUPS_FROM_SHIB_MAPPING, hostTabPtr);
++							if(status != 0 || strlen(result) == 0) {
++								fprintf(stderr, "The group %s was not found after the addGroupScript %s was run\n", tmp, addGroupScript);
++								//free(result);
++								free(name);
++								return ADD_GROUP_SCRIPT_DID_NOT_ADD_GROUP;
++							}
++						} else {
++							fprintf(stderr, "Error running addGroupScript %s: %d\n", addGroupScript, status);
++							//free(result);
++							free(name);
++							return status;
++						}
++				} 
++				if(status == 0 && strlen(result) != 0)
++					srbModifyUser(hostTabPtr->conn, catType, name, tmp, U_INSERT_SHIB_MAPPING_USER);
++			}		
++
++			ClientUser->privUserFlag = oldPriv;
++
++			if(next == NULL)
++				break;
++			scan = next + gsLen;
++		}
++	}
++
++	//DEBUG INFO only
++	fprintf(stderr, "\n");
++
++//	free(result);
++	free(name);
++	return MDAS_SUCCESS;
++}
++
+ /*
+  *  receiveCommand - srbServer command processing loop 
+  */
+diff -ruN old/SRB3_5_0/src/back/srbServerMisc.c new/SRB3_5_0/src/back/srbServerMisc.c
+--- old/SRB3_5_0/src/back/srbServerMisc.c	2006-03-25 04:22:48.000000000 +1000
++++ new/SRB3_5_0/src/back/srbServerMisc.c	2008-01-10 14:35:35.000000000 +1000
+@@ -1402,7 +1402,7 @@
+ }
+ 
+ int
+-procStartupMsg (Port *myPort, StartupInfo *sp)
++procStartupMsg (Port *myPort, StartupInfo *sp, int allowNewUser)
+ {
+     PacketBuf *p;
+     char *tmp;
+@@ -1412,7 +1412,7 @@
+     int privUserFlag;   /* proxy user is a privileged user ? */
+     int clPrivUserFlag;   /* client user is a privileged user ? */
+     int authSchemeInx;
+-
++    int newUser = 0;
+ 
+     p = &myPort->buf;
+ 
+@@ -1501,7 +1501,10 @@
+ 	     "_svrGetMcatZone error for %s@%s, stat=%d, pid=%d\n",
+              sp->proxyUserName, sp->proxyDomainName, status, getpid ());
+ 	    if (status == MCAT_INQUIRE_ERROR)
+-		return (USER_NAME_NOT_FOUND);
++		    if(allowNewUser != 1)			
++			return (USER_NAME_NOT_FOUND);
++		    else
++			newUser = 1;
+ 	    else
+                 return (status);
+         }
+@@ -1519,7 +1522,10 @@
+ 		 "_svrGetMcatZone error for %s@%s, stat=%d, pid=%d\n",
+                  sp->clientUserName, sp->clientDomainName, status, getpid ());
+                 if (status == MCAT_INQUIRE_ERROR)
+-                    return (USER_NAME_NOT_FOUND);
++		    if(allowNewUser != 1)			
++	            	return (USER_NAME_NOT_FOUND);
++		    else
++			newUser = 1;
+                 else
+                     return (status);
+             }
+@@ -1660,6 +1666,9 @@
+ 
+     ClientUser->privUserFlag = atoi (getenv (CLIENT_PRIV_KEYWORD));
+ 
++    if(allowNewUser == 1 && newUser == 1)
++    	return (USER_NAME_NOT_FOUND);
++
+     return (0);
+ }
+ 
+diff -ruN old/SRB3_5_0/src/catalog/include/mdasPrototypes.h new/SRB3_5_0/src/catalog/include/mdasPrototypes.h
+--- old/SRB3_5_0/src/catalog/include/mdasPrototypes.h	2006-01-28 13:10:36.000000000 +1000
++++ new/SRB3_5_0/src/catalog/include/mdasPrototypes.h	2008-01-10 14:35:35.000000000 +1000
+@@ -567,6 +567,8 @@
+                          int retraction_type, char *registrar_password,
+                             char *registrar_domain_name);
+ 
++extern int modify_shib_mapping(int cat_type, char *user_name, char *domain_name, char *data_value_1, char *data_value_2, int action_type);
++
+ extern int commit_db2_interaction(int  transaction_end_code);
+ 
+ extern int close_db2_interaction(int transaction_end_code);
+@@ -1104,8 +1106,9 @@
+ int changeAttrValueSet(char atname[][MAX_TOKEN],char atval[][MAX_DATA_SIZE], char *tabname, int atcount, int setCount);
+ int changeAttrValue(char atname[][MAX_TOKEN],char atval[][MAX_DATA_SIZE], char *tabname, int atcount);
+ int
+-get_2itype_list_from_query(int cval[], int cval2[], int *colcount,
+-                      char *sqlq);
++get_2itype_list_from_query(int cval[], int cval2[], int *colcount, char *sqlq);
++int
++get_itype_list_from_query(int cval[], int *colcount, char *sqlq);
+ int
+ deleteFromTableWithAllDataAccessCheck(char atname[][MAX_TOKEN],char atval[][MAX_DATA_SIZE], char *tabname, int atcount, int accsId, int userId);
+ int
+diff -ruN old/SRB3_5_0/src/catalog/include/srbC_mdas_externs.h new/SRB3_5_0/src/catalog/include/srbC_mdas_externs.h
+--- old/SRB3_5_0/src/catalog/include/srbC_mdas_externs.h	2007-05-03 04:51:20.000000000 +1000
++++ new/SRB3_5_0/src/catalog/include/srbC_mdas_externs.h	2008-01-10 14:35:35.000000000 +1000
+@@ -238,6 +238,15 @@
+ #define R_RENAME                                     214
+ #define R_ADJUST_LOCK                                215
+ #define R_CHANGE_LOCATION                            216
++#define U_INSERT_SHIB_MAPPING_USER                   217
++#define U_DELETE_SHIB_MAPPING_USER                   218
++#define U_INSERT_SHIB_MAPPING_GROUP                  219
++#define U_DELETE_SHIB_MAPPING_GROUP                  220
++#define U_DELETE_SHIB_MAPPING_GROUPS                 221
++#define U_QUERY_GROUPS_FROM_SHIB_MAPPING             222
++#define U_QUERY_SHIB_MAPPINGS_FROM_GROUP             223
++#define U_QUERY_USERS_FROM_SHIB_MAPPING              224
++#define U_QUERY_SHIB_MAPPINGS_FROM_USER              225
+ 
+ /* curator actions should have an equivalent in non-curator action!!! */
+ #define CURATOR_ACTION_TYPE_MIN                      3000
+diff -ruN old/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library3.c new/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library3.c
+--- old/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library3.c	2007-08-01 09:06:05.000000000 +1000
++++ new/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library3.c	2008-01-10 14:35:35.000000000 +1000
+@@ -2103,7 +2103,11 @@
+       strcpy(attrNameDelId[16],"user_id");
+       strcpy(tabNameDelId[17],"MDAS_CD_USER");
+       strcpy(attrNameDelId[17],"user_id");
+-      delIdCnt = 18;
++      strcpy(tabNameDelId[18],"MDAS_AU_SHIB_GROUP");
++      strcpy(attrNameDelId[18],"user_id");
++	  strcpy(tabNameDelId[19],"MDAS_AU_SHIB_MAPPING_USER");
++	  strcpy(attrNameDelId[19], "user_id");
++      delIdCnt = 20;
+       delNameCnt = 0; 
+ 
+ 
+@@ -2301,7 +2305,11 @@
+       strcpy(attrNameDelId[16],"user_id");
+       strcpy(tabNameDelId[17],"MDAS_CD_USER");
+       strcpy(attrNameDelId[17],"user_id");
+-      delIdCnt = 18;
++      strcpy(tabNameDelId[18],"MDAS_AU_SHIB_GROUP");
++      strcpy(attrNameDelId[18],"user_id");
++	  strcpy(tabNameDelId[19],"MDAS_AU_SHIB_MAPPING_USER");
++	  strcpy(attrNameDelId[19], "user_id");
++      delIdCnt = 20;
+       delNameCnt = 0; 
+ 
+ 
+diff -ruN old/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library.c new/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library.c
+--- old/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library.c	2007-10-10 05:15:12.000000000 +1000
++++ new/SRB3_5_0/src/catalog/mdas-srb/srbC_mdas_library.c	2008-01-10 14:43:01.000000000 +1000
+@@ -9980,7 +9980,93 @@
+ 
+ }		 
+ 
++int insert_shib_group(int user_id, int group_user_id) {
++	int i;
+ 
++	strcpy(reg_action_name,"insert shib group");
++	if (group_user_id < 0) { return (USER_GROUP_NOT_IN_CAT);}
++
++	sprintf(sqlq,"select * from  %sMDAS_AU_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,user_id,group_user_id);
++	if (check_exists(sqlq) != 0) {
++		// no regular mapping exists
++
++		sprintf(atname[0],"user_id");
++		sprintf(atname[1],"group_user_id");
++		sprintf(atval[0],"%i",user_id);
++		sprintf(atval[1],"%i",group_user_id);
++		i = insertIntoTable(atname, atval,"MDAS_AU_GROUP",2);
++		if (i != 0) 
++			return (MDAS_AU_GROUP_INSERTION_ERROR);
++
++		sprintf(atname[0],"user_id");
++		sprintf(atname[1],"group_user_id");
++		sprintf(atname[2],"ref_count");
++		sprintf(atval[0],"%i",user_id);
++		sprintf(atval[1],"%i",group_user_id);
++		sprintf(atval[2],"%i",1);
++		i = insertIntoTable(atname, atval,"MDAS_AU_SHIB_GROUP", 3);
++		if (i != 0) 
++			return (MDAS_AU_GROUP_INSERTION_ERROR);
++
++	} else { 
++		sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,user_id,group_user_id);
++		if (check_exists(sqlq) == 0)
++			// shib mapping exists, regular mapping may or may not exist
++			return (MDAS_SUCCESS);
++
++		// regular mapping exists
++		sprintf(atname[0],"user_id");
++		sprintf(atname[1],"group_user_id");
++		sprintf(atname[2],"ref_count");
++		sprintf(atval[0],"%i",user_id);
++		sprintf(atval[1],"%i",group_user_id);
++		sprintf(atval[2],"%i",2);
++		i = insertIntoTable(atname, atval,"MDAS_AU_SHIB_GROUP", 3);
++		if (i != 0) 
++			return (MDAS_AU_GROUP_INSERTION_ERROR);
++
++	}
++	return (MDAS_SUCCESS);
++}
++
++int delete_shib_group(int user_id, int group_user_id) {
++	int i;
++
++	strcpy(reg_action_name,"delete shib group");
++
++	sprintf(sqlq,"select * from  %sMDAS_AU_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,user_id,group_user_id);
++	if (check_exists(sqlq) != 0) 
++		// no regular mapping exists
++		return(MDAS_SUCCESS);
++
++	sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,user_id,group_user_id);
++	if (check_exists(sqlq) != 0)  
++		// no shib mapping exists
++		return(MDAS_SUCCESS);
++	
++	sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i and ref_count = 2", MDASSCHEMENAME,user_id,group_user_id);
++	if (check_exists(sqlq) != 0) {
++		// shib mapping exists
++		sprintf(atname[0],"user_id");
++		sprintf(atname[1],"group_user_id");
++		sprintf(atval[0],"%i",user_id);
++		sprintf(atval[1],"%i",group_user_id);
++		i = deleteFromTable(atname, atval,"MDAS_AU_GROUP",2);
++		if (i != 0) 
++			return (MDAS_AU_GROUP_DELETION_ERROR);
++	} 
++
++	// shib mapping exists, regular mapping may or may not exist
++	sprintf(atname[0],"user_id");
++	sprintf(atname[1],"group_user_id");
++	sprintf(atval[0],"%i",user_id);
++	sprintf(atval[1],"%i",group_user_id);
++	i = deleteFromTable(atname, atval,"MDAS_AU_SHIB_GROUP",2);
++	if (i != 0) 
++		return (MDAS_AU_GROUP_DELETION_ERROR);
++
++	return(MDAS_SUCCESS);
++}
+ 
+ int modify_user_info(int cat_type, char *obj_user_name,
+ 			 char *data_value_1, char *data_value_2,
+@@ -9988,7 +10074,7 @@
+ 		     char *user_domain_name)
+ { 
+ 
+-  int    replication_num, i;
++  int    replication_num, i, j;
+   int    obj_user_id, obj_action_id;
+   char  *newUserDomain, *newUserName, *distinName;
+   char tmpStr[MAX_TOKEN];
+@@ -9999,6 +10085,8 @@
+   int mdata_maxnum;
+   char udmdName[MAX_TOKEN];
+   char data_value_encoded[MAX_TOKEN];
++  int groups[MAX_TOKEN];
++  int num_groups;
+ 
+ 
+   newUserName = obj_user_name;
+@@ -10041,6 +10129,13 @@
+ #endif
+ 	if (intval < 0) { return (USER_GROUP_NOT_IN_CAT);}
+       }
++	
++	if (retraction_type == U_INSERT_SHIB_MAPPING_USER || retraction_type == U_DELETE_SHIB_MAPPING_USER ) {
++		sprintf(sqlq, "SELECT MDAS_CD_SHIB_MAPPING.mapping_id from MDAS_CD_SHIB_MAPPING WHERE MDAS_CD_SHIB_MAPPING.mapping_name = '%s'", data_value_2);
++		intval = get_itype_value_from_query(sqlq);
++		if (intval < 0)
++			return (USER_GROUP_NOT_IN_CAT);
++	}
+       if (isUserDomainAdminFlag == 1  && intval > 0  )
+ 	i = 0;
+       else {
+@@ -10183,41 +10278,131 @@
+ 			 if (i != 0) return (MDAS_AU_DOMN_INSERTION_ERROR);
+ 
+ 			 break;
+-     case U_DELETE_GROUP:
+-                         strcpy(reg_action_name,"delete group");
+-                         sprintf(atname[0],"user_id");
+-			 sprintf(atname[1],"group_user_id");
+-			 sprintf(atval[0],"%i",obj_user_id);
+-			 sprintf(atval[1],"%i",intval);
+-                         i = deleteFromTable(atname, atval,"MDAS_AU_GROUP",2);
+-			 if (i != 0) return (MDAS_AU_GROUP_DELETION_ERROR);
+ 
+-			 break;
+-    case U_INSERT_GROUP:
+-                         strcpy(reg_action_name,"insert group");
+-			 if (intval < 0) { return (USER_GROUP_NOT_IN_CAT);}
+-#ifdef NONBINDSQL
+-			 sprintf(sqlq,"select * from  %sMDAS_AU_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,obj_user_id,intval);
+-#endif /*NONBINDSQL */
+-#ifdef BINDSQL
+-			 sprintf(sqlq,"select * from  %sMDAS_AU_GROUP where user_id = %s and group_user_id = %s", MDASSCHEMENAME,BINPARDEF[spn+0], BINPARDEF[spn+1]);
++   case U_INSERT_GROUP:
++       strcpy(reg_action_name,"insert group");
++       if (intval < 0)
++           return (USER_GROUP_NOT_IN_CAT);
++
++       sprintf(sqlq,"select * from  %sMDAS_AU_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,obj_user_id,intval);
++       if (check_exists(sqlq) != 0) {
++           // no regular mapping exists
++
++           sprintf(atname[0],"user_id");
++           sprintf(atname[1],"group_user_id");
++           sprintf(atval[0],"%i",obj_user_id);
++           sprintf(atval[1],"%i",intval);
++           i = insertIntoTable(atname, atval,"MDAS_AU_GROUP",2);
++           if (i != 0) 
++               return (MDAS_AU_GROUP_INSERTION_ERROR);
++
++       } else { 
++           sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,obj_user_id,intval);
++           if (check_exists(sqlq) != 0) 
++               // regular mapping and no shib mapping exist
++               return(USER_IN_GROUP_ALREADY_IN_CAT);
++
++           sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i and ref_count = 2", MDASSCHEMENAME,obj_user_id,intval);
++           if (check_exists(sqlq) == 0)
++               // regular mapping and shib mapping exist
++               return(USER_IN_GROUP_ALREADY_IN_CAT);
++
++           //shib mapping exists
++           sprintf(atname[0],"ref_count");
++           sprintf(atname[1],"user_id");
++           sprintf(atname[2],"group_user_id");
++           sprintf(atval[0],"%i",2);
++           sprintf(atval[1],"%i",obj_user_id);
++           sprintf(atval[2],"%i",intval);
++           i = changeAttrValue(atname, atval,"MDAS_AU_SHIB_GROUP", 3);
++           if (i != 0) 
++               return (MDAS_AU_INFO_UPDATE_ERROR);
++       }
++       break;
++   case U_INSERT_SHIB_MAPPING_USER:
++       sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER WHERE user_id = %i AND mapping_id = %i", MDASSCHEMENAME, obj_user_id, intval);
++       if(check_exists(sqlq) == 0)
++           return(USER_IN_SHIB_MAPPING_ALREADY);
++
++       sprintf(sqlq, "SELECT group_user_id FROM %sMDAS_AU_SHIB_MAPPING_GROUP WHERE mapping_id = %i AND group_user_id NOT IN (SELECT t1.group_user_id FROM %sMDAS_AU_SHIB_MAPPING_GROUP t1, %sMDAS_AU_SHIB_MAPPING_USER t2 WHERE t2.user_id = %i AND t1.mapping_id = t2.mapping_id AND t2.mapping_id != %i)", MDASSCHEMENAME, intval, MDASSCHEMENAME, MDASSCHEMENAME, obj_user_id, intval);
++       i = get_itype_list_from_query(groups, &num_groups, sqlq);
++       if (i == 0) {
++           for(i = 0; i < num_groups; i++) {
++               j = insert_shib_group(obj_user_id, groups[i]);
++               if (j != MDAS_SUCCESS)
++                   return j;
++           }
++       }
+ 
+-    spn=0;
+-    sprintf(sqlParValArray[spn],SQL_INT_FMT,obj_user_id);
+-    strcpy(sqlParTypArray[spn++],SQL_INT_TYPE);
+-    sprintf(sqlParValArray[spn],SQL_INT_FMT,intval);
+-    strcpy(sqlParTypArray[spn++],SQL_INT_TYPE);
+-#endif /*BINDSQL */
+-			 if (check_exists(sqlq) == 0) 
+-			   return(USER_IN_GROUP_ALREADY_IN_CAT);
+-                         sprintf(atname[0],"user_id");
+-			 sprintf(atname[1],"group_user_id");
+-			 sprintf(atval[0],"%i",obj_user_id);
+-			 sprintf(atval[1],"%i",intval);
+-                         i = insertIntoTable(atname, atval,"MDAS_AU_GROUP",2);
+-			 if (i != 0) return (MDAS_AU_GROUP_INSERTION_ERROR);
++       sprintf(atname[0], "mapping_id");
++       sprintf(atname[1], "user_id");
++       sprintf(atval[0], "%i", intval);
++       sprintf(atval[1], "%i", obj_user_id);
++       i = insertIntoTable(atname, atval, "MDAS_AU_SHIB_MAPPING_USER", 2);
++       if (i != 0)
++           return (MDAS_AU_GROUP_INSERTION_ERROR);
++       break;
++   case U_DELETE_GROUP:
++       strcpy(reg_action_name,"delete group");
++       
++       sprintf(sqlq,"select * from  %sMDAS_AU_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,obj_user_id,intval);
++       if (check_exists(sqlq) != 0) 
++           // no regular mapping exists
++           break;
++       
++       sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i", MDASSCHEMENAME,obj_user_id,intval);
++       if (check_exists(sqlq) != 0)  {
++           // regular mapping and no shib mapping exists
++           sprintf(atname[0],"user_id");
++           sprintf(atname[1],"group_user_id");
++           sprintf(atval[0],"%i",obj_user_id);
++           sprintf(atval[1],"%i",intval);
++           i = deleteFromTable(atname, atval,"MDAS_AU_GROUP",2);
++           if (i != 0) 
++               return (MDAS_AU_GROUP_DELETION_ERROR);
++
++       } else {
++           sprintf(sqlq,"select * from  %sMDAS_AU_SHIB_GROUP where user_id = %i and group_user_id = %i and ref_count = 2", MDASSCHEMENAME,obj_user_id,intval);
++           if (check_exists(sqlq) != 0)
++               // shib mapping exists
++               break;
++
++           // regular mapping and shib mapping exists                  
++           sprintf(atname[0],"ref_count");
++           sprintf(atname[1],"user_id");
++           sprintf(atname[2],"group_user_id");
++           sprintf(atval[0],"%i",1);
++           sprintf(atval[1],"%i",obj_user_id);
++           sprintf(atval[2],"%i",intval);
++           i = changeAttrValue(atname, atval,"MDAS_AU_SHIB_GROUP", 3);
++           if (i != 0) 
++               return (MDAS_AU_INFO_UPDATE_ERROR);             
++       }
++       break;
++    case U_DELETE_SHIB_MAPPING_USER:
++        sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER WHERE user_id = %i AND mapping_id = %i", MDASSCHEMENAME, obj_user_id, intval);
++        if(check_exists(sqlq) != 0)
++            break;
++
++        sprintf(sqlq, "SELECT group_user_id FROM %sMDAS_AU_SHIB_MAPPING_GROUP WHERE mapping_id = %i AND group_user_id NOT IN (SELECT t1.group_user_id FROM %sMDAS_AU_SHIB_MAPPING_GROUP t1, %sMDAS_AU_SHIB_MAPPING_USER t2 WHERE t2.user_id = %i AND t2.mapping_id = t1.mapping_id AND t2.mapping_id != %i)", MDASSCHEMENAME, intval, MDASSCHEMENAME, MDASSCHEMENAME, obj_user_id, intval);
++        i = get_itype_list_from_query(groups, &num_groups, sqlq);
++        if (i == 0) {
++            for (i = 0; i < num_groups; i++) {
++                j = delete_shib_group(obj_user_id, groups[i]);
++               if (j != MDAS_SUCCESS)
++                   return j;
++           }
++        }
++
++        sprintf(atname[0], "mapping_id");
++        sprintf(atname[1], "user_id");
++        sprintf(atval[0], "%i", intval);
++        sprintf(atval[1], "%i", obj_user_id);
++        i = deleteFromTable(atname, atval, "MDAS_AU_SHIB_MAPPING_USER", 2);
++        if (i != 0)
++            return (MDAS_AU_GROUP_DELETION_ERROR);
+ 
+-			 break;
++       break;
+     case U_UPDATE_ADDRESS:
+                          sprintf(atname[0],"user_address");
+                          sprintf(atname[1],"user_id");
+@@ -10433,6 +10618,277 @@
+ }	
+ 
+ int
++query_domain_exists(int cat_type, char *domainName, char *parentName) {
++	char parentId[MAX_TOKEN];
++
++	sprintf(sqlq, "SELECT t1.domain_id FROM %SMDAS_TD_DOMN t1 WHERE t1.domain_desc = '%s'", MDASSCHEMENAME, parentName);
++	failure = 0;
++	get_ctype_value_from_query(parentId, sqlq);
++	if(failure != 0);
++		return MDAS_FAILURE;
++
++	sprinf(sqlq, "SELECT t1.domain_id FROM %SMDAS_TD_DOMN t1 WHERE t1.domain_desc = '%s' AND t1.domain_id LIKE '%s.____%%' AND t1.domain_id NOT LIKE '%s.____.%%'", MDASSCHEMENAME, domainName, parentId, parentId);
++
++	if(check_exists(sqlq) == 0)
++		return MDAS_SUCCESS;
++	else 
++		return MDAS_FAILURE;
++}
++
++int
++modify_shib_mapping(int cat_type, char *user_name, char *domain_name, char *data_value_1, char *data_value_2, int action_type)
++{
++	int i, j, k, mapping_id, group_user_id, num_users, num_groups;
++	int users[MAX_TOKEN];
++	int groups[MAX_TOKEN];
++
++	switch(action_type) {
++		case U_INSERT_SHIB_MAPPING_GROUP:
++			sprintf(sqlq, "SELECT t1.user_id from %sMDAS_CD_USER t1, %sMDAS_AU_DOMN t2, %sMDAS_TD_DOMN t3 WHERE t1.user_name = '%s' AND t1.user_id = t2.user_id AND t2.domain_id = t3.domain_id AND t3.domain_desc = 'groups'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, data_value_2);
++			group_user_id = get_itype_value_from_query(sqlq);		
++			if(group_user_id < 0)
++				return(USER_GROUP_NAME_NOT_FOUND);
++	
++			sprintf(sqlq, "SELECT MDAS_CD_SHIB_MAPPING.mapping_id from %sMDAS_CD_SHIB_MAPPING WHERE MDAS_CD_SHIB_MAPPING.mapping_name = '%s'", MDASSCHEMENAME, data_value_1);
++			mapping_id = get_itype_value_from_query(sqlq);
++			if(mapping_id < 0) {
++				mapping_id = get_next_counter_value("MAPPING_ID");
++				sprintf(atname[0],"mapping_id");
++				sprintf(atname[1],"mapping_name");
++				sprintf(atval[0],"%i",mapping_id);
++				sprintf(atval[1],"'%s'",data_value_1);
++				i =insertIntoTable(atname,atval,"MDAS_CD_SHIB_MAPPING", 2);
++				if (i != 0) 
++					return (MDAS_AU_GROUP_INSERTION_ERROR);
++			}
++
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_AU_SHIB_MAPPING_GROUP WHERE mapping_id = %i AND group_user_id = %i", MDASSCHEMENAME, mapping_id, group_user_id);
++			if(check_exists(sqlq) == 0)
++				return (GROUP_IN_SHIB_MAPPING_ALREADY);
++
++//			sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER where mapping_id = %i", MDASSCHEMENAME, mapping_id);
++			sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER where mapping_id = %i AND user_id NOT IN(SELECT t1.user_id FROM %sMDAS_AU_SHIB_MAPPING_USER t1, %sMDAS_AU_SHIB_MAPPING_GROUP t2 WHERE t1.mapping_id != %i AND t1.mapping_id = t2.mapping_id AND t2.group_user_id = %i)", MDASSCHEMENAME, mapping_id, MDASSCHEMENAME, MDASSCHEMENAME, mapping_id, group_user_id);
++			i = get_itype_list_from_query(users, &num_users, sqlq);
++			if (i == 0) {
++				for (i = 0; i < num_users; i++) {
++					j = insert_shib_group(users[i], group_user_id);
++					if (j != MDAS_SUCCESS)	
++						return j;
++				}
++			}
++
++            sprintf(atname[0],"mapping_id");
++            sprintf(atname[1],"group_user_id");
++            sprintf(atval[0],"%i",mapping_id);
++            sprintf(atval[1],"%i",group_user_id);
++            i = insertIntoTable(atname,atval,"MDAS_AU_SHIB_MAPPING_GROUP",2);
++            if (i != 0)
++                return (MDAS_AU_GROUP_INSERTION_ERROR);
++
++			break;
++		case U_DELETE_SHIB_MAPPING_GROUP:
++			sprintf(sqlq, "SELECT t1.user_id from %sMDAS_CD_USER t1, %sMDAS_AU_DOMN t2, %sMDAS_TD_DOMN t3 WHERE t1.user_name = '%s' AND t1.user_id = t2.user_id AND t2.domain_id = t3.domain_id AND t3.domain_desc = 'groups'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, data_value_2);
++			group_user_id = get_itype_value_from_query(sqlq);		
++			if(group_user_id < 0)
++				return(USER_GROUP_NAME_NOT_FOUND);
++			
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_CD_SHIB_MAPPING WHERE mapping_name = '%s'", MDASSCHEMENAME, data_value_1);
++			mapping_id = get_itype_value_from_query(sqlq);
++			if(mapping_id < 0)
++				return (SHIB_MAPPING_NAME_NOT_FOUND);
++
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_AU_SHIB_MAPPING_GROUP WHERE mapping_id = %i AND group_user_id = %i", MDASSCHEMENAME, mapping_id, group_user_id);
++			if(check_exists(sqlq) != 0)
++				// follow suite of insert / delete group, fail silently if asked to delete something that isn't there
++				break;
++
++//			sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER where mapping_id = %i", MDASSCHEMENAME, mapping_id);
++			sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER where mapping_id = %i AND user_id NOT IN(SELECT t1.user_id FROM %sMDAS_AU_SHIB_MAPPING_USER t1, %sMDAS_AU_SHIB_MAPPING_GROUP t2 WHERE t1.mapping_id != %i AND t1.mapping_id = t2.mapping_id AND t2.group_user_id = %i)", MDASSCHEMENAME, mapping_id, MDASSCHEMENAME, MDASSCHEMENAME, mapping_id, group_user_id);
++			i = get_itype_list_from_query(users, &num_users, sqlq);
++			if (i == 0) {
++				for (i = 0; i < num_users; i++) {
++					j = delete_shib_group(users[i], group_user_id);
++					if (j != MDAS_SUCCESS)
++						return j;
++				}
++			}
++			
++			sprintf(atname[0],"mapping_id");
++			sprintf(atname[1],"group_user_id");
++			sprintf(atval[0],"%i",mapping_id);
++			sprintf(atval[1],"%i",group_user_id);
++			i =deleteFromTable(atname,atval,"MDAS_AU_SHIB_MAPPING_GROUP",2);
++			if (i != 0) 
++				return (MDAS_AU_GROUP_DELETION_ERROR);
++
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_AU_SHIB_MAPPING_GROUP WHERE mapping_id = %i", MDASSCHEMENAME, mapping_id);
++			if (check_exists(sqlq) != 0) {
++				sprintf(atname[0],"mapping_id");
++				sprintf(atval[0],"%i",mapping_id);
++				i =deleteFromTable(atname,atval,"MDAS_AU_SHIB_MAPPING_GROUP",1);
++				if (i != 0) 
++					return (MDAS_AU_GROUP_DELETION_ERROR);
++				i =deleteFromTable(atname,atval,"MDAS_AU_SHIB_MAPPING_USER",1);
++				if (i != 0) 
++					return (MDAS_AU_GROUP_DELETION_ERROR);
++				i =deleteFromTable(atname,atval,"MDAS_CD_SHIB_MAPPING",1);
++				if (i != 0) 
++					return (MDAS_AU_GROUP_DELETION_ERROR);
++			}
++
++			break;
++		case U_DELETE_SHIB_MAPPING_GROUPS:
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_CD_SHIB_MAPPING WHERE mapping_name = '%s'", MDASSCHEMENAME, data_value_1);
++			mapping_id = get_itype_value_from_query(sqlq);
++			if(mapping_id < 0)
++				return (SHIB_MAPPING_NAME_NOT_FOUND);
++
++			sprintf(sqlq, "SELECT user_id from %sMDAS_AU_SHIB_MAPPING_USER where mapping_id = %i", MDASSCHEMENAME, mapping_id);
++			i = get_itype_list_from_query(users, &num_users, sqlq);	
++			if (i != 0) 
++				num_users = 0;;
++
++			sprintf(sqlq, "SELECT group_user_id from %sMDAS_AU_SHIB_MAPPING_GROUP where mapping_id = %i", MDASSCHEMENAME, mapping_id);
++			i = get_itype_list_from_query(groups, &num_groups, sqlq);	
++			if (i != 0)
++				num_groups = 0;
++
++			for (i = 0; i < num_users; i++)
++				for (j = 0; j < num_groups; j++) {
++					k = delete_shib_group(users[i], groups[j]);
++					if (k != MDAS_SUCCESS)
++						return k;
++				}
++
++			sprintf(atname[0],"mapping_id");
++			sprintf(atval[0],"%i",mapping_id);
++			i =deleteFromTable(atname,atval,"MDAS_AU_SHIB_MAPPING_GROUP",1);
++			if (i != 0) 
++				return (MDAS_AU_GROUP_DELETION_ERROR);
++			i =deleteFromTable(atname,atval,"MDAS_AU_SHIB_MAPPING_USER",1);
++			if (i != 0) 
++				return (MDAS_AU_GROUP_DELETION_ERROR);
++			i =deleteFromTable(atname,atval,"MDAS_CD_SHIB_MAPPING",1);
++			if (i != 0) 
++				return (MDAS_AU_GROUP_DELETION_ERROR);
++
++			break;
++		default:
++			return (MDAS_CATALOG_MODIFY_TYPE_ERROR);
++			break;
++	}
++
++	return (MDAS_SUCCESS);
++}
++
++int
++query_shib_mapping(int cat_type, char *user_name, char *domain_name, char *query_value, char *query_result, int query_type)
++{
++	int i;
++	int user_id, group_id, mapping_id;
++	char tmp[MAX_TOKEN], result[MAX_TOKEN];
++	char result_set[MAX_CTYPE_LIST_COUNT][MAX_TOKEN];
++	int num_results;
++
++	memset(tmp, 0, MAX_TOKEN);
++	memset(result, 0, MAX_TOKEN);
++
++	switch(query_type) {
++		case U_QUERY_GROUPS_FROM_SHIB_MAPPING:
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_CD_SHIB_MAPPING WHERE mapping_name = '%s'", MDASSCHEMENAME, query_value);
++			if(check_exists(sqlq) != 0) 
++				return (SHIB_MAPPING_NAME_NOT_FOUND);
++
++			sprintf(sqlq, "SELECT t1.user_name FROM %sMDAS_CD_USER t1, %sMDAS_CD_SHIB_MAPPING t2, %sMDAS_AU_SHIB_MAPPING_GROUP t3 WHERE t1.user_id = t3.group_user_id AND t2.mapping_id = t3.mapping_id AND t2.mapping_name = '%s'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, query_value);
++
++			if (check_exists(sqlq) != 0) {
++				result[0] = '\0';
++				break;
++			}
++
++			i = get_ctype_list_from_query(result_set, &num_results, sqlq);
++			if (i != 0)
++				return (NO_GROUPS_FOUND_FOR_SHIB_MAPPING);
++
++			for (i = 0; i < num_results; i++) {
++				sprintf(tmp, "%s\n", result_set[i]);
++				strcat(result, tmp);
++			}
++			break;
++		case U_QUERY_SHIB_MAPPINGS_FROM_GROUP:
++			sprintf(sqlq, "SELECT t1.user_id from %sMDAS_CD_USER t1, %sMDAS_AU_DOMN t2, %sMDAS_TD_DOMN t3 WHERE t1.user_name = '%s' AND t1.user_id = t2.user_id AND t2.domain_id = t3.domain_id AND t3.domain_desc = 'groups'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, query_value);
++			if(check_exists(sqlq) != 0) 
++				return (USER_GROUP_NAME_NOT_FOUND);
++
++			sprintf(sqlq, "SELECT t2.mapping_name FROM %sMDAS_CD_USER t1, %sMDAS_CD_SHIB_MAPPING t2, %sMDAS_AU_SHIB_MAPPING_GROUP t3 WHERE t1.user_id = t3.group_user_id AND t2.mapping_id = t3.mapping_id AND t1.user_name = '%s'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, query_value);
++			
++			if (check_exists(sqlq) != 0) {
++				result[0] = '\0';
++				break;
++			}
++
++			i = get_ctype_list_from_query(result_set, &num_results, sqlq);
++			if (i != 0)
++				return (NO_SHIB_MAPPINGS_FOUND_FOR_GROUP);
++
++			for (i = 0; i < num_results; i++) {
++				sprintf(tmp, "%s\n", result_set[i]);
++				strcat(result, tmp);
++			}
++			break;
++		case U_QUERY_USERS_FROM_SHIB_MAPPING:
++			sprintf(sqlq, "SELECT mapping_id from %sMDAS_CD_SHIB_MAPPING WHERE mapping_name = '%s'", MDASSCHEMENAME, query_value);
++			if(check_exists(sqlq) != 0) 
++				return (SHIB_MAPPING_NAME_NOT_FOUND);
++
++			sprintf(sqlq, "SELECT t1.user_name FROM %sMDAS_CD_USER t1, %sMDAS_CD_SHIB_MAPPING t2, %sMDAS_AU_SHIB_MAPPING_USER t3 WHERE t1.user_id = t3.user_id AND t2.mapping_id = t3.mapping_id AND t2.mapping_name = '%s'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, query_value);
++
++			if (check_exists(sqlq) != 0) {
++				result[0] = '\0';
++				break;
++			}
++
++			i = get_ctype_list_from_query(result_set, &num_results, sqlq);
++			if (i != 0)
++				return (NO_USERS_FOUND_FOR_SHIB_MAPPING);
++
++			for (i = 0; i < num_results; i++) {
++				sprintf(tmp, "%s\n", result_set[i]);
++				strcat(result, tmp);
++			}
++			break;
++		case U_QUERY_SHIB_MAPPINGS_FROM_USER:
++			sprintf(sqlq, "SELECT user_id from %sMDAS_CD_USER WHERE user_name = '%s'", MDASSCHEMENAME, query_value);
++			if(check_exists(sqlq) != 0) 
++				return (USER_NAME_NOT_FOUND);
++
++			sprintf(sqlq, "SELECT t2.mapping_name FROM %sMDAS_CD_USER t1, %sMDAS_CD_SHIB_MAPPING t2, %sMDAS_AU_SHIB_MAPPING_USER t3 WHERE t1.user_id = t3.user_id AND t2.mapping_id = t3.mapping_id AND t1.user_name = '%s'", MDASSCHEMENAME, MDASSCHEMENAME, MDASSCHEMENAME, query_value);
++
++			if (check_exists(sqlq) != 0) {
++				result[0] = '\0';
++				break;
++			}
++
++			i = get_ctype_list_from_query(result_set, &num_results, sqlq);
++			if (i != 0)
++				return (NO_SHIB_MAPPINGS_FOUND_FOR_USER);
++
++			for (i = 0; i < num_results; i++) {
++				sprintf(tmp, "%s\n", result_set[i]);
++				strcat(result, tmp);
++			}
++			break;
++		default:
++			return (MDAS_CATALOG_TYPE_ERROR);
++			break;
++	}
++
++	strcpy(query_result, result);
++
++	return (MDAS_SUCCESS);
++}
++
++int
+ modify_tape_info(int cat_type, char *tapeNum,
+ 		     char *obj_user_name,char *user_domain_name,
+ 		     int retraction_type,
+@@ -12850,6 +13306,12 @@
+     { error_exit("user registry API: DOMN  insertion error");
+     return(MDAS_AU_DOMN_INSERTION_ERROR);}
+ 
++  sprintf(query_string, "delete from %s%s where user_id = %i", MDASSCHEMENAME, "MDAS_AU_SHIB_GROUP", ival[0]);
++  res = ExecSqlDb2(henv, hdbc, query_string);
++  if (res != 0) 
++    {error_exit("user registry API: INTERNAL GROUP data insertion error");
++    return(MDAS_AU_GROUP_INSERTION_ERROR);}
++
+   /* every user added as themselves as a group*/
+ #ifdef NONBINDSQL
+   sprintf(query_string, "insert into %s%s (user_id,group_user_id) values (%i,%i)",
+diff -ruN old/SRB3_5_0/src/client/clAuth.c new/SRB3_5_0/src/client/clAuth.c
+--- old/SRB3_5_0/src/client/clAuth.c	2006-04-15 10:36:49.000000000 +1000
++++ new/SRB3_5_0/src/client/clAuth.c	2008-01-10 14:35:35.000000000 +1000
+@@ -1128,7 +1128,7 @@
+     	DefServerAuthInfo = (struct serverAuthInfo *) malloc 
+          (sizeof (struct serverAuthInfo));
+     	status = fillServerAuthInfo (tmpHostAddr, tmpAuthKeyWd,
+-         tmpAuthDn, DefServerAuthInfo);
++         tmpAuthDn, NULL, DefServerAuthInfo);
+     	if (status < 0) {
+ 	    free (DefServerAuthInfo);
+ 	    DefServerAuthInfo = NULL;
+@@ -1138,9 +1138,44 @@
+     return (status);
+ }
+ 
++void copyShibInfoToServerAuthInfo(struct shibConfigInfo *shibInfo, struct serverAuthInfo *serverAuthInfo) {
++	
++	if(shibInfo == NULL)
++		return;
++
++	if(shibInfo->dnToUserDomainScript != NULL && strlen(shibInfo->dnToUserDomainScript) != 0)
++		serverAuthInfo->shibInfo.dnToUserDomainScript = strdup(shibInfo->dnToUserDomainScript);
++	else
++		serverAuthInfo->shibInfo.dnToUserDomainScript = NULL;
++
++	if(shibInfo->addUserScript != NULL && strlen(shibInfo->addUserScript) != 0)
++		serverAuthInfo->shibInfo.addUserScript = strdup(shibInfo->addUserScript);
++	else
++		serverAuthInfo->shibInfo.addUserScript = NULL;
++
++	if(shibInfo->addGroupScript != NULL && strlen(shibInfo->addGroupScript) != 0)
++		serverAuthInfo->shibInfo.addGroupScript = strdup(shibInfo->addGroupScript);
++	else
++		serverAuthInfo->shibInfo.addGroupScript = NULL;
++
++	if(shibInfo->addDomainScript != NULL && strlen(shibInfo->addDomainScript) != 0)
++		serverAuthInfo->shibInfo.addDomainScript = strdup(shibInfo->addDomainScript);
++	else
++		serverAuthInfo->shibInfo.addDomainScript = NULL;
++
++	if(shibInfo->shibCertOid != NULL && strlen(shibInfo->shibCertOid) != 0)
++		serverAuthInfo->shibInfo.shibCertOid = strdup(shibInfo->shibCertOid);
++	else
++		serverAuthInfo->shibInfo.shibCertOid = NULL;
++
++	if(shibInfo->shibGroupSeparator != NULL && strlen(shibInfo->shibGroupSeparator) != 0)
++		serverAuthInfo->shibInfo.shibGroupSeparator = strdup(shibInfo->shibGroupSeparator);
++	else
++		serverAuthInfo->shibInfo.shibGroupSeparator = NULL;
++}
++
+ int
+-fillServerAuthInfo (char *hostAddr, char *authKeyWd, char *serverDn, 
+-struct serverAuthInfo *serverAuthInfo)
++fillServerAuthInfo (char *hostAddr, char *authKeyWd, char *serverDn, struct shibConfigInfo *shibInfo, struct serverAuthInfo *serverAuthInfo)
+ {
+     int status;
+     struct authsvc *myAuthsvc;
+@@ -1169,6 +1204,9 @@
+     serverAuthInfo->authsvc = myAuthsvc;
+     serverAuthInfo->hostAddr = strdup (hostAddr);
+     serverAuthInfo->serverDn = strdup (serverDn);
++
++	copyShibInfoToServerAuthInfo(shibInfo, serverAuthInfo);
++
+     serverAuthInfo->next = NULL;
+ 
+     return status;
+@@ -1295,7 +1333,7 @@
+ 	tmpAuthScheme = &authScheme[i*MAX_DATA_SIZE];
+ 	tmpDnName = &dnName[i*MAX_DATA_SIZE];
+ 	status = fillServerAuthInfo (tmpServerLoc, tmpAuthScheme,
+-    	 tmpDnName, tmpInfo);
++    	 tmpDnName, NULL, tmpInfo);
+ 	tmpInfo->next = NULL;
+ 
+     	if (status < 0) {
+diff -ruN old/SRB3_5_0/src/client/clStub.c new/SRB3_5_0/src/client/clStub.c
+--- old/SRB3_5_0/src/client/clStub.c	2007-11-21 10:45:46.000000000 +1000
++++ new/SRB3_5_0/src/client/clStub.c	2008-01-10 14:35:35.000000000 +1000
+@@ -10237,6 +10237,43 @@
+     return retval;
+ }
+ 
++int
++srbModifyShibMapping (srbConn* conn, int catType, char *dataValue1, char *dataValue2, int actionType) 
++{
++	int retval;
++	srb_long_t argv[MAXFMGRARGS];
++	ClOut clOut;
++	int clOutVal;
++
++	clOut.retval = (char *) &clOutVal;
++
++	argv[0] = catType;
++	argv[1] = addrToSRBLong(dataValue1);
++	argv[2] = addrToSRBLong(dataValue2);
++	argv[3] = actionType;
++
++	retval = clCall (conn, F_MODIFY_SHIB_MAPPING, argv, &clOut);
++	return retval;
++}
++
++int
++srbQueryShibMapping (srbConn* conn, int catType, char* queryValue, char* queryResult, int queryType) {
++
++	int retval;
++	srb_long_t argv[MAXFMGRARGS];
++	ClOut clOut;
++
++	argv[0] = catType;
++	argv[1] = addrToSRBLong(queryValue);
++	argv[2] = queryType;
++
++	clOut.retval = (char*) queryResult;
++
++    retval = clCall (conn, F_QUERY_SHIB_MAPPING, argv, &clOut);
++
++	return retval;
++}
++
+ char *
+ srb_inet_ntoa (struct in_addr in)
+ {
+diff -ruN old/SRB3_5_0/src/include/auth.h new/SRB3_5_0/src/include/auth.h
+--- old/SRB3_5_0/src/include/auth.h	2004-10-14 09:01:58.000000000 +1000
++++ new/SRB3_5_0/src/include/auth.h	2008-01-10 14:35:35.000000000 +1000
+@@ -68,4 +68,9 @@
+ int aid_establish_context_serverside_with_delegate(int fd, char *clientName,
+ int max_len_clientName, int type_flag);
+ 
++int getClientDn(int sock, char** clientDn);
++int checkClientDnInMcat(int sock, char *userName, char *domainName, char *clientDn);
++int getShibGroupString(int sock, char* oid, char** data);
++int aid_get_x509_extension_data_by_oid(int fd, char *oid, char **data);
++
+ #endif /* AUTH_H */
+diff -ruN old/SRB3_5_0/src/include/clAuthExtern.h new/SRB3_5_0/src/include/clAuthExtern.h
+--- old/SRB3_5_0/src/include/clAuthExtern.h	2005-10-13 10:24:15.000000000 +1000
++++ new/SRB3_5_0/src/include/clAuthExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -76,6 +76,8 @@
+ #define AUTH_KEYWD	"AUTH_SCHEME"	
+ #define AUTH_SERVER_KEYWD "AUTH_SERVER"
+ #define AUTH_SERVER_DN_KEYWD "SERVER_DN"		/* The server's Gsi Dn */
++#define SHIB_CERT_OID_KEYWD		"SHIB_CERT_OID"
++#define SHIB_GROUP_SEPARATOR_KEYWD	"SHIB_GROUP_SEPARATOR"
+ 
+ /* Authentication keyword and index */
+ #define PASSWD_AUTH_KEYWD	"PASSWD_AUTH"
+@@ -114,12 +116,24 @@
+ {
+ #endif
+ 
++struct shibConfigInfo {
++	char *dnToUserDomainScript;
++	char *addUserScript;
++	char *addGroupScript;
++	char *addDomainScript;
++	char *shibCertOid;
++	char *shibGroupSeparator;
++};
++
+ struct serverAuthInfo {
+ 	struct authsvc *authsvc;
+ 	char *mcatName;		/* the name of this MCAT if it is a 
+ 				 * MCAT enabled host */
+ 	char *hostAddr;
+ 	char *serverDn;
++
++	struct shibConfigInfo shibInfo;
++
+ 	struct serverAuthInfo *next;
+ };
+ 
+@@ -147,8 +161,7 @@
+ extern int clRecvStatus (int sock, srbConn *conn);
+ extern char *clGetServerGsiDn ();
+ extern char *clGetServerDn (srbConn *conn, char *hostAddr, int authInx);
+-extern int fillServerAuthInfo (char *hostAddr, char *authKeyWd, char *serverDn,
+-struct serverAuthInfo *serverAuthInfo);
++extern int fillServerAuthInfo (char *hostAddr, char *authKeyWd, char *serverDn, struct shibConfigInfo *shibInfo, struct serverAuthInfo *serverAuthInfo);
+ extern int getMcatServerAuthInfo (srbConn *conn);
+ extern int procMcatServerAuthInfo (mdasC_sql_result_struct  *myresult);
+ extern char * getFromResultStruct(mdasC_sql_result_struct *result,
+diff -ruN old/SRB3_5_0/src/include/clStubExtern.h new/SRB3_5_0/src/include/clStubExtern.h
+--- old/SRB3_5_0/src/include/clStubExtern.h	2007-11-23 09:58:01.000000000 +1000
++++ new/SRB3_5_0/src/include/clStubExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -3285,6 +3285,57 @@
+ srbChkRescAccess (srbConn* conn, int catType, char *resourceName,
+ char *accessPermit, char *userName, char *domainName);
+ 
++/*
++ * srbModifyShibMapping - Modifies the Shibboleth-attribute-to-SRB-group mappings
++ *                        This is a privileged function and should be called only by a 
++ *                        srbAdmin user.
++ *
++ * Input - srbConn* conn - From srbConnect()
++ *         int catType - Catalog type e.g. MDAS_CATALOG
++ *         char* dataValue1,
++ *         char* dataValue2,
++ *         int actionType - The type of action performed.
++ *                          Values supported are:
++ *                            U_INSERT_SHIB_MAPPING_GROUP
++ *                              dv1 - the name of the mapping
++ *                              dv2 - the SRB group it maps to
++ *                            U_DELETE_SHIB_MAPPING_GROUP
++ *                              same as U_INSERT_SHIB_MAPPING_GROUP
++ *                            U_DELETE_SHIB_MAPPING_GROUPS
++ *                              dv1 - the name of the mapping to delete
++ * 
++ *
++ * Output - Returns 0 - success.
++ *        - Returns negative - failure.
++ */
++
++extern int 
++srbModifyShibMapping (srbConn* conn, int catType, char *dataValue1, char *dataValue2, int actionType);
++
++/*
++ * srbQueryShibMapping - 
++ * 
++ * Input - srbConn* conn - From srbConnect()
++ *         int catType - Catalog type e.g. MDAS_CATALOG
++ *         char* queryValue, 
++ *         int queryType - The type of the query performed.
++ *                         Values supported are:
++ *                           U_QUERY_GROUPS_FROM_SHIB_MAPPING
++ *                             Queries for groups in the shib mapping with name <queryValue>
++ *                           U_QUERY_SHIB_MAPPINGS_FROM_GROUP
++ *                             Queries for shib mappings including the group with name <queryValue>
++ *                           U_QUERY_USERS_FROM_SHIB_MAPPING
++ *                             Queries for users that are part of the shib mapping with name <queryValue>
++ *                           U_QUERY_SHIB_MAPPINGS_FROM_USER
++ *                             Queries for shib mappings that include the user with name <queryValue>
++ *
++ * Output - Returns 0 - succes, char* result holds the result of the query
++ *        - Returns negative value - failure
++ */
++
++extern int
++srbQueryShibMapping (srbConn* conn, int catType, char* queryValue, char* queryResult, int queryType);
++
+ #ifdef c_plus_plus
+ }
+ #endif
+diff -ruN old/SRB3_5_0/src/include/commExtern.h new/SRB3_5_0/src/include/commExtern.h
+--- old/SRB3_5_0/src/include/commExtern.h	2005-09-07 07:24:55.000000000 +1000
++++ new/SRB3_5_0/src/include/commExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -27,6 +27,8 @@
+ #define HOST_CONFIG    "hostConfig"   /* The host config file */
+ #define MCAT_HOST      "mcatHost"     /* The config file that contain the MCAT 
+ 				       * host file */
++#define SHIB_CONFIG_FILENAME "shibConfig" /* The shibboleth configuration file*/
++
+ #ifdef FED_MCAT
+ #define FED_MCAT_HOST  "fedMcatHost"  /* The config file federated MCAT
+ 				       * host file */
+diff -ruN old/SRB3_5_0/src/include/comm.h new/SRB3_5_0/src/include/comm.h
+--- old/SRB3_5_0/src/include/comm.h	2005-07-27 13:04:47.000000000 +1000
++++ new/SRB3_5_0/src/include/comm.h	2008-01-10 14:35:35.000000000 +1000
+@@ -77,6 +77,35 @@
+ extern struct hostElement *LocalSlaveMcat;
+ #endif
+ 
++#define CONFIG_ID_DN_TO_USER_DOMAIN_SCRIPT 0
++#define CONFIG_ID_ADD_USER_SCRIPT 1
++#define CONFIG_ID_ADD_GROUP_SCRIPT 2
++#define CONFIG_ID_ADD_DOMAIN_SCRIPT 3
++#define CONFIG_ID_SHIB_CERT_OID 4
++#define CONFIG_ID_SHIB_GROUP_SEPARATOR 5
++
++#define CONFIG_HEADER_DN_TO_USER_DOMAIN_SCRIPT "dnToUserDomainScript"
++#define CONFIG_HEADER_ADD_USER_SCRIPT "addUserScript"
++#define CONFIG_HEADER_ADD_GROUP_SCRIPT "addGroupScript"
++#define CONFIG_HEADER_ADD_DOMAIN_SCRIPT "addDomainScript"
++#define CONFIG_HEADER_SHIB_CERT_OID "shibCertOid"
++#define CONFIG_HEADER_SHIB_GROUP_SEPARATOR "shibGroupSeparator"
++
++struct shibConfigLine {
++	int id;
++	char string[40];
++};
++
++static struct shibConfigLine shibConfigLines[] = {
++	{CONFIG_ID_DN_TO_USER_DOMAIN_SCRIPT, CONFIG_HEADER_DN_TO_USER_DOMAIN_SCRIPT},
++	{CONFIG_ID_ADD_USER_SCRIPT, CONFIG_HEADER_ADD_USER_SCRIPT},
++	{CONFIG_ID_ADD_GROUP_SCRIPT, CONFIG_HEADER_ADD_GROUP_SCRIPT},
++	{CONFIG_ID_ADD_DOMAIN_SCRIPT, CONFIG_HEADER_ADD_DOMAIN_SCRIPT},
++	{CONFIG_ID_SHIB_CERT_OID, CONFIG_HEADER_SHIB_CERT_OID},
++	{CONFIG_ID_SHIB_GROUP_SEPARATOR, CONFIG_HEADER_SHIB_GROUP_SEPARATOR}
++};
++
++static int numShibConfigLines = sizeof(shibConfigLines) / sizeof(struct shibConfigLine);
+  
+ /* ----------------
+  *      declarations
+@@ -109,8 +138,7 @@
+ 
+ /* extern struct mdasEnvData *MdasEnvData; */
+ int
+-fillMcatHostInfo (char *mcatName, char *mcatHost, char *mcatAuthScheme,
+-char *mcatDn, char *myPortNum, int cnt);
++fillMcatHostInfo (char *mcatName, char *mcatHost, char *mcatAuthScheme, char *mcatDn, char *myPortNum, int cnt);
+ extern int aid_setup_creds(char *service_name, int client_flag, int type_flag);
+ extern int aid_establish_context_clientside(int fd, char *service_name, 
+ int deleg_flag, int type_flag);
+diff -ruN old/SRB3_5_0/src/include/distribExtern.h new/SRB3_5_0/src/include/distribExtern.h
+--- old/SRB3_5_0/src/include/distribExtern.h	2008-01-10 14:06:47.000000000 +1000
++++ new/SRB3_5_0/src/include/distribExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -240,4 +240,10 @@
+ remoteGenProxyFunct (struct hostElement  *hostTabPtr,
+ int functType, int intInput1, int intInput2, char *strInput1, char *strInput2,
+ bytesBuf_t *bytesBufInp, bytesBuf_t *bytesBufOut, int maxOutSz);
++
++extern int 
++remoteModifyShibMapping(int catType, char *dataValue1, char *dataValue2, int actionType, struct hostElement *hostTabPtr);
++extern int
++remoteQueryShibMapping(int catType, char* queryValue, char* queryResult, int queryType, struct hostElement *hostTabPtr);
++
+ #endif	/* DISTRIB_EXTERN_H */
+diff -ruN old/SRB3_5_0/src/include/functionHandler.h new/SRB3_5_0/src/include/functionHandler.h
+--- old/SRB3_5_0/src/include/functionHandler.h	2007-11-21 10:45:49.000000000 +1000
++++ new/SRB3_5_0/src/include/functionHandler.h	2008-01-10 14:35:35.000000000 +1000
+@@ -1192,6 +1192,19 @@
+ #endif
+         "svrChkRescAccess", SIZEOF32, 5, SIZEOF32, -1, -1, -1, -1, 0,
+         0, 0, 0, 0, 0, 0},
++#if defined(SRB_SERVER) && !defined(STK_SERVER)
++		{F_MODIFY_SHIB_MAPPING, (func_ptr)svrModifyShibMapping,
++#else
++		{F_MODIFY_SHIB_MAPPING, (func_ptr)NULL,
++#endif
++		"svrModifyShibMapping", SIZEOF32, 4, SIZEOF32, -1, -1, SIZEOF32, 0, 0, 0, 0, 0, 0, 0, 0},
++#if defined(SRB_SERVER) && !defined(STK_SERVER)
++		{F_QUERY_SHIB_MAPPING, (func_ptr)svrQueryShibMapping,
++#else
++		{F_QUERY_SHIB_MAPPING, (func_ptr)NULL,
++#endif
++		"svrQueryShibMapping", -1, 3, SIZEOF32, -1, SIZEOF32, 0, 0, 0, 0, 0, 0, 0, 0, 0},
++
+         {F_DUMMY, (func_ptr)NULL, "dummy", 0, 0,
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+ };
+diff -ruN old/SRB3_5_0/src/include/objMcatAdminFunctExtern.h new/SRB3_5_0/src/include/objMcatAdminFunctExtern.h
+--- old/SRB3_5_0/src/include/objMcatAdminFunctExtern.h	2005-07-27 13:04:48.000000000 +1000
++++ new/SRB3_5_0/src/include/objMcatAdminFunctExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -27,6 +27,10 @@
+ struct varlena *vUserEmail);
+ extern int svrModifyUser (int catType, struct varlena *vDataValue1,
+ struct varlena *vDataValue2, int retractionType);
++extern int svrModifyShibMapping(int catType, struct varlena * vDataValue1, struct varlena *vDataValue2, int actionType);
++extern int _svrModifyShibMapping(int catType, char* dataValue1, char* dataValue2, int actionType);
++extern struct varlena *svrQueryShibMapping(int catType, struct varlena *vQueryValue, int queryType);
++extern int _svrQueryShibMapping(int catType, char* queryValue, char* queryResult, int queryType);
+ extern int set_audit_trail (int catType, int set_value);
+ extern int svrObjAudit (int catType, struct varlena *vUserName,
+ struct varlena *vObjID, struct varlena *vCollectionName,
+diff -ruN old/SRB3_5_0/src/include/srb_error.h new/SRB3_5_0/src/include/srb_error.h
+--- old/SRB3_5_0/src/include/srb_error.h	2007-04-17 04:01:32.000000000 +1000
++++ new/SRB3_5_0/src/include/srb_error.h	2008-01-10 14:35:35.000000000 +1000
+@@ -1466,6 +1466,33 @@
+ #define GRIDFTP_NO_FREE_GFTP_CONN_ERR -6025
+ #define GRIDFTP_GFTP_CONN_OUT_OF_RANG_ERR -6026
+ #define GRIDFTP_BAD_INPUT_URL_ERR -6027
++#define SHIB_MAPPING_NAME_NOT_FOUND -7000
++#define USER_IN_SHIB_MAPPING_ALREADY -7001
++#define USER_NOT_IN_SHIB_MAPPING -7002
++#define GROUP_IN_SHIB_MAPPING_ALREADY -7003
++#define GROUP_NOT_IN_SHIB_MAPPING -7004
++#define NO_USERS_FOUND_FOR_SHIB_MAPPING -7005
++#define NO_GROUPS_FOUND_FOR_SHIB_MAPPING -7006
++#define NO_SHIB_MAPPINGS_FOUND_FOR_USER -7007
++#define NO_SHIB_MAPPINGS_FOUND_FOR_GROUP -7008
++#define DN_TO_USER_DOMAIN_SCRIPT_NO_ENTRY -7100
++#define DN_TO_USER_DOMAIN_SCRIPT_NOT_FOUND -7101
++#define DN_TO_USER_DOMAIN_SCRIPT_NOT_EXECUTABLE -7102
++#define DN_TO_USER_DOMAIN_SCRIPT_BAD_OUTPUT -7103
++#define ADD_USER_SCRIPT_NO_ENTRY -7110
++#define ADD_USER_SCRIPT_NOT_FOUND -7111
++#define ADD_USER_SCRIPT_NOT_EXECUTABLE -7112
++#define ADD_USER_SCRIPT_USER_MISMATCH -7113
++#define ADD_USER_SCRIPT_DOMAIN_MISMATCH -7114
++#define ADD_USER_SCRIPT_USER_AND_DOMAIN_MISMATCH -7115
++#define ADD_USER_SCRIPT_DID_NOT_ADD_USER -7116
++#define ADD_GROUP_SCRIPT_NO_ENTRY -7120
++#define ADD_GROUP_SCRIPT_NOT_FOUND -7121
++#define ADD_GROUP_SCRIPT_NOT_EXECUTABLE -7122
++#define ADD_GROUP_SCRIPT_DID_NOT_ADD_GROUP -7123
++#define ADD_DOMAIN_SCRIPT_NO_ENTRY -7130
++#define ADD_DOMAIN_SCRIPT_NOT_FOUND -7131
++#define ADD_DOMAIN_SCRIPT_NOT_EXECUTABLE -7132
+ #define DONT_SEND_RETURN -999999
+ #define EXIT_WHEN_DONE -9999999
+ #define MSG_USE_SINGLE_PORT -99999999
+@@ -1478,7 +1505,7 @@
+ /* ERROR TABLE DECLARATIONS */
+ #else
+ int Srb_errtbl_serialno = 1173721683;
+-int Srb_numents = 1439;
++int Srb_numents = 1451;
+ 
+ struct srb_errtbl srb_errent[] =
+ 	{
+@@ -2918,6 +2945,33 @@
+ 		-6025, "GRIDFTP_NO_FREE_GFTP_CONN_ERR", "GRIDFTP_NO_FREE_GFTP_CONN_ERR", "", "",
+ 		-6026, "GRIDFTP_GFTP_CONN_OUT_OF_RANG_ERR", "GRIDFTP_GFTP_CONN_OUT_OF_RANG_ERR", "", "",
+ 		-6027, "GRIDFTP_BAD_INPUT_URL_ERR", "GRIDFTP_BAD_INPUT_URL_ERR", "", "",
++		-7000, "SHIB_MAPPING_NAME_NOT_FOUND", "The Shib mapping name was not found", "", "",
++		-7001, "USER_IN_SHIB_MAPPING_ALREADY", "The user is already in the Shib mapping", "", "",
++		-7002, "USER_NOT_IN_SHIB_MAPPING", "The user is not in the Shib mapping", "", "",
++		-7003, "GROUP_IN_SHIB_MAPPING_ALREADY", "The group is already in the Shib mapping", "", "",
++		-7004, "GROUP_NOT_IN_SHIB_MAPPING", "The group is not in the Shib mapping", "", "",
++		-7005, "NO_USERS_FOUND_FOR_SHIB_MAPPING", "No users were found for the given Shib mapping", "", "",
++		-7006, "NO_GROUPS_FOUND_FOR_SHIB_MAPPING", "No groups were found for the given Shib mapping", "", "",
++		-7007, "NO_SHIB_MAPPINGS_FOUND_FOR_USER", "No Shib mappings were found for the given user", "", "",
++		-7008, "NO_SHIB_MAPPINGS_FOUND_FOR_GROUP", "No Shib mappings were found for the given group", "", "",
++		-7100, "DN_TO_USER_DOMAIN_SCRIPT_NO_ENTRY", "There is no dnToUserDomainScript entry in the configuration file", "", "",
++		-7101, "DN_TO_USER_DOMAIN_SCRIPT_NOT_FOUND", "The dnToUserDomainScript file does not exist", "", "",
++		-7102, "DN_TO_USER_DOMAIN_SCRIPT_NOT_EXECUTABLE", "The dnToUserDomainScript file is not executable", "", "",
++		-7103, "DN_TO_USER_DOMAIN_SCRIPT_BAD_OUTPUT", "The output of the dnToUserDomainScript was not of the format 'user@domain'", "", "",
++		-7110, "ADD_USER_SCRIPT_NO_ENTRY", "There is no addUserScript entry in the configuration file", "", "",
++		-7111, "ADD_USER_SCRIPT_NOT_FOUND", "The addUserScript file does not exist", "", "",
++		-7112, "ADD_USER_SCRIPT_NOT_EXECUTABLE", "The addUserScript is not executable", "", "",
++		-7113, "ADD_USER_SCRIPT_USER_MISMATCH", "The user name provided does not match the user name derived from the dnToUserDomainScript", "", "",
++		-7114, "ADD_USER_SCRIPT_DOMAIN_MISMATCH", "The domain name provided does not match the domain name derived from the dnToUserDomainScript", "", "",
++		-7115, "ADD_USER_SCRIPT_USER_AND_DOMAIN_MISMATCH", "The user and domain names provided do not match the user and domain names derived from the dnToUserDomainScript", "", "",
++		-7116, "ADD_USER_SCRIPT_DID_NOT_ADD_USER", "The added user was not found after the running of the addUserScript", "", "", 
++		-7120, "ADD_GROUP_SCRIPT_NO_ENTRY", "There is no addGroupScript entry in the configuration file", "", "",
++		-7121, "ADD_GROUP_SCRIPT_NOT_FOUND", "The addGroupScript file does not exist", "", "",
++		-7122, "ADD_GROUP_SCRIPT_NOT_EXECUTABLE", "The addGroupScript file is not executable", "", "",
++		-7123, "ADD_GROUP_SCRIPT_DID_NOT_ADD_GROUP", "The added group was not found after the running of the addGroupScript", "", "",
++		-7130, "ADD_DOMAIN_SCRIPT_NO_ENTRY", "There is no addDomainScript entry in the configuration file", "", "",
++		-7131, "ADD_DOMAIN_SCRIPT_NOT_FOUND", "The addDomainScript does not exist", "", "",
++		-7132, "ADD_DOMAIN_SCRIPT_NOT_EXECUTABLE", "The addDomainScript is not executable", "", "",
+ 		-999999, "DONT_SEND_RETURN", "DONT_SEND_RETURN", "", "",
+ 		-9999999, "EXIT_WHEN_DONE", "EXIT_WHEN_DONE", "", "",
+ 		-99999999, "MSG_USE_SINGLE_PORT", "MSG_USE_SINGLE_PORT", "", "",
+diff -ruN old/SRB3_5_0/src/include/srbServerExtern.h new/SRB3_5_0/src/include/srbServerExtern.h
+--- old/SRB3_5_0/src/include/srbServerExtern.h	2004-11-16 06:20:17.000000000 +1000
++++ new/SRB3_5_0/src/include/srbServerExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -33,7 +33,7 @@
+ extern void initUserid();
+ int setAllowedUser (struct allowedUser **allowedUserHead);
+ int initSrbServer();
+-int procStartupMsg (Port *myPort, StartupInfo *sp);
++int procStartupMsg (Port *myPort, StartupInfo *sp, int allowNewUser);
+ 
+ 
+ 
+diff -ruN old/SRB3_5_0/src/include/srbServerMiscExtern.h new/SRB3_5_0/src/include/srbServerMiscExtern.h
+--- old/SRB3_5_0/src/include/srbServerMiscExtern.h	2006-02-02 07:20:06.000000000 +1000
++++ new/SRB3_5_0/src/include/srbServerMiscExtern.h	2008-01-10 14:35:35.000000000 +1000
+@@ -50,7 +50,7 @@
+ svrParseContainerName (char *inContainerName, char *outContainerName,
+ char *collectionName, char *userName, char *domainName);
+ extern int
+-procStartupMsg (Port *myPort, StartupInfo *sp);
++procStartupMsg (Port *myPort, StartupInfo *sp, int allowNewUser);
+ int svrCollStat (int catType, char *collection,
+ mdasC_sql_result_struct **myresult);
+ int isPureObject(int catType, char *dataName, char *collection);
+diff -ruN old/SRB3_5_0/src/include/stubdef.h new/SRB3_5_0/src/include/stubdef.h
+--- old/SRB3_5_0/src/include/stubdef.h	2007-11-21 10:45:49.000000000 +1000
++++ new/SRB3_5_0/src/include/stubdef.h	2008-01-10 14:40:11.000000000 +1000
+@@ -145,6 +145,9 @@
+ #define F_BULK_UNLOAD_RESTART_C 2179
+ 
+ #define F_GET_HOST_CONFIG    	2200
++
++#define F_MODIFY_SHIB_MAPPING  2300
++#define F_QUERY_SHIB_MAPPING   2301
+  
+ #define F_DB_LOBJ_CREATE 3000
+ #define F_DB_LOBJ_OPEN 3001
+diff -ruN old/SRB3_5_0/src/lib/aid.c new/SRB3_5_0/src/lib/aid.c
+--- old/SRB3_5_0/src/lib/aid.c	2007-09-28 02:11:24.000000000 +1000
++++ new/SRB3_5_0/src/lib/aid.c	2008-01-10 14:35:35.000000000 +1000
+@@ -243,6 +243,9 @@
+ #define AID_DCE 3
+ /* end aid.h  */
+ 
++#include <openssl/x509.h>
++#include <openssl/asn1.h>
++
+ int aidi_send_token(int fd, gss_buffer_t tok);
+ int aidi_rcv_token(int fd, gss_buffer_t tok);
+ void aidi_display_status
+@@ -256,7 +259,6 @@
+ #endif
+ 
+ extern gss_OID gss_nt_service_name;
+-extern int OBJ_create(char *input1, char *input2, char *input3);
+ extern void aid_close_all();
+ 
+ /* #define gss_nt_service_name_gsi GSS_C_NT_HOSTBASED_SERVICE 
+@@ -3025,4 +3027,42 @@
+ 
+     return 0;
+ }
++
++int aid_get_x509_extension_data_by_oid(int fd, char *oid, char **data) {
++
++   OM_uint32 maj_status, min_status;
++   ASN1_OBJECT *obj;
++   gss_OID_desc queryOID;
++   gss_buffer_set_t buffer_set = 0;    
++   int i;
++
++   *data = NULL;
++
++   obj = OBJ_txt2obj(oid, 1);
++
++   queryOID.length = obj->length;
++   queryOID.elements = (char*) malloc(obj->length * sizeof(char));
++   memcpy(queryOID.elements, obj->data, obj->length);
++
++   maj_status = gss_inquire_sec_context_by_oid(&min_status, context[fd], &queryOID, &buffer_set);
++
++   if(maj_status != GSS_S_COMPLETE) {
++       fprintf(stderr, "Failed querying extension by OID\n");
++       free(queryOID.elements);
++       return maj_status;
++   }
++
++   if(buffer_set->count == 0)
++       return GSS_S_COMPLETE;
++   
++   *data = (char*) malloc(buffer_set->elements[0].length+1);   
++   strncpy(*data, buffer_set->elements[0].value, buffer_set->elements[0].length);
++   *data[buffer_set->elements[0].length] = '\0';
++
++   free(queryOID.elements);
++
++   return GSS_S_COMPLETE;
++}
++
++
+ #endif /* end of if defined(DCE) || defined(GSI_AUTH) || defined(Kerberos) */
+diff -ruN old/SRB3_5_0/src/lib/auth.c new/SRB3_5_0/src/lib/auth.c
+--- old/SRB3_5_0/src/lib/auth.c	2005-12-01 11:23:23.000000000 +1000
++++ new/SRB3_5_0/src/lib/auth.c	2008-01-10 14:35:35.000000000 +1000
+@@ -265,6 +265,79 @@
+ #endif
+ }
+ 
++int getClientDn(int sock, char** clientDn) {
++#ifdef GSI_AUTH
++	int status;
++	if (aid_setup_creds (NULL, GSI_SERVER_FLAG, GSI_TYPE_FLAG) != 0) {
++		*clientDn = NULL;
++		return (AUTH_ERR_GSI_SETUP);
++	}
++
++	*clientDn = (char*) malloc((MAX_TOKEN + 1) * sizeof(char));
++	if ((status = aid_establish_context_serverside (sock, *clientDn, MAX_TOKEN, GSI_TYPE_FLAG)) != 0) {
++		fprintf(stderr, "Gsi Auth error. status = %d\n", status);
++		free(*clientDn);
++		*clientDn = NULL;
++		return (AUTH_ERR_GSI_AUTH);
++	}
++
++	return status;
++#else
++    return AUTH_ERR_GSI_NO_SUPPORT;
++#endif
++}
++
++int checkClientDnInMcat(int sock, char *userName, char *domainName, char *clientDn) {
++#ifdef GSI_AUTH	
++    int status;
++    char *mcatAuthDn;
++    int i;
++
++    /* Check the Dn with MCAT */
++
++    status = getAuthDnFromMCAT (userName, domainName, GSI_AUTH_KEYWD, &mcatAuthDn);
++    
++    if (status < 0)
++	return (AUTH_ERR_NO_GSI_DN_IN_MCAT);
++    
++    for (i = 0; i < status; i++) {
++    	/* if (strcmp (&mcatAuthDn[i*MAX_DATA_SIZE], gsiDnBuf) == 0) {  */
++    	if (compareGSIDn (&mcatAuthDn[i*MAX_DATA_SIZE], clientDn) > 0) { 
++	    free (mcatAuthDn);
++		elog(NOTICE, "chkGsiAuth: server side authorization checked out.\n User %s\n DN %s", userName, clientDn);
++	    return (0);
++	}
++    }
++	
++    /* no match */
++
++    if (status > 0) {
++    	fprintf (stderr, "chkGsiAuth: Dn mismatch, from MCAT-%s, from GSI-%s\n",
++	 mcatAuthDn, clientDn);
++	free (mcatAuthDn);
++    } else {
++	fprintf (stderr, "chkGsiAuth: Dn mismatch, from GSI-%s\n", clientDn);
++    }
++
++    return (AUTH_ERR_GSI_DN_MISMATCH);
++#else
++    return AUTH_ERR_GSI_NO_SUPPORT;
++#endif
++}
++
++int
++getShibGroupString(int sock, char* oid, char** data) {
++	int status;
++	int authSchemeInx;
++	
++	*data = NULL;
++	authSchemeInx = svrGetAuthScheme (CLIENT_MODE);
++	if(authSchemeInx == GSI_AUTH_INX || authSchemeInx == GSI_SECURE_COMM_INX) {
++		return aid_get_x509_extension_data_by_oid(sock, oid, data);
++	}
++	return 0;
++}
++
+ int
+ chkGsiAuth (int sock, char *userName, char *mdasDomain)
+ {
+diff -ruN old/SRB3_5_0/src/lib/comm.c new/SRB3_5_0/src/lib/comm.c
+--- old/SRB3_5_0/src/lib/comm.c	2007-04-03 04:24:40.000000000 +1000
++++ new/SRB3_5_0/src/lib/comm.c	2008-01-10 14:35:35.000000000 +1000
+@@ -1204,11 +1204,127 @@
+     return 0;
+ }
+ 
++FILE*
++openShibConfigFile () {
++	char *conFile;
++	FILE *file;
++
++	conFile = (char*) malloc((strlen(getSrbDataDir()) + strlen(SHIB_CONFIG_FILENAME) + 2) * sizeof(char));
++
++	strcpy(conFile, getSrbDataDir());
++	strcat(conFile, "/");
++	strcat(conFile, SHIB_CONFIG_FILENAME);
++
++	file = fopen(conFile, "r");
++
++	if(file == NULL) {
++		fprintf(stderr, "Unable to open SHIB_CONFIG_FILENAME (%s).  errno = %d\n", conFile, errno);
++	}
++
++	free(conFile);
++
++	return file;
++}
++
++int getLineType(char* buf) {
++	int i;
++	for(i = 0; i < numShibConfigLines; i++)
++		if(strncmp(buf, shibConfigLines[i].string, strlen(shibConfigLines[i].string)) == 0)
++			return shibConfigLines[i].id;
++	return -1;
++}
++
++int isWhiteSpace(char c) {
++	if(c == ' ' || c == '\t')
++		return 0;
++	return -1;
++}
++
++char* getLineData(char* buf) {
++	char* head = buf;
++	char* tail = buf + strlen(buf) - 1;
++
++	int i;
++	for(i = 0; i < numShibConfigLines; i++)
++		if(strncmp(buf, shibConfigLines[i].string, strlen(shibConfigLines[i].string)) == 0)
++			head += strlen(shibConfigLines[i].string);
++	if(head == buf)
++		return NULL;
++	while(isWhiteSpace(head[0]) == 0)
++		head++;
++	if(head[0] != '=')
++		return NULL;
++	head++;
++	while(isWhiteSpace(head[0]) == 0)
++		head++;
++	while(isWhiteSpace(tail[0]) == 0) {
++		tail[0] = '\0';
++		tail--;	
++	}
++	return head;
++}
++
++void configShibInfoWithFile(FILE* file, struct shibConfigInfo *shibInfo) {
++	int i, lines = 0;
++	char buf[MAX_LINE_SZ];
++	char *tmp;
++
++	if(file == NULL)
++		return;
++
++	while((i = getNextLine(file, buf, sizeof(buf))) != EOF) {
++		switch(getLineType(buf)) {
++			case CONFIG_ID_DN_TO_USER_DOMAIN_SCRIPT:
++				tmp = getLineData(buf);
++				if(tmp != NULL)
++					shibInfo->dnToUserDomainScript = strdup(tmp);
++				break;
++			case CONFIG_ID_ADD_USER_SCRIPT:
++				tmp = getLineData(buf);
++				if(tmp != NULL)
++					shibInfo->addUserScript = strdup(tmp);
++				break;
++			case CONFIG_ID_ADD_GROUP_SCRIPT:
++				tmp = getLineData(buf);
++				if(tmp != NULL)
++					shibInfo->addGroupScript = strdup(tmp);
++				break;
++			case CONFIG_ID_ADD_DOMAIN_SCRIPT:
++				tmp = getLineData(buf);
++				if(tmp != NULL)
++					shibInfo->addDomainScript = strdup(tmp);
++			case CONFIG_ID_SHIB_CERT_OID:
++				tmp = getLineData(buf);
++				if(tmp != NULL)
++					shibInfo->shibCertOid = strdup(tmp);
++				break;
++			case CONFIG_ID_SHIB_GROUP_SEPARATOR:
++				tmp = getLineData(buf);
++				if(tmp != NULL)
++					shibInfo->shibGroupSeparator = strdup(tmp);
++				break;
++		}
++	}
++}
++
++int loadShibInfo(struct shibConfigInfo *shibInfo) {	
++	FILE *file;
++
++	file = openShibConfigFile();
++	if(file == NULL) {
++		return -1;
++	}
++	
++	configShibInfoWithFile(file, shibInfo);
++	return 0;
++}
++
+ int
+ fillMcatHostInfo (char *mcatName, char *mcatHost, char *mcatAuthScheme, 
+ char *mcatDn, char *myPortNum, int localFlag)
+ {
+     struct serverAuthInfo *myServerAuthInfo;
++	struct shibConfigInfo *myShibInfo;
+     struct hostElement *tmpHElement;
+     char *mcatPort;
+     struct hostent *hostEnt;
+@@ -1267,10 +1383,19 @@
+     myServerAuthInfo = (struct serverAuthInfo *) malloc
+      (sizeof (struct serverAuthInfo));
+ 
+-    status = fillServerAuthInfo (mcatHost, mcatAuthScheme,
+-     mcatDn, myServerAuthInfo);
++	myShibInfo = (struct shibConfigInfo *) malloc(sizeof (struct shibConfigInfo));
++	status = loadShibInfo(myShibInfo);
++	if(status < 0) {
++		free(myShibInfo);
++		myShibInfo = NULL;
++	}
++
++    status = fillServerAuthInfo (mcatHost, mcatAuthScheme, mcatDn, myShibInfo, myServerAuthInfo);
+     myServerAuthInfo->mcatName = mcatName;
+ 
++	if(myShibInfo != NULL)
++		free(myShibInfo);
++
+     /* KESTOCK - mem leak patch */
+     if (mcatAuthScheme != NULL) {
+         free (mcatAuthScheme);
+@@ -2723,8 +2848,7 @@
+ 
+         DefServerAuthInfo = (struct serverAuthInfo *) malloc
+          (sizeof (struct serverAuthInfo));
+-        status = fillServerAuthInfo (tmpHostAddr, tmpAuthKeyWd,
+-         tmpAuthDn, DefServerAuthInfo);
++        status = fillServerAuthInfo (tmpHostAddr, tmpAuthKeyWd, tmpAuthDn, NULL, DefServerAuthInfo);
+         if (status < 0) {
+             free (DefServerAuthInfo);
+             DefServerAuthInfo = NULL;
+@@ -3302,15 +3426,14 @@
+         i = getNextLine (file, buf, sizeof(buf));
+ 
+         if (i < 0) {
+-            fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, NULL, NULL,
+-             cnt);
++            fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, NULL, NULL, cnt);
+             continue;
+         }
+ 
+         mcatDn = strdup (buf);
+ 
+-        fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, mcatDn, NULL,
+-         cnt);
++       fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, mcatDn, NULL, cnt);
++
+     }
+ 
+     return (0);
+@@ -3347,7 +3470,7 @@
+             mcatAuthScheme = strdup (buf);
+         } else if (mcatDn == NULL) {
+             mcatDn = strdup (buf);
+-        }
++		}
+     }
+     if (getenv (MCAT_ZONE_KEYWORD) != NULL) {
+         mcatName = strdup (getenv (MCAT_ZONE_KEYWORD));
+@@ -3358,17 +3481,15 @@
+ 	if (mcatAuthScheme != NULL)
+             slaveMcatAuthScheme = strdup (mcatAuthScheme);
+ 	if (mcatDn != NULL)
+-            slaveMcatDn = strdup (mcatDn); 
++            slaveMcatDn = strdup (mcatDn);
+     }
+ 
+-    fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, mcatDn, NULL, 
+-      LOCAL_MCAT_T);
++    fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, mcatDn, NULL, LOCAL_MCAT_T);
+ 
+     /* need to be here because getMcatZoneInfo will all use Master Mcat
+      * otherwise */ 
+     if (slaveMcatHost != NULL) {
+-        fillMcatHostInfo (mcatName, slaveMcatHost, slaveMcatAuthScheme,
+-          slaveMcatDn, NULL, LOCAL_SLAVE_MCAT_T);
++        fillMcatHostInfo (mcatName, slaveMcatHost, slaveMcatAuthScheme, slaveMcatDn, NULL, LOCAL_SLAVE_MCAT_T);
+     }
+ 
+     /* query the mcatZone */
+@@ -3500,7 +3621,7 @@
+ #ifdef foo	/* moved up */
+     if (slaveMcatHost != NULL) {
+         fillMcatHostInfo (mcatName, slaveMcatHost, slaveMcatAuthScheme, 
+-          slaveMcatDn, NULL, LOCAL_SLAVE_MCAT_T);
++          slaveMcatDn, slaveMcatAddUserScript, slaveMcatAddGroupScript, slaveMcatShibCertOid, slaveMcatShibGroupSeparator, NULL, LOCAL_SLAVE_MCAT_T);
+     }
+ #endif
+ 
+@@ -3524,11 +3645,10 @@
+             mcatAuthScheme = strdup (buf);
+         } else if (mcatDn == NULL) {
+             mcatDn = strdup (buf);
+-        }
++		}
+     }
+     mcatName = strdup ("defaultMcat");
+-    fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, mcatDn, NULL, 
+-      LOCAL_MCAT_T);
++    fillMcatHostInfo (mcatName, mcatHost, mcatAuthScheme, mcatDn, NULL, LOCAL_MCAT_T);
+ 
+     return (0);
+ }
+diff -ruN old/SRB3_5_0/utilities/Makefile.in new/SRB3_5_0/utilities/Makefile.in
+--- old/SRB3_5_0/utilities/Makefile.in	2006-07-20 08:53:55.000000000 +1000
++++ new/SRB3_5_0/utilities/Makefile.in	2008-01-10 14:35:35.000000000 +1000
+@@ -36,8 +36,8 @@
+ ADMINBIN = $(adminBinDir)/Singestuser $(adminBinDir)/SmodifyUser \
+            $(adminBinDir)/Sregisterlocation $(adminBinDir)/Sregisterresource  \
+            $(adminBinDir)/SmodR $(adminBinDir)/SdelValue $(adminBinDir)/Singestgroup  \
+-           $(adminBinDir)/Singesttoken $(adminBinDir)/pingall $(adminBinDir)/vaultchk
+-
++           $(adminBinDir)/Singesttoken $(adminBinDir)/pingall $(adminBinDir)/vaultchk \
++           $(adminBinDir)/SmodifyShibMapping $(adminBinDir)/SqueryShibMapping
+ 
+ UPLOADBIN = $(binDir)/Sput
+ ifdef PARA_OPR
+@@ -76,7 +76,8 @@
+ 	$(objDir)/SdelValue.o $(objDir)/Ssh.o $(objDir)/Sstage.o \
+ 	$(objDir)/Singestgroup.o $(objDir)/Sauth.o $(objDir)/SmodE.o \
+ 	$(objDir)/Singesttoken.o $(objDir)/getsrbobj.o $(objDir)/Squery.o $(objDir)/pingall.o \
+-	$(objDir)/Sds2db.o $(objDir)/Ssql.o $(objDir)/Sdsquery.o $(objDir)/vaultchk.o
++	$(objDir)/Sds2db.o $(objDir)/Ssql.o $(objDir)/Sdsquery.o $(objDir)/vaultchk.o \
++	$(objDir)/SmodifyShibMapping.o $(objDir)/SqueryShibMapping.o
+ 
+ ifdef PARA_OPR
+ OBJS+=$(objDir)/Sbload.o $(objDir)/srbpget.o $(objDir)/srbpput.o	\
+diff -ruN old/SRB3_5_0/utilities/man/man1/SmodifyShibMapping.1 new/SRB3_5_0/utilities/man/man1/SmodifyShibMapping.1
+--- old/SRB3_5_0/utilities/man/man1/SmodifyShibMapping.1	1970-01-01 10:00:00.000000000 +1000
++++ new/SRB3_5_0/utilities/man/man1/SmodifyShibMapping.1	2008-01-10 14:35:35.000000000 +1000
+@@ -0,0 +1,38 @@
++.\" For ascii version, process this file with
++.\" groff -man -Tascii S.1
++.\"
++.TH SmodifyShibMapping 1 "February 2007 " "Storage Resource Broker" "Admin SRB Commands"
++.SH NAME
++SmodifyShibMapping \- Modify Shibboleth mappings.
++.SH SYNOPSIS
++.BR "SmodifyShibMapping <" operationType >
++.IR Value1 " [" Value2 ]
++.SH DESCRIPTION
++.B "SmodifyShibMapping "
++modifies the details of a Shibboleth mapping.
++.BR < operationType >
++determines which modification is to be performed.
++.PP
++.SH "OPERATION TYPES"
++.TP 0.5i
++.B "addToMapping "
++Adds an existing group to a Shibboleth mapping, creating the Shibboleth mapping if necessary.
++.I Value1
++is the name of the Shibboleth mapping, and 
++.I Value2
++is the name of the group.
++.TP 0.5i
++.B "delFromMapping "
++Removes a group from a Shibboleth mapping, removing the Shibboleth mapping if no other groups are associated with it.
++.I Value1
++is the name of the Shibboleth mapping, and 
++.I Value2
++is the name of the group.
++.TP 0.5i
++.B "delShibMapping "
++Deletes the specified Shibboleth mapping.
++.I Value1
++is the name of the Shibboleth mapping.
++.SH "SEE ALSO"
++.BR SmodifyUser (1),
++.BR SqueryShibMapping (1)
+diff -ruN old/SRB3_5_0/utilities/man/man1/SmodifyUser.1 new/SRB3_5_0/utilities/man/man1/SmodifyUser.1
+--- old/SRB3_5_0/utilities/man/man1/SmodifyUser.1	2004-11-25 05:39:55.000000000 +1000
++++ new/SRB3_5_0/utilities/man/man1/SmodifyUser.1	2008-01-10 14:35:35.000000000 +1000
+@@ -23,6 +23,8 @@
+ .TP 0.5i
+ .B "addToGroup "
+ Adds this account to an already existing group.
++.B "addToShibMapping "
++Adds this account to an already existing Shibboleth mapping.
+ .TP 0.5i
+ .B "addDN "
+ Adds a Distinguished Name (DN string) to this account for GSI Authentication purposes.
+@@ -32,6 +34,8 @@
+ .TP 0.5i
+ .B "delFromGroup "
+ Remove the user from the specified group.
++.B "delFromShibMapping "
++Remove the user from the specified Shibboleth mapping.
+ .TP 0.5i
+ .B "delDN "
+ Deletes the specified DN string
+diff -ruN old/SRB3_5_0/utilities/man/man1/SqueryShibMapping.1 new/SRB3_5_0/utilities/man/man1/SqueryShibMapping.1
+--- old/SRB3_5_0/utilities/man/man1/SqueryShibMapping.1	1970-01-01 10:00:00.000000000 +1000
++++ new/SRB3_5_0/utilities/man/man1/SqueryShibMapping.1	2008-01-10 14:35:35.000000000 +1000
+@@ -0,0 +1,39 @@
++.\" For ascii version, process this file with
++.\" groff -man -Tascii S.1
++.\"
++.TH SqueryShibMapping 1 "February 2007 " "Storage Resource Broker" "Admin SRB Commands"
++.SH NAME
++SqueryyShibMapping \- Queryy for information about Shibboleth mappings.
++.SH SYNOPSIS
++.BR "SqueryShibMapping <" queryType >
++.I Value
++.SH DESCRIPTION
++.B "SqueryShibMapping "
++queries for the details of a Shibboleth mapping.
++.BR < queryType >
++determines which query is to be performed.
++.PP
++.SH "QUERY TYPES"
++.TP 0.5i
++.B "groupsFromMapping "
++Queries for the groups associated with a specified Shibboleth mapping.
++.I Value
++is the name of the Shibboleth mapping of interest.
++.TP 0.5i
++.B "mappingsFromGroup "
++Queries for the Shibboleth mappings associated with a specified group.
++.I Value
++is the name of the group of interest.
++.TP 0.5i
++.B "usersFromMapping "
++Queries for the users associated with a specified Shibboleth mapping.
++.I Value
++is the name of the Shibboleth mapping of interest.
++.TP 0.5i
++.B "mappingsFromUser "
++Queries for the Shibboleth mappings associated with a specified user.
++.I Value
++is the name of the user of interest.
++.SH "SEE ALSO"
++.BR SmodifyUser (1),
++.BR SmodifyShibMapping (1)
+diff -ruN old/SRB3_5_0/utilities/src/SmodifyShibMapping.c new/SRB3_5_0/utilities/src/SmodifyShibMapping.c
+--- old/SRB3_5_0/utilities/src/SmodifyShibMapping.c	1970-01-01 10:00:00.000000000 +1000
++++ new/SRB3_5_0/utilities/src/SmodifyShibMapping.c	2008-01-10 14:35:35.000000000 +1000
+@@ -0,0 +1,91 @@
++#include <stdio.h>
++#ifndef _WIN32
++#include <sys/file.h>
++#include <sys/stat.h>
++#endif
++#if defined(PORTNAME_c90) || defined(PORTNAME_solaris)
++#include <sys/fcntl.h>  /* For C-90 - define O_RDONLY */
++#endif
++ 
++#include "srbClient.h"
++
++extern char *clGetUserName(), *clGetDomainName(), *clGetAuth();
++
++int usage(char *name) {
++        fprintf(stderr,"usage: %s <operationType> <Value1> <Value2>\n", name );
++        fprintf(stderr,"Where <operationType> = addToMapping, delFromMapping, delShibMapping\n");
++		fprintf(stderr,"Example: %s addToMapping VOGroup SRBGroup' \n", name);
++		fprintf(stderr,"Example: %s delShibMapping VOGroup' \n", name);
++	return(0);
++}
++
++int main(int argc, char* argv[])
++{  
++  srbConn *conn;
++  int i, modAction;
++  char val1[MAX_TOKEN], val2[MAX_TOKEN];
++
++  if (argc < 2) {
++      usage(argv[0]);
++      exit(0);
++  }
++
++  if (!strcmp(argv[1], "addToMapping")) {
++	if (argc != 4) {
++		usage(argv[0]);
++		exit(0);
++	}
++	modAction = U_INSERT_SHIB_MAPPING_GROUP;
++	sprintf(val1, "%s", argv[2]);
++	sprintf(val2, "%s", argv[3]);
++  }
++  else if (!strcmp(argv[1], "delFromMapping")) {
++	if (argc != 4) {
++		usage(argv[0]);
++		exit(0);
++	}
++	modAction = U_DELETE_SHIB_MAPPING_GROUP;
++	sprintf(val1, "%s", argv[2]);
++	sprintf(val2, "%s", argv[3]);
++  }
++  else if (!strcmp(argv[1], "delShibMapping")) {
++	if (argc != 3) {
++		usage(argv[0]);
++		exit(0);
++	}
++	modAction = U_DELETE_SHIB_MAPPING_GROUPS;
++	sprintf(val1, "%s", argv[2]);
++	sprintf(val2, "");
++  }
++  else {
++    usage(argv[0]);
++    exit(-1);
++  }
++
++  conn = srbConnect (NULL, NULL, NULL, NULL, NULL, NULL, NULL);
++  if (clStatus(conn) != CLI_CONNECTION_OK) 
++  {
++        fprintf(stderr,"Connection to exfMaster failed.\n");
++        fprintf(stderr,"%s",clErrorMessage(conn));
++		clFinish(conn);
++		exit (1);
++  }
++
++  i = srbModifyShibMapping(conn, 0, val1, val2, modAction);
++
++  if (i == -3207) {
++    fprintf(stderr,"You do not have sufficient permission to run this command\n");
++    srb_perror(2, i, "", SRB_RCMD_ACTION|SRB_LONG_MSG);
++  }
++  else if (i != 0) {
++    fprintf(stderr,"SmodifyShibMapping Error: %i\n",i);
++    srb_perror(2, i, "", SRB_RCMD_ACTION|SRB_LONG_MSG);
++    fprintf(stderr,"Contact SRB Consultants for more help\n");
++    clFinish(conn);
++    exit(1);
++  }
++
++  clFinish(conn);
++  exit(0);
++}
++
+diff -ruN old/SRB3_5_0/utilities/src/SmodifyUser.c new/SRB3_5_0/utilities/src/SmodifyUser.c
+--- old/SRB3_5_0/utilities/src/SmodifyUser.c	2005-06-18 03:24:47.000000000 +1000
++++ new/SRB3_5_0/utilities/src/SmodifyUser.c	2008-01-10 14:35:35.000000000 +1000
+@@ -15,6 +15,7 @@
+         fprintf(stderr,"usage: %s <operationType> <UserName> <UserDomain> <Value>\n", name );
+         fprintf(stderr,"Where <operationType> = addToGroup, addDN, password, delFromGroup, delDN, changeType,\n");
+ 	fprintf(stderr,"                        addUserGroupOwner, delUserGroupOwner, changeZone,\n");
++	fprintf(stderr,"                        addToShibMapping, delFromShibMapping,\n");
+ 	fprintf(stderr,"                        changeUserAddress, changeUserEmail, changeUserPhone\n"); 
+ 	fprintf(stderr,"Example: %s addDN mike sdsc '/C=blah/O=foo/user=mike' \n", name);
+ 	return(0);
+@@ -38,6 +39,10 @@
+       modAction = U_INSERT_GROUP;
+       sprintf(newVal,"%s",argv[4]);
+   }
++  else if (!strcmp(argv[1],"addToShibMapping")) {
++      modAction = U_INSERT_SHIB_MAPPING_USER;
++      sprintf(newVal,"%s",argv[4]);
++  }
+   else if(!strcmp(argv[1],"addDN")) {
+       modAction = U_INSERT_AUTH_MAP;
+       sprintf(newVal,"GSI_AUTH:%s",argv[4]);
+@@ -50,6 +55,10 @@
+       modAction = U_DELETE_GROUP;
+       sprintf(newVal,"%s",argv[4]);
+   }
++  else if(!strcmp(argv[1],"delFromShibMapping")) {
++      modAction = U_DELETE_SHIB_MAPPING_USER;
++      sprintf(newVal,"%s",argv[4]);
++  }
+   else if(!strcmp(argv[1],"delDN")) {
+       modAction = U_DELETE_AUTH_MAP;
+       sprintf(newVal,"GSI_AUTH:%s",argv[4]);
+diff -ruN old/SRB3_5_0/utilities/src/SqueryShibMapping.c new/SRB3_5_0/utilities/src/SqueryShibMapping.c
+--- old/SRB3_5_0/utilities/src/SqueryShibMapping.c	1970-01-01 10:00:00.000000000 +1000
++++ new/SRB3_5_0/utilities/src/SqueryShibMapping.c	2008-01-10 14:35:35.000000000 +1000
+@@ -0,0 +1,126 @@
++#include <stdio.h>
++#ifndef _WIN32
++#include <sys/file.h>
++#include <sys/stat.h>
++#endif
++#if defined(PORTNAME_c90) || defined(PORTNAME_solaris)
++#include <sys/fcntl.h>  /* For C-90 - define O_RDONLY */
++#endif
++ 
++#include "srbClient.h"
++
++extern char *clGetUserName(), *clGetDomainName(), *clGetAuth();
++
++int usage(char *name) {
++        fprintf(stderr,"usage: %s <queryType> <value>\n", name );
++        fprintf(stderr,"Where <queryType> = groupsFromMapping, mappingsFromGroup, usersFromMapping, mappingsFromUser\n");
++		fprintf(stderr,"Example: %s mappingsFromGroup SRBGroup' \n", name);
++		fprintf(stderr,"Example: %s groupsFromMapping VOGroup' \n", name);
++	return(0);
++}
++
++void printResults(const char *data, int dataLen) {
++	char tmp[MAX_TOKEN];
++	char *scan, *start, *end;
++	
++	scan = (char*) malloc(dataLen * sizeof(char));
++	strncpy(scan, data, dataLen);
++
++	start = scan;
++	end = scan + dataLen;
++
++	while(sscanf(scan, "%s\n", tmp) != EOF && scan != end) {
++		printf(" - %s\n", tmp);
++		scan += strlen(tmp);
++		scan++;
++	}
++
++	free(start);
++}
++
++int main(int argc, char* argv[])
++{  
++  srbConn *conn;
++  int i, queryAction;
++  char val[MAX_TOKEN], result[MAX_TOKEN];
++
++  if (argc != 3) {
++      usage(argv[0]);
++      exit(0);
++  }
++
++  sprintf(val, "%s", argv[2]);
++
++  if (!strcmp(argv[1], "groupsFromMapping"))
++	queryAction = U_QUERY_GROUPS_FROM_SHIB_MAPPING;
++  else if (!strcmp(argv[1], "mappingsFromGroup"))
++	queryAction = U_QUERY_SHIB_MAPPINGS_FROM_GROUP;
++  else if (!strcmp(argv[1], "usersFromMapping"))
++	queryAction = U_QUERY_USERS_FROM_SHIB_MAPPING;
++  else if (!strcmp(argv[1], "mappingsFromUser"))
++	queryAction = U_QUERY_SHIB_MAPPINGS_FROM_USER;
++  else {
++    usage(argv[0]);
++    exit(-1);
++  }
++
++  conn = srbConnect (NULL, NULL, NULL, NULL, NULL, NULL, NULL);
++  if (clStatus(conn) != CLI_CONNECTION_OK) 
++  {
++        fprintf(stderr,"Connection to exfMaster failed.\n");
++        fprintf(stderr,"%s",clErrorMessage(conn));
++		clFinish(conn);
++		exit (1);
++  }
++
++  i = srbQueryShibMapping(conn, 0, val, result, queryAction);
++
++  if (i == -3207) {
++    fprintf(stderr,"You do not have sufficient permission to run this command\n");
++    srb_perror(2, i, "", SRB_RCMD_ACTION|SRB_LONG_MSG);
++  }
++  else if (i < 0) {
++    fprintf(stderr,"SqueryShibMapping Error: %i\n",i);
++    srb_perror(2, i, "", SRB_RCMD_ACTION|SRB_LONG_MSG);
++    fprintf(stderr,"Contact SRB Consultants for more help\n");
++    clFinish(conn);
++    exit(1);
++  } else {
++	if(i == 0) {
++		switch(queryAction) {
++			case U_QUERY_GROUPS_FROM_SHIB_MAPPING:
++				printf("No SRB groups are linked to the Shib mapping %s\n", val);
++			break;
++			case U_QUERY_SHIB_MAPPINGS_FROM_GROUP:
++				printf("No Shib mappings are linked to the SRB group %s\n", val);
++			break;
++			case U_QUERY_USERS_FROM_SHIB_MAPPING:
++				printf("No SRB users are linked to the Shib mapping %s\n", val);
++			break;
++			case U_QUERY_SHIB_MAPPINGS_FROM_USER:
++				printf("No Shib mappings are linked to the SRB user %s\n", val);
++			break;
++		}
++	} else {
++		switch(queryAction) {
++			case U_QUERY_GROUPS_FROM_SHIB_MAPPING:
++				printf("SRB groups linked to the Shib mapping %s:\n", val);
++			break;
++			case U_QUERY_SHIB_MAPPINGS_FROM_GROUP:
++				printf("Shib mappings linked to the SRB group %s:\n", val);
++			break;
++			case U_QUERY_USERS_FROM_SHIB_MAPPING:
++				printf("SRB users linked to the Shib mapping %s:\n", val);
++			break;
++			case U_QUERY_SHIB_MAPPINGS_FROM_USER:
++				printf("Shib mappings linked to the SRB user %s:\n", val);
++			break;
++		}
++		printResults(result, i);
++	}
++  }
++
++  clFinish(conn);
++  exit(0);
++}
++

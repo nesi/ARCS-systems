@@ -6,11 +6,13 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        5.arcs
+Release:        6.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
-Patch:          srb3.5-destdir.patch
+Patch0:         srb3.5-destdir.patch
+Patch1:         srb3.5-shib-srb.patch
+Patch2:         srb3.5-securecomm.patch
 URL:            http://www.sdsc.edu/srb/index.php/Main_Page
 Packager:       David Gwynne <dlg@itee.uq.edu.au>, Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
@@ -91,13 +93,16 @@ This package updates the server version 3.4.2 to version 3.5.
 %setup -q -n %{srbSrc}
 
 %patch0 -p1 -b .destdir
+%patch1 -p2 -b .shib-srb
+%patch2 -p2 -b .securecomm
 
 %build
 # real men use --prefix
 export GLOBUS_LOCATION=%{globuslocation}
 export LD_LIBRARY_PATH=$GLOBUS_LOCATION/lib
 export CFLAGS="-I$GLOBUS_LOCATION/include -I$GLOBUS_LOCATION/include/gcc32dbg -I$GLOBUS_LOCATION/include/gcc32dbgpthr"
-%configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr --enable-httpd=8080
+#%configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr --enable-httpd=8080
+%configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr
 make DBMS_INCLUDE="-I%{srbroot}/include -DPSQMCAT" DBMS_LIB="-L%{srbroot}/lib -lpsqlodbc"
 
 cd MCAT
@@ -487,6 +492,9 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Tue May 06 2008 Florian Goessmann <florian@ivec.org>
+- applied JCU patches for Shibboleth, thanks to Nigel Sim <nigel.sim@jcu.edu.au>
+- disabled build of gridhttpd -> never worked and broke the build with the patches
 * Fri Apr 18 2008 Florian Goessmann <florian@ivec.org>
 - added creation of ticketuser
 * Wed Apr 3  2008 Florian Goessmann <florian@ivec.org>

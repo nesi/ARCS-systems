@@ -1,0 +1,13 @@
+--- SRBInstaller350/SRB3_5_0.clean/mk/mk.config.in	2007-07-06 06:42:37.000000000 +1000
++++ SRBInstaller350/SRB3_5_0/mk/mk.config.in	2008-04-21 12:09:56.000000000 +1000
+@@ -837,9 +838,9 @@
+ OPENSSL_LOCATION=@OPENSSLHOME@
+ TEST_LOCATION = $(OPENSSL_LOCATION) $(GLOBUS_LOCATION)
+ ifdef TEST_LOCATION
+ AUTH_INCLUDE += $(OPENSSL_LOCATION)/include
+-LIB_GSI_AUTH = \
++LIB_GSI_AUTH += \
+         -L$(OPENSSL_LOCATION)/lib \
+ 	-lssl \
+ 	-lcrypto
+ else
