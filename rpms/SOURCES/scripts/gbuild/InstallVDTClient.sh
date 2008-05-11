@@ -54,8 +54,6 @@ fi
 
 PACMAN=pacman-3.21
 PACMANSRC=http://projects.arcs.org.au/svn/systems/trunk/rpms/SOURCES/$PACMAN.tar.gz
-# TODO: download from APAC repository instead?
-#  http://www.grid.apac.edu.au/repository/trac/systems/browser/gateway/rpms/SOURCES
 if [ ! -d $PACMAN ]; then
   echo "==> Installing Pacman!"
   which wget > /dev/null || ( echo "wget not in path!" && exit 1 )

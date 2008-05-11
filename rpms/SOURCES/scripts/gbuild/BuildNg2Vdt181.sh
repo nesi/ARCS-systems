@@ -1,9 +1,9 @@
 #!/bin/sh
-# BuildNg2Vdt161.sh	APAC NG2 gateway build from VDT 1.6.x cache.
-#			Installs Globus-WS with PRIMA and APAC-specific
-#			additions on a minimal CentOS 4.4 or similar machine.
-#			Graham Jenkins <graham@vpac.org> Dec 2006, Rev 20070516
-
+# BuildNg2Vdt181.sh	ARCS NG2 gateway build from VDT 1.8.x cache.
+#			Installs Globus-WS with PRIMA and ARCS-specific
+#			additions on a minimal CentOS 4 or similar machine.
+#
+# See: http://projects.arcs.org.au/trac/systems/wiki/HowTo/InstallNg2
 #
 # PATH, environment, id-check, hosts-check
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin   \
