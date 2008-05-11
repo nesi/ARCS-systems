@@ -68,7 +68,7 @@ for Component in Globus-Base-Data-Server GSIOpenSSH PRIMA Fetch-CRL CA-Certifica
 
   # Pacman 3.21 complains about -pretend-platform when installation exists
   # ie. after first component is installed!
-  [ -f o..pacman..o/platform ] && unset Platform
+  [ -f o..pacman..o/platform ] && unset PLATFORM
 
   echo "==> Checking/Installing: $Component"
   pacman $PLATFORM $ProxyString \
