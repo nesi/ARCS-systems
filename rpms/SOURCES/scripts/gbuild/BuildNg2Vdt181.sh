@@ -28,6 +28,14 @@ yum install vim-minimal dhclient openssh-clients Ggateway      \
             gcc vixie-cron anacron crontabs diffutils xinetd tmpwatch \
             sysklogd logrotate man pbs-telltail compat-libstdc++-33   \
             compat-libcom_err perl-DBD-MySQL openssl097a gcc-c++ $Extras
+# check yum's return status
+if (($? == 1));
+then
+    echo "==> yum bailed out!"
+    exit 2
+fi
+
+# Torque qstat
 until qstat >/dev/null 2>/dev/null ; do
   echo    "==> qstat not found or not configured!"
   echo -n "==> Enter path (e.g. /usr/local/pbs/bin), else enter 'q' .. "
@@ -36,28 +44,29 @@ until qstat >/dev/null 2>/dev/null ; do
 done
 [ -d /usr/spool/PBS/server_logs ] && export PBS_HOME=/usr/spool/PBS
 
-#
-# Pacman, port-range adjustment, java-version adjustment, VDT
+# VDT port-range adjustment
 mkdir -p /opt/vdt/post-setup; cd /opt/vdt
-if [ ! -f /opt/vdt/post-setup/APAC01.sh ] ; then
+SETTINGS=ARCS01.sh
+if [ ! -f /opt/vdt/post-setup/$SETTINGS ] ; then
   until [ -n "$TcpRange" ]; do
     echo -n "==> Please enter GLOBUS_TCP_PORT_RANGE [e.g. 40000,41000] .. " 
     read TcpRange
     echo "$TcpRange" | egrep -q "^[[:digit:]]+,[[:digit:]]+$" || unset TcpRange
   done
-  cat <<-EOF >/opt/vdt/post-setup/APAC01.sh
+  cat <<-EOF >/opt/vdt/post-setup/$SETTINGS
 	export GLOBUS_TCP_PORT_RANGE=$TcpRange
 	EOF
-  chmod a+xr /opt/vdt/post-setup/APAC01.sh
-  echo "==> Created: /opt/vdt/post-setup/APAC01.sh"
+  chmod a+xr /opt/vdt/post-setup/$SETTINGS
+  echo "==> Created: /opt/vdt/post-setup/$SETTINGS"
 fi
 
-PACMAN=pacman-3.20
-# TODO: download from APAC repository instead?
-#  http://www.grid.apac.edu.au/repository/trac/systems/browser/gateway/rpms/SOURCES
+# Pacman
+PACMAN=pacman-3.21
+PACMANSRC=http://projects.arcs.org.au/svn/systems/trunk/rpms/SOURCES/$PACMAN.tar.gz
 if [ ! -d $PACMAN ]; then
   echo "==> Installing Pacman!"
-  wget http://physics.bu.edu/pacman/sample_cache/tarballs/$PACMAN.tar.gz &&
+  which wget > /dev/null || ( echo "wget not in path!" && exit 1 )
+  wget $PACMANSRC &&
   tar xzf $PACMAN.tar.gz && echo "==> Done!" || echo "==> Failed!"
 fi
 cd $PACMAN && source setup.sh && cd ..
@@ -65,10 +74,13 @@ cd $PACMAN && source setup.sh && cd ..
 #
 # VDT Components
 PLATFORM="-pretend-platform linux-rhel-4"
-VDTVER=1.8.1
-VDTMIRROR=http://www.grid.apac.edu.au/repository/mirror/vdt-$VDTVER.mirror
-VDTMIRROR=http://www.grid.apac.edu.au/repository/mirror/vdt/vdt_181_cache
+VDTMIRROR=http://projects.arcs.org.au/mirror/vdt/vdt_181_cache
 for Component in JDK-1.5 Globus-WS PRIMA-GT4 Fetch-CRL Globus-WS-PBS-Setup ; do
+
+  # Pacman 3.21 complains about -pretend-platform when installation exists
+  # ie. after first component is installed!
+  [ -f o..pacman..o/platform ] && unset PLATFORM
+
   echo "==> Checking/Installing: $Component"
   pacman $PLATFORM $ProxyString \
     -get $VDTMIRROR:$Component || echo "==> Failed!"
@@ -80,17 +92,23 @@ echo   "==> Performing: Certificate Check/Update"
 pacman $PLATFORM $ProxyString -update CA-Certificates
 
 #
-# Install startup scripts, work-around for MySQL timeout, PRIMA configuration files
+# Install environment
 sed --in-place=.ORI -e '/WSC_PORT/ s/9443/8443/' /opt/vdt/post-install/globus-ws
 for File in setup.sh setup.csh ; do
   [ ! -s /etc/profile.d/vdt_$File ] && ln -s /opt/vdt/$File /etc/profile.d/vdt_$File &&
                                        echo "==> Created: /etc/profile.d/vdt_$File"
 done
+. /etc/profile
+
+# work-around for MySQL timeout
 grep "^wait_timeout"  /opt/vdt/mysql/var/my.cnf >/dev/null ||
   sed --in-place=.ORI -e '/^\[mysqld\]/ a \
 wait_timeout=2764800
 ' /opt/vdt/mysql/var/my.cnf
-. /etc/profile; vdt-control --force --on && echo "==> Installed: startup scripts"
+
+vdt-control --force --on && echo "==> Installed: startup scripts"
+
+# PRIMA configuration
 if [ ! -f /etc/grid-security/prima-authz.conf ] ; then
   until [ -n "$Gums_Server" ] ; do
     echo -n "==> Please enter the name of your GUMS server [e.g. nggums.vpac.org ] .. "
@@ -132,9 +150,11 @@ fi
 chkconfig --add pbs-logmaker; service pbs-logmaker start
 echo "==> Re-starting: xinetd"
 chkconfig --add xinetd; service xinetd start; service xinetd reload
+
 echo "==> Running: /opt/vdt/fetch-crl/share/doc/fetch-crl-2.6.2/fetch-crl.cron"
 cd /tmp &&
   nohup /opt/vdt/fetch-crl/share/doc/fetch-crl-2.6.2/fetch-crl.cron >/dev/null &
+
 echo "==> You may now need to copy: /usr/local/src/pbs.pm.APAC"
 echo "==> To: /opt/vdt/globus/lib/perl/Globus/GRAM/JobManager/pbs.pm and edit"
 echo "==> Then: service globus-ws stop; service mysql restart; service globus-ws start"

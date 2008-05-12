@@ -34,8 +34,7 @@ then
     exit 2
 fi
 
-#
-# Pacman, port-range adjustment, VDT
+# VDT port-range adjustment
 SETTINGS=ARCS01.sh
 mkdir -p /opt/vdt/post-setup; cd /opt/vdt
 if [ ! -f /opt/vdt/post-setup/$SETTINGS ] ; then
@@ -49,7 +48,7 @@ if [ ! -f /opt/vdt/post-setup/$SETTINGS ] ; then
   echo "==> Created: /opt/vdt/post-setup/$SETTINGS"
 fi
 
-
+# Pacman
 PACMAN=pacman-3.21
 PACMANSRC=http://projects.arcs.org.au/svn/systems/trunk/rpms/SOURCES/$PACMAN.tar.gz
 if [ ! -d $PACMAN ]; then
@@ -81,7 +80,7 @@ echo   "==> Performing: Certificate Check/Update"
 pacman $PLATFORM $ProxyString -update CA-Certificates
 
 #
-# Install startup scripts and PRIMA configuration files
+# Install environment
 for File in setup.sh setup.csh ; do
   [ ! -s /etc/profile.d/vdt_$File ] && ln -s /opt/vdt/$File /etc/profile.d/vdt_$File &&
                                        echo "==> Created: /etc/profile.d/vdt_$File"
@@ -102,6 +101,9 @@ vdt-register-service --name gsisshd --type init --enable --protocol tcp \
 chkconfig --del sshd
 
 vdt-control --force --on && echo "==> Installed: startup scripts"
+
+# PRIMA configuration
+# TODO: ask for server as in ng2 script
 if [ ! -f /etc/grid-security/prima-authz.conf ] ; then
   /opt/vdt/vdt/setup/configure_prima
   cp $VDT_LOCATION/post-install/gsi-authz.conf   /etc/grid-security/
@@ -111,12 +113,14 @@ fi
 
 #
 # Wrapup
-echo "==> Re-loading: xinetd"
+echo "==> Re-starting: xinetd"
 chkconfig --add syslog; service syslog condrestart; service xinetd reload
+
 echo "==> Running: /opt/vdt/fetch-crl/share/doc/fetch-crl-2.6.2/fetch-crl.cron"
 cd /tmp &&
   nohup /opt/vdt/fetch-crl/share/doc/fetch-crl-2.6.2/fetch-crl.cron >/dev/null &
+
 service gsissh status >/dev/null 2>&1 && exit 0
-echo "==> Stopping: sshd   and Starting: gsisshd"
+echo "==> Stopping: sshd and Starting: gsisshd"
 service sshd stop; service gsisshd start
 exit 0
