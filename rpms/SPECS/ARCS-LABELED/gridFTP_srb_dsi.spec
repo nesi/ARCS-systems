@@ -4,7 +4,7 @@
 Summary:        gridFTP_SRB_DSI
 Name:           gridFTP_SRB_DSI
 Version:        0.28
-Release:        1.arcs
+Release:        2.arcs
 License:        Custom
 Group:          Applications/Internet
 Source:         gridftp_srb_dsi-%{version}.tar.gz
@@ -63,6 +63,7 @@ service gsiftp-srb
     env += GLOBUS_TCP_PORT_RANGE=40000,41000
     env += LD_LIBRARY_PATH=%{GLOBUS_LOCATION}/lib
     env += GRIDMAP=/etc/grid-security/grid-mapfile.srb
+    env += GSI_AUTHZ_CONF=''
     server = %{GLOBUS_LOCATION}/sbin/globus-gridftp-server
     server_args = -i -p 5000 -dsi srb -auth-level 4 -log-level ALL -logfile /var/log/gridftp-srb.log
     disable = no
@@ -115,6 +116,8 @@ EOF
 # %{GLOBUS_LOCATION}/etc/gridftp_srb.conf
 
 %changelog
+* Mon May 12 2008 Florian Goessmann <florian@ivec.org>
+- fixed problem with PRIMA enabled gridFTP running on same host
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>
 - added changelog
 - now depends on the SRB enabled package of gridFTP
