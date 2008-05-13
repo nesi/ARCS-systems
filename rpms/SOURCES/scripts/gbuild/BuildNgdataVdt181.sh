@@ -59,25 +59,33 @@ if [ ! -d $PACMAN ]; then
 fi
 cd $PACMAN && source setup.sh && cd ..
 
+# prevent this Pacman error
+# Failed to save http proxy information in [/opt/vdt]...
+# No installation at [o..pacman..o].
+pacman -verify
+
+# set proxy
+pacman $ProxyString
+
 #
 # VDT Components
 PLATFORM="-pretend-platform linux-rhel-4"
 VDTMIRROR=http://projects.arcs.org.au/mirror/vdt/vdt_181_cache
 for Component in Globus-Base-Data-Server GSIOpenSSH PRIMA Fetch-CRL CA-Certificates-Updater ; do
 
-  # Pacman 3.21 complains about -pretend-platform when installation exists
+  # Pacman 3.21+ complains about -pretend-platform when installation exists
   # ie. after first component is installed!
   [ -f o..pacman..o/platform ] && unset PLATFORM
 
   echo "==> Checking/Installing: $Component"
-  pacman $PLATFORM $ProxyString \
+  pacman $PLATFORM \
     -get $VDTMIRROR:$Component || echo "==> Failed!"
 done
 
 #
 # IGTF Certificate Check/Update
 echo   "==> Performing: Certificate Check/Update"
-pacman $PLATFORM $ProxyString -update CA-Certificates
+pacman -update CA-Certificates
 
 #
 # Install environment
