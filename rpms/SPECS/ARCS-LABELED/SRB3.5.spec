@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        6.arcs
+Release:        7.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -40,7 +40,7 @@ Requires:   globus-srb-gridftp-server, postgresql-server, srb-psqlodbc
 %package install
 Summary:    The Storage Resource Broker server configuration package
 Group:      Applications/File
-Requires:       srb-server, srb-clients
+Requires:   srb-server, srb-clients
 
 %package server-update
 Summary:    The Storage Resource Broker server 3.4.2 -> 3.5.0 update package
@@ -274,7 +274,7 @@ fi
 
 %preun server
 if  rpm -qa | grep srb-install ; then
-    su srb -mc "/usr/bin/pg_ctl -D %{srbHome}/mcat stop"
+    su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D %{srbHome}/mcat stop"
 fi
 
 %postun server
@@ -358,26 +358,26 @@ Port=$PGPORT
 EOF
 /bin/chown srb:srb %{srbHome}/.odbc.ini
 
-su srb -mc "unset LANG && /usr/bin/initdb --lc-collate=C -D $MCATDATA"
+su srb -s /bin/bash -mc "unset LANG && /usr/bin/initdb --lc-collate=C -D $MCATDATA"
 
-su srb -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
-su srb -mc "sed s/#listen_addresses\ =\ \'localhost\'/listen_addresses\ =\ \'*\'/ $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
-su srb -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
-su srb -mc "sed s/#port\ =\ 5432/port\ =\ $PGPORT/g $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
+su srb -s /bin/bash -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
+su srb -s /bin/bash -mc "sed s/#listen_addresses\ =\ \'localhost\'/listen_addresses\ =\ \'*\'/ $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
+su srb -s /bin/bash -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
+su srb -s /bin/bash -mc "sed s/#port\ =\ 5432/port\ =\ $PGPORT/g $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
 
 cat <<-EOF >> $MCATDATA/pg_hba.conf
 host    all         all         $HOSTIP/32        trust
 EOF
 
-su srb -mc "/usr/bin/pg_ctl -D $MCATDATA start"
+su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA start"
 sleep 10 # to give postmaster time to start before the trying to create the database
-su srb -mc "unset LANG && /usr/bin/createdb MCAT"
+su srb -s /bin/bash -mc "unset LANG && /usr/bin/createdb MCAT"
 
-su srb -mc "cd %{srbroot}/MCAT/data && /usr/bin/psql MCAT < catalog.install.psg"
+su srb -s /bin/bash -mc "cd %{srbroot}/MCAT/data && /usr/bin/psql MCAT < catalog.install.psg"
 
-su srb -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestToken Domain $SRB_DOMAIN gen-lvl4"
-su srb -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestUser $SRB_ADMIN_NAME '$SRB_ADMIN_PASSWD' $SRB_DOMAIN sysadmin '' '' '' "
-su srb -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./modifyUser changePassword srb sdsc '$SRB_ADMIN_PASSWD' "
+su srb -s /bin/bash -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestToken Domain $SRB_DOMAIN gen-lvl4"
+su srb -s /bin/bash -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestUser $SRB_ADMIN_NAME '$SRB_ADMIN_PASSWD' $SRB_DOMAIN sysadmin '' '' '' "
+su srb -s /bin/bash -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./modifyUser changePassword srb sdsc '$SRB_ADMIN_PASSWD' "
 
 mkdir -p %{srbHome}/.srb
 cat <<-EOF > %{srbHome}/.srb/.MdasEnv
@@ -398,28 +398,28 @@ cat <<-EOF > %{srbHome}/.srb/.MdasAuth
 $SRB_ADMIN_PASSWD
 EOF
 
-su srb -mc "cp %{srbroot}/data/mcatHost %{srbroot}/data/mcatHost.old"
-su srb -mc "sed s/srb.sdsc.edu/$HOSTNAME/ %{srbroot}/data/mcatHost.old > %{srbroot}/data/mcatHost"
+su srb -s /bin/bash -mc "cp %{srbroot}/data/mcatHost %{srbroot}/data/mcatHost.old"
+su srb -s /bin/bash -mc "sed s/srb.sdsc.edu/$HOSTNAME/ %{srbroot}/data/mcatHost.old > %{srbroot}/data/mcatHost"
 
 /bin/chown -R srb:srb %{srbHome}/.srb
 
 su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./runsrb"
 
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestLocation '$SRB_LOCATION' '$HOSTNAME:NULL.NULL' 'level4' $SRB_ADMIN_NAME $SRB_DOMAIN"
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestLocation '$SRB_LOCATION' '$HOSTNAME:NULL.NULL' 'level4' $SRB_ADMIN_NAME $SRB_DOMAIN"
 
 mkdir -p $SRB_VAULT
 chown srb:srb $SRB_VAULT
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestResource '$SRB_RESOURCE' 'unix file system' '$SRB_LOCATION' '$SRB_VAULT/?USER.?DOMAIN/?SPLITPATH/?PATH?DATANAME.?RANDOM.?TIMESEC' permanent 0"
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestResource '$SRB_RESOURCE' 'unix file system' '$SRB_LOCATION' '$SRB_VAULT/?USER.?DOMAIN/?SPLITPATH/?PATH?DATANAME.?RANDOM.?TIMESEC' permanent 0"
 
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
-#su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
+#su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
 
 # run twice as well
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
 
 # create SDSC ticketuser -> broken in 3.5 as it doesn't exist by default but nothing works without it
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Singestuser ticketuser ansdkjqw sdsc public '' '' '' ENCRYPT1 ''"
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Singestuser ticketuser ansdkjqw sdsc public '' '' '' ENCRYPT1 ''"
 
 # Setup inca test user
 
@@ -429,7 +429,7 @@ fi
 
 if [[ !$SRB_NO_INCA ]]; then
     echo "Setting up INCA Test User."
-    su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Singestuser inca GTest $SRB_DOMAIN  staff '' '' '' GSI_AUTH '/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest' && /usr/bin/Sexit"
+    su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Singestuser inca GTest $SRB_DOMAIN  staff '' '' '' GSI_AUTH '/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest' && /usr/bin/Sexit"
 
     if ! test -d /etc/grid-security; then
         mkdir etc/grid-security
@@ -492,6 +492,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Wed May 14 2008 Florian Goessmann <florian@ivec.org>
+- fixed problem caused when yum install was called from a c shell
 * Tue May 06 2008 Florian Goessmann <florian@ivec.org>
 - applied JCU patches for Shibboleth, thanks to Nigel Sim <nigel.sim@jcu.edu.au>
 - disabled build of gridhttpd -> never worked and broke the build with the patches
