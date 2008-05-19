@@ -4,7 +4,7 @@
 Summary:        gridFTP_SRB_DSI
 Name:           gridFTP_SRB_DSI
 Version:        0.28
-Release:        3.arcs
+Release:        4.arcs
 License:        Custom
 Group:          Applications/Internet
 Source:         gridftp_srb_dsi-%{version}.tar.gz
@@ -95,7 +95,7 @@ touch /etc/grid-security/grid-mapfile.srb
 # fi
 
 export HOSTNAME=`uname -n`
-if test -e %{GLOBUS_LOCATION}/etc/gridftp_srb.conf ; then
+if ! test -e %{GLOBUS_LOCATION}/etc/gridftp_srb.conf ; then
 cat <<EOF > %{GLOBUS_LOCATION}/etc/gridftp_srb.conf
 srb_hostname $HOSTNAME:5544
 EOF
