@@ -4,7 +4,7 @@
 Summary:        gridFTP_SRB_DSI
 Name:           gridFTP_SRB_DSI
 Version:        0.28
-Release:        2.arcs
+Release:        3.arcs
 License:        Custom
 Group:          Applications/Internet
 Source:         gridftp_srb_dsi-%{version}.tar.gz
@@ -13,6 +13,7 @@ Packager:       Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
 BuildRequires:  make gcc globus-srb-gridftp-srb-dsi-dependencies srb-server
 Requires:       globus-srb-gridftp-srb-dsi-dependencies, srb-server
+PreReq:		/bin/chgrp, /bin/chmod
 
 %description
 Interface to allow data staging to and from SRB using the gridFTP protocol.
@@ -79,6 +80,10 @@ if ! grep -q ^gsiftp-srb /etc/services; then
 	EOF
 fi
 
+touch /etc/grid-security/grid-mapfile.srb
+/bin/chgrp srb /etc/grid-security/grid-mapfile.srb
+/bin/chmod g+w /etc/grid-security/grid-mapfile.srb
+
 # if [[ !$SRB_HOSTNAME_DN ]]; then
 #     echo Enter the SRB Server DN
 #     read SRB_HOSTNAME_DN
@@ -90,9 +95,11 @@ fi
 # fi
 
 export HOSTNAME=`uname -n`
+if test -e %{GLOBUS_LOCATION}/etc/gridftp_srb.conf ; then
 cat <<EOF > %{GLOBUS_LOCATION}/etc/gridftp_srb.conf
 srb_hostname $HOSTNAME:5544
 EOF
+fi
 
 cat <<EOF
 Please add 
@@ -116,6 +123,8 @@ EOF
 # %{GLOBUS_LOCATION}/etc/gridftp_srb.conf
 
 %changelog
+* Mon May 19 2008 Florian Goessmann <florian@ivec.org>
+- added creation of /etc/grid-security/grid-mapfile.srb
 * Mon May 12 2008 Florian Goessmann <florian@ivec.org>
 - fixed problem with PRIMA enabled gridFTP running on same host
 * Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>

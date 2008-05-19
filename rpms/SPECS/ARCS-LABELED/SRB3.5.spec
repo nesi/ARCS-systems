@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        7.arcs
+Release:        8.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -40,7 +40,7 @@ Requires:   globus-srb-gridftp-server, postgresql-server, srb-psqlodbc
 %package install
 Summary:    The Storage Resource Broker server configuration package
 Group:      Applications/File
-Requires:   srb-server, srb-clients
+PreReq:     srb-server, srb-clients
 
 %package server-update
 Summary:    The Storage Resource Broker server 3.4.2 -> 3.5.0 update package
@@ -160,7 +160,9 @@ echo '#!/bin/bash
 # srb        Starts SRB Server
 #
 #
-# chkconfig: 2345 99 01
+# chkconfig: 35 99 01
+# description:  This service controlls the SRB server \
+#               and its postgresql data base.
 
 # Source function library.
 . /etc/init.d/functions
@@ -273,16 +275,14 @@ fi
 #fi
 
 %preun server
-if  rpm -qa | grep srb-install ; then
-    su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D %{srbHome}/mcat stop"
-fi
+export MCATDATA=`cat %{srbHome}/.mcat_location`
+su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./killsrb now"
+su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA stop"
+#/usr/bin/killall postmaster
 
 %postun server
-if [ $1 -ge 1 ]; then
-    /sbin/service srb condrestart >/dev/null 2>&1 || :
-fi
 if [ $1 = 0 ] ; then
-        userdel srb >/dev/null 2>&1 || :
+        /usr/sbin/userdel srb >/dev/null 2>&1 || :
 fi
 
 # %files gridftp-dsi-dependencies
@@ -291,9 +291,8 @@ fi
 
 ################### server config ##############################################
 %pre install
-rm -rf /etc/rc.d/init.d/srb
 
-%post install
+if ! rpm -qa | grep srb-install ; then
 
 export HOSTNAME=`uname -n`
 export HOST=`host $HOSTNAME | grep "has address"`
@@ -306,6 +305,10 @@ fi
 if [[ !$MCATDATA ]]; then
     export MCATDATA=%{srbHome}/mcat
 fi
+
+cat <<-EOF > %{srbHome}/.mcat_location
+$MCATDATA
+EOF
 
 if [[ !$SRB_DOMAIN ]]; then
     export SRB_DOMAIN=$HOSTNAME
@@ -357,6 +360,14 @@ Username=srb
 Port=$PGPORT
 EOF
 /bin/chown srb:srb %{srbHome}/.odbc.ini
+
+if test -e $MCATDATA.rpm.orig ; then
+	rm -rf $MCATDATA.rpm.orig
+fi
+
+if test -e $MCATDATA ; then
+	mv -f $MCATDATA $MCATDATA.rpm.orig
+fi
 
 su srb -s /bin/bash -mc "unset LANG && /usr/bin/initdb --lc-collate=C -D $MCATDATA"
 
@@ -443,6 +454,7 @@ if [[ !$SRB_NO_INCA ]]; then
     fi
     echo "done."
 fi
+
 # done
 
 cat<<EOF
@@ -461,8 +473,17 @@ it is most likely ok.
 ---------------------------------------------------
 EOF
 
+fi
+
 %files install
-%attr(0755,root,root) /etc/rc.d/init.d/srb
+%attr(0755,root,root) %config(noreplace) /etc/rc.d/init.d/srb
+
+%post install
+/sbin/chkconfig --add srb
+
+%postun install
+/sbin/chkconfig --del srb
+
 ################### end server config ##############################################
 
 %pre server-update
@@ -486,12 +507,18 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %defattr(-,srb,srb)
 %doc COPYRIGHT
 %{srbroot}/*
-/etc/rc.d/init.d/srb
+%config(noreplace) %{srbroot}/bin/runsrb
+%config(noreplace) %{srbroot}/data/host*
+%config(noreplace) %{srbroot}/data/mcatHost
+%config(noreplace) %{srbroot}/data/MdasConfig
+%config(noreplace) %{srbroot}/data/shibConfig
 %attr(0755,srb,srb) %dir /var/lib/srb
 %attr(0750,srb,srb) /var/lib/srb/.srb
-%attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
+%attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Mon May 19 2008 Florian Goessmann <florian@ivec.org>
+- added fixes to allow proper uninstall
 * Wed May 14 2008 Florian Goessmann <florian@ivec.org>
 - fixed problem caused when yum install was called from a c shell
 * Tue May 06 2008 Florian Goessmann <florian@ivec.org>
