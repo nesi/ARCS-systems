@@ -70,7 +70,7 @@ function uninstall() {
 		TARGET="$PATCH_BASE/$i"
 		if [  -f "$TARGET.orig" ]; then
 			echo "==> redeploying $TARGET.orig"
-			echo mv $TARGET.orig $TARGET
+			mv $TARGET.orig $TARGET
 		else
 			echo "==> removing $TARGET"
 			rm $TARGET
