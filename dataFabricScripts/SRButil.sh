@@ -56,10 +56,12 @@ backup () {
 	tar -rpPf $1 $SRBROOT/data/shibConfig
 	tar -rpPf $1 $SRBROOT/globus/etc/gridftp_srb.conf
 	startSRB
-	/usr/bin/Sinit
-	/usr/bin/Scd /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain
-	/usr/bin/Sput -S $remoteBackupResource  $1
-	/usr/bin/Sexit
+	if [ $2 -eq 1 ]; then
+		/usr/bin/Sinit
+		/usr/bin/Scd /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain
+		/usr/bin/Sput -S $remoteBackupResource  $1
+		/usr/bin/Sexit
+	fi
 	mv $1 $BACKUPROOT/
 	return $?
 }
@@ -78,13 +80,20 @@ restore () {
 
 case "$1" in
 	backup)
-		backup srb-backup-$HOST-$NOW.tar
+		case "$2" in
+			remote)
+				backup srb-backup-$HOST-$NOW.tar 1
+				;;
+			*)
+				backup srb-backup-$HOST-$NOW.tar 0
+				;;
+		esac
 		;;
 	restore)
 		restore $2 srb-backup-$HOST-$NOW-before_restore.tar
 		;;
 *)
-	echo $"Usage: $0 {backup|restore <ARCHIVE>}"
+	echo $"Usage: $0 {backup [remote] |restore <ARCHIVE>}"
 	exit 1
 esac
 
