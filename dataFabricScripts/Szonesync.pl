@@ -362,7 +362,7 @@ for ($i=0;$i<$zoneCount;$i++) {
 			$ENV{'mdasEnvFile'} = $UsersEnvVar; # back to the user's Env file
 		    }
 		    runCmd(1, "Spullmeta -F $DO_LIST_DATED $CHANGED_DATE > $zone.$DO_LIST_DATED.orig");
-		    runCmd(1, "/usr/bin/python /var/lib/srb/bin/ZoneUserSync.py $zone.$DO_LIST_DATED.orig  $zone.$DO_LIST_DATED.mod 2>&1 | tee sync.$zone.$DO_LIST_DATED");
+		    runCmd(1, "/usr/bin/python /usr/srb/bin/ZoneUserSync.py $zone.$DO_LIST_DATED.orig  $zone.$DO_LIST_DATED.mod 2>&1 | tee sync.$zone.$DO_LIST_DATED");
 		    #runCmd(1, "Spushmeta $zone.$DO_LIST_DATED.mod 2>&1 | tee push.$zone.$DO_LIST_DATED");
 		    print $cmdOutput;
 		}

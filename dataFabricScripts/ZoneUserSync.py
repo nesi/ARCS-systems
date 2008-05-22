@@ -1,6 +1,6 @@
 import os, sys, numpy, random
 
-administrativeZones = ['srb-dev.ivec.org']
+administrativeZones = ['srb.ivec.org']
 ignoreDomains = ['sdsc','npaci']
 
 def makeUsersArray (filehandle):
@@ -53,7 +53,6 @@ def modUser (u,currentDomains,currentZones):
 
 
 def createUser (u,currentDomains,currentZones):
-	print 'createUser'
 	if u['Zone'] not in currentZones:
 		return 0
 	if u['Domain'] in ignoreDomains:
@@ -106,11 +105,16 @@ for user in newUsersArray:
 					if u['Zone'] not in administrativeZones:
 						modUser(u, currentDomains, currentZones)
 						index = False
-				if index != False:
+				try:
 					index += 1
+				except:
+					pass
+				try:
 					if index == len(currentUsersArrayIndex):
 						if u['Zone'] not in administrativeZones:
-                                                	modUser(u, currentDomains, currentZones)
+							createUser(u, currentDomains, currentZones)
+				except:
+					pass
 		else:
 			if u['Zone'] not in administrativeZones:
 				createUser(u, currentDomains, currentZones)
