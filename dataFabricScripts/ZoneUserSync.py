@@ -1,6 +1,6 @@
 import os, sys, numpy, random
 
-administrativeZones = ['srb.ivec.org']
+administrativeZones = ['srb-dev.ivec.org']
 ignoreDomains = ['sdsc','npaci']
 
 def makeUsersArray (filehandle):
@@ -102,25 +102,19 @@ for user in newUsersArray:
 		u['Zone'] = user[3]
 		#u['ModTime'] = user[8]
 		#u['Address'] = user[1]
-		currentUsersArrayIndex = numpy.where(tmpCurrentArray[:,2] == u['Name'])[0]
+		currentUsersArrayIndex = numpy.where(tmpCurrentArray[:,1] == u['Name'])[0]
 		if len(currentUsersArrayIndex) > 0 and u['Zone'] == currentSyncZone:
 			index = 0
 			for count in range(len(currentUsersArrayIndex)):
+				index += 1
 				domain = tmpCurrentArray[:,3][currentUsersArrayIndex[count]]
 				if domain == u['Domain']:
 					if u['Zone'] not in administrativeZones:
 						modUser(u, currentDomains, currentZones)
-						index = False
-				try:
-					index += 1
-				except:
-					pass
-				try:
+						break
 					if index == len(currentUsersArrayIndex):
 						if u['Zone'] not in administrativeZones:
 							createUser(u, currentDomains, currentZones)
-				except:
-					pass
 		elif u['Zone'] == currentSyncZone:
 			if u['Zone'] not in administrativeZones:
 				createUser(u, currentDomains, currentZones)
