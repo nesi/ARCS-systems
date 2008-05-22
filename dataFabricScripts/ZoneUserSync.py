@@ -15,6 +15,9 @@ def makeUsersArray (filehandle):
 		tmp = line.strip().split('|')
 		tmp.pop(-1)
 		tmp.pop(-1)
+		tmp.pop(1)
+		tmp.pop(3)
+		tmp.pop(3)
 		array.append(tmp)
 	return array
 
@@ -72,12 +75,15 @@ def createUser (u,currentDomains,currentZones):
 try:
 	currentUsersFile = sys.argv[1]
 except:
-	print 'Usage: %s <CURRENT_USERS_FILE> <NEW_USERS_FILE>'%(sys.argv[0])
+	print 'Usage: %s <CURRENT_USERS_FILE> <NEW_USERS_FILE> <CURRENT SYNCING ZONE>'%(sys.argv[0])
 try:
 	newUsersFile = sys.argv[2]
 except:
-	print 'Usage: %s <CURRENT_USERS_FILE> <NEW_USERS_FILE>'%(sys.argv[0])
-
+	print 'Usage: %s <CURRENT_USERS_FILE> <NEW_USERS_FILE> <CURRENT SYNCING ZONE>'%(sys.argv[0])
+try:
+	currentSyncZone = sys.argv[3]
+except:
+	print 'Usage: %s <CURRENT_USERS_FILE> <NEW_USERS_FILE> <CURRENT SYNCING ZONE>'%(sys.argv[0])
 
 currentUsersArray = makeUsersArray(currentUsersFile)
 newUsersArray = makeUsersArray(newUsersFile)
@@ -85,19 +91,19 @@ newUsersArray = makeUsersArray(newUsersFile)
 
 tmpCurrentArray = numpy.array(currentUsersArray)
 currentDomains = getcurrentDomains()
-currentZones = numpy.unique(tmpCurrentArray[:,6])
+currentZones = numpy.unique(tmpCurrentArray[:,3])
 
 for user in newUsersArray:
 	if user not in currentUsersArray:
 		u = {}
-		u['Name'] = user[2]
-		u['Domain'] = user[3]
+		u['Name'] = user[1]
+		u['Domain'] = user[2]
 		u['Type'] = user[0]
-		u['Zone'] = user[6]
+		u['Zone'] = user[3]
 		#u['ModTime'] = user[8]
-		u['Address'] = user[1]
+		#u['Address'] = user[1]
 		currentUsersArrayIndex = numpy.where(tmpCurrentArray[:,2] == u['Name'])[0]
-		if len(currentUsersArrayIndex) > 0:
+		if len(currentUsersArrayIndex) > 0 and u['Zone'] == currentSyncZone:
 			index = 0
 			for count in range(len(currentUsersArrayIndex)):
 				domain = tmpCurrentArray[:,3][currentUsersArrayIndex[count]]
@@ -115,6 +121,8 @@ for user in newUsersArray:
 							createUser(u, currentDomains, currentZones)
 				except:
 					pass
-		else:
+		elif u['Zone'] == currentSyncZone:
 			if u['Zone'] not in administrativeZones:
 				createUser(u, currentDomains, currentZones)
+		else:
+			pass

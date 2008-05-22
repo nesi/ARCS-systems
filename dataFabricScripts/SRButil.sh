@@ -24,8 +24,8 @@ if [[ !$HOSTCERT ]]; then
 	export HOSTCERT=$SRBHOME/hostcert.pem
 fi
 
-export remoteBackupZone=srb-dev.ivec.org
-export remoteBackupResource=srb-dev.ivec.org
+export remoteBackupZone=ngdev2.its.utas.edu.au
+export remoteBackupResource=data_fabric
 export srbAdminUser=srbAdmin
 export srbAdminDomain=srb.ivec.org
 
