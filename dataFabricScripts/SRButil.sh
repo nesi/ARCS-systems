@@ -44,25 +44,25 @@ startSRB () {
 
 backup () {
 	stopSRB
-	tar -cpPf $1 $MCATDATA/
-	tar -rpPf $1 $SRBHOME/.srb/
-	tar -rpPf $1 $HOSTCERT
-	tar -rpPf $1 $HOSTKEY
-	tar -rpPf $1 $SRBHOME/.odbc.ini
-	tar -rpPf $1 $SRBROOT/bin/runsrb
-	tar -rpPf $1 $SRBROOT/data/host*
-	tar -rpPf $1 $SRBROOT/data/mcatHost
-	tar -rpPf $1 $SRBROOT/data/MdasConfig
-	tar -rpPf $1 $SRBROOT/data/shibConfig
-	tar -rpPf $1 $SRBROOT/globus/etc/gridftp_srb.conf
+	tar -cpPf /tmp/$1 $MCATDATA/
+	tar -rpPf /tmp/$1 $SRBHOME/.srb/
+	tar -rpPf /tmp/$1 $HOSTCERT
+	tar -rpPf /tmp/$1 $HOSTKEY
+	tar -rpPf /tmp/$1 $SRBHOME/.odbc.ini
+	tar -rpPf /tmp/$1 $SRBROOT/bin/runsrb
+	tar -rpPf /tmp/$1 $SRBROOT/data/host*
+	tar -rpPf /tmp/$1 $SRBROOT/data/mcatHost
+	tar -rpPf /tmp/$1 $SRBROOT/data/MdasConfig
+	tar -rpPf /tmp/$1 $SRBROOT/data/shibConfig
+	tar -rpPf /tmp/$1 $SRBROOT/globus/etc/gridftp_srb.conf
 	startSRB
 	if [ $2 -eq 1 ]; then
 		/usr/bin/Sinit
 		/usr/bin/Scd /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain
-		/usr/bin/Sput -S $remoteBackupResource  $1
+		/usr/bin/Sput -S $remoteBackupResource  /tmp/$1
 		/usr/bin/Sexit
 	fi
-	mv $1 $BACKUPROOT/
+	mv /tmp/$1 $BACKUPROOT/
 	return $?
 }
 
