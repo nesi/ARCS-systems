@@ -24,6 +24,11 @@ if [[ !$HOSTCERT ]]; then
 	export HOSTCERT=$SRBHOME/hostcert.pem
 fi
 
+export remoteBackupZone=srb-dev.ivec.org
+export remoteBackupResource=srb-dev.ivec.org
+export srbAdminUser=srbAdmin
+export srbAdminDomain=srb.ivec.org
+
 export NOW=`date +%Y%m%d%k%M`
 export HOST=`uname -n`
 
@@ -39,18 +44,23 @@ startSRB () {
 
 backup () {
 	stopSRB
-	tar -cpPf $BACKUPROOT/$1 $MCATDATA/
-	tar -rpPf $BACKUPROOT/$1 $SRBHOME/.srb/
-	tar -rpPf $BACKUPROOT/$1 $HOSTCERT
-	tar -rpPf $BACKUPROOT/$1 $HOSTKEY
-	tar -rpPf $BACKUPROOT/$1 $SRBHOME/.odbc.ini
-	tar -rpPf $BACKUPROOT/$1 $SRBROOT/bin/runsrb
-	tar -rpPf $BACKUPROOT/$1 $SRBROOT/data/host*
-	tar -rpPf $BACKUPROOT/$1 $SRBROOT/data/mcatHost
-	tar -rpPf $BACKUPROOT/$1 $SRBROOT/data/MdasConfig
-	tar -rpPf $BACKUPROOT/$1 $SRBROOT/data/shibConfig
-	tar -rpPf $BACKUPROOT/$1 $SRBROOT/globus/etc/gridftp_srb.conf
+	tar -cpPf $1 $MCATDATA/
+	tar -rpPf $1 $SRBHOME/.srb/
+	tar -rpPf $1 $HOSTCERT
+	tar -rpPf $1 $HOSTKEY
+	tar -rpPf $1 $SRBHOME/.odbc.ini
+	tar -rpPf $1 $SRBROOT/bin/runsrb
+	tar -rpPf $1 $SRBROOT/data/host*
+	tar -rpPf $1 $SRBROOT/data/mcatHost
+	tar -rpPf $1 $SRBROOT/data/MdasConfig
+	tar -rpPf $1 $SRBROOT/data/shibConfig
+	tar -rpPf $1 $SRBROOT/globus/etc/gridftp_srb.conf
 	startSRB
+	/usr/bin/Sinit
+	/usr/bin/Scd /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain
+	/usr/bin/Sput -S $remoteBackupResource  $1
+	/usr/bin/Sexit
+	mv $1 $BACKUPROOT/
 	return $?
 }
 
