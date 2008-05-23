@@ -1,5 +1,9 @@
 #!/bin/bash
-
+#
+# this script requires sudo access for the srb user. Add:
+# srb     srb.ivec.org=NOPASSWD: /sbin/service srb stop, /sbin/service srb start, /sbin/service srb restart
+# to /etc/sudoers
+#
 if [[ !$SRBROOT ]]; then
 	export SRBROOT=/usr/srb
 fi
