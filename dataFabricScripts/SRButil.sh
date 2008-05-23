@@ -29,7 +29,7 @@ export remoteBackupResource=data_fabric
 export srbAdminUser=srbAdmin
 export srbAdminDomain=srb.ivec.org
 
-export NOW=`date +%Y%m%d%k%M`
+export NOW=`date +%Y%m%d%H%M`
 export HOST=`uname -n`
 
 stopSRB () {
