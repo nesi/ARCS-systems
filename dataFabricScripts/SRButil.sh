@@ -38,7 +38,7 @@ export srbAdminUser=srbAdmin
 export srbAdminDomain=srb.ivec.org
 
 export NOW=`date +%Y%m%d%H%M`
-export PAST=`date --date "now -3 days" +%Y-%m-%d-%H.%M`
+export PAST=`date --date "now -2 days" +%Y-%m-%d-%H.%M`
 export HOST=`uname -n`
 
 stopSRB () {
@@ -102,7 +102,7 @@ restore () {
 
 cleanOld () {
 	echo "Cleaning old local backups..."
-	find $BACKUPROOT -ctime +3 | xargs rm -rf
+	find $BACKUPROOT -mtime +2 | xargs rm -rf
 	echo "done."
 	if [ $1 -eq 1 ]; then
 		echo "Cleaning old remote backups..."
