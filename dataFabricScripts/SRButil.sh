@@ -107,7 +107,7 @@ cleanOld () {
 	if [ $1 -eq 1 ]; then
 		echo "Cleaning old remote backups..."
 		/usr/bin/Sinit
-		/usr/bin/Srm -A "CTIME < $PAST"-rf /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain/
+		/usr/bin/Srm -A "CTIME < $PAST"-rf /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain/*
 		/usr/bin/Sexit
 		echo "done."
 	fi	
