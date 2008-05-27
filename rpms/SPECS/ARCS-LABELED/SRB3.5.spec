@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        8.arcs
+Release:        9.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -251,6 +251,12 @@ exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %pre server
+id srb
+if [ $? -eq 0 ]; then
+        echo "System already has a user called 'srb'. Instaltion aborted."
+        exit 1
+fi
+
 if ! getent passwd srb >/dev/null 2>&1 ; then
     /usr/sbin/useradd -m -d /var/lib/srb -s /bin/bash -c "SRB Server" srb > /dev/null 2>&1 || :
     echo "export LANG=en_US.iso88591" >> /var/lib/srb/.bashrc
@@ -517,6 +523,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Mon May 27 2008 Florian Goessmann <florian@ivec.org>
+- added check if srb user exists. exits if true.
 * Mon May 19 2008 Florian Goessmann <florian@ivec.org>
 - added fixes to allow proper uninstall
 * Wed May 14 2008 Florian Goessmann <florian@ivec.org>
