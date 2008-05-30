@@ -55,8 +55,9 @@ except:
     sys.exit(0)
 
 for i in userInfoMCAT[numpy.where(userInfoMCAT[:][:,2] != 'NULL')]:
-    map = i[0] + '@' + i[1]
-    if map not in mappedUsers:
-        mapfile.write('"%s" %s\n'%(i[2],map))
+    if i[2] == '':
+        map = i[0] + '@' + i[1]
+        if map not in mappedUsers:
+            mapfile.write('"%s" %s\n'%(i[2],map))
 
 mapfile.close()
