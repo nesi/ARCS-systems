@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        9.arcs
+Release:        10.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -253,8 +253,11 @@ exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
 %pre server
 id srb
 if [ $? -eq 0 ]; then
-        echo "System already has a user called 'srb'. Instaltion aborted."
-        exit 1
+	SRB_HOME = `getent passwd | grep srb | awk 'split($2,tmp,":") {print tmp[2]}'`
+	if [ "$SRB_HOME" != "/var/lib/srb" ]; then
+        	echo "System already has a user called 'srb'. Instaltion aborted."
+        	exit 1
+	fi
 fi
 
 if ! getent passwd srb >/dev/null 2>&1 ; then
@@ -301,8 +304,7 @@ fi
 if ! rpm -qa | grep srb-install ; then
 
 export HOSTNAME=`uname -n`
-export HOST=`host $HOSTNAME | grep "has address"`
-export HOSTIP=`echo $HOST | awk {'print $4'}`
+export HOSTIPS=`host $HOSTNAME | grep "has address" | awk '{print $4}'`
 
 if [[ !$PGPORT ]]; then
     export PGPORT=5432
@@ -382,9 +384,11 @@ su srb -s /bin/bash -mc "sed s/#listen_addresses\ =\ \'localhost\'/listen_addres
 su srb -s /bin/bash -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
 su srb -s /bin/bash -mc "sed s/#port\ =\ 5432/port\ =\ $PGPORT/g $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
 
+for HOSTIP in $HOSTIPS ; do
 cat <<-EOF >> $MCATDATA/pg_hba.conf
 host    all         all         $HOSTIP/32        trust
 EOF
+done
 
 su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA start"
 sleep 10 # to give postmaster time to start before the trying to create the database
@@ -523,6 +527,9 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Wed Jun 04 2008 Florian Goessmann <florian@ivec.org>
+- added Youzhen's patch for host with multiple IPs
+- made check for existing SRB user more graceful
 * Mon May 27 2008 Florian Goessmann <florian@ivec.org>
 - added check if srb user exists. exits if true.
 * Mon May 19 2008 Florian Goessmann <florian@ivec.org>
