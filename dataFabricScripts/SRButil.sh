@@ -142,7 +142,7 @@ case "$1" in
 		esac
 		;;
 *)
-	echo $"Usage: $0 {backup [remote] | restore <ARCHIVE> | clean [remote]}"
+	echo $"Usage: $0 {backup [remote] [data] | restore <ARCHIVE> | clean [remote]}"
 	exit 1
 esac
 
