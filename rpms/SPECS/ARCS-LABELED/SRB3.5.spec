@@ -6,13 +6,14 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        10.arcs
+Release:        11.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
 Patch0:         srb3.5-destdir.patch
 Patch1:         srb3.5-shib-srb.patch
 Patch2:         srb3.5-securecomm.patch
+Patch3:         srb3.5-userSync.patch
 URL:            http://www.sdsc.edu/srb/index.php/Main_Page
 Packager:       David Gwynne <dlg@itee.uq.edu.au>, Florian Goessmann <florian@ivec.org>
 Buildroot:      %{_tmppath}/%{name}-root
@@ -29,7 +30,7 @@ or physical locations.
 %package clients
 Summary:    The Storage Resource Broker unix client commands (Scommands)
 Group:      Applications/File
-Requires:   globus-srb-libraries
+Requires:   globus-srb-libraries, numpy
 
 %package server
 Summary:    The Storage Resource Broker server
@@ -95,6 +96,7 @@ This package updates the server version 3.4.2 to version 3.5.
 %patch0 -p1 -b .destdir
 %patch1 -p2 -b .shib-srb
 %patch2 -p2 -b .securecomm
+%patch3 -p1 -b .userSync
 
 %build
 # real men use --prefix
@@ -130,6 +132,7 @@ mkdir -p $RPM_BUILD_ROOT/%{srbroot}/data
 cp -pr $RPM_BUILD_DIR/%{srbSrc}/utilities/bin/* $RPM_BUILD_ROOT%{_bindir}
 cp -pr $RPM_BUILD_DIR/%{srbSrc}/utilities/admin-bin/* $RPM_BUILD_ROOT%{_bindir}
 rm -rf $RPM_BUILD_ROOT%{_bindir}/{exitcode,getsrbobj,metaFile,metaFile2,metaFileManyData,CVS}
+rm -rf $RPM_BUILD_ROOT%{_bindir}/*userSync
 cp -pr $RPM_BUILD_DIR/%{srbSrc}/utilities/man/man1/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 cp -p mk/RPM/srb $RPM_BUILD_ROOT/etc/rc.d/init.d
 cp -pr mk/RPM/.srb $RPM_BUILD_ROOT/var/lib/srb
@@ -251,7 +254,7 @@ exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %pre server
-id srb
+id srb > /dev/null 2>&1
 if [ $? -eq 0 ]; then
 	SRB_HOME = `getent passwd | grep srb | awk 'split($2,tmp,":") {print tmp[2]}'`
 	if [ "$SRB_HOME" != "/var/lib/srb" ]; then
@@ -467,6 +470,11 @@ fi
 
 # done
 
+# set admin zone in ZoneUserSync.py
+%define srb_zone $SRB_ZONE
+cp %{_bindir}/ZoneUserSync.py %{_bindir}/ZoneUserSync.py.bak
+sed s/administrativeZones\ =\ \\[\\]/administrativeZones\ =\ \\[\"%{srb_zone}\"\\]/g %{_bindir}/ZoneUserSync.py.bak > %{_bindir}/ZoneUserSync.py
+
 cat<<EOF
 --------------------------------------------------
 If you see and error like:
@@ -527,6 +535,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Thu Jun 05 2008 Florian Goessmann <florian@ivec.org>
+- added patch that incoporates the new user sync facility
 * Wed Jun 04 2008 Florian Goessmann <florian@ivec.org>
 - added Youzhen's patch for host with multiple IPs
 - made check for existing SRB user more graceful

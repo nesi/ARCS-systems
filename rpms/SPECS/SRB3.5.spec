@@ -1,21 +1,24 @@
 %define srbroot /usr/srb
-%define srbHome	/var/lib/srb
-%define srbSrc	SRB3_5_0
-%define globuslocation /usr/globus
+%define srbHome /var/lib/srb
+%define srbSrc  SRB3_5_0
+%define globuslocation /usr/srb/globus
 
-Summary:	The Storage Resource Broker
-Name:		srb
-Version:	3.5.0
-Release:	1
-License:	Custom
-Group:		Applications/File
-Source:		SRB%{version}.tar.gz
-Patch:		srb3.5-destdir.patch
-URL:		http://www.sdsc.edu/srb/index.php/Main_Page
-Packager:	David Gwynne <dlg@itee.uq.edu.au>, Florian Goessmann <florian@ivec.org>
-Buildroot:	%{_tmppath}/%{name}-root
-BuildRequires:	make gcc srb-psqlodbc, APAC-globus-gridftp-server
-#Requires:	srb-psqlodbc, APAC-globus-gridftp-server, postgresql-server
+Summary:        The Storage Resource Broker
+Name:           srb
+Version:        3.5.0
+Release:        11.arcs
+License:        Custom
+Group:          Applications/File
+Source:         SRB%{version}.tar.gz
+Patch0:         srb3.5-destdir.patch
+Patch1:         srb3.5-shib-srb.patch
+Patch2:         srb3.5-securecomm.patch
+Patch3:         srb3.5-userSync.patch
+URL:            http://www.sdsc.edu/srb/index.php/Main_Page
+Packager:       David Gwynne <dlg@itee.uq.edu.au>, Florian Goessmann <florian@ivec.org>
+Buildroot:      %{_tmppath}/%{name}-root
+BuildRequires:  make gcc srb-psqlodbc, globus-srb-gridftp-server
+
 %description
 The Storage Resource Broker is a distributed file system (Data Grid),
 based on a client-server architecture.
@@ -25,24 +28,24 @@ and computers based on their attributes rather than just their names
 or physical locations.
 
 %package clients
-Summary:	The Storage Resource Broker unix client commands (Scommands)
-Group:		Applications/File
-Requires:	APAC-globus-libraries
+Summary:    The Storage Resource Broker unix client commands (Scommands)
+Group:      Applications/File
+Requires:   globus-srb-libraries, numpy
 
 %package server
-Summary:	The Storage Resource Broker server
-Group:		Applications/File
-Prereq:		/sbin/chkconfig, /usr/sbin/useradd, /sbin/ldconfig
-Requires:	APAC-globus-gridftp-server, postgresql-server, srb-psqlodbc
+Summary:    The Storage Resource Broker server
+Group:      Applications/File
+Prereq:     /sbin/chkconfig, /usr/sbin/useradd, /sbin/ldconfig
+Requires:   globus-srb-gridftp-server, postgresql-server, srb-psqlodbc
 
-%package server-config
-Summary:	The Storage Resource Broker server configuration package
-Group:		Applications/File
-Requires:   	srb-server, srb-clients
+%package install
+Summary:    The Storage Resource Broker server configuration package
+Group:      Applications/File
+PreReq:     srb-server, srb-clients
 
 %package server-update
 Summary:    The Storage Resource Broker server 3.4.2 -> 3.5.0 update package
-Group:		Applications/File
+Group:      Applications/File
 Requires:   srb-server = 3.4.2
 
 %description clients
@@ -66,7 +69,7 @@ or physical locations.
 
 This is the server portion.
 
-%description server-config
+%description install
 This package provides basic configuration for the SRB server.
 
 The configuration can be controlled by setting environment variables.
@@ -81,8 +84,8 @@ SRB_VAULT           Local directory for the local resource. Default: /var/lib/sr
 SRB_LOCATION        Name of the SRB Location. Default: current hostname
 SRB_ZONE            Name of the SRB zone the location belongs to. Default: current hostname
 SRB_RESOURCE        Name of the local resource. Default: current hostname
-SRB_NO_INCA	    If set to any value, INCA test user is not created. Default: not set
-SRB_INCA_DN	    DN of the INCA test user. Default: /C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest
+SRB_NO_INCA     If set to any value, INCA test user is not created. Default: not set
+SRB_INCA_DN     DN of the INCA test user. Default: /C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest
 
 %description server-update
 This package updates the server version 3.4.2 to version 3.5.
@@ -91,12 +94,16 @@ This package updates the server version 3.4.2 to version 3.5.
 %setup -q -n %{srbSrc}
 
 %patch0 -p1 -b .destdir
+%patch1 -p2 -b .shib-srb
+%patch2 -p2 -b .securecomm
+%patch3 -p1 -b .userSync
 
 %build
 # real men use --prefix
 export GLOBUS_LOCATION=%{globuslocation}
 export LD_LIBRARY_PATH=$GLOBUS_LOCATION/lib
 export CFLAGS="-I$GLOBUS_LOCATION/include -I$GLOBUS_LOCATION/include/gcc32dbg -I$GLOBUS_LOCATION/include/gcc32dbgpthr"
+#%configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr --enable-httpd=8080
 %configure --enable-installdir=%{srbroot} --enable-psgmcat --enable-psghome=/usr --enable-gsi-auth --enable-globus-location=$GLOBUS_LOCATION --enable-globus-flavor=gcc32dbgpthr
 make DBMS_INCLUDE="-I%{srbroot}/include -DPSQMCAT" DBMS_LIB="-L%{srbroot}/lib -lpsqlodbc"
 
@@ -125,6 +132,7 @@ mkdir -p $RPM_BUILD_ROOT/%{srbroot}/data
 cp -pr $RPM_BUILD_DIR/%{srbSrc}/utilities/bin/* $RPM_BUILD_ROOT%{_bindir}
 cp -pr $RPM_BUILD_DIR/%{srbSrc}/utilities/admin-bin/* $RPM_BUILD_ROOT%{_bindir}
 rm -rf $RPM_BUILD_ROOT%{_bindir}/{exitcode,getsrbobj,metaFile,metaFile2,metaFileManyData,CVS}
+rm -rf $RPM_BUILD_ROOT%{_bindir}/*userSync
 cp -pr $RPM_BUILD_DIR/%{srbSrc}/utilities/man/man1/*.1 $RPM_BUILD_ROOT%{_mandir}/man1
 cp -p mk/RPM/srb $RPM_BUILD_ROOT/etc/rc.d/init.d
 cp -pr mk/RPM/.srb $RPM_BUILD_ROOT/var/lib/srb
@@ -149,221 +157,15 @@ rm -rf $RPM_BUILD_ROOT/var/lib/srb/.srb/CVS
 rm -rf $RPM_BUILD_ROOT/%{srbroot}/MCAT/install.pl
 rm -rf $RPM_BUILD_ROOT/%{srbroot}/MCAT/install.ora.pl
 
-%clean
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-
-%pre server
-if ! getent passwd srb >/dev/null 2>&1 ; then
-    /usr/sbin/useradd -m -d /var/lib/srb -s /bin/bash -c "SRB Server" srb > /dev/null 2>&1 || :
-    echo "export LANG=en_US.iso88591" >> /var/lib/srb/.bashrc
-    echo "export LANG=en_US.iso88591" >> /var/lib/srb/.profile
-fi
-if ! grep -q %{srbroot}/lib /etc/ld.so.conf; then
-        echo "%{srbroot}/lib" >> /etc/ld.so.conf
-fi
-/sbin/ldconfig
-
-%post server
-rm -f /etc/rc.d/init.d/srb
-
-chmod a+x /etc/rc.d/init.d/srb
-if [ $1 = 1 ]; then
-    /sbin/chkconfig --add srb
-fi
-/bin/chmod 0755 /var/lib/srb
-/bin/chmod 0750 /var/lib/srb/.srb
-if [ $1 = 0 ]; then
-    /sbin/chkconfig --del srb
-fi
-
-%preun server
-su srb -mc "/usr/bin/pg_ctl -D %{srbHome}/mcat stop"
-
-%postun server
-if [ $1 -ge 1 ]; then
-    /sbin/service srb condrestart >/dev/null 2>&1 || :
-fi
-if [ $1 = 0 ] ; then
-        userdel srb >/dev/null 2>&1 || :
-fi
-
-# %files gridftp-dsi-dependencies
-# /%{srbroot}/%{srbSrc}/*
-
-
-################### server config ##############################################
-%post server-config
-
-export HOSTNAME=`uname -n`
-export HOST=`host $HOSTNAME | grep "has address"`
-export HOSTIP=`echo $HOST | awk {'print $4'}`
-
-if [[ !$PGPORT ]]; then
-    export PGPORT=5432
-fi
-
-if [[ !$MCATDATA ]]; then
-    export MCATDATA=%{srbHome}/mcat
-fi
-
-if [[ !$SRB_DOMAIN ]]; then
-    export SRB_DOMAIN=$HOSTNAME
-fi
-
-if [[ !$SRB_ADMIN_NAME ]]; then
-    export SRB_ADMIN_NAME=srbAdmin
-fi
-
-if [[ !$SRB_ADMIN_PASSWD ]]; then
-    export SRB_ADMIN_PASSWD='adim#srb'
-fi
-
-if [[ !$SRB_VAULT ]]; then
-    export SRB_VAULT=%{srbHome}/Vault
-fi
-
-if [[ !$SRB_LOCATION ]]; then
-    export SRB_LOCATION=$HOSTNAME
-fi
-
-if [[ !$SRB_ZONE ]]; then
-    export SRB_ZONE=$HOSTNAME
-fi
-
-if [[ !$SRB_RESOURCE ]]; then
-    export SRB_RESOURCE=$HOSTNAME
-fi
-
-cat <<-EOF > %{srbroot}/data/MdasConfig
-DASDBTYPE        postgres
-MDASDBNAME        PostgreSQL
-MDASINSERTSFILE  %{srbroot}/data/mdas_inserts
-METADATA_FKREL_FILE metadata.fkrel
-DB2USER           srb
-DB2LOGFILE       %{srbroot}/data/db2logfile
-DBHOME          $MCATDATA
-EOF
-/bin/chown srb:srb %{srbroot}/data/MdasConfig
-
-cat <<-EOF > %{srbHome}/.odbc.ini
-[PostgreSQL]
-Driver=%{srbroot}/lib/psqlodbc.so
-Debug=0
-CommLog=0
-Servername=$HOSTNAME
-Database=MCAT
-Username=srb
-Port=$PGPORT
-EOF
-/bin/chown srb:srb %{srbHome}/.odbc.ini
-
-su srb -mc "unset LANG && /usr/bin/initdb --lc-collate=C -D $MCATDATA"
-
-su srb -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
-su srb -mc "sed s/#listen_addresses\ =\ \'localhost\'/listen_addresses\ =\ \'*\'/ $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
-su srb -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
-su srb -mc "sed s/#port\ =\ 5432/port\ =\ $PGPORT/g $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
-
-cat <<-EOF >> $MCATDATA/pg_hba.conf
-host    all         all         $HOSTIP/32        trust
-EOF
-
-su srb -mc "/usr/bin/pg_ctl -D $MCATDATA start"
-sleep 10 # to give postmaster time to start before the trying to create the database
-su srb -mc "unset LANG && /usr/bin/createdb MCAT"
-
-su srb -mc "cd %{srbroot}/MCAT/data && /usr/bin/psql MCAT < catalog.install.psg"
-
-su srb -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestToken Domain $SRB_DOMAIN gen-lvl4"
-su srb -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestUser $SRB_ADMIN_NAME '$SRB_ADMIN_PASSWD' $SRB_DOMAIN sysadmin '' '' '' "
-su srb -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./modifyUser changePassword srb sdsc '$SRB_ADMIN_PASSWD' "
-
-mkdir -p %{srbHome}/.srb
-cat <<-EOF > %{srbHome}/.srb/.MdasEnv
-mdasCollectionName '/$SRB_ZONE/home/$SRB_ADMIN_NAME.$SRB_DOMAIN'
-mdasCollectionHome '/$SRB_ZONE/home/$SRB_ADMIN_NAME.$SRB_DOMAIN'
-mdasDomainName '$SRB_DOMAIN'
-mdasDomainHome '$SRB_DOMAIN'
-srbUser '$SRB_ADMIN_NAME'
-srbHost '$HOSTNAME'
-#srbPort '5544'
-defaultResource '$SRB_RESOURCE'
-#AUTH_SCHEME 'PASSWD_AUTH'
-#AUTH_SCHEME 'GSI_AUTH'
-AUTH_SCHEME 'ENCRYPT1'
-EOF
-
-cat <<-EOF > %{srbHome}/.srb/.MdasAuth
-$SRB_ADMIN_PASSWD
-EOF
-
-su srb -mc "cp %{srbroot}/data/mcatHost %{srbroot}/data/mcatHost.old"
-su srb -mc "sed s/srb.sdsc.edu/$HOSTNAME/ %{srbroot}/data/mcatHost.old > %{srbroot}/data/mcatHost"
-
-/bin/chown -R srb:srb %{srbHome}/.srb
-
-su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./runsrb"
-
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestLocation '$SRB_LOCATION' '$HOSTNAME:NULL.NULL' 'level4' $SRB_ADMIN_NAME $SRB_DOMAIN"
-
-mkdir -p $SRB_VAULT
-chown srb:srb $SRB_VAULT
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestResource '$SRB_RESOURCE' 'unix file system' '$SRB_LOCATION' '$SRB_VAULT/?USER.?DOMAIN/?SPLITPATH/?PATH?DATANAME.?RANDOM.?TIMESEC' permanent 0"
-
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
-
-# run twice as well
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by server-config RPM' && /usr/bin/Sexit"
-su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by server-config RPM' && /usr/bin/Sexit"
-
-# Setup inca test user
-
-if [[ !$SRB_INCA_DN ]]; then
-	export SRB_INCA_DN='/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest'
-fi
-
-if [[ !$SRB_NO_INCA ]]; then
-	echo "Setting up INCA Test User."
-	su srb -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Singestuser inca GTest $SRB_DOMAIN  staff '' '' '' GSI_AUTH '/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest' && /usr/bin/Sexit"
-
-	if ! test -d /etc/grid-security; then
-		mkdir etc/grid-security
-	fi
-	if ! test -e /etc/grid-security/grid-mapfile.srb; then
-		touch /etc/grid-security/grid-mapfile.srb
-	fi 
-
-	if ! grep -q inca@$SRB_DOMAIN /etc/grid-security/grid-mapfile.srb; then
-		echo "\"$SRB_INCA_DN\" inca@$SRB_DOMAIN" >> /etc/grid-security/grid-mapfile.srb
-	fi
-	echo "done."
-fi
-# done
-
-cat<<EOF
---------------------------------------------------
-If you see and error like:
-
-Szone: Error in Performing Action: -1007
-AUTH_ERR_PROXY_NOPRIV: proxy user not privileged
-
-or
-
-Szone: Error in Performing Action: -3314
-ZONE_NAME_NOT_IN_CAT: ZONE_NAME_NOT_IN_CAT
-
-it is most likely ok.
----------------------------------------------------
-EOF
-
-rm -f /etc/rc.d/init.d/srb
-cat <<-EOF > /etc/rc.d/init.d/srb
-#!/bin/bash
+mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d/
+echo '#!/bin/bash
 #
 # srb        Starts SRB Server
 #
 #
-# chkconfig: 2345 99 01
+# chkconfig: 35 99 01
+# description:  This service controlls the SRB server \
+#               and its postgresql data base.
 
 # Source function library.
 . /etc/init.d/functions
@@ -446,10 +248,260 @@ case "$1" in
        exit 1
 esac
 
-exit $?
+exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
+
+%clean
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+%pre server
+id srb > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+	SRB_HOME = `getent passwd | grep srb | awk 'split($2,tmp,":") {print tmp[2]}'`
+	if [ "$SRB_HOME" != "/var/lib/srb" ]; then
+        	echo "System already has a user called 'srb'. Instaltion aborted."
+        	exit 1
+	fi
+fi
+
+if ! getent passwd srb >/dev/null 2>&1 ; then
+    /usr/sbin/useradd -m -d /var/lib/srb -s /bin/bash -c "SRB Server" srb > /dev/null 2>&1 || :
+    echo "export LANG=en_US.iso88591" >> /var/lib/srb/.bashrc
+    echo "export LANG=en_US.iso88591" >> /var/lib/srb/.profile
+fi
+if ! grep -q %{srbroot}/lib /etc/ld.so.conf; then
+        echo "%{srbroot}/lib" >> /etc/ld.so.conf
+fi
+/sbin/ldconfig
+
+%post server
+#rm -f /etc/rc.d/init.d/srb
+
+#chmod a+x /etc/rc.d/init.d/srb
+#if [ $1 = 1 ]; then
+#    /sbin/chkconfig --add srb
+#fi
+#/bin/chmod 0755 /var/lib/srb
+#/bin/chmod 0750 /var/lib/srb/.srb
+#if [ $1 = 0 ]; then
+#    /sbin/chkconfig --del srb
+#fi
+
+%preun server
+export MCATDATA=`cat %{srbHome}/.mcat_location`
+su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./killsrb now"
+su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA stop"
+#/usr/bin/killall postmaster
+
+%postun server
+if [ $1 = 0 ] ; then
+        /usr/sbin/userdel srb >/dev/null 2>&1 || :
+fi
+
+# %files gridftp-dsi-dependencies
+# /%{srbroot}/%{srbSrc}/*
+
+
+################### server config ##############################################
+%pre install
+
+if ! rpm -qa | grep srb-install ; then
+
+export HOSTNAME=`uname -n`
+export HOSTIPS=`host $HOSTNAME | grep "has address" | awk '{print $4}'`
+
+if [[ !$PGPORT ]]; then
+    export PGPORT=5432
+fi
+
+if [[ !$MCATDATA ]]; then
+    export MCATDATA=%{srbHome}/mcat
+fi
+
+cat <<-EOF > %{srbHome}/.mcat_location
+$MCATDATA
 EOF
 
-%files server-config
+if [[ !$SRB_DOMAIN ]]; then
+    export SRB_DOMAIN=$HOSTNAME
+fi
+
+if [[ !$SRB_ADMIN_NAME ]]; then
+    export SRB_ADMIN_NAME=srbAdmin
+fi
+
+if [[ !$SRB_ADMIN_PASSWD ]]; then
+    export SRB_ADMIN_PASSWD='adim#srb'
+fi
+
+if [[ !$SRB_VAULT ]]; then
+    export SRB_VAULT=%{srbHome}/Vault
+fi
+
+if [[ !$SRB_LOCATION ]]; then
+    export SRB_LOCATION=$HOSTNAME
+fi
+
+if [[ !$SRB_ZONE ]]; then
+    export SRB_ZONE=$HOSTNAME
+fi
+
+if [[ !$SRB_RESOURCE ]]; then
+    export SRB_RESOURCE=$HOSTNAME
+fi
+
+cat <<-EOF > %{srbroot}/data/MdasConfig
+DASDBTYPE        postgres
+MDASDBNAME        PostgreSQL
+MDASINSERTSFILE  %{srbroot}/data/mdas_inserts
+METADATA_FKREL_FILE metadata.fkrel
+DB2USER           srb
+DB2LOGFILE       %{srbroot}/data/db2logfile
+DBHOME          $MCATDATA
+EOF
+/bin/chown srb:srb %{srbroot}/data/MdasConfig
+
+cat <<-EOF > %{srbHome}/.odbc.ini
+[PostgreSQL]
+Driver=%{srbroot}/lib/psqlodbc.so
+Debug=0
+CommLog=0
+Servername=$HOSTNAME
+Database=MCAT
+Username=srb
+Port=$PGPORT
+EOF
+/bin/chown srb:srb %{srbHome}/.odbc.ini
+
+if test -e $MCATDATA.rpm.orig ; then
+	rm -rf $MCATDATA.rpm.orig
+fi
+
+if test -e $MCATDATA ; then
+	mv -f $MCATDATA $MCATDATA.rpm.orig
+fi
+
+su srb -s /bin/bash -mc "unset LANG && /usr/bin/initdb --lc-collate=C -D $MCATDATA"
+
+su srb -s /bin/bash -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
+su srb -s /bin/bash -mc "sed s/#listen_addresses\ =\ \'localhost\'/listen_addresses\ =\ \'*\'/ $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
+su srb -s /bin/bash -mc "cp $MCATDATA/postgresql.conf $MCATDATA/postgresql.conf.old"
+su srb -s /bin/bash -mc "sed s/#port\ =\ 5432/port\ =\ $PGPORT/g $MCATDATA/postgresql.conf.old > $MCATDATA/postgresql.conf"
+
+for HOSTIP in $HOSTIPS ; do
+cat <<-EOF >> $MCATDATA/pg_hba.conf
+host    all         all         $HOSTIP/32        trust
+EOF
+done
+
+su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA start"
+sleep 10 # to give postmaster time to start before the trying to create the database
+su srb -s /bin/bash -mc "unset LANG && /usr/bin/createdb MCAT"
+
+su srb -s /bin/bash -mc "cd %{srbroot}/MCAT/data && /usr/bin/psql MCAT < catalog.install.psg"
+
+su srb -s /bin/bash -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestToken Domain $SRB_DOMAIN gen-lvl4"
+su srb -s /bin/bash -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./ingestUser $SRB_ADMIN_NAME '$SRB_ADMIN_PASSWD' $SRB_DOMAIN sysadmin '' '' '' "
+su srb -s /bin/bash -mc "export srbUser=srb && export srbAuth=CANDO && export mdasDomainName=sdsc && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && cd %{srbroot}/MCAT/bin && ./modifyUser changePassword srb sdsc '$SRB_ADMIN_PASSWD' "
+
+mkdir -p %{srbHome}/.srb
+cat <<-EOF > %{srbHome}/.srb/.MdasEnv
+mdasCollectionName '/$SRB_ZONE/home/$SRB_ADMIN_NAME.$SRB_DOMAIN'
+mdasCollectionHome '/$SRB_ZONE/home/$SRB_ADMIN_NAME.$SRB_DOMAIN'
+mdasDomainName '$SRB_DOMAIN'
+mdasDomainHome '$SRB_DOMAIN'
+srbUser '$SRB_ADMIN_NAME'
+srbHost '$HOSTNAME'
+#srbPort '5544'
+defaultResource '$SRB_RESOURCE'
+#AUTH_SCHEME 'PASSWD_AUTH'
+#AUTH_SCHEME 'GSI_AUTH'
+AUTH_SCHEME 'ENCRYPT1'
+EOF
+
+cat <<-EOF > %{srbHome}/.srb/.MdasAuth
+$SRB_ADMIN_PASSWD
+EOF
+
+su srb -s /bin/bash -mc "cp %{srbroot}/data/mcatHost %{srbroot}/data/mcatHost.old"
+su srb -s /bin/bash -mc "sed s/srb.sdsc.edu/$HOSTNAME/ %{srbroot}/data/mcatHost.old > %{srbroot}/data/mcatHost"
+
+/bin/chown -R srb:srb %{srbHome}/.srb
+
+su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./runsrb"
+
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestLocation '$SRB_LOCATION' '$HOSTNAME:NULL.NULL' 'level4' $SRB_ADMIN_NAME $SRB_DOMAIN"
+
+mkdir -p $SRB_VAULT
+chown srb:srb $SRB_VAULT
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./ingestResource '$SRB_RESOURCE' 'unix file system' '$SRB_LOCATION' '$SRB_VAULT/?USER.?DOMAIN/?SPLITPATH/?PATH?DATANAME.?RANDOM.?TIMESEC' permanent 0"
+
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
+#su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Szone -C demozone $SRB_ZONE && /usr/bin/Sexit" # change zone twice; tipp from install.pl
+
+# run twice as well
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Szone -M $SRB_ZONE $SRB_LOCATION '' $SRB_ADMIN_NAME@$SRB_DOMAIN '' 'Zone create by install RPM' && /usr/bin/Sexit"
+
+# create SDSC ticketuser -> broken in 3.5 as it doesn't exist by default but nothing works without it
+su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Singestuser ticketuser ansdkjqw sdsc public '' '' '' ENCRYPT1 ''"
+
+# Setup inca test user
+
+if [[ !$SRB_INCA_DN ]]; then
+    export SRB_INCA_DN='/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest'
+fi
+
+if [[ !$SRB_NO_INCA ]]; then
+    echo "Setting up INCA Test User."
+    su srb -s /bin/bash -mc "export HOME=%{srbHome} && cd %{srbroot}/MCAT/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && /usr/bin/Sinit && /usr/bin/Singestuser inca GTest $SRB_DOMAIN  staff '' '' '' GSI_AUTH '/C=AU/O=APACGrid/OU=SAPAC/CN=Gerson Galang GTest' && /usr/bin/Sexit"
+
+    if ! test -d /etc/grid-security; then
+        mkdir etc/grid-security
+    fi
+    if ! test -e /etc/grid-security/grid-mapfile.srb; then
+        touch /etc/grid-security/grid-mapfile.srb
+    fi 
+
+    if ! grep -q inca@$SRB_DOMAIN /etc/grid-security/grid-mapfile.srb; then
+        echo "\"$SRB_INCA_DN\" inca@$SRB_DOMAIN" >> /etc/grid-security/grid-mapfile.srb
+    fi
+    echo "done."
+fi
+
+# done
+
+# set admin zone in ZoneUserSync.py
+%define srb_zone $SRB_ZONE
+cp %{_bindir}/ZoneUserSync.py %{_bindir}/ZoneUserSync.py.bak
+sed s/administrativeZones\ =\ \\[\\]/administrativeZones\ =\ \\[\"%{srb_zone}\"\\]/g %{_bindir}/ZoneUserSync.py.bak > %{_bindir}/ZoneUserSync.py
+
+cat<<EOF
+--------------------------------------------------
+If you see and error like:
+
+Szone: Error in Performing Action: -1007
+AUTH_ERR_PROXY_NOPRIV: proxy user not privileged
+
+or
+
+Szone: Error in Performing Action: -3314
+ZONE_NAME_NOT_IN_CAT: ZONE_NAME_NOT_IN_CAT
+
+it is most likely ok.
+---------------------------------------------------
+EOF
+
+fi
+
+%files install
+%attr(0755,root,root) %config(noreplace) /etc/rc.d/init.d/srb
+
+%post install
+/sbin/chkconfig --add srb
+
+%postun install
+/sbin/chkconfig --del srb
+
 ################### end server config ##############################################
 
 %pre server-update
@@ -473,7 +525,37 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %defattr(-,srb,srb)
 %doc COPYRIGHT
 %{srbroot}/*
-/etc/rc.d/init.d/srb
+%config(noreplace) %{srbroot}/bin/runsrb
+%config(noreplace) %{srbroot}/data/host*
+%config(noreplace) %{srbroot}/data/mcatHost
+%config(noreplace) %{srbroot}/data/MdasConfig
+%config(noreplace) %{srbroot}/data/shibConfig
 %attr(0755,srb,srb) %dir /var/lib/srb
 %attr(0750,srb,srb) /var/lib/srb/.srb
-%attr(0640,srb,srb) %config /var/lib/srb/.srb/.Mdas*
+%attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
+
+%changelog
+* Thu Jun 05 2008 Florian Goessmann <florian@ivec.org>
+- added patch that incoporates the new user sync facility
+* Wed Jun 04 2008 Florian Goessmann <florian@ivec.org>
+- added Youzhen's patch for host with multiple IPs
+- made check for existing SRB user more graceful
+* Mon May 27 2008 Florian Goessmann <florian@ivec.org>
+- added check if srb user exists. exits if true.
+* Mon May 19 2008 Florian Goessmann <florian@ivec.org>
+- added fixes to allow proper uninstall
+* Wed May 14 2008 Florian Goessmann <florian@ivec.org>
+- fixed problem caused when yum install was called from a c shell
+* Tue May 06 2008 Florian Goessmann <florian@ivec.org>
+- applied JCU patches for Shibboleth, thanks to Nigel Sim <nigel.sim@jcu.edu.au>
+- disabled build of gridhttpd -> never worked and broke the build with the patches
+* Fri Apr 18 2008 Florian Goessmann <florian@ivec.org>
+- added creation of ticketuser
+* Wed Apr 3  2008 Florian Goessmann <florian@ivec.org>
+- fixed a problem with the creation of the init script
+- enabled GridHTTPD
+- fixed a problem with demozone not being correctly changed to new zone
+* Mon Feb 11 2008 Florian Goessmann <florian@ivec.org>
+- added changelog
+- now depends on the SRB enabled package of gridFTP
+- changed name of server-config to install
