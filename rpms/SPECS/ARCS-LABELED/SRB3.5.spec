@@ -289,7 +289,7 @@ fi
 %preun server
 export MCATDATA=`cat %{srbHome}/.mcat_location`
 su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./killsrb now"
-su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA stop"
+su srb -s /bin/bash -mc "/usr/bin/pg_ctl stop -D $MCATDATA"
 #/usr/bin/killall postmaster
 
 %postun server
