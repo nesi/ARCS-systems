@@ -256,7 +256,7 @@ exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
 %pre server
 id srb > /dev/null 2>&1
 if [ $? -eq 0 ]; then
-	SRB_HOME = `getent passwd | grep srb | awk 'split($2,tmp,":") {print tmp[2]}'`
+	SRB_HOME=`getent passwd | grep srb | awk 'split($2,tmp,":") {print tmp[2]}'`
 	if [ "$SRB_HOME" != "/var/lib/srb" ]; then
         	echo "System already has a user called 'srb'. Instaltion aborted."
         	exit 1
