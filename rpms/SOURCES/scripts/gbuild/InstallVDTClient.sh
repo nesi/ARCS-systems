@@ -66,6 +66,14 @@ cd $PACMAN && source setup.sh && cd ..
 VDTMIRROR=http://projects.arcs.org.au/mirror/vdt/vdt_181_cache
 [ -n "$http_proxy" ] && ProxyString="-http-proxy $http_proxy" &&echo "==> Using Proxy: $http_proxy"
 
+# prevent this Pacman error
+# Failed to save http proxy information in [/opt/vdt]...
+# No installation at [o..pacman..o].
+pacman -verify
+
+# set proxy
+pacman $ProxyString
+
 # set up platform.  More special cases need to be added here.
 # tested on Mac OS 10.4 (i386).
 # tested on Centos 5. (i686) 09/11/2007 -- S. McMahon
@@ -95,6 +103,6 @@ for Component in $components; do
   [ -f o..pacman..o/platform ] && unset Platform
 
   echo "==> Checking/Installing: $Component"
-  pacman $Platform $ProxyString -get $VDTMIRROR:$Component || echo "==> Failed!"
+  pacman $Platform -get $VDTMIRROR:$Component || echo "==> Failed!"
 done
-pacman $Platform $ProxyString -update CA-Certificates
+pacman $Platform -update CA-Certificates
