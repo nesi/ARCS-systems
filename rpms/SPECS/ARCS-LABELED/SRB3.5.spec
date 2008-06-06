@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        11.arcs
+Release:        13.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -256,7 +256,7 @@ exit $?' > $RPM_BUILD_ROOT/etc/rc.d/init.d/srb
 %pre server
 id srb > /dev/null 2>&1
 if [ $? -eq 0 ]; then
-	SRB_HOME=`getent passwd | grep srb | awk 'split($2,tmp,":") {print tmp[2]}'`
+	SRB_HOME=`getent passwd | grep srb | awk 'split($1$2,tmp,":") {print tmp[6]}'`
 	if [ "$SRB_HOME" != "/var/lib/srb" ]; then
         	echo "System already has a user called 'srb'. Instaltion aborted."
         	exit 1
@@ -535,6 +535,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Fri Jun 06 2008 Florian Goessmann <florian@ivec.org>
+- fixed problem in check for existing SRB user
 * Thu Jun 05 2008 Florian Goessmann <florian@ivec.org>
 - added patch that incoporates the new user sync facility
 * Wed Jun 04 2008 Florian Goessmann <florian@ivec.org>
