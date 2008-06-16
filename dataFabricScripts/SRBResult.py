@@ -213,13 +213,13 @@ class SRBZone(SRBResult):
                 quotaAmount = (float)(self.quotas[use.values['phy_rsrc_name']])
                 print "------------------------------------------------------"
                 print "user_name: " + user.values['user_name'] + "@" + user.values['domain_desc']
-                print "quota: " + `(quotaAmount / SRBZone.DISPLAY_SIZE)`
+                print "quota: %3.3f Mb"%(quotaAmount / SRBZone.DISPLAY_SIZE)
                 usedAmount = (float)(use.values['data_size'])
                 quotaPercentage = (usedAmount / quotaAmount)
                 print "phy_rsrc_name: " + use.values['phy_rsrc_name']
-                print "data_size: " + `(usedAmount / displaySize)`
+                print "data_size: %3.3f Mb"%(usedAmount / displaySize)
                 print "data_id: " + use.values['data_id']
-                print "free: " + `(quotaAmount - usedAmount) / displaySize`
-                print "percentage: " + `quotaPercentage * 100`
+                print "free: %3.3f Mb"%((quotaAmount - usedAmount) / displaySize)
+                print "percentage: %3.3f%%"%(quotaPercentage * 100)
 
     getUsersInDomain = Callable(getUsersInDomain)

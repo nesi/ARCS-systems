@@ -32,8 +32,8 @@ class SRBWrapper:
 
     def getTotalUsage(self):
         totalsList = {}
-        #srb-dev.ivec.org hangs for some reason
-        zones =  [z for z in self.knownZones if (z.values['zone_id'] <> 'srb-dev.ivec.org')] 
+        #Only list zones that are "active"
+        zones =  [z for z in self.knownZones if (z.values['zone_status'] == '1')] 
         for zone in zones:
             for zone2 in zones:
                 userDomain = zone2.values['domain_desc']
