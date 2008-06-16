@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        13.arcs
+Release:        16.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -72,8 +72,10 @@ This is the server portion.
 %description install
 This package provides basic configuration for the SRB server.
 
-The configuration can be controlled by setting environment variables.
-A default value will be used in case a variable is not set.
+During configuration, the setup script will source /tmp/SRBInstallSettings.sh
+if this files exists.
+In order to adjust the installation the following environament variables can be
+exported in /tmp/SRBInstallSettings.sh:
 
 PGPORT              Port for the MCAT PostgreSQL database. Default: 5432
 MCATDATA            Root directory for the MCAT database. Default: /var/lib/srb/mcat
@@ -289,7 +291,7 @@ fi
 %preun server
 export MCATDATA=`cat %{srbHome}/.mcat_location`
 su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroot}/lib && ./killsrb now"
-su srb -s /bin/bash -mc "/usr/bin/pg_ctl stop -D $MCATDATA"
+su srb -s /bin/bash -mc "/usr/bin/pg_ctl -D $MCATDATA stop"
 #/usr/bin/killall postmaster
 
 %postun server
@@ -309,45 +311,31 @@ if ! rpm -qa | grep srb-install ; then
 export HOSTNAME=`uname -n`
 export HOSTIPS=`host $HOSTNAME | grep "has address" | awk '{print $4}'`
 
-if [[ !$PGPORT ]]; then
-    export PGPORT=5432
-fi
+export PGPORT=5432
 
-if [[ !$MCATDATA ]]; then
-    export MCATDATA=%{srbHome}/mcat
+export MCATDATA=%{srbHome}/mcat
+
+export SRB_DOMAIN=$HOSTNAME
+
+export SRB_ADMIN_NAME=srbAdmin
+
+export SRB_ADMIN_PASSWD='adim#srb'
+
+export SRB_VAULT=%{srbHome}/Vault
+
+export SRB_LOCATION=$HOSTNAME
+
+export SRB_ZONE=$HOSTNAME
+
+export SRB_RESOURCE=$HOSTNAME
+
+if test -e /tmp/SRBInstallSettings.sh ; then
+	source /tmp/SRBInstallSettings.sh
 fi
 
 cat <<-EOF > %{srbHome}/.mcat_location
 $MCATDATA
 EOF
-
-if [[ !$SRB_DOMAIN ]]; then
-    export SRB_DOMAIN=$HOSTNAME
-fi
-
-if [[ !$SRB_ADMIN_NAME ]]; then
-    export SRB_ADMIN_NAME=srbAdmin
-fi
-
-if [[ !$SRB_ADMIN_PASSWD ]]; then
-    export SRB_ADMIN_PASSWD='adim#srb'
-fi
-
-if [[ !$SRB_VAULT ]]; then
-    export SRB_VAULT=%{srbHome}/Vault
-fi
-
-if [[ !$SRB_LOCATION ]]; then
-    export SRB_LOCATION=$HOSTNAME
-fi
-
-if [[ !$SRB_ZONE ]]; then
-    export SRB_ZONE=$HOSTNAME
-fi
-
-if [[ !$SRB_RESOURCE ]]; then
-    export SRB_RESOURCE=$HOSTNAME
-fi
 
 cat <<-EOF > %{srbroot}/data/MdasConfig
 DASDBTYPE        postgres
@@ -497,10 +485,10 @@ fi
 %attr(0755,root,root) %config(noreplace) /etc/rc.d/init.d/srb
 
 %post install
-/sbin/chkconfig --add srb
+#/sbin/chkconfig --add srb
 
 %postun install
-/sbin/chkconfig --del srb
+#/sbin/chkconfig --del srb
 
 ################### end server config ##############################################
 
@@ -520,6 +508,7 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %files clients
 %{_bindir}/*
 %{_mandir}/man1/*
+%config(noreplace) %{_bindir}/ZoneUserSync.py
 
 %files server
 %defattr(-,srb,srb)
@@ -535,6 +524,8 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
 
 %changelog
+* Mon Jun 17 2008 Florian Goessmann <florian@ivec.org>
+- changed installation customization
 * Fri Jun 06 2008 Florian Goessmann <florian@ivec.org>
 - fixed problem in check for existing SRB user
 * Thu Jun 05 2008 Florian Goessmann <florian@ivec.org>
