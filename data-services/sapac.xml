@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<data-services>
+  <srb-servers site="sapac">
+    <srb type="production">
+      <host-name>srb.sapac.edu.au</host-name>
+      <port-number>5544</port-number>
+      <srb-dsi-port>2811</srb-dsi-port>
+      <zone-name>srb.sapac.edu.au</zone-name>
+      <domain-name>srb.sapac.edu.au</domain-name>
+      <domain-home>srb.sapac.edu.au</domain-home>
+      <collection-name>srb.sapac.edu.au</collection-name>
+      <collection-home>srb.sapac.edu.au</collection-home>
+      <resources>
+      	<resource default="yes">datafabric.srb.sapac.edu.au</resource>
+      	<resource>srb.sapac.edu.au</resource>
+      </resources>
+      <auth-schemes>
+      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srb.sapac.edu.au">GSI</auth-scheme>
+      	<auth-scheme>ENCRYPT1</auth-scheme>
+      </auth-schemes>
+    </srb>
+    <srb type="development">
+      <host-name>ngspare.sapac.edu.au</host-name>
+      <port-number>5544</port-number>
+      <srb-dsi-port>2811</srb-dsi-port>
+      <zone-name>ngspare.sapac.edu.au</zone-name>
+      <domain-name>ngspare.sapac.edu.au</domain-name>
+      <domain-home>ngspare.sapac.edu.au</domain-home>
+      <collection-name>ngspare.sapac.edu.au</collection-name>
+      <collection-home>ngspare.sapac.edu.au</collection-home>
+      <resources>
+      	<resource default="yes">datafabric.ngspare.sapac.edu.au</resource>
+      	<resource>ngspare.sapac.edu.au</resource>
+      </resources>
+      <auth-schemes>
+      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=ngspare.sapac.edu.au">GSI</auth-scheme>
+      	<auth-scheme>ENCRYPT1</auth-scheme>
+      </auth-schemes>
+    </srb>
+  </srb-servers>
+</data-services>
