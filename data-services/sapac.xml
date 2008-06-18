@@ -2,29 +2,32 @@
 <data-services>
   <srb-servers site="sapac">
     <srb type="production">
-      <host-name>srb.sapac.edu.au</host-name>
-      <port-number>5544</port-number>
-      <srb-dsi-port>2811</srb-dsi-port>
       <zone-name>srb.sapac.edu.au</zone-name>
-      <domain-name>srb.sapac.edu.au</domain-name>
-      <collection-home>srb.sapac.edu.au</collection-home>
-      <srb-admin>srbAdmin</srb-admin>
-      <resources>
-      	<resource default="yes">
-      	  <name>datafabric.srb.sapac.edu.au</name>
-       	  <available-space></available-space>
-      	  <total-space>1.5T</total-space>
-      	</resource>
-      	<resource default="no">
-      	  <name>srb.sapac.edu.au</name>
-      	  <available-space></available-space>
-      	  <total-space>500M</total-space>
-      	</resource>
-      </resources>
-      <auth-schemes>
-      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srb.sapac.edu.au">GSI</auth-scheme>
-      	<auth-scheme>ENCRYPT1</auth-scheme>
-      </auth-schemes>
+      <domains>
+        <domain>
+	      <domain-name>srb.sapac.edu.au</domain-name>
+	      <host-name>srb.sapac.edu.au</host-name>
+	      <port-number>5544</port-number>
+	      <srb-dsi-port>2811</srb-dsi-port>
+	      <srb-admin>srbAdmin</srb-admin>
+	      <resources>
+	      	<resource default="yes">
+	      	  <name>datafabric.srb.sapac.edu.au</name>
+	       	  <available-space></available-space>
+	      	  <total-space>1.5T</total-space>
+	      	</resource>
+	      	<resource default="no">
+	      	  <name>srb.sapac.edu.au</name>
+	      	  <available-space></available-space>
+	      	  <total-space>500M</total-space>
+	      	</resource>
+	      </resources>
+	      <auth-schemes>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srb.sapac.edu.au">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </domain>
+	  </domains>	
       <description>
       	This SRB is part of ARCS data fabric federation, with a 1.5T disk array attached.
       </description>
@@ -39,29 +42,32 @@
       </backup-strategy>
     </srb>
     <srb type="development">
-      <host-name>ngspare.sapac.edu.au</host-name>
-      <port-number>5544</port-number>
-      <srb-dsi-port>2811</srb-dsi-port>
       <zone-name>ngspare.sapac.edu.au</zone-name>
-      <domain-name>ngspare.sapac.edu.au</domain-name>
-      <collection-home>ngspare.sapac.edu.au</collection-home>
-      <srb-admin>srbAdmin</srb-admin>
-      <resources>
-       	<resource default="yes">
-      	  <name>datafabric.ngspare.sapac.edu.au</name>
-       	  <available-space></available-space>
-      	  <total-space>200M</total-space>
-      	</resource>
-      	<resource default="no">
-      	  <name>ngspare.sapac.edu.au</name>
-      	  <available-space></available-space>
-      	  <total-space>200M</total-space>
-      	</resource>
-      </resources>
-      <auth-schemes>
-      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=ngspare.sapac.edu.au">GSI</auth-scheme>
-      	<auth-scheme>ENCRYPT1</auth-scheme>
-      </auth-schemes>
+      <domains>
+        <domain>
+	      <domain-name>ngspare.sapac.edu.au</domain-name>
+	      <host-name>ngspare.sapac.edu.au</host-name>
+	      <port-number>5544</port-number>
+	      <srb-dsi-port>2811</srb-dsi-port>
+	      <srb-admin>srbAdmin</srb-admin>
+	      <resources>
+	       	<resource default="yes">
+	      	  <name>datafabric.ngspare.sapac.edu.au</name>
+	       	  <available-space></available-space>
+	      	  <total-space>200M</total-space>
+	      	</resource>
+	      	<resource default="no">
+	      	  <name>ngspare.sapac.edu.au</name>
+	      	  <available-space></available-space>
+	      	  <total-space>200M</total-space>
+	      	</resource>
+	      </resources>
+	      <auth-schemes>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=ngspare.sapac.edu.au">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </domain>
+	  </domains>	
       <description>
       	This SRB is for testing.
       </description>
