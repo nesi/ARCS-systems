@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="ivec">
+    <srb type="production">    <!-- refers to MCAT -->
+      <zone-name>srb.ivec.org</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>datafabric.srb.ivec.org</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>1T</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>srb.ivec.org</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>5G</total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb.ivec.org</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <host-name>srb.ivec.org</host-name>
+		  <port-number>5544</port-number>
+		  <gridftp-dsi-port>5000</gridftp-dsi-port>
+	      <auth-schemes>
+			<auth-scheme dn="/C=AU/O=APACGrid/OU=iVEC/CN=srb.ivec.org">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This SRB is part of ARCS data fabric federation, with a 1T of storage.
+      </description>
+      <status>
+        Production from 17 June 2008.
+      </status>
+      <quota>
+        25GB for all users initially. 
+      </quota>
+      <backup-strategy>
+        Nightly backup of SRB installation and all stored data.
+      </backup-strategy>
+    </srb>
+</data-services>
