@@ -1,24 +1,26 @@
 <?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
 <data-services>
   <srb-servers site="sapac">
-    <srb type="production">
+    <srb type="production">    <!-- refers to MCAT -->
       <zone-name>srb.sapac.edu.au</zone-name>
-      <resources>
+      <resources>    <!-- there can be one primary resource -->
       	<resource primary="yes">
-      	  <name>datafabric.srb.sapac.edu.au</name>
+      	  <resource-name>datafabric.srb.sapac.edu.au</resource-name>
        	  <available-space></available-space>
       	  <total-space>1.5T</total-space>
       	</resource>
       	<resource primary="no">
-      	  <name>srb.sapac.edu.au</name>
+      	  <resource-name>srb.sapac.edu.au</resource-name>
       	  <available-space></available-space>
       	  <total-space>500M</total-space>
       	</resource>
       </resources>
-      <domains>
+      <domains>    <!-- like a group; there can be one primary domain -->
         <domain primary="yes">
           <domain-name>srb.sapac.edu.au</domain-name>
-		  <srb-admin>srbAdmin</srb-admin>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
         </domain>
 	  </domains>
 	  <hosts>
@@ -47,31 +49,36 @@
     </srb>
     <srb type="development">
       <zone-name>ngspare.sapac.edu.au</zone-name>
+      <resources>
+       	<resource primary="yes">
+      	  <resource-name>datafabric.ngspare.sapac.edu.au</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>200M</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>ngspare.sapac.edu.au</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>200M</total-space>
+      	</resource>
+      </resources>
       <domains>
-        <domain>
+        <domain primary="yes">
 	      <domain-name>ngspare.sapac.edu.au</domain-name>
+	      <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>shunde</domain-test-user>
+	    </domain>
+	  </domains>
+	  <hosts>
+	    <host>
 	      <host-name>ngspare.sapac.edu.au</host-name>
 	      <port-number>5544</port-number>
 	      <srb-dsi-port>2811</srb-dsi-port>
-	      <srb-admin>srbAdmin</srb-admin>
-	      <resources>
-	       	<resource default="yes">
-	      	  <name>datafabric.ngspare.sapac.edu.au</name>
-	       	  <available-space></available-space>
-	      	  <total-space>200M</total-space>
-	      	</resource>
-	      	<resource default="no">
-	      	  <name>ngspare.sapac.edu.au</name>
-	      	  <available-space></available-space>
-	      	  <total-space>200M</total-space>
-	      	</resource>
-	      </resources>
 	      <auth-schemes>
 	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=ngspare.sapac.edu.au">GSI</auth-scheme>
 	      	<auth-scheme>ENCRYPT1</auth-scheme>
 	      </auth-schemes>
-	    </domain>
-	  </domains>	
+	    </host>
+	  </hosts>
       <description>
       	This SRB is for testing.
       </description>
