@@ -47,4 +47,5 @@
         Nightly backup of SRB installation and all stored data.
       </backup-strategy>
     </srb>
+  </srb-servers>
 </data-services>
