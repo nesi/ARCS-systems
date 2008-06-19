@@ -5,11 +5,22 @@ import os
 #the Taiwan scipt for usage statstics.  
 #The original is here: http://srb.grid.sinica.edu.tw/asmss/
 
+
+
+#----------------------------------------------------------------
+# CHANGELOT
+# 2008-06-18: 
+#   - added SRBResource class for handling quotas
+#   - quota should be identified by rsrc_name, not phy_rsrc_name
+#
+#----------------------------------------------------------------
+
 #---static goodness
 class Callable:
     def __init__(self, anycallable):
         self.__call__ = anycallable
 
+#---------------------------------------------------------------------------------------------
 
 #This is thrown whenver output from an Scommand
 #cannot be read
@@ -19,6 +30,7 @@ class SRBException(Exception):
     
     def __str__(self):
         return repr(self.value)
+#---------------------------------------------------------------------------------------------
 
 class SRBResult(object):
     """This class is used for storing results from
@@ -28,15 +40,16 @@ class SRBResult(object):
 
     pattern = re.compile("(.*): (.*)\s")
 
-    def __init__(self, result):
+    def __init__(self, result = None):
         """Creates a SRBResult object
             where result is a list of 
             line ouptut from SRB commands """
-        self.values = {}
-        for line in result:
-            split = re.match(SRBResult.pattern, line)
-            if(len(split.groups()) == 2):
-                self.values[split.group(1)] = split.group(2)
+        if(result <> None):
+            self.values = {}
+            for line in result:
+                split = re.match(SRBResult.pattern, line)
+                if(len(split.groups()) == 2):
+                    self.values[split.group(1)] = split.group(2)
 
     def getOutputLines(cmd, error):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
@@ -87,6 +100,7 @@ class SRBResult(object):
     parseAsType = Callable(parseAsType)
     getOutputLines = Callable(getOutputLines)
 
+#---------------------------------------------------------------------------------------------
 
 class SRBUser(SRBResult):
     """No surprise here - this class represents
@@ -139,6 +153,7 @@ class SRBUser(SRBResult):
     def getHomeCollection(self, zone_id):
         return zone_id + "/home/" + self.values['user_name'] + "." + self.values['domain_desc']
 
+#---------------------------------------------------------------------------------------------
 
 class SRBZone(SRBResult):
     """This class represents a SRB zone..."""
@@ -147,7 +162,24 @@ class SRBZone(SRBResult):
 
     def __init__(self, result):
         super(SRBZone, self).__init__(result)
-        self.quotas = {}
+        self.resourceList = {}
+        if(self.values['zone_status'] == '1'):
+            self.getResources() 
+
+    def getResources(self):
+        self.resourceList = {}
+        netprefix = self.values['netprefix']
+        host = netprefix[:netprefix.find(":")]
+        lines = SRBResult.getOutputLines('/usr/bin/SgetR -z ' + self.values['zone_id'],
+                    'Errpr getting resources for zone')
+                                       #first line of output says QueryZone = blah
+        list = SRBResult.parseAsType(lines[1:], 12, SRBResourceFactory)
+        for rs in list:
+            if(self.resourceList.has_key(rs.values['rsrc_name'])):
+                self.resourceList[rs.values['rsrc_name']].addResource(rs)
+            else:
+                self.resourceList[rs.values['rsrc_name']] = rs
+        return self.resourceList
 
     def getUsersInDomain(domain):
         usersList = []
@@ -163,7 +195,8 @@ class SRBZone(SRBResult):
         return usersList
 
     def setQuota(self, resource, limit):
-        self.quotas[resource] = limit
+        if(self.resourceList.has_key(resource)):
+            self.resourceList[resource].setQuota(limit)
 
     def getUsageInfo(self, userDomain):
         """Grabs all usage of a specific zone for 
@@ -192,34 +225,120 @@ class SRBZone(SRBResult):
                 print "user_name: " + user.values['user_name']
                 for rsc, use in resources.iteritems():
                     print use.toString()
-                    
 
     def sendNastygram(self, percentage, user, useageInfo):
         #should do something meaningful here
+        
         print "TODO: send email to user " + user.values['user_name'] + user.values['user_email']
 
     def handleQuota(self, user):
         usages = user.getUsageByResource(self.values['zone_id'])
         for rsc, use in usages.iteritems():
             usedAmount = (float)(use.values['data_size'])
-            quotaPercentage = (usedAmount / self.quotas[use.values['phy_rsrc_name']])
-            if(quotaPercentage >= 0.8):
+            quotaPercentage = (usedAmount / self.quotas[use.values['rsrc_name']])
+            if(quotaPercentage > 0.8):
                 self.sendNastygram(quotaPercentage, user, use)
-
-    def printUsageReport(self, user, displaySize = (1024 * 1024)):
+    def printUsageReport(self, user, displaySize = None):
+        if(displaySize == None):
+            displaySize = SRBZone.DISPLAY_SIZE
         usages = user.getUsageByResource(self.values['zone_id'])
-        if(len(usages.keys()) > 0):
-            for rsc, use in usages.iteritems():
-                quotaAmount = (float)(self.quotas[use.values['phy_rsrc_name']])
-                print "------------------------------------------------------"
-                print "user_name: " + user.values['user_name'] + "@" + user.values['domain_desc']
-                print "quota: %3.3f Mb"%(quotaAmount / SRBZone.DISPLAY_SIZE)
-                usedAmount = (float)(use.values['data_size'])
-                quotaPercentage = (usedAmount / quotaAmount)
-                print "phy_rsrc_name: " + use.values['phy_rsrc_name']
-                print "data_size: %3.3f Mb"%(usedAmount / displaySize)
-                print "data_id: " + use.values['data_id']
-                print "free: %3.3f Mb"%((quotaAmount - usedAmount) / displaySize)
-                print "percentage: %3.3f%%"%(quotaPercentage * 100)
+        for rs in self.resourceList:
+            if(self.resourceList[rs].hasQuota):
+                self.resourceList[rs].printQuota(user, usages, displaySize)
 
+    #--static goodness
     getUsersInDomain = Callable(getUsersInDomain)
+
+#---------------------------------------------------------------------------------------------
+
+class SRBResource(SRBResult):
+    def __init__(self, list = None):
+        super(SRBResource, self).__init__(list)
+        self.hasQuota = False
+
+    #limit is in BYTES
+    def setQuota(self, _limit):
+        self.limit = _limit
+        self.hasQuota = True
+
+    def printQuota(self, user, usages, displaySize):
+        rsName = self.values['rsrc_name']
+        print "------------------------------------------------------"
+        print "user_name: " + user.values['user_name'] + "@" + user.values['domain_desc']
+        print "quota: %3.3f Mb"%(self.limit / displaySize)
+        print "phy_rsrc_name: " + rsName
+        #if the user hasn't put anything on the resource, then
+        #there will be no record in usages.  So it will be al;
+        #quota amount will be available
+        usedAmount = 0.00
+        quotaPercentage = 1.00       
+        data_id = 0
+
+        (usedAmount, data_id) = self.getAmountAndCount(usages)
+
+        print "data_size: %3.3f Mb"%(usedAmount / displaySize)
+        print "data_id: " + `data_id`
+        print "free: %3.3f Mb"%((self.limit - usedAmount) / displaySize)
+        print "percentage: %3.3f%%"%(quotaPercentage * 100)
+
+    def handleQuota(self, user, usage):
+        return True    
+
+    def getAmountAndCount(self, usages):
+        return (self.getUsedAmount(usages),
+                    self.getNumFiles(usages))
+
+    def getNumFiles(self, usages):
+        return (int)(usages[rsName].values['data_id'])
+
+    def getUsedAmount(self, useages):
+        return (float)(usages[rsName].values['data_size'])
+
+    def isOverSoftQuota(self, user):
+        return False
+
+    def isOverHardQuota(self, user):
+        return False
+
+#----------------------------------------------------------------------------------------------
+class SRBLogicalResource(SRBResource):
+    #contains a list of SRBResource
+    def __init__(self, list = None):
+        super(SRBLogicalResource, self).__init__(list)
+        self.resourceList = {}
+        #I know... this is kind of redundant
+        rs = SRBResource(list)
+        self.resourceList[rs.values['phy_rsrc_name']] = rs
+
+    def addResource(self, rs):
+        self.resourceList[rs.values['phy_rsrc_name']] = rs
+
+    def getUsedAmount(self, usages):
+        total = 0.0
+        for rsName in self.resourceList.keys():
+            if(usages.has_key(rsName)):
+                total += (float)(usages[rsName].values['data_size'])
+        return total
+ 
+    def getNumFiles(self, usages):
+        
+        total = 0
+        for rsName in self.resourceList.keys():
+            if(usages.has_key(rsName)):
+                total += (int)(usages[rsName].values['data_id'])
+        return total
+
+#----------------------------------------------------------------------------------------------
+def SRBResourceFactory(result):
+    """A fun factory of SRB resource... 
+        Logical is the only 'special' case"""
+    #hmm... a bit dogey
+    if(result[2].find('logical') > -1):
+        lr = SRBLogicalResource(result)
+        return lr
+    else:
+        rs = SRBResource(result)
+        return rs
+
+
+    

@@ -8,8 +8,10 @@ class SRBWrapper:
                                 # Gb - Mb - Kb  
         #self.quotaLimit = 25 * 1024 * 1024 * 1024
         #self.zone.setQuota('data_fabric', 25 * 1024 & 1024 *1024)
-        self.zone.setQuota('data_fabric', 1 * 1024 *1024)
-        self.zone.setQuota('ngdev2.its.utas.edu.au', 1000 * 1024 * 1024)
+        #self.zone.setQuota('data_fabric', 1 * 1024 *1024)
+        #self.zone.setQuota('ngdev2.its.utas.edu.au', 1000 * 1024 * 1024)
+        self.zone.setQuota('both', 1 * 1024 * 1024)    
+
 
     def getKnownZones(self):
         lines = SRBResult.getOutputLines('/usr/bin/Stoken Zone', 
