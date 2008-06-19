@@ -13,7 +13,7 @@
       	<resource primary="no">
       	  <resource-name>srb.tpac.org.au</resource-name>
       	  <available-space></available-space>
-      	  <total-space>7.7G<total-space>
+      	  <total-space>7.7G</total-space>
       	</resource>
       </resources>
       <domains>    <!-- like a group; there can be one primary domain -->
