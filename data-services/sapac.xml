@@ -46,6 +46,23 @@
       <backup-strategy>
         Nightly VM snapshot backup.
       </backup-strategy>
+      <tech-support>
+      	<srb-admin priority="0">
+      	  <name>Shunde Zhang</name>
+      	  <phone>(08)83038265</phone>
+      	  <email>shunde.zhang@arcs.org.au</email>
+      	</srb-admin>
+      	<srb-admin priority="1">
+      	  <name>Florian Goessmann</name>
+      	  <phone>(08)64368835</phone>
+      	  <email>florian.goessmann@arcs.org.au</email>
+      	</srb-admin>
+      	<sys-admin>
+      	  <name>Daniel Cox</name>
+      	  <phone>(08)830xxxxx</phone>
+      	  <email>daniel.cox@arcs.org.au</email>
+      	</sys-admin>
+      </tech-support>
     </srb>
     <srb type="development">
       <zone-name>ngspare.sapac.edu.au</zone-name>
