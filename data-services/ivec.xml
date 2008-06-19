@@ -46,6 +46,28 @@
       <backup-strategy>
         Nightly backup of SRB installation and all stored data.
       </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Florian Goessmann</name>
+          <phone>0417097948</phone>
+          <email>florian.goessmann@arcs.org.au</email>
+        </srb-admin>
+        <srb-admin priority="1">
+          <name>Shunde Zhang</name>
+          <phone>0883038265</phone>
+          <email>shunde.zhang@arcs.org.au</email>
+        </srb-admin>
+        <sys-admin priority="0">
+          <name>Florian Goessmann</name>
+          <phone>0417097948</phone>
+          <email>florian.goessmann@arcs.org.au</email>
+        </sys-admin>
+        <sys-admin priority="1">
+          <name>Darran Carey</name>
+          <phone>0864368661</phone>
+          <email>darran.carey@arcs.org.au</email>
+        </sys-admin>
+      </tech-support>
     </srb>
   </srb-servers>
 </data-services>
