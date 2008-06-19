@@ -57,12 +57,17 @@
       	  <phone>(08)64368835</phone>
       	  <email>florian.goessmann@arcs.org.au</email>
       	</srb-admin>
-      	<sys-admin>
+      	<sys-admin priority="0">
       	  <name>Leigh Gordon</name>
-      	  <phone>(03)6226xxxx</phone>
+      	  <phone>(03)62266389</phone>
       	  <email>leigh.gordon@arcs.org.au</email>
       	</sys-admin>
-      </tech-support>
+      	<sys-admin priority="1">
+      	  <name>Ben Joseph</name>
+      	  <phone>(03)62266217</phone>
+      	  <email>ben.joseph@utas.edu.au</email>
+      	</sys-admin>
+       </tech-support>
     </srb>
     <srb type="development">
       <zone-name>ngdev2.its.utas.edu.au</zone-name>
