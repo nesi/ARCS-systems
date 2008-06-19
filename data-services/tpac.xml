@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="tpac">
+    <srb type="production">    <!-- refers to MCAT -->
+      <zone-name>srb.tpac.org.au</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>datafabric.srb.tpac.org.au</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>1.0T</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>srb.tpac.org.au</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>7.7G<total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb.tpac.org.au</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <host-name>srb.tpac.org.au</host-name>
+		  <port-number>5544</port-number>
+		  <gridftp-dsi-port>2811</gridftp-dsi-port>
+	      <auth-schemes>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=TPAC/CN=srb.sf.utas.edu.au">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This SRB is part of ARCS data fabric federation, with a 1.0T disk array attached.
+      </description>
+      <status>
+        Production from 19 June 2008.
+      </status>
+      <quota>
+        25GB for all users initially, need to pay for more. 
+      </quota>
+      <backup-strategy>
+        Nightly VM snapshot backup.
+      </backup-strategy>
+      <tech-support>
+      	<srb-admin priority="0">
+      	  <name>Pauline Mak</name>
+      	  <phone>(03)62267518</phone>
+      	  <email>pauline.mak@arcs.org.au</email>
+      	</srb-admin>
+      	<srb-admin priority="1">
+      	  <name>Florian Goessmann</name>
+      	  <phone>(08)64368835</phone>
+      	  <email>florian.goessmann@arcs.org.au</email>
+      	</srb-admin>
+      	<sys-admin>
+      	  <name>Leigh Gordon</name>
+      	  <phone>(03)6226xxxx</phone>
+      	  <email>leigh.gordon@arcs.org.au</email>
+      	</sys-admin>
+      </tech-support>
+    </srb>
+    <srb type="development">
+      <zone-name>ngdev2.its.utas.edu.au</zone-name>
+      <resources>
+       	<resource primary="yes">
+      	  <resource-name>datafabric.ngdev2.its.utas.edu.au</resource-name>
+       	  <available-space></available-space>
+      	  <total-space></total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>ngdev2.its.utas.edu.au</resource-name>
+      	  <available-space></available-space>
+      	  <total-space></total-space>
+      	</resource>
+      </resources>
+      <domains>
+        <domain primary="yes">
+	      <domain-name>ngdev2.its.utas.edu.au</domain-name>
+	      <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>pmak</domain-test-user>
+	    </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+	      <host-name>ngdev2.its.utas.edu.au</host-name>
+	      <port-number>5544</port-number>
+	      <srb-dsi-port>2811</srb-dsi-port>
+	      <auth-schemes>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=TPAC/CN=ngdev2.its.utas.edu.au">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This SRB is for testing.
+      </description>
+      <status>
+        Currently offline.
+      </status>
+      <quota>
+        Nil. 
+      </quota>
+      <backup-strategy>
+        None.
+      </backup-strategy>
+    </srb>
+  </srb-servers>
+</data-services>
