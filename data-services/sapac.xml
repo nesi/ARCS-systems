@@ -57,10 +57,15 @@
       	  <phone>(08)64368835</phone>
       	  <email>florian.goessmann@arcs.org.au</email>
       	</srb-admin>
-      	<sys-admin>
+      	<sys-admin priority="0">
       	  <name>Daniel Cox</name>
       	  <phone>(08)83037301</phone>
       	  <email>daniel.cox@arcs.org.au</email>
+      	</sys-admin>
+      	<sys-admin priority="1">
+      	  <name>Patrick Fitzhenry</name>
+      	  <phone>(08)83038263</phone>
+      	  <email>john.fitzhenry@adelaide.edu.au</email>
       	</sys-admin>
       </tech-support>
     </srb>
