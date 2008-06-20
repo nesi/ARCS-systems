@@ -58,16 +58,11 @@
           <email>Florian.Goessmann@arcs.org.au</email>
         </srb-admin>
         <sys-admin priority="0">
-          <name>Kai Lu</name>
-          <phone>(07)33467734</phone>
-          <email>Kai.Lu@arcs.org.au</email>
-        </sys-admin>
-        <sys-admin priority="1">
           <name>William Hsu</name>        
           <phone>(07)33659708</phone>
           <email>Will.Hsu@arcs.org.au</email>
         </sys-admin>
-        <sys-admin priority="2">
+        <sys-admin priority="1">
           <name>David Green</name>
           <phone>(07)33467311</phone>
           <email>David.Green@uq.edu.au</email>
