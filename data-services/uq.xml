@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="uq">
+    <srb type="production">    <!-- refers to MCAT -->
+      <zone-name>srb.hpcu.uq.edu.au</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+        <resource primary="yes">
+          <resource-name>datafabric.srb.hpcu.uq.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>1.1T</total-space>
+        </resource>
+        <resource primary="no">
+          <resource-name>srb.hpcu.uq.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>6.7G</total-space>
+        </resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb.hpcu.uq.edu.au</domain-name>
+                  <domain-admin>srbAdmin</domain-admin>
+                  <domain-test-user>inca</domain-test-user>   <!-- a user that inca test script will use to test srb -->
+        </domain>
+          </domains>
+          <hosts>
+            <host>
+                  <host-name>srb.hpcu.uq.edu.au</host-name>
+                  <port-number>5544</port-number>
+                  <gridftp-dsi-port>2811</gridftp-dsi-port>
+              <auth-schemes>
+                <auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=ngsrb.hpcu.uq.edu.au">GSI</auth-scheme>
+                <auth-scheme>ENCRYPT1</auth-scheme>
+              </auth-schemes>
+            </host>
+          </hosts>
+      <description>
+        This SRB is part of ARCS data fabric federation, with a 1.1T of disk storage space.
+      </description>
+      <status>
+        Production from 13 June 2008.
+      </status>
+      <quota>
+        25.0GB for all users initially, need to pay for more. 
+      </quota>
+      <backup-strategy>
+        VM backup after major changes and nightly backup of SRB.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Kai Lu</name>
+          <phone>(07)33467734</phone>
+          <email>Kai.Lu@arcs.org.au</email>
+        </srb-admin>     
+        <srb-admin priority="1">
+          <name>Florian Goessmann</name>       
+          <phone>(08)64368835</phone>
+          <email>Florian.Goessmann@arcs.org.au</email>
+        </srb-admin>
+        <sys-admin priority="0">
+          <name>Kai Lu</name>
+          <phone>(07)33467734</phone>
+          <email>Kai.Lu@arcs.org.au</email>
+        </sys-admin>
+        <sys-admin priority="1">
+          <name>William Hsu</name>        
+          <phone>(07)33659708</phone>
+          <email>Will.Hsu@arcs.org.au</email>
+        </sys-admin>
+        <sys-admin priority="2">
+          <name>David Green</name>
+          <phone>(07)33467311</phone>
+          <email>David.Green@uq.edu.au</email>
+        </sys-admin>
+      </tech-support>
+    </srb>
+    <srb type="development">
+      <zone-name>srbrunner.hpcu.uq.edu.au</zone-name>
+      <resources>
+        <resource primary="yes">
+          <resource-name>datafabric.srbrunner.hpcu.uq.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>480.0G</total-space>
+        </resource>
+        <resource primary="no">
+          <resource-name>srbrunner.hpcu.uq.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>5.9G</total-space>
+        </resource>
+      </resources>
+      <domains>
+        <domain primary="yes">
+              <domain-name>srbrunner.hpcu.uq.edu.au</domain-name>
+              <domain-admin>srbAdmin</domain-admin>
+                  <domain-test-user>uqklu</domain-test-user>
+            </domain>
+          </domains>
+          <hosts>
+            <host>
+              <host-name>srbrunner.hpcu.uq.edu.au</host-name>
+              <port-number>5544</port-number>
+              <srb-dsi-port>2811</srb-dsi-port>
+              <auth-schemes>
+                <auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srbrunner.hpcu.uq.edu.au">GSI</auth-scheme>
+                <auth-scheme>ENCRYPT1</auth-scheme>
+              </auth-schemes>
+            </host>
+          </hosts>
+      <description>
+        This SRB is for testing.
+      </description>
+      <status>
+        Currently online.
+      </status>
+      <quota>
+        Nil. 
+      </quota>
+      <backup-strategy>
+        None.
+      </backup-strategy>
+    </srb>
+  </srb-servers>
+</data-services>
+
