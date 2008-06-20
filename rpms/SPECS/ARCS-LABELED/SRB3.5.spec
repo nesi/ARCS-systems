@@ -6,7 +6,7 @@
 Summary:        The Storage Resource Broker
 Name:           srb
 Version:        3.5.0
-Release:        16.arcs
+Release:        17.arcs
 License:        Custom
 Group:          Applications/File
 Source:         SRB%{version}.tar.gz
@@ -522,8 +522,11 @@ su srb -c "cd %{srbroot}/bin && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%{srbroo
 %attr(0755,srb,srb) %dir /var/lib/srb
 %attr(0750,srb,srb) /var/lib/srb/.srb
 %attr(0640,srb,srb) %config(noreplace) /var/lib/srb/.srb/.Mdas*
+%config(noreplace) /var/lib/srb/.odbc.ini
 
 %changelog
+* Fri Jun 19 2008 Florian Goessmann <florian@ivec.org>
+- added config flag to odbc.ini
 * Mon Jun 17 2008 Florian Goessmann <florian@ivec.org>
 - changed installation customization
 * Fri Jun 06 2008 Florian Goessmann <florian@ivec.org>
