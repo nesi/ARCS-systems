@@ -1,5 +1,9 @@
 from SRBResult import SRBResult, SRBUser, SRBZone
 
+#----------------------------------------------------------------
+# CHANGELOG
+#----------------------------------------------------------------
+
 class SRBWrapper:
     def __init__(self):
         self.knownZones = self.getKnownZones()
@@ -8,9 +12,9 @@ class SRBWrapper:
                                 # Gb - Mb - Kb  
         #self.quotaLimit = 25 * 1024 * 1024 * 1024
         #self.zone.setQuota('data_fabric', 25 * 1024 & 1024 *1024)
-        #self.zone.setQuota('data_fabric', 1 * 1024 *1024)
+        #self.zone.setQuota('data_fabric', 120 * 1024 *1024)
         #self.zone.setQuota('ngdev2.its.utas.edu.au', 1000 * 1024 * 1024)
-        self.zone.setQuota('both', 1 * 1024 * 1024)    
+        self.zone.setQuota('both', 100 * 1024 * 1024)    
 
 
     def getKnownZones(self):
@@ -32,6 +36,13 @@ class SRBWrapper:
                 usersList.append(user)
         return usersList
 
+    def printLocalResourceUsage(self):
+        table = self.zone.getTotalByResource()
+        for rs, amount in table.iteritems():
+            print "----------------------------------------------------"
+            print "rsrc_name: " + rs
+            print "used: " + `amount`
+
     def getTotalUsage(self):
         totalsList = {}
         #Only list zones that are "active"
@@ -39,7 +50,7 @@ class SRBWrapper:
         for zone in zones:
             for zone2 in zones:
                 userDomain = zone2.values['domain_desc']
-                usages = zone.getUsageInZone(userDomain)
+                usages = zone.getUsageForUserDomain(userDomain)
                 for use in usages:
                     key = (use.values['user_name'], userDomain)
                     size = (int)(use.values['data_size'])
@@ -50,3 +61,4 @@ class SRBWrapper:
                     else:
                         totalsList[key] = (size, count)
         return totalsList
+

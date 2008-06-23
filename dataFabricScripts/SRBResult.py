@@ -1,5 +1,7 @@
 import re
 import os
+import smtplib
+from email.MIMEText import MIMEText
 
 #A lot of funcationality here is "borrowed/stolen" from 
 #the Taiwan scipt for usage statstics.  
@@ -8,11 +10,16 @@ import os
 
 
 #----------------------------------------------------------------
-# CHANGELOT
+# CHANGELOG
 # 2008-06-18: 
 #   - added SRBResource class for handling quotas
 #   - quota should be identified by rsrc_name, not phy_rsrc_name
-#
+# 2008-06-28:
+#   - woops.  Resource should be identified by phy_rsrc_name, since
+#       usages are SRB only returns phy_rsrc_names with SgetColl
+#   - implemented email sending when over 80% of quota
+#   - implmeneted SRBZone.getTotalByResource - total number of 
+#        bytes used per resource
 #----------------------------------------------------------------
 
 #---static goodness
@@ -108,33 +115,8 @@ class SRBUser(SRBResult):
     def __init__(self, result):
         super(SRBUser, self).__init__(result)
 
-    def setZone(self, _zone):
+    def setLocalZone(self, _zone):
         self.zone = _zone
-
-    def getUsageInZone(self, zone_id):
-        lines = SRBResult.getOutputLines('/usr/bin/SgetColl -e /' +
-                self.getHomeCollection(zone_id) +  "*",
-                'Error getting user space usage statistics')
-        if(len(lines) == 3):
-            stats = SRBResult(lines)
-            return stats
-        return None
-
-    def isOverLocalQuota(self, limit):
-        return self.isOverQuota(limit, self.values['zone_id'])
-
-    def isOverQuota(self, limit, zone_id):
-        """Returns true if the TOTAL usage within the specified zone
-            i.e. across all resources are over the limit value.  Note
-            that the limit and the total are in BYTES"""
-        stats = self.getUsageInZone(zone_id)
-        if(stats <> None):
-            size = (int)(stats.values['data_size'])
-            if(size > limit):
-                return True
-            else:
-                return False
-        return False
 
     def getUsageByResource(self, zone_id):
         """zone_id = name of resource zone(?)"""
@@ -192,59 +174,55 @@ class SRBZone(SRBResult):
         """Grabs a list of SRBUser, as with the usual SgetU 
             command for a specified group (_group)"""
         usersList = SRBZone.getUsersInDomain(self.values['domain_desc'])
+        for user in usersList:
+            user.setLocalZone(self)
         return usersList
 
     def setQuota(self, resource, limit):
         if(self.resourceList.has_key(resource)):
             self.resourceList[resource].setQuota(limit)
 
-    def getUsageInfo(self, userDomain):
-        """Grabs all usage of a specific zone for 
-            user of the specified userDomain"""
-        lines = SRBResult.getOutputLines('/usr/bin/SgetColl -e ' +
-                self.values['zone_id'] + "/home/*" + "." + userDomain + "*",
-                'Error getting user space usage statistics')
-        results = SRBResult.parse(lines, 3)
-        return results
-
-    def getUsageInZone(self, userDomain):
+    def getUsageForUserDomain(self, userDomain):
         """Grabs all usage of a specific storage zone for 
             user of the specified userDomain"""
-        lines = SRBResult.getOutputLines('/usr/bin/SgetColl -e ' +
+        lines = SRBResult.getOutputLines('/usr/bin/SgetColl -e /' +
                 self.values['zone_id'] + "/home/*" + "." + userDomain + "*",
                 'Error getting user space usage statistics')
         results = SRBResult.parse(lines, 3)
         return results
 
-    def printLocalResourceReport(self):
-        users = self.getUsers()
-        for user in users:
-            resources = user.getUsageByResource(self.values['zone_id'])
-            if(len(resources) > 0):            
-                print "---------------------------------------------------"
-                print "user_name: " + user.values['user_name']
-                for rsc, use in resources.iteritems():
-                    print use.toString()
+    def getTotalByResource(self):
+        """Returns a dictionary of resource name (both logical
+            and physical and other seemingly randome ones) with 
+            the amount of used space in bytes"""
+        lines = SRBResult.getOutputLines('/usr/bin/SgetColl -f /' +
+               self.values['zone_id'] + "/home/*",
+                'Error getting total stored by resources')
+        uses = SRBResult.parse(lines, 3)
+        #return results
+        table = {}
+        for rs in uses:
+            table[rs.values['phy_rsrc_name']] = rs
 
-    def sendNastygram(self, percentage, user, useageInfo):
-        #should do something meaningful here
-        
-        print "TODO: send email to user " + user.values['user_name'] + user.values['user_email']
+        result = {}
+        for rsName, rs in self.resourceList.iteritems():
+            result[rsName] = rs.getUsedAmount(table)
+        return result
 
     def handleQuota(self, user):
         usages = user.getUsageByResource(self.values['zone_id'])
-        for rsc, use in usages.iteritems():
-            usedAmount = (float)(use.values['data_size'])
-            quotaPercentage = (usedAmount / self.quotas[use.values['rsrc_name']])
-            if(quotaPercentage > 0.8):
-                self.sendNastygram(quotaPercentage, user, use)
+        for rsName, rs in self.resourceList.iteritems():
+            if(rs.hasQuota):
+                rs.handleQuota(user, usages)
+                                
     def printUsageReport(self, user, displaySize = None):
+        """Prints the usage report for a user zone"""
         if(displaySize == None):
             displaySize = SRBZone.DISPLAY_SIZE
         usages = user.getUsageByResource(self.values['zone_id'])
-        for rs in self.resourceList:
-            if(self.resourceList[rs].hasQuota):
-                self.resourceList[rs].printQuota(user, usages, displaySize)
+        for rsName, rs in self.resourceList.iteritems():
+            if(rs.hasQuota):
+                rs.printQuota(user, usages, displaySize)
 
     #--static goodness
     getUsersInDomain = Callable(getUsersInDomain)
@@ -256,9 +234,12 @@ class SRBResource(SRBResult):
         super(SRBResource, self).__init__(list)
         self.hasQuota = False
 
-    #limit is in BYTES
+    def setZone(self, _zone):
+        self.zone = _zone
+
+    #limit is in number of BYTES.  It will be converted to a FLOAT
     def setQuota(self, _limit):
-        self.limit = _limit
+        self.limit = (float)(_limit)
         self.hasQuota = True
 
     def printQuota(self, user, usages, displaySize):
@@ -281,24 +262,68 @@ class SRBResource(SRBResult):
         print "free: %3.3f Mb"%((self.limit - usedAmount) / displaySize)
         print "percentage: %3.3f%%"%(quotaPercentage * 100)
 
-    def handleQuota(self, user, usage):
-        return True    
+    def handleQuota(self, user, usages):
+        usedAmount = self.getUsedAmount(usages)
+        quotaPercentage = (usedAmount / self.limit)
+        if(quotaPercentage > 0.8):
+            self.sendNastygram(quotaPercentage, user, usedAmount)
+
+    def sendNastygram(self, percentage, user, usedAmount):
+        #should do something meaningful here
+        if(percentage > 1):
+            percent = 100
+        else:
+            percent = ((int)(percentage * 100)) /10
+            percent = percent * 10
+
+        quotaInMb = self.limit / 1024 / 1024
+        usedInMb = usedAmount / 1024 / 1024 
+
+        message = "Dear data fabric user,\n\n"
+
+        message += "This is a generated message sent to notify you of your use of "
+        message += "the ARCS Data Fabric service.  You have exceeded " + `percent` + "% "
+        message += "of your allowed quota of " + `quotaInMb` + " Mb.  At the time this "
+        message += "message was generated, you have used " + `usedInMb` + " Mb. \n\n" 
+
+        message += "If you have any further questions, you can log a request "
+        message += "for help at help@arcs.org.au"
+
+        msg = MIMEText(message)
+        msg['To'] = user.values['user_email']
+        #msg['To'] = "pmak@utas.edu.au"
+        #msg['Cc'] = get admin email??
+        msg['Subject'] = "Warning: Account '" + user.values['user_name'] + "@" + user.values['domain_desc'] + "' is over " + `percent` + "% of quota"
+        msg['From'] = 'srbAdmin@' + self.values['domain_desc']
+        
+        server = smtplib.SMTP()
+        server.connect()
+        server.sendmail(msg['From'], 
+                        msg['To'], 
+                        msg.as_string())
+        server.close()
+
+    def getDefaultPath(self):
+        path = self.values['phy_default_path']
+        return path[:path.find('?')]
 
     def getAmountAndCount(self, usages):
         return (self.getUsedAmount(usages),
                     self.getNumFiles(usages))
 
     def getNumFiles(self, usages):
-        return (int)(usages[rsName].values['data_id'])
+        rsName = self.values['phy_rsrc_name']
+        if(usages.has_key(rsName)):
+            return (int)(usages[rsName].values['data_id'])
+        else:
+            return 0
 
-    def getUsedAmount(self, useages):
-        return (float)(usages[rsName].values['data_size'])
-
-    def isOverSoftQuota(self, user):
-        return False
-
-    def isOverHardQuota(self, user):
-        return False
+    def getUsedAmount(self, usages):
+        rsName = self.values['phy_rsrc_name']
+        if(usages.has_key(rsName)):
+            return (float)(usages[rsName].values['data_size'])
+        else:
+            return 0
 
 #----------------------------------------------------------------------------------------------
 class SRBLogicalResource(SRBResource):
@@ -313,6 +338,7 @@ class SRBLogicalResource(SRBResource):
     def addResource(self, rs):
         self.resourceList[rs.values['phy_rsrc_name']] = rs
 
+
     def getUsedAmount(self, usages):
         total = 0.0
         for rsName in self.resourceList.keys():
@@ -321,7 +347,6 @@ class SRBLogicalResource(SRBResource):
         return total
  
     def getNumFiles(self, usages):
-        
         total = 0
         for rsName in self.resourceList.keys():
             if(usages.has_key(rsName)):
@@ -339,6 +364,3 @@ def SRBResourceFactory(result):
     else:
         rs = SRBResource(result)
         return rs
-
-
-    
