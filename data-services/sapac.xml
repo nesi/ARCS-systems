@@ -25,6 +25,7 @@
 	  </domains>
 	  <hosts>
 	    <host>
+		  <friendly-name>srb.sapac.edu.au</friendly-name>
 		  <host-name>srb.sapac.edu.au</host-name>
 		  <port-number>5544</port-number>
 		  <gridftp-dsi-port>2811</gridftp-dsi-port>
@@ -92,6 +93,7 @@
 	  </domains>
 	  <hosts>
 	    <host>
+	      <friendly-name>ngspare.sapac.edu.au</friendly-name>
 	      <host-name>ngspare.sapac.edu.au</host-name>
 	      <port-number>5544</port-number>
 	      <srb-dsi-port>2811</srb-dsi-port>
