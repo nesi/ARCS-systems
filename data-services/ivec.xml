@@ -25,6 +25,7 @@
 	  </domains>
 	  <hosts>
 	    <host>
+		  <friendly-name>srb.ivec.org</friendly-name>
 		  <host-name>srb.ivec.org</host-name>
 		  <port-number>5544</port-number>
 		  <gridftp-dsi-port>5000</gridftp-dsi-port>
