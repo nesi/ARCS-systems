@@ -25,12 +25,12 @@
 	  </domains>
 	  <hosts>
 	    <host>
-		  <friendly-name>srb.sapac.edu.au</friendly-name>
-		  <host-name>srb.sapac.edu.au</host-name>
+		  <friendly-name>srb.sapac.edu.au</friendly-name>   <!-- What you'll tell users, should be your cname -->
+		  <host-name>srb.sapac.edu.au</host-name>   <!-- the real host name when you run 'hostname' on your box -->
 		  <port-number>5544</port-number>
 		  <gridftp-dsi-port>2811</gridftp-dsi-port>
 	      <auth-schemes>
-	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srb.sapac.edu.au">GSI</auth-scheme>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srb.sapac.edu.au">GSI</auth-scheme>  <!-- should be the same as your cname -->
 	      	<auth-scheme>ENCRYPT1</auth-scheme>
 	      </auth-schemes>
 	    </host>
