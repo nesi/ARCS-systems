@@ -14,12 +14,16 @@ from email.MIMEText import MIMEText
 # 2008-06-18: 
 #   - added SRBResource class for handling quotas
 #   - quota should be identified by rsrc_name, not phy_rsrc_name
-# 2008-06-28:
+# 2008-06-23:
 #   - woops.  Resource should be identified by phy_rsrc_name, since
 #       usages are SRB only returns phy_rsrc_names with SgetColl
 #   - implemented email sending when over 80% of quota
 #   - implmeneted SRBZone.getTotalByResource - total number of 
 #        bytes used per resource
+# 2008-06-27:
+#   - SRBZone now delays getting resources list until required
+#   - changed SRBZone.getUsageForUserDomain - this has an option   
+#     torgroup result by resource.
 #----------------------------------------------------------------
 
 #---static goodness
@@ -57,7 +61,7 @@ class SRBResult(object):
                 split = re.match(SRBResult.pattern, line)
                 if(len(split.groups()) == 2):
                     self.values[split.group(1)] = split.group(2)
-
+    
     def getOutputLines(cmd, error):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
         lines = []
@@ -98,7 +102,9 @@ class SRBResult(object):
         if(len(lines) > 0):
             for j in range(0, (len(lines)/numElements)):
                 sIndex = j * numElements
-                srbResults.append(Type(lines[sIndex:(sIndex + numElements)]))
+                newObj = Type(lines[sIndex:(sIndex + numElements)])
+                srbResults.append(newObj)
+                
         return srbResults
 
     #-----------------------------------------------
@@ -145,17 +151,18 @@ class SRBZone(SRBResult):
     def __init__(self, result):
         super(SRBZone, self).__init__(result)
         self.resourceList = {}
-        if(self.values['zone_status'] == '1'):
-            self.getResources() 
 
     def getResources(self):
-        self.resourceList = {}
-        netprefix = self.values['netprefix']
-        host = netprefix[:netprefix.find(":")]
+        if(len(self.resourceList) > 0):
+            return self.resourceList
+
+        #netprefix = self.values['netprefix']
+        #host = netprefix[:netprefix.find(":")]
         lines = SRBResult.getOutputLines('/usr/bin/SgetR -z ' + self.values['zone_id'],
                     'Errpr getting resources for zone')
-                                       #first line of output says QueryZone = blah
-        list = SRBResult.parseAsType(lines[1:], 12, SRBResourceFactory)
+         
+        #first line of output says QueryZone = blah
+        list = SRBResult.parseAsType(lines[1:], 12, lambda x: SRBResourceFactory(self, x)) 
         for rs in list:
             if(self.resourceList.has_key(rs.values['rsrc_name'])):
                 self.resourceList[rs.values['rsrc_name']].addResource(rs)
@@ -179,22 +186,31 @@ class SRBZone(SRBResult):
         return usersList
 
     def setQuota(self, resource, limit):
+        self.getResources()
         if(self.resourceList.has_key(resource)):
             self.resourceList[resource].setQuota(limit)
 
-    def getUsageForUserDomain(self, userDomain):
+    def getUsageForUserDomain(self, userDomain, groupByResource = False):
         """Grabs all usage of a specific storage zone for 
             user of the specified userDomain"""
-        lines = SRBResult.getOutputLines('/usr/bin/SgetColl -e /' +
-                self.values['zone_id'] + "/home/*" + "." + userDomain + "*",
-                'Error getting user space usage statistics')
-        results = SRBResult.parse(lines, 3)
+
+        numRows = 3
+        cmd = '/usr/bin/SgetColl -e '
+
+        if(groupByResource):
+            cmd += " -f "
+            numRows = 4
+        cmd += "/" + self.values['zone_id'] + "/home/*" + "." + userDomain + "*"
+
+        lines = SRBResult.getOutputLines(cmd, 'Error getting user space usage statistics')
+        results = SRBResult.parse(lines, numRows)
         return results
 
     def getTotalByResource(self):
         """Returns a dictionary of resource name (both logical
             and physical and other seemingly randome ones) with 
             the amount of used space in bytes"""
+        self.getResources()
         lines = SRBResult.getOutputLines('/usr/bin/SgetColl -f /' +
                self.values['zone_id'] + "/home/*",
                 'Error getting total stored by resources')
@@ -210,6 +226,7 @@ class SRBZone(SRBResult):
         return result
 
     def handleQuota(self, user):
+        self.getResources()
         usages = user.getUsageByResource(self.values['zone_id'])
         for rsName, rs in self.resourceList.iteritems():
             if(rs.hasQuota):
@@ -219,6 +236,7 @@ class SRBZone(SRBResult):
         """Prints the usage report for a user zone"""
         if(displaySize == None):
             displaySize = SRBZone.DISPLAY_SIZE
+        self.getResources()
         usages = user.getUsageByResource(self.values['zone_id'])
         for rsName, rs in self.resourceList.iteritems():
             if(rs.hasQuota):
@@ -230,10 +248,10 @@ class SRBZone(SRBResult):
 #---------------------------------------------------------------------------------------------
 
 class SRBResource(SRBResult):
-    def __init__(self, list = None):
+    def __init__(self, zone, list = None):
         super(SRBResource, self).__init__(list)
         self.hasQuota = False
-
+        self.zone = zone
     def setZone(self, _zone):
         self.zone = _zone
 
@@ -290,8 +308,8 @@ class SRBResource(SRBResult):
         message += "for help at help@arcs.org.au"
 
         msg = MIMEText(message)
-        msg['To'] = user.values['user_email']
-        #msg['To'] = "pmak@utas.edu.au"
+        #msg['To'] = user.values['user_email']
+        msg['To'] = "pmak@utas.edu.au"
         #msg['Cc'] = get admin email??
         msg['Subject'] = "Warning: Account '" + user.values['user_name'] + "@" + user.values['domain_desc'] + "' is over " + `percent` + "% of quota"
         msg['From'] = 'srbAdmin@' + self.values['domain_desc']
@@ -326,13 +344,15 @@ class SRBResource(SRBResult):
             return 0
 
 #----------------------------------------------------------------------------------------------
+
 class SRBLogicalResource(SRBResource):
     #contains a list of SRBResource
-    def __init__(self, list = None):
-        super(SRBLogicalResource, self).__init__(list)
+    def __init__(self, zone, list = None):
+        super(SRBLogicalResource, self).__init__(zone, list)
         self.resourceList = {}
+        self.zone = zone
         #I know... this is kind of redundant
-        rs = SRBResource(list)
+        rs = SRBResource(zone, list)
         self.resourceList[rs.values['phy_rsrc_name']] = rs
 
     def addResource(self, rs):
@@ -354,13 +374,14 @@ class SRBLogicalResource(SRBResource):
         return total
 
 #----------------------------------------------------------------------------------------------
-def SRBResourceFactory(result):
+
+def SRBResourceFactory(zone, result):
     """A fun factory of SRB resource... 
         Logical is the only 'special' case"""
     #hmm... a bit dogey
     if(result[2].find('logical') > -1):
-        lr = SRBLogicalResource(result)
+        lr = SRBLogicalResource(zone, result)
         return lr
     else:
-        rs = SRBResource(result)
+        rs = SRBResource(zone, result)
         return rs
