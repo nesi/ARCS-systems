@@ -1,0 +1,99 @@
+#!/usr/bin/env perl
+
+use warnings;
+use strict;
+use Inca::Reporter::Performance;
+use Cwd;
+#my $dir = getcwd;
+my $dir = $ENV{'ILDG_INCA_TEST_PATH'}?$ENV{'ILDG_INCA_TEST_PATH'}:"/opt/ildg-inca-test"; 
+
+my $reporter = new Inca::Reporter::Performance(
+  name => 'ildg.se.unittest',
+  description => 'Measures the time it takes to copy a file from other sites to SAPAC',
+  version => 1.7,
+  url => 'http://www.sapac.edu.au/inca',
+  measurement_name => 'storage_element_test'
+);
+$reporter->addDependency('Inca::Reporter::GridProxy');
+$reporter->addArg('source');
+$reporter->addArg('timeout', 'max num of seconds to wait for fc client to complete', 1800, '[\d\.]+');
+$reporter->processArgv(@ARGV);
+my $test_source = $reporter->argValue('source');
+$test_source =~ s/_/ /g;
+my $timeout=$reporter->argValue('timeout');
+my $tempFile="/tmp/_copy_test_tmp_file_ildg.$$";
+
+#print $0."\n";
+#print $dir."\n";
+`rm -rf $tempFile`;
+my $cmd = "`$dir/se-test.py $test_source`.$$ 2>&1";
+# 2>&1";
+#print $cmd;
+`echo "Executing: $cmd" 1>&2`;
+my $start=`date +%s`;
+my $output = $reporter->loggedCommand($cmd,$timeout);
+#my $speed = `$cmd`;
+#chomp($speed);
+if(!defined($output)) {
+  $reporter->setResult(0, "Transfer timeout");
+  `echo ".......Transfer timeout!" 1>&2`;
+}
+$output = $! if !defined($output);
+#$speed = $! if !defined($speed);
+if($? != 0 ){
+  $reporter->setResult(0, "Transfer failed");
+  `echo ".......Transfer failed!" 1>&2`;
+  `echo "$output" 1>&2`;
+} else {
+  my $end=`date +%s`;
+  my $diff=$end-$start;
+
+  # for test purpose
+  if ($diff==0){
+    $diff=1;
+  }
+  my $filesize=`stat --format=%s $tempFile`;
+  my $speed=$filesize/$diff/1024;
+  my $benchmark = $reporter->addNewBenchmark("file_transfer_speed_from_".$reporter->argValue('source'));
+  $benchmark->setStatistic('download_speed', $speed, 'KByte/s');
+  $reporter->setResult(1);
+}
+`rm -rf $tempFile`; 
+$reporter->print();
+
+
+
+#my $start = time();
+#`cp $file /tmp`;
+#my $elapsed = time() - $start;
+#print "./se-test.py $test_source\n";
+#my $output=`./se-test.py $test_source`;
+#$output=~ s/\n//g;
+#my $rt=$?;
+#print "output:".$output."\n";
+#print "exit code:".$rt."\n";
+
+#if ($rt==0)
+#{
+#    print "success\n";
+#    my $benchmark = new Inca::Reporter::Performance::Benchmark();
+#    $benchmark->setStatistic('download_speed', $output, 'kb/s');
+#    $reporter->addBenchmark('file_transfer_speed', $benchmark);
+#    $reporter->print();
+#}
+#else
+#{
+#    print "fail\n";
+#    my $unit_reporter = new Inca::Reporter::SimpleUnit(
+#      name => 'ildg.se.unittest',
+#      version => 1.0,
+#      description => 'Display error message of transfer test',
+#      url => 'http://www.sapac.edu.au/inca',
+#      unit_name => 'transfer_test'
+#    );
+
+#    $unit_reporter->unitFail($output);
+#    $unit_reporter->print();
+
+#}
+

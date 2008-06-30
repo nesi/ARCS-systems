@@ -1,0 +1,41 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Inca::Reporter::SimpleUnit;
+use Cwd;
+
+#my $workdir = cwd();
+my $workdir = $ENV{'ILDG_INCA_TEST_PATH'}?$ENV{'ILDG_INCA_TEST_PATH'}:"/opt/ildg-inca-test";
+
+my $reporter = new Inca::Reporter::SimpleUnit(
+  name => 'ildg.mdc.unittest',
+  version => 1.1,
+  description => 'This test queries remote MDC services and verifies the result',
+  url => 'http://www.sapac.edu.au/inca',
+  unit_name => 'ILDG MDC service tester'
+);
+
+
+
+$reporter->addArg('mdc');
+$reporter->processArgv(@ARGV);
+my $mdc_name = $reporter->argValue('mdc');
+
+#print "$workdir/mdc-test.py $mdc_name";
+#my $output=$reporter->loggedCommand("$workdir/mdc-test.py $mdc_name");
+my $output=`$workdir/mdc-test.py $mdc_name`;
+#print $?;
+if ($? ==0 )
+{
+  $reporter->unitSuccess();
+}
+elsif ($? == 1)
+{
+  $reporter->unitFailure($output);
+}
+else
+{
+  $reporter->failPrintAndExit($output);
+}
+$reporter->print();

@@ -1,0 +1,242 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Inca::Reporter::SimpleUnit;
+use Cwd;
+use XML::DOM;
+
+#my $workdir = cwd();
+my $workdir = $ENV{'ILDG_INCA_TEST_PATH'}?$ENV{'ILDG_INCA_TEST_PATH'}:"/opt/ildg-inca-test";
+
+my $reporter = new Inca::Reporter::SimpleUnit(
+  name => 'ildg.fc.unittest',
+  version => 2.3,
+  description => 'This test queries remote FC services and verifies the result',
+  url => 'http://www.sapac.edu.au/inca',
+  unit_name => 'ILDG FC service tester'
+);
+
+
+
+
+$reporter->addDependency('Inca::Reporter::GridProxy');
+$reporter->addArg('fc');
+$reporter->addArg('timeout', 'max num of seconds to wait for fc client to complete', 60, '[\d\.]+');
+$reporter->processArgv(@ARGV);
+my $fc = $reporter->argValue('fc');
+my $timeout=$reporter->argValue('timeout');
+my $fc_location=$ENV{'FC_CLIENT_LOCATION'}?$ENV{'FC_CLIENT_LOCATION'}:"/opt/fc-client";
+
+my $cfgfile="$workdir/fc-config.xml";
+my $drvparser = new XML::DOM::Parser;
+my $drvdoc    = $drvparser->parsefile ("$cfgfile");
+
+
+my $drvFCNodeList = $drvdoc->getElementsByTagName("fc");
+
+
+my $fc_name = undef;             # Name of fc
+my $url  = undef;             # ws url
+my $lfn = undef;
+my @surls;
+my $delegation = undef;
+
+for (my $i = 0; $i < $drvFCNodeList->getLength; $i++) {
+  my $drvFCNode = $drvFCNodeList->item($i);
+
+  foreach my $child ($drvFCNode->getChildNodes) {
+    my $type = $XML::DOM::Node::NodeNames[$child->getNodeType];
+    if ($type eq "ELEMENT_NODE") {
+      my $name = $child->getNodeName;
+#print $name."\n";
+      if ($name eq "name") {
+        $fc_name = $child->getFirstChild->getNodeValue;
+      }
+      elsif ($name eq "delegation" && $fc_name eq $fc) {
+	$delegation = $child->getFirstChild->getNodeValue;
+      }
+      elsif ($name eq "url" && $fc_name eq $fc) {
+        $url = $child->getFirstChild->getNodeValue;
+      }
+      if ($name eq "test-unit" && $fc_name eq $fc) {
+#print $fc_name."\n";
+#	my $testUnitList=$child->getElementsByTagName("test-unit");
+        foreach my $test_unit ($child->getChildNodes) {
+          my $type1 = $XML::DOM::Node::NodeNames[$test_unit->getNodeType];
+          if ($type1 eq "ELEMENT_NODE") {
+            my $name1 = $test_unit->getNodeName;
+#print $name1."\n";
+	    if ($name1 eq "lfn") {
+	      $lfn = $test_unit->getFirstChild->getNodeValue;
+#print $lfn."\n";
+            }
+	    if ($name1 eq "surls") {
+	      foreach my $surl ($test_unit->getChildNodes){
+		my $type2 = $XML::DOM::Node::NodeNames[$surl->getNodeType];
+		if ($type2 eq "ELEMENT_NODE") {
+		  my $name2 = $surl->getNodeName;
+#print $name2."\n";
+		  if ($name2 eq "surl"){
+#print $surl->getFirstChild->getNodeValue."\n";
+		    push(@surls, $surl->getFirstChild->getNodeValue);
+	          }
+	        }
+              }
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+$fc_name=$fc;
+
+#print $fc_name."\n";
+#print $url."\n";
+#if (defined $delegation) {print $delegation."\n";}
+#print $lfn."\n";
+#foreach my $element (@surls){
+#  print $element."\n";
+#}
+
+my $java_home=$ENV{'JAVA_HOME'};
+my $classpath=`echo $fc_location/lib/*.jar | sed 's/ /:/g'`;
+chomp($classpath);
+#print $classpath."\n";
+my $command=undef;
+my $dlgor=$fc_location."/conf/dlgor.properties";
+my $proxy="-Dhttp.proxyHost=www-proxy.sapac.edu.au -Dhttp.proxyPort=8080";
+my $grid_proxy=$ENV{X509_USER_PROXY}?$ENV{X509_USER_PROXY}:"/tmp/x509up_u".`id -u`;
+chomp($grid_proxy);
+#if ($url=~/8080/
+if (defined $delegation){
+  $command="$java_home/bin/java -DGLITE_DLGOR_PROPERTY=\"$dlgor\" -Dlog4j.configuration=\"file:$fc_location/conf/log4j.properties\" -DX509_USER_PROXY=\"$grid_proxy\" -DgridProxyFile=\"$grid_proxy\" -DsslCAFiles=\"$ENV{X509_CERT_DIR}\" -cp \"$classpath\" org.lqcd.ildg.fc.client.Client -l$url -d$delegation -ogetURL $lfn";
+}else{
+  $command="$java_home/bin/java -Dlog4j.configuration=\"file:$fc_location/conf/log4j.properties\" $proxy -cp \"$classpath\" org.lqcd.ildg.fc.client.Client -l$url -ogetURL $lfn";
+}
+
+#`cp $grid_proxy /tmp/fc-proxy`;
+
+#my $output="";
+#my $output=$reporter->loggedCommand("$command",$timeout);
+#print $output."\n";
+#print $?;
+
+#my $parser="echo \"$output\"";
+my @in_surlList=();
+#my $result=s/$output/surlList=\[([^\]]+)\]/;
+#print $result."\n";
+#print $parser."\n";
+#print $command;
+`echo $command>/tmp/fc-command`;
+`rm -rf /tmp/fc-output`;
+`touch /tmp/fc-output`;
+open(IN, "$command |") || $reporter->failPrintAndExit("cannot open pipe\n");
+
+#my @strs=split(/\n/,$output);
+#print @strs[scalar @strs-1]."\n";
+
+#$_=chomp(@strs[scalar @strs-1]);
+#$_=s#\s+##g;
+#print("$_\n");
+#if (/TSURLInfo: lfn = ([^,]+), numberOfSURL = (\d+), accessCode = (ACE_[^,]+), surlList = \[([^\]]+)\]/) {
+#  my $in_lfn = $1;
+#  my $in_numberOfSURL = $2;
+#  my $in_accessCode = $3;
+#  my @in_strList = split(/,/, $4);
+
+
+#(my $in_lfn,my $in_numberOfSURL,my $in_accessCode,my $strList)=/TSURLInfo:lfn=([^,]+),numberOfSURL=(\d+),accessCode=(ACE_[^,]+),surlList=\[([^\]]+)\]/g;
+#print $in_lfn."\n";
+#    print("numberOfSURL = $in_numberOfSURL\n");
+#    print("accessCode = $in_accessCode\n");
+#}
+my $result=1;
+my @in_strList = undef;
+my $fatal="";
+my $cur_surl=undef;
+while (<IN>) {
+  s#\s+##g;
+  `echo "$_\n">>/tmp/fc-output`;
+  if (/TSURLInfo:lfn=([^,]+),numberOfSURL=(\d+),accessCode=(ACE_[^,]+),surlList=\[([^\]]+)\]/) {
+    my $in_lfn = $1;
+    my $in_numberOfSURL = $2;
+    my $in_accessCode = $3;
+    @in_strList = split(/,/, $4);
+    `echo "lfn = $in_lfn\n">>/tmp/fc-output`;
+    `echo "numberOfSURL = $in_numberOfSURL">>/tmp/fc-output`;
+    `echo "accessCode = $in_accessCode">>/tmp/fc-output`;
+    foreach (@in_strList) {
+      `echo "SURL = $_\n">>/tmp/fc-output`;
+    }
+    if ($in_lfn eq $lfn) {
+      foreach (@in_strList) {
+	$cur_surl=URI->new($_);
+#	print $cur_surl."\n";
+#	print exists $surls[$cur_surl];
+#        if (exists $surls[$cur_surl]) {
+	  push @in_surlList, $cur_surl;
+#	}
+      }
+      last;
+    }
+  }
+  if (/([^,]+)FATAL([^,]+)/){
+    $fatal.=$2."\n";
+  }
+}
+
+if ( @in_surlList && scalar @in_surlList== scalar @surls){
+  @in_surlList = sort (@in_surlList);
+  @surls = sort (@surls);
+  $result=0;
+  for(my $start=0;$start<scalar @in_surlList;$start++) {
+    if ($in_surlList[$start] ne $surls[$start]){
+      $result=1;
+    }
+  }
+}
+
+#foreach my $element (@in_surlList){
+#  print $element."\n";
+#}
+
+
+#print scalar @in_strList;
+#print length($fatal);
+close(IN) || $reporter->failPrintAndExit("Execution of java client failed\n");
+
+`echo $?>>/tmp/fc-output`;
+#print $result;
+if ($result ==0 )
+{
+  $reporter->unitSuccess();
+}
+elsif (length($fatal)>0){
+  $reporter->failPrintAndExit($fatal);
+}
+else
+{
+  my $output = "Returned SURLs don't match the expectation.\nExpects:";
+  foreach my $element (@surls){
+    $output.=$element.",";
+  }
+  $output.="\nReturned:";
+#  print scalar @in_strList;
+#  print @in_strList[0];
+  if (@in_surlList && scalar @in_surlList > 0){
+    foreach my $element (@in_surlList){
+      if (defined $element){
+	$output.=$element.",";
+      }
+    }
+  }
+  $output.="\n";
+  $reporter->unitFailure($output);
+}
+#else
+#{
+#  $reporter->failPrintAndExit(""); #$output);
+#}
+$reporter->print();

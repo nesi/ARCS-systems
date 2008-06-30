@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<!-- $Id: file-transfer-test.xml,v 1.7 2008/06/18 01:39:40 shundezh Exp $ -->
+
+<!-- 
+
+CSSM_SE: cssm_sasr.edu.au_gsiftp cssm_sasr.edu.au_srm
+JLDG_SE: jldg_jldg.org_gsiftp 
+LDG_SE: ldg_ifh.de_srm ldg_desy.de_srm ldg_in2p3.fr_srm ldg_zib.de_srm ldg_fz-juelich.de_srm 
+UKQCD_SE: ukqcd_epcc.ed.ac.uk_gsiftp
+USQCD_SE: usqcd_fnal.gov_srm
+-->
+
+<fileTransferTest>
+
+  <!-- CSSM -->
+
+  <file>
+    <grid>cssm</grid>
+    <se>sasr.edu.au</se>
+    <url>gsiftp://data.sasr.edu.au:2811/pnfs/sasr.edu.au/data/single/1.pdf</url>
+    <md5>e2f81028a84bec35c6b0fda6a8e7e213</md5>
+  </file>
+
+  <file>
+    <grid>cssm</grid>
+    <se>sasr.edu.au</se>
+    <url>srm://data.sasr.edu.au:8443/pnfs/sasr.edu.au/data/single/1.pdf</url>
+    <md5>e2f81028a84bec35c6b0fda6a8e7e213</md5>
+  </file>
+
+  <!-- JLDG -->
+
+  <!--file>
+    <grid>jldg</grid>
+    <se>jldg.org</se>
+    <url>gsiftp://www.jldg.org/nfs/jldg-fs1-work1/JLDG/CP-PACS/RCNF2/Config/B1950/RC16x32-B1950K013750C1530-A-00120</url>
+    <md5>6ade9ab145374aa7002a110843b81930</md5>
+  </file-->
+
+  <!-- 30M -->
+  <file>
+    <grid>jldg</grid>
+    <se>jldg.org</se>
+    <url>gsiftp://www.jldg.org/gfarm/public/ILDG/JLDG/CP-PACS/RCNF2/RC12x24-B1800/K014640/RC12x24-B1800K014640C1600-D-01420</url>
+    <md5>e3eaff81e35db6e5914a8140f29ae738</md5>
+  </file>
+
+  <!-- LDG/DESY-Zeuthen (Germany) -->
+  <!-- 37M -->
+  <file>
+    <grid>ldg</grid>
+    <se>ifh.de</se>
+    <url>srm://globe-door.ifh.de:8443/pnfs/ifh.de/acs/qcdsf/pleiter1/ukqcdsf/b5p20/kp13420-16x32/confs-ildg/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
+  <!-- LDG/DESY-Hamburg (Germany) -->
+  <!-- 37M -->
+  <file>
+    <grid>ldg</grid>
+    <se>desy.de</se>
+    <url>srm://grid-se3.desy.de:8443/pnfs/desy.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
+  <!-- LDG/Juelich (Germany) -->
+  <!-- 37M -->
+  <file>
+    <grid>ldg</grid>
+    <se>fz-juelich.de</se>
+    <url>srm://dcache.fz-juelich.de:8443/pnfs/fz-juelich.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
+  <!-- LDG/ZIB-Berlin (Germany) -->
+  <!-- 37M -->
+  <file>
+    <grid>ldg</grid>
+    <se>zib.de</se>
+    <url>srm://dcache.zib.de:8443/pnfs/zib.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
+  <!-- LDG/IN2P3-Lyon (France) -->
+  <!-- 37M -->
+  <file>
+    <grid>ldg</grid>
+    <se>in2p3.fr</se>
+    <url>srm://ccsrm02.in2p3.fr:8443/pnfs/in2p3.fr/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
+  <!-- UKQCD/Edinburgh (Scotland) -->
+  <!-- 80M -->
+  <file>
+    <grid>ukqcd</grid>
+    <se>epcc.ed.ac.uk</se>
+    <url>gsiftp://qcdocx.epcc.ed.ac.uk/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
+    <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
+  </file>
+
+  <!--  file>
+    <grid>ukqcd</grid>
+    <se>epcc.ed.ac.uk</se>
+    <url>gsiftp://qcdgrid2.epcc.ed.ac.uk/home/qcdgrid/qcdgrid1.5/STORAGE/qcdgrid/private.txt</url>
+    <accessDeny/>
+  </file -->
+
+  <!-- USQCD/FNAL (US) -->
+  <!-- 56M -->
+  <file>
+    <grid>usqcd</grid>
+    <se>fnal.gov</se>
+    <url>srm://fndca1.fnal.gov:8443//pnfs/fnal.gov/usr/lqcd/USQCD/MILC/asqtad/2_plus_1_flavor/1648f21b6586m0194m0484/series_0/l1648f21b6586m0194m0484.1065.ildg</url>
+    <md5>2a0358270d5411d5454805a0286eb176</md5>
+  </file>
+
+</fileTransferTest>

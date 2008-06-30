@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ildg-mdc-config>
+    <mdc>
+	<name>cssm</name>
+	<url>http://cssm.sasr.edu.au/axis/services/CSSM_MDC</url>
+    </mdc>
+    <mdc>
+        <name>jldg</name>
+        <url>http://ws.jldg.org/axis/services/mdc</url>
+    </mdc>
+    <mdc>
+        <name>ldg</name>
+        <url>http://globe-meta.ifh.de:8080/axis/services/ILDG_MDC</url>
+    </mdc>
+    <mdc>
+        <name>ukqcd</name>
+        <url>http://edqcdgrid.epcc.ed.ac.uk:8080/axis/services/MetadataCatalogue</url>
+    </mdc>
+    <mdc>
+        <name>usqcd</name>
+        <url>http://usqcd.jlab.org/mdc-service/services/ILDGMDCService</url>
+    </mdc>
+</ildg-mdc-config>
+
