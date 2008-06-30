@@ -1,0 +1,183 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Inca::Reporter::Performance;
+use XML::DOM;
+
+sub cleanTmpFile($$$) {
+  my ($remoteServer,$remotePort,$remoteTmpFile) = @_;
+  my $cleanCmd="uberftp $remoteServer -P $remotePort \"rm $remoteTmpFile\" 2>&1";
+  `echo "Executing: $cleanCmd" 1>&2`;
+  `$cleanCmd 1>&2`;
+  return $?;
+}
+
+my $reporter = new Inca::Reporter::Performance(
+  name => 'data.copy.thirdparty',
+  version => 2.7,
+  description => 'third party copy test of data services',
+  url => 'http://www.sapac.edu.au/inca',
+  measurement_name => 'data_third_party_copy_test'
+);
+$reporter->addDependency('Inca::Reporter::GridProxy');
+$reporter->addArg('source', 'server name', 'ng2.sapac.edu.au');
+$reporter->addArg('dest', 'server name', 'srb.ivec.org:5000');
+$reporter->addArg('timeout', 'max num of seconds to wait for transfer tests to complete', 1200, '[\d\.]+');
+$reporter->processArgv(@ARGV);
+my $source= $reporter->argValue('source');
+my $dest= $reporter->argValue('dest');
+my $timeout=$reporter->argValue('timeout');
+
+my $testuser="inca";
+
+my $tempFile="/tmp/_tmpfile";
+my $tempSource="file:///".$tempFile;
+my $sourceEndpoint=`wsrf-query -a -z none -s "https://mds.grid.apac.edu.au:8443/wsrf/services/DefaultIndexService" '//*[local-name()="Endpoint"][contains(text(),"$source")][contains(text(),"gsiftp")]/text()'`;
+chomp($sourceEndpoint);
+my $destEndpoint=`wsrf-query -a -z none -s "https://mds.grid.apac.edu.au:8443/wsrf/services/DefaultIndexService" '//*[local-name()="Endpoint"][contains(text(),"$dest")][contains(text(),"gsiftp")]/text()'`;
+chomp($destEndpoint);
+
+my $destURL;
+my $remoteServer;
+my $sourceServer;
+my $sourcePort;
+my $remotePort;
+my $error_msg="";
+my $return_code=1;
+
+if($source =~ m#(.+):([0-9]+)# && ! -e $1) {
+  $sourceServer = $1;
+  $sourcePort = $2;
+}else{
+  $sourceServer = $source;
+  $sourcePort = "2811";
+}
+if($dest =~ m#(.+):([0-9]+)# && ! -e $1) {
+  $remoteServer = $1;
+  $remotePort = $2;
+}else{
+  $remoteServer = $dest;
+  $remotePort = "2811";
+}
+
+my $remoteSrcFile="/tmp/.tmpfile.transfer.test.src.$$";
+if ($source =~ /srb/){
+  $remoteSrcFile="/".$sourceServer."/home/".$testuser.".".$sourceServer."/.tmpfile.transfer.test.src.$$";
+}
+my $remoteTmpFile="/tmp/.tmpfile.transfer.test.dest.$$";
+if ($dest =~ /srb/){
+  $remoteTmpFile="/".$remoteServer."/home/".$testuser.".".$remoteServer."/.tmpfile.transfer.test.dest.$$";
+}
+
+my $sourceURL=$sourceEndpoint.$remoteSrcFile;
+$destURL=$destEndpoint.$remoteTmpFile;
+
+
+my $benchmark = $reporter->addNewBenchmark($sourceServer);
+
+if ($source!~$dest && $sourceEndpoint !~ /Query did not return any results\./ && $destEndpoint !~ /Query did not return any results\./) {
+
+  my $guc = "globus-url-copy $tempSource $sourceURL 2>&1";
+#  $error_msg.="Executed Command: ".$guc."\n";
+  `echo "Executing: $guc" 1>&2`;
+#print $guc."\n";
+#print "----------------------1-----------------\n";
+
+  my $output = $reporter->loggedCommand("$guc", $timeout);
+#  my $output = `$guc`;
+
+  if(!defined($output)) {
+    $benchmark->setStatistic($remoteServer, -4, 'KByte/s');
+    $return_code=0;
+    $error_msg.="Copy of test file to src timeout.\n";
+  }
+  $output = $! if !defined($output);
+  if($? != 0) {
+    $return_code=0;
+    $benchmark->setStatistic($remoteServer, -3, 'KByte/s');
+#    $error_msg.=$output."\n";
+    $error_msg.="Failed to copy test file to src.\n";
+    `echo "$output" 1>&2`;
+  } else {
+
+#print "----------------------2-----------------\n";
+    $error_msg.="Successfully copied test file to src.\n";
+    $guc = "globus-url-copy -fast $sourceURL $destURL 2>&1";
+#    $error_msg.="Executed Command: ".$guc."\n";
+    `echo "Executing: $guc" 1>&2`;
+#  print ">>>>>>>>>>>>>>>>>>> ".$guc."\n";
+
+    my $start=`date +%s`;
+
+#print "----------------------3-----------------\n";
+
+    $output = $reporter->loggedCommand("$guc", $timeout);
+#print "----------------------4-----------------\n";
+#  print ">>>>>>>>>>> return code: ".$?."\n";
+#  print ">>>>>>>>>>> output: ".$output."\n";
+
+    if(!defined($output)) {
+      $benchmark->setStatistic($remoteServer, -1, 'KByte/s');
+      $return_code=0;
+      $error_msg.="Copy of test file from src to dest timeout.\n";
+    }else{
+      $output = $! if !defined($output);
+      if($? != 0) {
+        $error_msg.=$output."\n";
+        $return_code=0;
+        $error_msg.="Failed to copy test file from src to dest.\n";
+        `echo "$output" 1>&2`;
+        $benchmark->setStatistic($remoteServer, 0, 'KByte/s');
+      } else {
+
+#    print $output."\n";
+        $error_msg.="Successfully copied test file from src to dest.\n";
+        my $end=`date +%s`;
+        my $diff=$end-$start; 
+
+        # for test purpose
+        if ($diff==0){
+          $diff=1;
+        }
+
+        my $filesize=`stat --format=%s $tempFile`;
+        my $speed=$filesize/$diff/1024;
+        $benchmark->setStatistic($remoteServer, $speed, 'KByte/s');
+      }
+    }
+    if (cleanTmpFile($remoteServer,$remotePort,$remoteTmpFile)!=0){
+      $error_msg.="Failed to delete test file from dest.\n";
+    }else{
+      $error_msg.="Successfully deleted test file from dest.\n";
+    }
+  }
+  if (cleanTmpFile($sourceServer,$sourcePort,$remoteSrcFile)!=0){
+    $error_msg.="Failed to delete test file from src.\n";
+  }else{
+    $error_msg.="Successfully deleted test file from src.\n";
+  }
+}elsif ($source=~$dest){
+  $benchmark->setStatistic($remoteServer, -2, 'KByte/s');
+  $return_code=0;
+}else{
+  $benchmark->setStatistic($remoteServer, -5, 'KByte/s');
+  $return_code=0;
+  if ($sourceEndpoint =~ /Query did not return any results\./) {
+    $error_msg="output of MDS: ".$sourceEndpoint."\nCannot get source endpoint from MDS!";
+  }
+  if ($destEndpoint =~ /Query did not return any results\./ ){
+    $error_msg="output of MDS: ".$destEndpoint."\nCannot get dest endpoint from MDS!";
+  }
+}
+
+$return_code=1;
+if ($return_code==0){
+  $reporter->setResult($return_code, $error_msg);
+} else {
+  $reporter->setResult(1,$error_msg);
+}
+
+$reporter->print();
+
+
