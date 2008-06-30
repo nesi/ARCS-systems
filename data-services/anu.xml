@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="ANU">
+    <srb type="production">    <!-- refers to MCAT -->
+      <zone-name>srb.dc.apac.edu.au</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>datafabric.srb.dc.apac.edu.au</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>1T</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>z19_dc_resc</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>1G</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>z00_dc_resc</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>1.2T</total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb.dc.apac.edu.au</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <friendly-name>srb.dc.apac.edu.au</friendly-name>
+		  <host-name>srb.dc.apac.edu.au</host-name>
+		  <port-number>5544</port-number>
+                  <!-- the following needs to be set up and tested
+		       still -->
+		  <gridftp-dsi-port>5000</gridftp-dsi-port>
+	      <auth-schemes>
+			<auth-scheme dn="/C=AU/O=APACGrid/OU=ANU/CN=srb.dc.apac.edu.au">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This SRB is part of ARCS data fabric federation, with a 1T of
+      	storage.  It is also connected to a slave SRB server which
+      	serves resources on ANU's mass data store.
+      </description>
+      <status>
+        Production from 30 June 2008.
+      </status>
+      <quota>
+        25GB for all users initially. 
+      </quota>
+      <backup-strategy>
+        Nightly backup of SRB installation and all stored data.  Data
+        hosted on the tape silo gets archived about every 10 minutes.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Stephen McMahon</name>
+          <phone>0261250539</phone>
+          <email>stephen.mcmahon@arcs.org.au</email>
+        </srb-admin>
+        <sys-admin priority="0">
+          <name>Joseph Antony</name>
+          <phone>0261255988</phone>
+          <email>joseph.antony@arcs.org.au</email>
+        </sys-admin>
+        <sys-admin priority="1">
+          <name>Jason Ozolins</name>
+          <phone>0261255499</phone>
+          <email>jason.ozolins@arcs.org.au</email>
+        </sys-admin>
+      </tech-support>
+    </srb>
+  </srb-servers>
+</data-services>
