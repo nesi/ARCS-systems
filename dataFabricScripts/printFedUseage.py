@@ -1,36 +1,90 @@
-#!/usr/bin/python
-
-"""
-This prints out an XML with for storage used by
-any user in the federation.  It's grouped by the
-*resource* zone (i.e. zone that user is writing to)
-and then by resources within each zone.  Finally,
-a total across all zones is also included
-
-It's a bit slow - it makes n^2 queries, where n is 
-the number of federated zones.
-"""
-
 from SRBWrapper import SRBWrapper
+from email.MIMEText import MIMEText
+import smtplib
+
 wrapper = SRBWrapper()
+#kb, Mb, Gb
+MB = 1024 * 1024
+#QUOTA_AMOUNT = 1 * MBa
+QUOTA_AMOUNT = 12000
+QUOTA_IN_MB = (float)(QUOTA_AMOUNT) / MB
+ADMIN_EMAIL = "pmak@utas.edu.au"
 
 totalsList = wrapper.getTotalUsageByResourceUserZone()
-print """<?xml version="1.0" encoding="UTF-8"?>"""
+def printXML():
+    print """<?xml version="1.0" encoding="UTF-8"?>"""
+    print "<users>"
+    for key, (amount, zoneGroups) in totalsList.iteritems():
+        print "\t<user>"
+        nameSplit = key.split("@")
+        print "\t\t<name>" + nameSplit[0] + "</name>"
+        print "\t\t<domain>" + nameSplit[1] + "</domain>"
+        for (zone, zoneUseList) in zoneGroups.iteritems():
+            print "\t\t<zone>"
+            print "\t\t\t<id>" + zone + "</id>"
+            rsrc_zone = wrapper.getZone(zone)
+            rsrcList = rsrc_zone.getResources()
+            zoneTotal = 0.0
+            for resource in rsrcList.values():
+                print "\t\t\t<resource>"
+                print "\t\t\t\t<rsrc_name>" + resource.values['rsrc_name'] + "</rsrc_name>"
+                resourceSize = resource.getUsedAmount(zoneUseList)
+                print "\t\t\t\t<data_size>%f</data_size>"%resourceSize
+                print "\t\t\t</resource>"
+                #no point adding logical resources
+                if(resource.values['rsrc_typ_name'] != 'logical'):
+                    zoneTotal += resourceSize
+            print "\t\t\t<zone_total>%f</zone_total>"%zoneTotal
+            print "\t\t</zone>"
+        print "\t\t<total>%d</total>"%amount
+        print "\t</user>"
+    print "</users>"
 
-for key, (amount, zoneGroups) in totalsList.iteritems():
-    print "<user>"
-    nameSplit = key.split("@")
-    print "\t<name>" + nameSplit[0] + "</name>"
-    print "\t<domain>" + nameSplit[1] + "</domain>"
-    for (zone, zoneUseList) in zoneGroups.iteritems():
-        print "\t<zone>"
-        print "\t\t<id>" + zone + "</id>"
-        for use in zoneUseList:
-            print "\t\t<resource>"
-            print "\t\t\t<phy_rsrc_name>" + use.values['phy_rsrc_name'] + "</phy_rsrc_name>"
-            print "\t\t\t<data_size>" + use.values['data_size'] + "</data_size>"
-            print "\t\t</resource>"
-        print "\t</zone>"
-    print "\t<total>%d</total>"%amount
-    print "</user>"
 
+def listToString(list, percent):
+    if(len(list) > 0):
+        str = "The following users have used over %d%% of their quota:\n"%percent
+        for (user, amount, zoneGroups) in list:
+            str += "%(user)s has used %(amount)f Mb of storage\n" % \
+                    {'user': user, 'amount': amount}  
+        return str + "\n\n"
+    else:
+        return ""
+
+def handleQuota():
+    message = ""
+    overQuota = []
+    over90 = []
+    over80 = []
+    for user, (amount, zoneGroups) in totalsList.iteritems():
+        percentage = (float)(amount)/QUOTA_AMOUNT
+        usedInMb = (float)(amount) / MB
+        list = None
+        if(percentage > 1):
+            list = overQuota
+        elif(percentage > 0.9):
+            list = over90
+        elif(percentage > 0.8):
+            list = over80
+        if(list <> None):
+            list.append((user, amount, zoneGroups))
+
+    message += "Currently Data Fabric quota is: %f Mb\n\n"%QUOTA_IN_MB
+    message += listToString(overQuota, 100)
+    message += listToString(over90, 90)
+    message += listToString(over80, 80)
+
+    msg = MIMEText(message)
+    msg['To'] = ADMIN_EMAIL
+    msg['Subject'] = "Data fabric quota"
+    msg['From'] = ADMIN_EMAIL
+
+    server = smtplib.SMTP()
+    server.connect()
+    server.sendmail(msg['From'],
+                    msg['To'],
+                    msg.as_string())
+    server.close()
+               
+printXML()
+handleQuota()

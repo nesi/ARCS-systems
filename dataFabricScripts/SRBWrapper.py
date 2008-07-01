@@ -9,13 +9,14 @@ class SRBWrapper:
     def __init__(self):
         self.knownZones = self.getKnownZones()
         #admin zone
-        self.zone = self.getZone('srb.tpac.org.au')
+        self.zone = self.getZone('ngdev2.its.utas.edu.au')
                                 # Gb - Mb - Kb  
         #self.quotaLimit = 25 * 1024 * 1024 * 1024
         #self.zone.setQuota('data_fabric', 25 * 1024 & 1024 *1024)
         #self.zone.setQuota('data_fabric', 120 * 1024 *1024)
         #self.zone.setQuota('ngdev2.its.utas.edu.au', 1000 * 1024 * 1024)
-        self.zone.setQuota('srb.tpac.org.au', 25 * 1024 * 1024 * 1024)    
+        #self.zone.setQuota('datafabric.ngdev2.its.utas.edu.au', 1024 * 1024)    
+        
 
     def getKnownZones(self):
         lines = SRBResult.getOutputLines('/usr/bin/Stoken Zone', 

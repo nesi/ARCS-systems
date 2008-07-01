@@ -1,7 +1,5 @@
 import re
 import os
-import smtplib
-from email.MIMEText import MIMEText
 
 #A lot of funcationality here is "borrowed/stolen" from 
 #the Taiwan scipt for usage statstics.  
@@ -24,6 +22,10 @@ from email.MIMEText import MIMEText
 #   - SRBZone now delays getting resources list until required
 #   - changed SRBZone.getUsageForUserDomain - this has an option   
 #     torgroup result by resource.
+# 2008-06-30:
+#   - quota is now applied to federated storage rather than 
+#     individual resources.  Therefore, handleQuota has been
+#     removed from SRBZone and SRBResource
 #----------------------------------------------------------------
 
 #---static goodness
@@ -60,7 +62,11 @@ class SRBResult(object):
             for line in result:
                 split = re.match(SRBResult.pattern, line)
                 if(len(split.groups()) == 2):
-                    self.values[split.group(1)] = split.group(2)
+                    if(self.values.has_key(split.group(1))):
+                        count = len([x for x in self.values.keys() if(x.find(split.group(1)) > -1)])
+                        self.values[split.group(1) + `count`] = split.group(2)
+                    else:
+                        self.values[split.group(1)] = split.group(2)
     
     def getOutputLines(cmd, error):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
@@ -151,31 +157,46 @@ class SRBZone(SRBResult):
     def __init__(self, result):
         super(SRBZone, self).__init__(result)
         self.resourceList = {}
+        self.adminUser = None
 
-    def getResources(self):
+    def getAdminUser(self):
+        if(self.adminUser == None):
+            self.adminUser = self.getUser(self.values['user_name'])
+        return self.adminUser
+
+    def getUser(self, userName):
+        lines = SRBResult.getOutputLines("/usr/bin/SgetU -P " + userName + 
+                 "@" + self.values['domain_desc'], "Unable to get local user " + 
+                userName + "'s infomration")
+        if(len(lines) == 7):
+            return SRBUser(lines)
+        else:
+            return None     
+
+    def getResources(self, onlineOnly = True):
         if(len(self.resourceList) > 0):
             return self.resourceList
 
-        #netprefix = self.values['netprefix']
-        #host = netprefix[:netprefix.find(":")]
-        lines = SRBResult.getOutputLines('/usr/bin/SgetR -z ' + self.values['zone_id'],
+        cmd = '/usr/bin/SgetR '
+        if(onlineOnly):
+            cmd += "-l "
+
+        cmd +=  "-z " + self.values['zone_id']
+        lines = SRBResult.getOutputLines(cmd,
                     'Errpr getting resources for zone')
-         
-        #first line of output says QueryZone = blah
-        list = SRBResult.parseAsType(lines[1:], 12, lambda x: SRBResourceFactory(self, x)) 
+
+        #first line of output says QueryZone = blah       
+
+        list = SRBResult.parseAsType(lines[1:], 21, lambda x: SRBResourceFactory(self, x))
         for rs in list:
-            if(self.resourceList.has_key(rs.values['rsrc_name'])):
-                self.resourceList[rs.values['rsrc_name']].addResource(rs)
+            if(rs.values['rsrc_typ_name'] == 'logical'):
+                if(self.resourceList.has_key(rs.values['rsrc_name'])):
+                    self.resourceList[rs.values['rsrc_name']].addResource(rs)
+                else:
+                    self.resourceList[rs.values['rsrc_name']] = rs
             else:
                 self.resourceList[rs.values['rsrc_name']] = rs
         return self.resourceList
-
-    def getUsersInDomain(domain):
-        usersList = []
-        lines = SRBResult.getOutputLines('/usr/bin/SgetU -P -M ' + domain,
-                    'Error getting user info')
-        usersList = SRBResult.parseAsType(lines, 7, SRBUser)
-        return usersList
 
     def getUsers(self):
         """Grabs a list of SRBUser, as with the usual SgetU 
@@ -225,13 +246,15 @@ class SRBZone(SRBResult):
             result[rsName] = rs.getUsedAmount(table)
         return result
 
-    def handleQuota(self, user):
-        self.getResources()
-        usages = user.getUsageByResource(self.values['zone_id'])
-        for rsName, rs in self.resourceList.iteritems():
-            if(rs.hasQuota):
-                rs.handleQuota(user, usages)
-                                
+    
+    def getUsersInDomain(domain):
+        usersList = []
+        lines = SRBResult.getOutputLines('/usr/bin/SgetU -P -M ' + domain,
+                    'Error getting user info')
+        usersList = SRBResult.parseAsType(lines, 7, SRBUser)
+        return usersList
+
+                            
     def printUsageReport(self, user, displaySize = None):
         """Prints the usage report for a user zone"""
         if(displaySize == None):
@@ -251,9 +274,8 @@ class SRBResource(SRBResult):
     def __init__(self, zone, list = None):
         super(SRBResource, self).__init__(list)
         self.hasQuota = False
+        #A resource can only belong to a zone...
         self.zone = zone
-    def setZone(self, _zone):
-        self.zone = _zone
 
     #limit is in number of BYTES.  It will be converted to a FLOAT
     def setQuota(self, _limit):
@@ -280,47 +302,6 @@ class SRBResource(SRBResult):
         print "free: %3.3f Mb"%((self.limit - usedAmount) / displaySize)
         print "percentage: %3.3f%%"%(quotaPercentage * 100)
 
-    def handleQuota(self, user, usages):
-        usedAmount = self.getUsedAmount(usages)
-        quotaPercentage = (usedAmount / self.limit)
-        if(quotaPercentage > 0.8):
-            self.sendNastygram(quotaPercentage, user, usedAmount)
-
-    def sendNastygram(self, percentage, user, usedAmount):
-        #should do something meaningful here
-        if(percentage > 1):
-            percent = 100
-        else:
-            percent = ((int)(percentage * 100)) /10
-            percent = percent * 10
-
-        quotaInMb = self.limit / 1024 / 1024
-        usedInMb = usedAmount / 1024 / 1024 
-
-        message = "Dear data fabric user,\n\n"
-
-        message += "This is a generated message sent to notify you of your use of "
-        message += "the ARCS Data Fabric service.  You have exceeded " + `percent` + "% "
-        message += "of your allowed quota of " + `quotaInMb` + " Mb.  At the time this "
-        message += "message was generated, you have used " + `usedInMb` + " Mb. \n\n" 
-
-        message += "If you have any further questions, you can log a request "
-        message += "for help at help@arcs.org.au"
-
-        msg = MIMEText(message)
-        #msg['To'] = user.values['user_email']
-        msg['To'] = "pmak@utas.edu.au"
-        #msg['Cc'] = get admin email??
-        msg['Subject'] = "Warning: Account '" + user.values['user_name'] + "@" + user.values['domain_desc'] + "' is over " + `percent` + "% of quota"
-        msg['From'] = 'srbAdmin@' + self.values['domain_desc']
-        
-        server = smtplib.SMTP()
-        server.connect()
-        server.sendmail(msg['From'], 
-                        msg['To'], 
-                        msg.as_string())
-        server.close()
-
     def getDefaultPath(self):
         path = self.values['phy_default_path']
         return path[:path.find('?')]
@@ -338,10 +319,10 @@ class SRBResource(SRBResult):
 
     def getUsedAmount(self, usages):
         rsName = self.values['phy_rsrc_name']
-        if(usages.has_key(rsName)):
-            return (float)(usages[rsName].values['data_size'])
-        else:
-            return 0
+        for use in usages:
+            if(use.values['phy_rsrc_name'] == rsName):
+                return (float)(use.values['data_size'])
+        return 0
 
 #----------------------------------------------------------------------------------------------
 
@@ -358,12 +339,11 @@ class SRBLogicalResource(SRBResource):
     def addResource(self, rs):
         self.resourceList[rs.values['phy_rsrc_name']] = rs
 
-
     def getUsedAmount(self, usages):
         total = 0.0
-        for rsName in self.resourceList.keys():
-            if(usages.has_key(rsName)):
-                total += (float)(usages[rsName].values['data_size'])
+        for use in usages:
+            if(use.values['phy_rsrc_name'] in self.resourceList.keys()):
+                total += (float)(use.values['data_size'])
         return total
  
     def getNumFiles(self, usages):
