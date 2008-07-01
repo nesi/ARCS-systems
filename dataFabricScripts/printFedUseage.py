@@ -6,7 +6,7 @@ wrapper = SRBWrapper()
 #kb, Mb, Gb
 MB = 1024 * 1024
 #QUOTA_AMOUNT = 1 * MBa
-QUOTA_AMOUNT = 12000
+QUOTA_AMOUNT = 1200
 QUOTA_IN_MB = (float)(QUOTA_AMOUNT) / MB
 ADMIN_EMAIL = "pmak@utas.edu.au"
 
@@ -46,19 +46,38 @@ def listToString(list, percent):
         str = "The following users have used over %d%% of their quota:\n"%percent
         for (user, amount, zoneGroups) in list:
             str += "%(user)s has used %(amount)f Mb of storage\n" % \
-                    {'user': user, 'amount': amount}  
+                    {'user': user, 'amount': (float)(amount)/MB}  
+            for (zone, zoneUseList) in zoneGroups.iteritems():
+                rsrc_zone = wrapper.getZone(zone)
+                rsrcList = rsrc_zone.getResources()
+                str += "\tzone: " + zone + "\n"
+                resource = rsrcList["datafabric." + rsrc_zone.values['zone_id']]
+                str += "\t\trsrc_name: %(resource)s amount: %(size)f Mb\n" % \
+                       {"resource": resource.values['rsrc_name'],
+                            "size": resource.getUsedAmount(zoneUseList)/MB}
         return str + "\n\n"
     else:
         return ""
+
 
 def handleQuota():
     message = ""
     overQuota = []
     over90 = []
     over80 = []
-    for user, (amount, zoneGroups) in totalsList.iteritems():
-        percentage = (float)(amount)/QUOTA_AMOUNT
-        usedInMb = (float)(amount) / MB
+                #this total is across all resources, NOT JUST DATAFABRIC
+                #hence the name wrongTotal :/
+    for user, (wrongTotal, zoneGroups) in totalsList.iteritems():
+        quotaTotal = 0
+        useList = []
+        for (zone, zoneUseList) in zoneGroups.iteritems():
+            rsrc_zone = wrapper.getZone(zone)
+            rsrcList = rsrc_zone.getResources()
+            resource = rsrcList["datafabric." + rsrc_zone.values['zone_id']]
+            quotaTotal += resource.getUsedAmount(zoneUseList)
+        
+        percentage = (float)(quotaTotal)/QUOTA_AMOUNT
+        usedInMb = (float)(quotaTotal) / MB
         list = None
         if(percentage > 1):
             list = overQuota
@@ -67,7 +86,7 @@ def handleQuota():
         elif(percentage > 0.8):
             list = over80
         if(list <> None):
-            list.append((user, amount, zoneGroups))
+            list.append((user, quotaTotal, zoneGroups))
 
     message += "Currently Data Fabric quota is: %f Mb\n\n"%QUOTA_IN_MB
     message += listToString(overQuota, 100)
