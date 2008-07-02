@@ -107,13 +107,49 @@
     <xsl:variable name="suite" select="."/>
     <xsl:variable name="sources" select="distinct-values(reportSummary/body/performance/benchmark/ID)"/>
     <xsl:variable name="dests" select="distinct-values(reportSummary/body/performance/benchmark/statistics/statistic/ID)"/>
+    <xsl:variable name="sites">
+        <xsl:for-each select="$dests">
+            <xsl:variable name="destName" select="."/>
+            <xsl:if test="ends-with($destName,'au')">
+                <xsl:value-of select="string-join(subsequence(reverse(tokenize($destName,'\.')),3,1),'')"/><xsl:text>,</xsl:text>
+            </xsl:if>
+            <xsl:if test="ends-with($destName,'org')">
+                <xsl:value-of select="string-join(subsequence(reverse(tokenize($destName,'\.')),2,1),'')"/><xsl:text>,</xsl:text>
+            </xsl:if>
+        </xsl:for-each>
+    </xsl:variable>
+    <xsl:variable name="siteCol" select="tokenize($sites,',')"/>
     <table class="subheader">
       <xsl:for-each select="$sources">
         <xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
 	<xsl:variable name="sourceName" select="."/> 
         <xsl:if test="position() = 1">
           <tr>
-            <td class="subheader"><b>source\destination</b></td> 
+            <td class="subheader" rowspan="2"><b>source\destination</b></td>
+            <xsl:for-each select="distinct-values(subsequence($siteCol,1,count($siteCol)-1))">
+	        <xsl:sort/>
+                <xsl:text disable-output-escaping="yes">&lt;td class="subheader" align="center" colspan="</xsl:text>
+		<xsl:number value="count(index-of($siteCol,current()))" format="1" />
+		<xsl:text disable-output-escaping="yes">">&lt;b&gt;</xsl:text>
+		<xsl:value-of select="." />
+		<xsl:text disable-output-escaping="yes">&lt;/b&gt;&lt;/td&gt;</xsl:text>
+            </xsl:for-each>
+          </tr>
+<!--          <tr>
+            <xsl:for-each select="$dests">
+                <xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
+		<xsl:variable name="destName" select="."/>
+		<xsl:if test="ends-with($destName,'au')">
+		    <xsl:variable name="siteName" select="string-join(subsequence(reverse(tokenize($destName,'\.')),3,1),'')"/>
+                    <td class="subheader" align="center"><b><xsl:value-of select="$siteName" /></b></td>
+		</xsl:if>
+                <xsl:if test="ends-with($destName,'org')">
+		    <xsl:variable name="siteName" select="string-join(subsequence(reverse(tokenize($destName,'\.')),2,1),'')"/>
+                    <td class="subheader" align="center"><b><xsl:value-of select="$siteName" /></b></td>
+                </xsl:if>
+            </xsl:for-each>
+          </tr>  -->
+          <tr>
 	    <xsl:for-each select="$dests">
 		<xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
 		<td class="subheader"><b><xsl:value-of select="." /></b></td>
