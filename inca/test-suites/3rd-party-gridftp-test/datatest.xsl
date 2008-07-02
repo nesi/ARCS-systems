@@ -109,13 +109,16 @@
     <xsl:variable name="dests" select="distinct-values(reportSummary/body/performance/benchmark/statistics/statistic/ID)"/>
     <xsl:variable name="sites">
         <xsl:for-each select="$dests">
+	    <xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
             <xsl:variable name="destName" select="."/>
-            <xsl:if test="ends-with($destName,'au')">
-                <xsl:value-of select="string-join(subsequence(reverse(tokenize($destName,'\.')),3,1),'')"/><xsl:text>,</xsl:text>
-            </xsl:if>
-            <xsl:if test="ends-with($destName,'org')">
-                <xsl:value-of select="string-join(subsequence(reverse(tokenize($destName,'\.')),2,1),'')"/><xsl:text>,</xsl:text>
-            </xsl:if>
+	    <xsl:choose>
+		<xsl:when test="contains($destName,'edu')">
+            	    <xsl:value-of select="string-join(subsequence(reverse(tokenize($destName,'\.')),3,1),'')"/><xsl:text>,</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="string-join(subsequence(reverse(tokenize($destName,'\.')),2,1),'')"/><xsl:text>,</xsl:text>
+		</xsl:otherwise>
+	    </xsl:choose>
         </xsl:for-each>
     </xsl:variable>
     <xsl:variable name="siteCol" select="tokenize($sites,',')"/>
@@ -127,7 +130,6 @@
           <tr>
             <td class="subheader" rowspan="2"><b>source\destination</b></td>
             <xsl:for-each select="distinct-values(subsequence($siteCol,1,count($siteCol)-1))">
-	        <xsl:sort/>
                 <xsl:text disable-output-escaping="yes">&lt;td class="subheader" align="center" colspan="</xsl:text>
 		<xsl:number value="count(index-of($siteCol,current()))" format="1" />
 		<xsl:text disable-output-escaping="yes">">&lt;b&gt;</xsl:text>
