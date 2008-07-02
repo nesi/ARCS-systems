@@ -6,8 +6,8 @@
     Set an upstream entry for each VO index that you wish to participate in.
 -->
 
-    <upstream>https://mds0.gridaus.org.au:8443/wsrf/services/DefaultIndexService</upstream>
-    <upstream>https://mds1.gridaus.org.au:8443/wsrf/services/DefaultIndexService</upstream>
+    <upstream>https://mds0.arcs.org.au:8443/wsrf/services/DefaultIndexService</upstream>
+    <upstream>https://mds1.arcs.org.au:8443/wsrf/services/DefaultIndexService</upstream>
 
 <!-- <downstream> elements specify remote index service which will be 
      registered into the local index. You do not need to configure 
