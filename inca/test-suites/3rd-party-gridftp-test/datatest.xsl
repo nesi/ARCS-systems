@@ -109,13 +109,13 @@
     <xsl:variable name="dests" select="distinct-values(reportSummary/body/performance/benchmark/statistics/statistic/ID)"/>
     <table class="subheader">
       <xsl:for-each select="$sources">
-        <xsl:sort/>
+        <xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
 	<xsl:variable name="sourceName" select="."/> 
         <xsl:if test="position() = 1">
           <tr>
             <td class="subheader"><b>source\destination</b></td> 
 	    <xsl:for-each select="$dests">
-		<xsl:sort/>
+		<xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
 		<td class="subheader"><b><xsl:value-of select="." /></b></td>
 	    </xsl:for-each>
           </tr>
@@ -126,7 +126,7 @@
           </td>
 
 	  <xsl:for-each select="$dests">
-	    <xsl:sort/>
+	    <xsl:sort select="string-join(reverse(tokenize(current(),'\.')),',')"/>
 	    <xsl:variable name="destName" select="."/>
 	    <xsl:variable name="thisTest" select="$suite/reportSummary/body/performance/benchmark[ID=$sourceName and statistics/statistic/ID=$destName]"/>
 	    <xsl:choose>
