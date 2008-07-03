@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!-- 
+http://twiki.org/cgi-bin/view/Plugins/XmlQueryPlugin 
+http://trac-hacks.org/wiki/XsltMacro
+-->
+<?xml-stylesheet type="text/xsl" href="http://projects.arcs.org.au/trac/systems/browser/trunk/data-services/data-fabric-web.xsl?format=raw"?>
