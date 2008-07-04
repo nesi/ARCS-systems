@@ -33,12 +33,20 @@ def parse_dn(dn):
 	res[n].append(v)
 	return res
 
-def getUsername(user):
-	return user.replace(' ','').lower()
+def getUsername(user,O):
+	if O == 'ARCS':
+		user = user.split(' ')[:-1]
+		username = ''
+		for string in user:
+			username += string.lower()
+		return username
+	else:
+		return user.replace(' ','').lower()
 
 domains = {
     'iVEC':'srb.ivec.org',
     'JCU':'srb.ivec.org',
+    'SAPAC':'srb.ivec.org'
     }
 
 if __name__ == '__main__':
@@ -49,7 +57,7 @@ if __name__ == '__main__':
 		exe, dn = sys.argv
 		comp = parse_dn(dn)
 		if domains.has_key(comp['OU'][0]):
-			user = "%s@%s"%(getUsername(comp['CN'][0]),domains[comp['OU'][0]])
+			user = "%s@%s"%(getUsername(comp['CN'][0],comp['O'][0]),domains[comp['OU'][0]])
 			print user
 
 	else:
