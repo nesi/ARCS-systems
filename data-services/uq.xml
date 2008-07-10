@@ -25,7 +25,8 @@
           </domains>
           <hosts>
             <host>
-                  <host-name>srb.hpcu.uq.edu.au</host-name>
+		  		  <friendly-name>ngsrb.hpcu.uq.edu.au</friendly-name>   <!-- What you'll tell users, should be your cname -->
+                  <host-name>srb.hpcu.uq.edu.au</host-name>    <!-- the real host name when you run 'hostname' on your box -->
                   <port-number>5544</port-number>
                   <gridftp-dsi-port>2811</gridftp-dsi-port>
               <auth-schemes>
