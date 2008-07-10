@@ -25,6 +25,7 @@ def run_cmd(cmd):
     result=commands.getstatusoutput(cmd)
     if result[0] != 0:
 	print result[1]
+	return result[0]
 
 def federate(site_name,svr_type):
 #    if os.environ.has_key("http_proxy"):
@@ -32,7 +33,11 @@ def federate(site_name,svr_type):
 #    else:
 #        my_http_proxy=None
     xml_url="http://projects.arcs.org.au/trac/systems/browser/trunk/data-services/"+site_name+".xml?format=raw"
-    response = urllib2.urlopen(xml_url)
+    try:
+        response = urllib2.urlopen(xml_url)
+    except Exception,inst:
+        print "There is no such site information."
+        return 1
     xml_content=response.read()
 #    print xml_content
     doc = minidom.parseString(xml_content).documentElement
@@ -52,7 +57,9 @@ def federate(site_name,svr_type):
 	return 1
     if cname is None:
 	cname = hostname
-    run_cmd("Sinit")
+    if run_cmd("Sinit")!=0:
+	print "Cannot initiate SRB session."
+	return 1
     run_cmd("Singesttoken Domain "+cname+" home")
     run_cmd("Singestuser srbAdmin wabkusbdkweu "+cname+" sysadmin '' '' '' ENCRPYT1 ''")
     run_cmd("Sregisterlocation "+cname+" "+hostname+" home srbAdmin "+cname)
