@@ -6,23 +6,21 @@ from SRBResult import SRBResult, SRBUser, SRBZone
 #----------------------------------------------------------------
 
 class SRBWrapper:
-    def __init__(self):
+    def __init__(self, zone_id):
+        self.knownZones = None
         self.knownZones = self.getKnownZones()
         #admin zone
-        self.zone = self.getZone('ngdev2.its.utas.edu.au')
-                                # Gb - Mb - Kb  
-        #self.quotaLimit = 25 * 1024 * 1024 * 1024
-        #self.zone.setQuota('data_fabric', 25 * 1024 & 1024 *1024)
-        #self.zone.setQuota('data_fabric', 120 * 1024 *1024)
-        #self.zone.setQuota('ngdev2.its.utas.edu.au', 1000 * 1024 * 1024)
-        #self.zone.setQuota('datafabric.ngdev2.its.utas.edu.au', 1024 * 1024)    
-        
+        self.zone = self.getZone(zone_id)
+        self.knownDomains = None
+        self.knownDomains = self.getKnownDomains()
 
     def getKnownZones(self):
-        lines = SRBResult.getOutputLines('/usr/bin/Stoken Zone', 
+        if(self.knownZones == None):
+            lines = SRBResult.getOutputLines('/usr/bin/Stoken Zone', 
                     'Error getting known zones')
-        zonesList = SRBResult.parseAsType(lines, 14, SRBZone)
-        return zonesList
+            zonesList = SRBResult.parseAsType(lines, 14, SRBZone)
+            self.knownZones = zonesList
+        return self.knownZones
  
     def getZone(self, zone_id):
         for zone in self.knownZones:
@@ -37,6 +35,13 @@ class SRBWrapper:
                 usersList.append(user)
         return usersList
 
+    def getKnownDomains(self):
+        if(self.knownDomains == None):
+            lines = SRBResult.getOutputLines('/usr/bin/Stoken Domain',
+                    'Error getting known domains')
+            domains = SRBResult.parse(lines, 1)
+            self.knownDomains = domains
+        return self.knownDomains
 
     def printLocalUserTotal(self):
         """Prints out usage of users in YOUR LOCAL ADMIN ZONE
@@ -85,7 +90,6 @@ class SRBWrapper:
                         totalsList[key] = (size, count)
         return totalsList
 
-
     def getTotalUsageByResourceUserZone(self):
         """This grabs usage info on users who have
             written something to the data fabric.
@@ -117,5 +121,5 @@ class SRBWrapper:
                             totalsList[key] = (amount, zoneGroups)    
                         else:
                             totalsList[key] = (size, {resourceZoneId : [use]})
-	return totalsList
+	    return totalsList
                     

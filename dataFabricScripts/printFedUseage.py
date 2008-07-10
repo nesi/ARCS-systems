@@ -1,16 +1,31 @@
+"""
+This is a util script that can print out
+usage informtion in a SRB federation.
+
+usage:  printFedUseage.py [-xq]
+        -x: prints user/zone/resource in XML
+        -q: handles quota and sends email to data@arcs.org.au
+"""
+
+
 from SRBWrapper import SRBWrapper
 from email.MIMEText import MIMEText
 import smtplib
+import sys
 
-wrapper = SRBWrapper()
+totalsList = None
+wrapper = None
 #kb, Mb, Gb
 MB = 1024 * 1024
 #QUOTA_AMOUNT = 1 * MBa
 QUOTA_AMOUNT = 1200
 QUOTA_IN_MB = (float)(QUOTA_AMOUNT) / MB
 ADMIN_EMAIL = "pmak@utas.edu.au"
+  
+def getData():
+    wrapper = SRBWrapper('ngdev2.its.utas.edu.au')
+   totalsList = wrapper.getTotalUsageByResourceUserZone()
 
-totalsList = wrapper.getTotalUsageByResourceUserZone()
 def printXML():
     print """<?xml version="1.0" encoding="UTF-8"?>"""
     print "<users>"
@@ -34,12 +49,11 @@ def printXML():
                 #no point adding logical resources
                 if(resource.values['rsrc_typ_name'] != 'logical'):
                     zoneTotal += resourceSize
-            print "\t\t\t<zone_total>%f</zone_total>"%zoneTotal
+            printotalsList = Nonet "\t\t\t<zone_total>%f</zone_total>"%zoneTotal
             print "\t\t</zone>"
         print "\t\t<total>%d</total>"%amount
         print "\t</user>"
     print "</users>"
-
 
 def listToString(list, percent):
     if(len(list) > 0):
@@ -58,7 +72,6 @@ def listToString(list, percent):
         return str + "\n\n"
     else:
         return ""
-
 
 def handleQuota():
     message = ""
@@ -104,6 +117,16 @@ def handleQuota():
                     msg['To'],
                     msg.as_string())
     server.close()
-               
-printXML()
-handleQuota()
+
+if (__name__ == "__main__"):
+    if(len(sys.argv) == 2):
+        if(sys.argv[1] in ["-x", "-q", "-u"]):
+            init()
+            if(sys.argv[1] == "-x"):
+                printXML()
+            elif(sys.argv[1] == "-q"):
+                handleQuota()
+        else:
+            print __doc__
+    else:
+       print __doc__ 
