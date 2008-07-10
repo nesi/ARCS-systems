@@ -93,6 +93,7 @@
           </domains>
           <hosts>
             <host>
+              <friendly-name>srbrunner.hpcu.uq.edu.au</friendly-name>
               <host-name>srbrunner.hpcu.uq.edu.au</host-name>
               <port-number>5544</port-number>
               <srb-dsi-port>2811</srb-dsi-port>
