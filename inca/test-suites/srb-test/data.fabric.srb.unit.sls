@@ -6,12 +6,12 @@ use Inca::Reporter::SimpleUnit;
 use Cwd;
 my $reporter = new Inca::Reporter::SimpleUnit(
   name => 'data.fabric.srb.unit.sls',
-  version => 1.1,
+  version => 1.4,
   description => 'This reporter tests the Sls command',
   url => 'http://www.arcs.org.au/',
   unit_name => 'sls'
 );
-my $dir = getcwd;
+my $dir = $ENV{'SRB_TEST_PATH'}?$ENV{'SRB_TEST_PATH'}:$reporter->getcwd;
 #print $dir;
 $reporter->addDependency('Inca::Reporter::GridProxy');
 $reporter->addArg('site');
@@ -29,6 +29,7 @@ $reporter->tempFile($MDIR);
 
 my $mdasEnv="$MDIR/.MdasEnv.$$";
 my $cmd="$dir/srb-env.py -m $site $type -o $mdasEnv";
+$reporter->log('info',$cmd);
 #print $cmd;
 `$cmd 2>&1`;
 #`cp $ENV{HOME}/.srb/.MdasEnv $MDIR/.MdasEnv.$$`;
