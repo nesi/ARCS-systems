@@ -21,7 +21,7 @@ $reporter->processArgv(@ARGV);
 my $site=$reporter->argValue('site');
 my $type=$reporter->argValue('type');
 
-$reporter->setUnitName($site."_Sls");
+$reporter->setBody("<srb_site>".$site."</srb_site><srb_test>Sls</srb_test>");
 
 my $MDIR = "$ENV{HOME}/.srb/srb_test.$$";
 mkdir $MDIR || die "couldn't make $MDIR";
