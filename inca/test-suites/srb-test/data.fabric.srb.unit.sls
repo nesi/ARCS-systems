@@ -6,7 +6,7 @@ use Inca::Reporter::SimpleUnit;
 use Cwd;
 my $reporter = new Inca::Reporter::SimpleUnit(
   name => 'data.fabric.srb.unit.sls',
-  version => 1,
+  version => 1.1,
   description => 'This reporter tests the Sls command',
   url => 'http://www.arcs.org.au/',
   unit_name => 'sls'
