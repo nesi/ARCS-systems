@@ -88,7 +88,7 @@
         <domain primary="yes">
               <domain-name>srbrunner.hpcu.uq.edu.au</domain-name>
               <domain-admin>srbAdmin</domain-admin>
-                  <domain-test-user>uqklu</domain-test-user>
+                  <domain-test-user>kailu</domain-test-user>
             </domain>
           </domains>
           <hosts>
