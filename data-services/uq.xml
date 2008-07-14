@@ -30,7 +30,7 @@
                   <port-number>5544</port-number>
                   <gridftp-dsi-port>2811</gridftp-dsi-port>
               <auth-schemes>
-                <auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=ngsrb.hpcu.uq.edu.au">GSI</auth-scheme>
+                <auth-scheme dn="/C=AU/O=APACGrid/OU=UQ/CN=ngsrb.hpcu.uq.edu.au">GSI</auth-scheme>
                 <auth-scheme>ENCRYPT1</auth-scheme>
               </auth-schemes>
             </host>
@@ -98,7 +98,7 @@
               <port-number>5544</port-number>
               <srb-dsi-port>2811</srb-dsi-port>
               <auth-schemes>
-                <auth-scheme dn="/C=AU/O=APACGrid/OU=SAPAC/CN=srbrunner.hpcu.uq.edu.au">GSI</auth-scheme>
+                <auth-scheme dn="/C=AU/O=APACGrid/OU=UQ/CN=srbrunner.hpcu.uq.edu.au">GSI</auth-scheme>
                 <auth-scheme>ENCRYPT1</auth-scheme>
               </auth-schemes>
             </host>
