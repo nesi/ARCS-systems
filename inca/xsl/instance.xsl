@@ -138,9 +138,9 @@
         <xsl:if test="$resultText='did not complete' or $resultText='unknown'
           or $resultText=$comp">
           <p class="code"><xsl:apply-templates select="$errMsg"/></p>
-          <xsl:if test="$errMsg=''">
+          <!-- <xsl:if test="$errMsg=''"> -->
             <p class="code"><xsl:apply-templates  select="../stderr"/></p>
-          </xsl:if>
+          <!-- </xsl:if> -->
         </xsl:if>
       </td>
       </tr>

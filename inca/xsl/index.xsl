@@ -49,9 +49,20 @@
     <form method="get" action="xslt.jsp" name="form" onsubmit="setParam(form);">
       <table border="0" align="center" cellpadding="10" width="400">
         <tr><td colspan="2">
-          <h3 align="center">Welcome to the Inca Consumer web pages!</h3>
-          <p>To display the status page for a suite, please select one suite
-            and one resource below and click 'Submit'.</p>
+          <h3 align="center">Welcome to the ARCS Inca web interface</h3>
+          <p>To display the status page for a suite, please select a suite-resource
+            pair and press the 'Submit' button.</p>
+          <p>To view the series results, you'll need to select
+            the suite-resource pair corresponding to the series result you want
+            to view</p>
+          <ol>
+            <li><a href="/inca/xslt.jsp?suiteName=wsgram_tests&amp;resourceID=localResource&amp;xsl=default.xsl&amp;xmlFile=swStack.xml&amp;Submit=Submit">WSGRAM Series</a> - wsgram_tests and localResource</li>
+            <li><a href="/inca/xslt.jsp?suiteName=gridftp_from_submit_hosts&amp;resourceID=GridAustraliaHosts&amp;xsl=default.xsl&amp;xmlFile=swStack.xml&amp;Submit=Submit">GridFTP Series</a> - gridftp_from_submit_hosts and GridAustraliaHosts</li>
+            <li><a href="/inca/xslt.jsp?suiteName=dataservice_3rdparty_tests&amp;resourceID=localResource&amp;xsl=datatest.xsl&amp;xmlFile=swStack.xml&amp;Submit=Submit">DataService 3rd Party Transfer Series</a> - dataservice_3rdparty_tests and localResource</li>
+            <li><a href="/inca/xslt.jsp?suiteName=infosystem_tests&amp;resourceID=localResource&amp;xsl=default.xsl&amp;xmlFile=swStack.xml&amp;Submit=Submit">Information Systems Series</a> - infosystem_tests and localResource</li>
+            <li><a href="/inca/xslt.jsp?suiteName=ildg_tests&amp;resourceID=localResource&amp;xsl=default.xsl&amp;xmlFile=swStack.xml&amp;Submit=Submit">ILDG Series</a> - ildg_tests and localResource</li>
+            <li><a href="/inca/xslt.jsp?suiteName=application_tests&amp;resourceID=localResource&amp;xsl=default.xsl&amp;xmlFile=swStack.xml&amp;Submit=Submit">Commonly Used Applications on GridAustralia Series</a> - application_tests and localResource</li>
+          </ol>
         </td></tr>
         <tr align="center">
           <td>

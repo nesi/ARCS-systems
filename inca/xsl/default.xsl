@@ -137,6 +137,8 @@
     <xsl:variable name="instance" select="$result/instanceId" />
     <xsl:variable name="comparitor" select="$result/comparisonResult" />
     <xsl:variable name="foundVersion" select="$result/body/package/version" />
+    <xsl:variable name="downloadSpeed" select="$result/body/performance/benchmark/statistics/statistic[1]/value" />
+    <xsl:variable name="downloadSpeedUnits" select="$result/body/performance/benchmark/statistics/statistic[1]/units" />
     <xsl:choose>
       <xsl:when test="count($result)>0">
         <!-- resource is not exempt -->
@@ -153,7 +155,14 @@
               (string($result/body)!=''
                and string($result/errorMessage)=''
                and string($comparitor)='' )">
-              <xsl:value-of select="'pass'" />
+              <xsl:choose>
+                <xsl:when test="string($downloadSpeed)!=''">
+                  <xsl:value-of select="concat(format-number(number($downloadSpeed),'###.##'),$downloadSpeedUnits)" />
+                </xsl:when>
+                <xsl:otherwise>
+                  <xsl:value-of select="'pass'" />
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:when>
             <xsl:otherwise>
               <xsl:value-of select="'error'" />
