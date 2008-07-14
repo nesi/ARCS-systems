@@ -93,6 +93,7 @@
 	  </domains>
 	  <hosts>
 	    <host>
+	      <friendly-name>ngdev2.its.utas.edu.au</friendly-name>
 	      <host-name>ngdev2.its.utas.edu.au</host-name>
 	      <port-number>5544</port-number>
 	      <srb-dsi-port>2811</srb-dsi-port>
