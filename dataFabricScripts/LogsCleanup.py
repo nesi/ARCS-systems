@@ -52,7 +52,7 @@ def process_files(count, file_list, action):
        tar.close()
 
 def usage():
-    usage = ["          Slogrotate.py -k Value - a positive number \n"]
+    usage = ["          LogsCleanup.py -k Value - a positive number \n"]
     usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 means that you will keep recent 5 log files \n")
 #   usage.append ("         [-c | --compress] Compress the old log files - DEFAULT \n")
 #   usage.append ("         [-d | --delete]  Delete the old log files \n")
