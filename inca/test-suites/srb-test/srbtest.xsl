@@ -120,9 +120,9 @@
             <xsl:variable name="thisTest" select="$suite/reportSummary[body/srb_site=$siteName and body/srb_test=$testName]"/>
             <xsl:choose>
               <xsl:when test="exists($thisTest)">
-                <xsl:variable name="instanceId" select="$thisTest/../../../instanceId" />
-                <xsl:variable name="configId" select="$thisTest/../../../seriesConfigId" />
-                <xsl:variable name="href" select="concat('xslt.jsp?xsl=datainstance.xsl&amp;instanceID=', $instanceId, '&amp;configID=', $configId)"/>
+                <xsl:variable name="instanceId" select="$thisTest/instanceId" />
+                <xsl:variable name="configId" select="$thisTest/seriesConfigId" />
+                <xsl:variable name="href" select="concat('xslt.jsp?xsl=instance.xsl&amp;instanceID=', $instanceId, '&amp;configID=', $configId)"/>
 
                 <xsl:choose>
                   <xsl:when test="string($thisTest/errorMessage) = ''">
