@@ -4,7 +4,7 @@
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	10
+Release:	11
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -58,6 +58,8 @@ else
         mv config/apac_config.py.tmp config/apac_config.py
         sed "s/accessProtocol\.Version = '1.0.0'/accessProtocol\.Version = '2.3'/" config/apac_config.py > config/apac_config.py.tmp
         mv config/apac_config.py.tmp config/apac_config.py
+        echo "Backing up old modules/default/SubCluster/softwareInfoData/localSoftware.xml to modules/default/SubCluster/softwareInfoData/localSoftware.xml.`date +%Y%m%d`."
+        cp modules/default/SubCluster/softwareInfoData/localSoftware.xml modules/default/SubCluster/softwareInfoData/localSoftware.xml.`date +%Y%m%d`
         echo "This version of the GridAus-mip module already supports publishing of SRM information."
         echo "%{prefix}/mip/modules/apac_py/example_config.py has examples of how to publish SRM information."
 fi
@@ -98,8 +100,11 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoProvider.py
 %{prefix}/mip/modules/%{PKG_NAME}/*.py
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
+%{prefix}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoData/localSoftware.xml
 
 %changelog
+* Mon Jul 14 2008 Gerson Galang
+- included a backup line for localSoftware.xml
 * Fri Apr 11 2008 Gerson Galang
 - fixed the problem with VOView.FreeJobSlots outputting a negative value
 * Tue Apr 1 2008  Gerson Galang
