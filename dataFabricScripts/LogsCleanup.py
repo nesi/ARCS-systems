@@ -100,11 +100,14 @@ def main():
             assert False, "unhandled option"
 
     matches = list(fetch_files(file, logdir))
-    if numFiles in range(1,7):
-        fList = sort_files(matches)
-        process_files(numFiles, fList, ops)
+
+    if numFiles in range(1, len(matches)):
+         fList = sort_files(matches)
+         process_files(numFiles, fList, ops)
+    elif numFiles == len(matches):
+         sys.exit('No log files needs to be cleaned up!')
     else:
-        sys.exit("Must provide one number between 1 and " + str(len(matches)-1))
+         sys.exit("Must provide one number between 1 and " + str(len(matches)))
 
 if __name__ == "__main__": 
    sys.exit(main())
