@@ -25,7 +25,7 @@ def run_cmd(cmd):
     result=commands.getstatusoutput(cmd)
     if result[0] != 0:
 	print result[1]
-	return result[0]
+    return result[0]
 
 def federate(site_name,svr_type):
 #    if os.environ.has_key("http_proxy"):
