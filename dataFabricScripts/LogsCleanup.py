@@ -71,7 +71,7 @@ def main():
     ops = 0
 
     try:
-        options, args = getopt.getopt(sys.argv[1:], "hk:cdv", ["help", "keep", "compress", "delete="])
+        options, args = getopt.getopt(sys.argv[1:], "hk:cd", ["help", "keep", "compress", "delete="])
     except getopt.GetoptError, err:
         # will print something like "option -a not recognized"
         print str(err)
