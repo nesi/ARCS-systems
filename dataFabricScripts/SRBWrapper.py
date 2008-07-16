@@ -1,4 +1,4 @@
-from SRBResult import SRBResult, SRBUser, SRBZone
+from SRBResult import SRBResult, SRBUser, SRBZone, SRBDomain
 
 #----------------------------------------------------------------
 # CHANGELaOG
@@ -28,18 +28,30 @@ class SRBWrapper:
                 return zone
         return None
 
+    def getDomain(self, domain_name):
+        for domain in self.knownDomains:
+            if(domain.values['domain_desc'] == domain_name):
+                return domain
+        return None
+
     def getAllKnownUsers(self):
         usersList = []
-        for zone in self.knownZones:
-            for user in zone.getUsers():
+        for domain in self.knownDomains:
+            for user in domain.getAllUsers():
                 usersList.append(user)
         return usersList
+
+    def getResourceTypes(self):
+        lines = SRBResult.getOutputLines('/usr/bin/Stoken ResourceType',
+                    'Error getting resource types')
+        typesList = SRBResult.parse(lines, 1)
+        return typesList
 
     def getKnownDomains(self):
         if(self.knownDomains == None):
             lines = SRBResult.getOutputLines('/usr/bin/Stoken Domain',
                     'Error getting known domains')
-            domains = SRBResult.parse(lines, 1)
+            domains = SRBResult.parseAsType(lines, 1, SRBDomain)
             self.knownDomains = domains
         return self.knownDomains
 
@@ -103,23 +115,23 @@ class SRBWrapper:
         zones =  [z for z in self.knownZones if (z.values['zone_status'] == '1')]
         for zone in zones:
             resourceZoneId = zone.values['zone_id']
-            for zone2 in zones:
-                userDomain = zone2.values['domain_desc']
-                #yes, we want to group by resource
-                usages = zone.getUsageForUserDomain(userDomain, True)
-                if(len(usages)> 0):
-                    for use in usages:
-                        size = (long)(use.values['data_size'])
-                        key = use.values['user_name'] + "@" + userDomain
-                        if(totalsList.has_key(key)):
-                            (amount, zoneGroups) = totalsList[key]
-                            amount = amount + size
-                            if(zoneGroups.has_key(resourceZoneId)):
-                                zoneGroups[resourceZoneId].append(use)
+            for domain in self.knownDomains:
+                if(domain.hasUsers()):
+                    #yes, we want to group by resource
+                    usages = domain.getUsageForUserDomain(zone.values['zone_id'], True)
+                    if(len(usages)> 0):
+                        for use in usages:
+                            size = (long)(use.values['data_size'])
+                            key = use.values['user_name'] + "@" + domain.values['domain_desc']
+                            if(totalsList.has_key(key)):
+                                (amount, zoneGroups) = totalsList[key]
+                                amount = amount + size
+                                if(zoneGroups.has_key(resourceZoneId)):
+                                    zoneGroups[resourceZoneId].append(use)
+                                else:
+                                    zoneGroups[resourceZoneId] = [use]
+                                totalsList[key] = (amount, zoneGroups)    
                             else:
-                                zoneGroups[resourceZoneId] = [use]
-                            totalsList[key] = (amount, zoneGroups)    
-                        else:
-                            totalsList[key] = (size, {resourceZoneId : [use]})
-	    return totalsList
+                                totalsList[key] = (size, {resourceZoneId : [use]})
+        return totalsList
                     

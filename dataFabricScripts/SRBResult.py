@@ -1,5 +1,6 @@
 import re
 import os
+import popen2
 
 #A lot of funcationality here is "borrowed/stolen" from 
 #the Taiwan scipt for usage statstics.  
@@ -7,7 +8,7 @@ import os
 
 
 
-#----------------------------------------------------------------
+a#----------------------------------------------------------------
 # CHANGELOG
 # 2008-06-18: 
 #   - added SRBResource class for handling quotas
@@ -26,6 +27,9 @@ import os
 #   - quota is now applied to federated storage rather than 
 #     individual resources.  Therefore, handleQuota has been
 #     removed from SRBZone and SRBResource
+# 2008-06-16:
+#   - users now belongs to domain, rather than zones.  Other methods
+#       have been changed acoordingly
 #----------------------------------------------------------------
 
 #---static goodness
@@ -72,11 +76,14 @@ class SRBResult(object):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
         lines = []
         try:
-            lines = os.popen(cmd).readlines()
+            r, w, e = popen2.popen3(cmd)
+            lines = r.readlines()
+            w.close()
+            e.close()
             #exclude lines beginning with '-'
             lines = [x for x in lines if (x[0] <> '-')]
             return lines
-        except:
+        except Exception, e:
             raise SRBException(error)
 
     def toString(self):
@@ -119,6 +126,7 @@ class SRBResult(object):
     parseAsType = Callable(parseAsType)
     getOutputLines = Callable(getOutputLines)
 
+
 #---------------------------------------------------------------------------------------------
 
 class SRBUser(SRBResult):
@@ -126,9 +134,6 @@ class SRBUser(SRBResult):
         a SRB user"""
     def __init__(self, result):
         super(SRBUser, self).__init__(result)
-
-    def setLocalZone(self, _zone):
-        self.zone = _zone
 
     def getUsageByResource(self, zone_id):
         """zone_id = name of resource zone(?)"""
@@ -147,7 +152,49 @@ class SRBUser(SRBResult):
     def getHomeCollection(self, zone_id):
         return zone_id + "/home/" + self.values['user_name'] + "." + self.values['domain_desc']
 
-#---------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------
+class SRBDomain(SRBResult):
+    def __init__(self, result):
+        super(SRBDomain, self).__init__(result)
+        self.users = self.getAllUsers()
+
+    def getUser(self, userName):
+        lines = SRBResult.getOutputLines("/usr/bin/SgetU -P " + userName +
+                 "@" + self.values['domain_desc'], "Unable to get local user " +
+                userName + "'s infomration")
+        if(len(lines) == 7):
+            return SRBUser(lines)
+        else:
+            return None
+
+    def hasUsers(self):
+        return (len(self.users) <> 0)
+
+    def getAllUsers(self):
+        usersList = []
+        lines = SRBResult.getOutputLines('/usr/bin/SgetU -P -M ' + 
+                    self.values['domain_desc'],
+                    'Error getting user info')
+        usersList = SRBResult.parseAsType(lines, 7, SRBUser)
+        return usersList
+
+    def getUsageForUserDomain(self, zone_id, groupByResource = False):
+        """Grabs all usage of a specific storage zone for 
+            user of the specified userDomain"""
+
+        numRows = 3
+        cmd = '/usr/bin/SgetColl -e '
+
+        if(groupByResource):
+            cmd += " -f "
+            numRows = 4
+        cmd += "/"  + zone_id + "/home/*" + "." + self.values['domain_desc'] + "*"
+
+        lines = SRBResult.getOutputLines(cmd, 'Error getting user space usage statistics')
+        results = SRBResult.parse(lines, numRows)
+        return results
+
+#-----------------------------------------------------------------------------------
 
 class SRBZone(SRBResult):
     """This class represents a SRB zone..."""
@@ -164,14 +211,8 @@ class SRBZone(SRBResult):
             self.adminUser = self.getUser(self.values['user_name'])
         return self.adminUser
 
-    def getUser(self, userName):
-        lines = SRBResult.getOutputLines("/usr/bin/SgetU -P " + userName + 
-                 "@" + self.values['domain_desc'], "Unable to get local user " + 
-                userName + "'s infomration")
-        if(len(lines) == 7):
-            return SRBUser(lines)
-        else:
-            return None     
+    def getResource(self, name):
+        return self.resourceList[name]
 
     def getResources(self, onlineOnly = True):
         if(len(self.resourceList) > 0):
@@ -198,34 +239,10 @@ class SRBZone(SRBResult):
                 self.resourceList[rs.values['rsrc_name']] = rs
         return self.resourceList
 
-    def getUsers(self):
-        """Grabs a list of SRBUser, as with the usual SgetU 
-            command for a specified group (_group)"""
-        usersList = SRBZone.getUsersInDomain(self.values['domain_desc'])
-        for user in usersList:
-            user.setLocalZone(self)
-        return usersList
-
     def setQuota(self, resource, limit):
         self.getResources()
         if(self.resourceList.has_key(resource)):
             self.resourceList[resource].setQuota(limit)
-
-    def getUsageForUserDomain(self, userDomain, groupByResource = False):
-        """Grabs all usage of a specific storage zone for 
-            user of the specified userDomain"""
-
-        numRows = 3
-        cmd = '/usr/bin/SgetColl -e '
-
-        if(groupByResource):
-            cmd += " -f "
-            numRows = 4
-        cmd += "/" + self.values['zone_id'] + "/home/*" + "." + userDomain + "*"
-
-        lines = SRBResult.getOutputLines(cmd, 'Error getting user space usage statistics')
-        results = SRBResult.parse(lines, numRows)
-        return results
 
     def getTotalByResource(self):
         """Returns a dictionary of resource name (both logical
@@ -246,15 +263,7 @@ class SRBZone(SRBResult):
             result[rsName] = rs.getUsedAmount(table)
         return result
 
-    
-    def getUsersInDomain(domain):
-        usersList = []
-        lines = SRBResult.getOutputLines('/usr/bin/SgetU -P -M ' + domain,
-                    'Error getting user info')
-        usersList = SRBResult.parseAsType(lines, 7, SRBUser)
-        return usersList
-
-                            
+                               
     def printUsageReport(self, user, displaySize = None):
         """Prints the usage report for a user zone"""
         if(displaySize == None):
@@ -264,10 +273,6 @@ class SRBZone(SRBResult):
         for rsName, rs in self.resourceList.iteritems():
             if(rs.hasQuota):
                 rs.printQuota(user, usages, displaySize)
-
-    #--static goodness
-    getUsersInDomain = Callable(getUsersInDomain)
-
 #---------------------------------------------------------------------------------------------
 
 class SRBResource(SRBResult):

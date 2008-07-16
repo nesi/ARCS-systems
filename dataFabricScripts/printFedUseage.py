@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 """
 This is a util script that can print out
 usage informtion in a SRB federation.
@@ -21,10 +23,16 @@ MB = 1024 * 1024
 QUOTA_AMOUNT = 1200
 QUOTA_IN_MB = (float)(QUOTA_AMOUNT) / MB
 ADMIN_EMAIL = "pmak@utas.edu.au"
+DB_USERNAME = "srbTest"
+DB_PASSWORD = "srbTestPass"
+DB_NAME = "testDB"
+DB_HOST = "localhost"
   
-def getData():
+def init():
+    global totalsList
+    global wrapper
     wrapper = SRBWrapper('ngdev2.its.utas.edu.au')
-   totalsList = wrapper.getTotalUsageByResourceUserZone()
+    totalsList = wrapper.getTotalUsageByResourceUserZone()
 
 def printXML():
     print """<?xml version="1.0" encoding="UTF-8"?>"""
@@ -49,7 +57,7 @@ def printXML():
                 #no point adding logical resources
                 if(resource.values['rsrc_typ_name'] != 'logical'):
                     zoneTotal += resourceSize
-            printotalsList = Nonet "\t\t\t<zone_total>%f</zone_total>"%zoneTotal
+            printotalsList = "\t\t\t<zone_total>%f</zone_total>"%zoneTotal
             print "\t\t</zone>"
         print "\t\t<total>%d</total>"%amount
         print "\t</user>"
