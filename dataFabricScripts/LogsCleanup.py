@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 """
-The script is a tool for removing some old srb log files because of ever-increasing number of log files that are created based on interval(days). The default interval is 
-5 days. 
+The script is a tool for removing some old srb log files because of ever-increasing number of log files that are created based on interval(days). 
+The default interval is 5 days. 
 """
-import datetime, glob, getopt, os, string, sys, tarfile, time
+import datetime, glob, getopt, os, string, sys, tarfile
+
+today = datetime.date.today()
 
 def fetch_files(pattern, search_path, pathsep = os.pathsep):
 
@@ -26,7 +28,6 @@ def sort_files(file_list):
         elif len(seg[3]) < 4: year = "2"+seg[3]
         else: filedate3 = seg[3]  
         date1 = datetime.date(int(year), int(month), int(day))
-        today = datetime.date.today()
         diff_1 = str(today - date1) 
         diff = int(diff_1[0]+diff_1[1]) + 1
         files_dict[diff] = match 
@@ -41,19 +42,19 @@ def process_files(count, file_list, action):
             print name
             os.remove(name)
     else:
-       today = datetime.date.today()
        if not os.path.exists('/usr/srb/data/log/bak'):
             os.system('mkdir /usr/srb/data/log/bak')
        tarname = '/usr/srb/data/log/bak/'+ 'srbLog.' + str(today)+'.tar.bz2'
        tar = tarfile.open(tarname, "w:bz2")
+       print "The compressed files are as follows:"
        for name in file_list[count:]:
             print name
             tar.add(name)
        tar.close()
 
 def usage():
-    usage = ["          LogsCleanup.py -k Value - a positive number \n"]
-    usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 means that you will keep recent 5 log files \n")
+    usage = ["          python LogsCleanup.py -k Value - a positive number \n"]
+    usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 means that you will keep last 5 log files \n")
 #   usage.append ("         [-c | --compress] Compress the old log files - DEFAULT \n")
 #   usage.append ("         [-d | --delete]  Delete the old log files \n")
     usage.append ("         [-h | --help]  Print a short usage summary \n")
@@ -72,14 +73,14 @@ def main():
     try:
         options, args = getopt.getopt(sys.argv[1:], "hk:cdv", ["help", "keep", "compress", "delete="])
     except getopt.GetoptError, err:
+        # will print something like "option -a not recognized"
         print str(err)
         # print help information and exit:
         usage()
-        # will print something like "option -a not recognized"
         sys.exit()
         
     if len(options) ==0 : 
-        sys.exit('Please use the argument -k to specify the number of log files that you want to keep') 
+        sys.exit('Please use the option -k to specify the number of log files that you want to keep') 
     
     for o, a in options:
         if o in ("-h", "--help"):
@@ -98,11 +99,12 @@ def main():
         else:
             assert False, "unhandled option"
 
-    if numFiles < 0:  # negative integer
-        sys.exit("Must provide one positive number!")
     matches = list(fetch_files(file, logdir))
-    fList = sort_files(matches)
-    process_files(numFiles, fList, ops)
+    if numFiles in range(1,7):
+        fList = sort_files(matches)
+        process_files(numFiles, fList, ops)
+    else:
+        sys.exit("Must provide one number between 1 and " + str(len(matches)-1))
 
 if __name__ == "__main__": 
    sys.exit(main())
