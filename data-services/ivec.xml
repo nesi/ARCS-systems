@@ -70,5 +70,51 @@
         </sys-admin>
       </tech-support>
     </srb>
+    <srb type="development">    <!-- refers to MCAT -->
+      <zone-name>srb-dev.ivec.org</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>srb-dev.ivec.org</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>1T</total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb-dev.ivec.org</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <friendly-name>srb-dev.ivec.org</friendly-name>
+		  <host-name>srb-dev.ivec.org</host-name>
+		  <port-number>5544</port-number>
+		  <gridftp-dsi-port>5000</gridftp-dsi-port>
+	      <auth-schemes>
+			<auth-scheme dn="/C=AU/O=APACGrid/OU=iVEC/CN=srb-dev.ivec.org">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	SRB test server at iVEC.
+      </description>
+      <status>
+      </status>
+      <quota>
+      </quota>
+      <backup-strategy>
+        none.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Florian Goessmann</name>
+          <phone>0417097948</phone>
+          <email>florian.goessmann@arcs.org.au</email>
+        </srb-admin>
+      </tech-support>
+    </srb>
   </srb-servers>
 </data-services>
