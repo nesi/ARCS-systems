@@ -100,7 +100,6 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoProvider.py
 %{prefix}/mip/modules/%{PKG_NAME}/*.py
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
-%{prefix}/mip/modules/%{PKG_NAME}/SubCluster/softwareInfoData/localSoftware.xml
 
 %changelog
 * Mon Jul 14 2008 Gerson Galang
