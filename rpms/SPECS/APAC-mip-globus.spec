@@ -1,7 +1,7 @@
 Summary:	Globus configuration for the Modular Information Provider for APAC Grid usage
 Name:		APAC-mip-globus
 version:	0.1
-release:	9
+release:	10
 License:	GridAustralia
 Source:		globus-mip-config.tar.gz
 Prefix:		/usr/local
@@ -53,7 +53,7 @@ fi
 %{prefix}/mip/config/globus
 
 %changelog
-* Thu Jul 17 2008 Gereson Galang
+* Thu Jul 17 2008 Gerson Galang (rel 10)
 - fixed post and postun scriptlets
 * Wed Jul 2 2008 Gerson Galang
 - rel 8 updated domain names of mds0 and mds1 to arcs.org.au of hierarchy.xml
