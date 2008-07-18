@@ -36,27 +36,28 @@ def sort_files(file_list):
     return [files_dict[key] for key in keys]
 
 def process_files(count, file_list, action):
-
+    
+    timestamp = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
     if action == 1: 
        for name in file_list[count:]:
-            print name
+            print '[' + timestamp+'] ' + name + ' is removed'
             os.remove(name)
+
     else:
        if not os.path.exists('/usr/srb/data/log/bak'):
             os.system('mkdir /usr/srb/data/log/bak')
-       tarname = '/usr/srb/data/log/bak/'+ 'srbLog.' + str(today)+'.tar.bz2'
-       tar = tarfile.open(tarname, "w:bz2")
-       print "The compressed files are as follows:"
+       tarname = '/usr/srb/data/log/bak/'+ 'srbLog.' + str(today)+'.tar'
+       tar = tarfile.open(tarname, "w:tar")
        for name in file_list[count:]:
-            print name
-            tar.add(name)
+           print '[' + timestamp+'] ' + name + ' is compressed' 
+           tar.add(name)
        tar.close()
 
 def usage():
-    usage = ["          python LogsCleanup.py -k Value - a positive number \n"]
+    usage = ["          python LogsCleanup.py -k 5 \n"]
     usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 means that you will keep last 5 log files \n")
-#   usage.append ("         [-c | --compress] Compress the old log files - DEFAULT \n")
-#   usage.append ("         [-d | --delete]  Delete the old log files \n")
+    usage.append ("         [-c | --compress] Compress the old log files - DEFAULT \n")
+    usage.append ("         [-d | --delete]  Delete the old log files \n")
     usage.append ("         [-h | --help]  Print a short usage summary \n")
 
     message = string.join(usage)
@@ -91,11 +92,10 @@ def main():
                numFiles = int(sys.argv[2])
             except:
                sys.exit('Must provide a valid number!')
-#        elif o in ("-c", "--compress"):
-#            print 'compress'
-#        elif o in ("-d", "--delete"):
-#             ops = 1
-#             print 'delete'
+        elif o in ("-c", "--compress"):
+            print ''
+        elif o in ("-d", "--delete"):
+            ops = 1
         else:
             assert False, "unhandled option"
 
