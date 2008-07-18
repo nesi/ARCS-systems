@@ -9,7 +9,6 @@ def parse_dn(dn):
     res={}
     for item in dn.split('/')[1:]:
             res[item.split('=')[0]] = item.split('=')[1]
-    print res
     return res
 
 
