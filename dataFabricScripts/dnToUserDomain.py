@@ -3,35 +3,15 @@
 import sys, os
 
 def parse_dn(dn):
-	"""
-	Parse DN into a dict of arrays
-	"""
-	res={}
-	n = None
-	v = None
-	for i in dn:
-		if i == '/':
-			if n == None:
-				continue
-			if not res.has_key(n):
-				res[n] = []
-			res[n].append(v)
-			n = None
-			v = None
-		elif i == '=':
-			v = ''
-		else:
-			if v == None:
-				if n == None:
-					n = i
-				else:
-					n = n + i
-			else:
-				v = v + i
-	if not res.has_key(n):
-		res[n] = []
-	res[n].append(v)
-	return res
+    """
+    Parse DN into a dict of arrays
+    """
+    res={}
+    for item in dn.split('/')[1:]:
+            res[item.split('=')[0]] = item.split('=')[1]
+    print res
+    return res
+
 
 def getUsername(user,O):
 	if O == 'ARCS':
