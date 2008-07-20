@@ -43,6 +43,12 @@ def process_files(count, file_list, action):
             print '[' + timestamp+'] ' + name + ' is removed'
             os.remove(name)
 
+    elif action == 2:
+       print '\nA list of SRB log files is displayed as follows:\n'
+       for name in file_list[0:]:     
+            print  name 
+       print '\nThe total number of SRB log files is: ' +str(len(file_list))+'\n'
+
     else:
        if not os.path.exists('/usr/srb/data/log/bak'):
             os.system('mkdir /usr/srb/data/log/bak')
@@ -54,11 +60,11 @@ def process_files(count, file_list, action):
        tar.close()
 
 def usage():
-    usage = ["          python LogsCleanup.py -k 5 \n"]
-    usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 means that you will keep last 5 log files \n")
-    usage.append ("         [-c | --compress] Compress the old log files - DEFAULT \n")
-    usage.append ("         [-d | --delete]  Delete the old log files \n")
-    usage.append ("         [-h | --help]  Print a short usage summary \n")
+    usage = ["\n     python LogsCleanup.py -k N -d \n"]
+    usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 for N means that you will keep last 5 log files \n")
+    usage.append ("         [-d | --delete] Delete all the log files but for the last N log files \n")
+    usage.append ("         [-l | --list] Print a list of current SRB log files \n")
+    usage.append ("         [-h | --help] Print a short usage summary \n")
 
     message = string.join(usage)
     print message
@@ -72,7 +78,7 @@ def main():
     ops = 0
 
     try:
-        options, args = getopt.getopt(sys.argv[1:], "hk:cd", ["help", "keep", "compress", "delete="])
+        options, args = getopt.getopt(sys.argv[1:], "hk:ld", ["help", "keep", "list", "delete="])
     except getopt.GetoptError, err:
         # will print something like "option -a not recognized"
         print str(err)
@@ -92,22 +98,25 @@ def main():
                numFiles = int(sys.argv[2])
             except:
                sys.exit('Must provide a valid number!')
-        elif o in ("-c", "--compress"):
-            print ''
+        elif o in ("-l", "--list"):
+            ops = 2
         elif o in ("-d", "--delete"):
             ops = 1
         else:
             assert False, "unhandled option"
 
     matches = list(fetch_files(file, logdir))
-
+    fList = sort_files(matches)
+    if ops == 2: 
+         process_files(numFiles, fList, ops)
+         sys.exit()
     if numFiles in range(1, len(matches)):
-         fList = sort_files(matches)
          process_files(numFiles, fList, ops)
     elif numFiles == len(matches):
          sys.exit('No log files needs to be cleaned up!')
     else:
-         sys.exit("Must provide one number between 1 and " + str(len(matches)))
+         if ops == 2: process_files(numFiles, fList, ops)
+         else: sys.exit("Must provide one number between 1 and " + str(len(matches)))
 
 if __name__ == "__main__": 
    sys.exit(main())
