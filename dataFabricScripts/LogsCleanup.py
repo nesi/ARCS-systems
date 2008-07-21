@@ -28,8 +28,10 @@ def sort_files(file_list):
         elif len(seg[3]) < 4: year = "2"+seg[3]
         else: filedate3 = seg[3]  
         date1 = datetime.date(int(year), int(month), int(day))
-        diff_1 = str(today - date1) 
-        diff = int(diff_1[0]+diff_1[1]) + 1
+        if today == date1: diff = 1
+        else:
+           diff_1 = str(today - date1) 
+           diff = int(diff_1[0]+diff_1[1]) + 1
         files_dict[diff] = match 
     keys = files_dict.keys()
     keys.sort()
