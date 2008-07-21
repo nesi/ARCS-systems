@@ -62,7 +62,7 @@ def process_files(count, file_list, action):
        tar.close()
 
 def usage():
-    usage = ["\n     python LogsCleanup.py -k N -d \n"]
+    usage = ["\n     python logsCleanup.py -k N -d \n"]
     usage.append ("         [-k | --keep] Set how many log files are kept - A value of 5 for N means that you will keep last 5 log files \n")
     usage.append ("         [-d | --delete] Delete all the log files but for the last N log files \n")
     usage.append ("         [-l | --list] Print a list of current SRB log files \n")
