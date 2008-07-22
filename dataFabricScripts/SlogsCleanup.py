@@ -7,6 +7,7 @@ The default interval is 5 days.
 import datetime, glob, getopt, os, string, sys, tarfile
 
 today = datetime.date.today()
+timestamp = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
 
 def fetch_files(pattern, search_path, pathsep = os.pathsep):
 
@@ -39,7 +40,6 @@ def sort_files(file_list):
 
 def process_files(count, file_list, action):
     
-    timestamp = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
     if action == 1: 
        for name in file_list[count:]:
             print '[' + timestamp+'] ' + name + ' is removed'
@@ -115,10 +115,10 @@ def main():
     if numFiles in range(1, len(matches)):
          process_files(numFiles, fList, ops)
     elif numFiles == len(matches):
-         sys.exit('No log files needs to be cleaned up!')
+         sys.exit('[' + timestamp+'] ' + 'No log files needs to be cleaned up!')
     else:
          if ops == 2: process_files(numFiles, fList, ops)
-         else: sys.exit("Must provide one number between 1 and " + str(len(matches)))
+         else: sys.exit('[' + timestamp+'] ' + 'Must provide one number between 1 and ' + str(len(matches)))
 
 if __name__ == "__main__": 
    sys.exit(main())
