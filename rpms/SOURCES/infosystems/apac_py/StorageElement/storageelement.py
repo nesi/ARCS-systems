@@ -16,6 +16,9 @@ if __name__ == '__main__':
 
 	config = c[sys.argv[1]].StorageElement[sys.argv[2]]
 
+	# vlad's workaround to the max limit of int32
+	maxInt32 = 2147483647
+
 	if config.RootDirectory is not None and os.path.exists(config.RootDirectory):
 		lines = lib.run_command(['df', '-k', config.RootDirectory])
 		if len(lines) == 3:
@@ -27,11 +30,17 @@ if __name__ == '__main__':
 		if config.SizeTotal is None:
 			total_space = int(lines[-1].split()[total_index])
 			if total_space > 0:
-				config.SizeTotal = total_space
+				if total_space <= maxInt32:
+					config.SizeTotal = total_space
+				else:
+					config.SizeTotal = maxInt32
 		if config.SizeFree is None:
 			free_space = int(lines[-1].split()[free_index])
 			if free_space > 0:
-				config.SizeFree = free_space
+				if free_space <= maxInt32:
+					config.SizeFree = free_space
+				else:
+					config.SizeFree = maxInt32
 
 	for key in ['SizeTotal', 'SizeFree', 'Architecture']:
 		if config.__dict__[key] is not None:
@@ -54,8 +63,6 @@ if __name__ == '__main__':
 				free_index = 3
 				used_index = 2
 
-			# vlad's workaround to the max limit of int32
-			maxInt32 = 2147483647
 			# config file overrides this
 			if area.AvailableSpace is None:
 #				free_space = int(lines[-1].split()[3])
