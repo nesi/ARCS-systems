@@ -1,10 +1,10 @@
 %define PKG_NAME apac_py
-%define REVISION 502
+%define REVISION 648
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	12
+Release:	13
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -102,6 +102,8 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Thu Jul 24 2008 Gerson Galang
+- fixed qstat -B -f bug
 * Thu Jul 24 2008 Gerson Galang
 - fixed 32-bit overflow in sizeTotal and sizeFree
 * Mon Jul 14 2008 Gerson Galang
