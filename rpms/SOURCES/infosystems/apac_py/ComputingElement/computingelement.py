@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	elif config.LRMSType == "OpenPBS":
 		#sys.stderr.write('in the ANUPBS number of cpus section\n')
 		if config.qstat is not None and os.path.isfile(config.qstat):
-			lines = lib.run_command([config.qstat, '-B', '-f'])
+			lines = lib.run_command([config.qstat, '-B', '-f', config.HostName])
 
 			for line in lines:
 				#sys.stderr.write('line is : ' + line + '\n')
