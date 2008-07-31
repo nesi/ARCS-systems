@@ -1,5 +1,5 @@
 %define PKG_NAME apac_py
-%define REVISION 648
+%define REVISION 651
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
