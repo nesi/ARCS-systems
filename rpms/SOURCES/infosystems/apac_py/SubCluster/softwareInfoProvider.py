@@ -53,7 +53,7 @@ class Log:
 		hdlr.setFormatter(formatter)
 		self.logger.addHandler(hdlr)
 		self.logger.setLevel(logging.DEBUG)
-		self.validLog = False
+		self.validLog = True
 		
 	def message(self, message, status = 'error'):
 		''' create a log entry with default status of error'''
