@@ -6,7 +6,7 @@ use Inca::Reporter::SimpleUnit;
 
 my $reporter = new Inca::Reporter::SimpleUnit(
   name => 'data.fabric.srb.unit.sput_sget',
-  version => 1.0,
+  version => 1.1,
   description => 'This reporter tests data transfer via SRB',
   url => 'http://www.arcs.org.au',
   unit_name => 'sput_sget'
@@ -30,6 +30,7 @@ my $mdasEnv="$MDIR/.MdasEnv.$$";
 my $cmd="$dir/srb-env.py -m $site $type -o $mdasEnv";
 $reporter->log('info',$cmd);
 `$cmd 2>&1`;
+`cat $mdasEnv 1>&2`;
 $ENV{"mdasEnvFile"} = "$MDIR/.MdasEnv.$$";
 
 my $srbdir = "srb_test.$$";

@@ -6,7 +6,7 @@ use Inca::Reporter::SimpleUnit;
 use Cwd;
 my $reporter = new Inca::Reporter::SimpleUnit(
   name => 'data.fabric.srb.unit.sls',
-  version => 1.4,
+  version => 1.5,
   description => 'This reporter tests the Sls command',
   url => 'http://www.arcs.org.au/',
   unit_name => 'sls'
@@ -32,6 +32,7 @@ my $cmd="$dir/srb-env.py -m $site $type -o $mdasEnv";
 $reporter->log('info',$cmd);
 #print $cmd;
 `$cmd 2>&1`;
+`cat $mdasEnv 1>&2`;
 #`cp $ENV{HOME}/.srb/.MdasEnv $MDIR/.MdasEnv.$$`;
 #`cp $ENV{HOME}/.srb/.MdasAuth $MDIR/.MdasAuth.$$`;
 $ENV{"mdasEnvFile"} = "$MDIR/.MdasEnv.$$";
