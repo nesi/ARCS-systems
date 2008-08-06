@@ -6,7 +6,7 @@ use Inca::Reporter::SimpleUnit;
 
 my $reporter = new Inca::Reporter::SimpleUnit(
   name => 'data.fabric.srb.unit.sput_sget',
-  version => 1.1,
+  version => 1.2,
   description => 'This reporter tests data transfer via SRB',
   url => 'http://www.arcs.org.au',
   unit_name => 'sput_sget'
@@ -20,7 +20,6 @@ $reporter->processArgv(@ARGV);
 my $site=$reporter->argValue('site');
 my $type=$reporter->argValue('type');
 
-$reporter->setBody("<srb_site>".$site."</srb_site><srb_test>Sput_Sget</srb_test>");
 
 my $MDIR = "$ENV{HOME}/.srb/srb_test.$$";
 mkdir $MDIR || die "couldn't make $MDIR";
@@ -32,6 +31,15 @@ $reporter->log('info',$cmd);
 `$cmd 2>&1`;
 `cat $mdasEnv 1>&2`;
 $ENV{"mdasEnvFile"} = "$MDIR/.MdasEnv.$$";
+
+my $tmp_line=`grep 'srbHost' $mdasEnv`;
+#print $tmp_line;
+my $svr_name = "";
+if($tmp_line =~ m#srbHost \'(.+)\'# ) {
+  $svr_name = $1;
+}
+
+$reporter->setBody("<srb_site>".$site."</srb_site><srb_test>Sput_Sget</srb_test><srb_host>".$svr_name."</srb_host>");
 
 my $srbdir = "srb_test.$$";
 my $srbfile = "$srbdir/srb.$$";

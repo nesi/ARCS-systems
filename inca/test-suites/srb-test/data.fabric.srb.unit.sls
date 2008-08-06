@@ -4,9 +4,10 @@ use strict;
 use warnings;
 use Inca::Reporter::SimpleUnit;
 use Cwd;
+
 my $reporter = new Inca::Reporter::SimpleUnit(
   name => 'data.fabric.srb.unit.sls',
-  version => 1.5,
+  version => 1.6,
   description => 'This reporter tests the Sls command',
   url => 'http://www.arcs.org.au/',
   unit_name => 'sls'
@@ -21,7 +22,6 @@ $reporter->processArgv(@ARGV);
 my $site=$reporter->argValue('site');
 my $type=$reporter->argValue('type');
 
-$reporter->setBody("<srb_site>".$site."</srb_site><srb_test>Sls</srb_test>");
 
 my $MDIR = "$ENV{HOME}/.srb/srb_test.$$";
 mkdir $MDIR || die "couldn't make $MDIR";
@@ -33,6 +33,16 @@ $reporter->log('info',$cmd);
 #print $cmd;
 `$cmd 2>&1`;
 `cat $mdasEnv 1>&2`;
+
+my $tmp_line=`grep 'srbHost' $mdasEnv`;
+#print $tmp_line;
+my $svr_name = "";
+if($tmp_line =~ m#srbHost \'(.+)\'# ) {
+  $svr_name = $1;
+}
+
+$reporter->setBody("<srb_site>".$site."</srb_site><srb_test>Sls</srb_test><srb_host>".$svr_name."</srb_host>");
+
 #`cp $ENV{HOME}/.srb/.MdasEnv $MDIR/.MdasEnv.$$`;
 #`cp $ENV{HOME}/.srb/.MdasAuth $MDIR/.MdasAuth.$$`;
 $ENV{"mdasEnvFile"} = "$MDIR/.MdasEnv.$$";
