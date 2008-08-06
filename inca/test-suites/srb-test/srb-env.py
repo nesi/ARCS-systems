@@ -85,7 +85,7 @@ def makeenv(site_name,svr_type,output_file):
         print "cannot find domain test user!"
         return 1
     for res in srb_zone.getElementsByTagName("resource"):
-        if domain.attributes["primary"].value=="yes":
+        if res.attributes["primary"].value=="yes":
             default_res=res.getElementsByTagName("resource-name")[0].childNodes[0].nodeValue
     if default_res is None:
         print "cannot find default resource!"
