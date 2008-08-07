@@ -75,6 +75,10 @@ for my $testid ( split(/\n/,$guid) ){
 #}
 
 my $cli = RPC::XML::Client->new('http://status.arcs.org.au/xmlrpc/');
+if ($ENV{"http_proxy"}) {
+  my $http_proxy=$ENV{"http_proxy"};
+  $cli->useragent->proxy(['http', 'ftp'] => "$http_proxy");
+}
 #my $resp = $cli->send_request('system.listMethods');
 #for my $method ( @{$resp} ) {
 #  print $$method."\n";
