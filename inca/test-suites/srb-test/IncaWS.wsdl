@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+NOTE: When the attribute
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+is included in the definitions tag, SOAP::Lite->service() includes this value
+SOAP requests, instead of the correct
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+To work around this, the first attribute is instead included with the binding
+and service tags.
+-->
+<definitions name="IncaWS"
+   targetNamespace="http://inca.sdsc.edu/wsdl/IncaWS.wsdl"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:tns="http://inca.sdsc.edu/wsdl/IncaWS.wsdl"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+   <types>
+      <schema xmlns="http://www.w3.org/2001/XMLSchema"
+         targetNamespace="http://inca.sdsc.edu/wsdl/IncaWS.wsdl"
+         xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+         xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">
+         <complexType name="ArrayOfString">
+            <complexContent>
+               <restriction base="soapenc:Array">
+                  <attribute ref="soapenc:arrayType" 
+                     wsdl:arrayType="string[]"/>
+               </restriction>
+            </complexContent>
+         </complexType>
+      </schema>
+   </types>
+
+   <message name="getCatalogRequest">
+      <part name="url" type="xsd:string"/>
+   </message>
+   <message name="getCatalogResponse">
+      <part name="catalog" type="xsd:string"/>
+   </message>
+   <message name="getConfigRequest">
+   </message>
+   <message name="getConfigResponse">
+      <part name="config" type="xsd:string"/>
+   </message>
+   <message name="pingAgentRequest">
+      <part name="text" type="xsd:string"/>
+   </message>
+   <message name="pingAgentResponse">
+      <part name="text" type="xsd:string"/>
+   </message>
+   <message name="pingDepotRequest">
+      <part name="text" type="xsd:string"/>
+   </message>
+   <message name="pingDepotResponse">
+      <part name="text" type="xsd:string"/>
+   </message>
+   <message name="queryGuidsRequest">
+   </message>
+   <message name="queryGuidsResponse">
+      <part name="guids" type="xsd:string"/>
+   </message>
+   <message name="queryHqlRequest">
+      <part name="hql" type="xsd:string"/>
+   </message>
+   <message name="queryResponse">
+      <part name="queryResult" type="tns:ArrayOfString"/>
+   </message>
+   <message name="queryInstanceRequest">
+      <part name="instanceId" type="xsd:long"/>
+      <part name="configId" type="xsd:long"/>
+   </message>
+   <message name="querySeriesRequest">
+      <part name="configId" type="xsd:long"/>
+   </message>
+   <message name="querySuiteRequest">
+      <part name="guid" type="xsd:string"/>
+   </message>
+
+   <portType name="IncaWS_PortType">
+      <operation name="getCatalog">
+         <input message="tns:getCatalogRequest"/>
+         <output message="tns:getCatalogResponse"/>
+      </operation>
+      <operation name="getConfig">
+         <input message="tns:getConfigRequest"/>
+         <output message="tns:getConfigResponse"/>
+      </operation>
+      <operation name="pingAgent">
+         <input message="tns:pingAgentRequest"/>
+         <output message="tns:pingAgentResponse"/>
+      </operation>
+      <operation name="pingDepot">
+         <input message="tns:pingDepotRequest"/>
+         <output message="tns:pingDepotResponse"/>
+      </operation>
+      <operation name="queryGuids">
+         <input message="tns:queryGuidsRequest"/>
+         <output message="tns:queryGuidsResponse"/>
+      </operation>
+      <operation name="queryHql">
+         <input message="tns:queryHqlRequest"/>
+         <output message="tns:queryResponse"/>
+      </operation>
+      <operation name="queryInstance">
+         <input message="tns:queryInstanceRequest"/>
+         <output message="tns:queryResponse"/>
+      </operation>
+      <operation name="querySeries">
+         <input message="tns:querySeriesRequest"/>
+         <output message="tns:queryResponse"/>
+      </operation>
+      <operation name="querySuite">
+         <input message="tns:querySuiteRequest"/>
+         <output message="tns:queryResponse"/>
+      </operation>
+   </portType>
+
+   <binding name="IncaWS_Binding" type="tns:IncaWS_PortType"
+            xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   >
+      <soap:binding style="rpc"
+         transport="http://schemas.xmlsoap.org/soap/http"/>
+      <operation name="getCatalog">
+         <soap:operation soapAction="urn:IncaWebService#getCatalog"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="getConfig">
+         <soap:operation soapAction="urn:IncaWebService#getConfig"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="pingAgent">
+         <soap:operation soapAction="urn:IncaWebService#pingAgent"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="pingDepot">
+         <soap:operation soapAction="urn:IncaWebService#pingDepot"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="queryGuids">
+         <soap:operation soapAction="urn:IncaWebService#queryGuids"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="queryHql">
+         <soap:operation soapAction="urn:IncaWebService#queryHql"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="queryInstance">
+         <soap:operation soapAction="urn:IncaWebService#queryInstance"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="querySeries">
+         <soap:operation soapAction="urn:IncaWebService#querySeries"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+      <operation name="querySuite">
+         <soap:operation soapAction="urn:IncaWebService#querySuite"/>
+         <input>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </input>
+         <output>
+            <soap:body
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+               namespace="urn:IncaWebService"
+               use="encoded"/>
+         </output>
+      </operation>
+   </binding>
+
+   <service name="IncaWebService"
+            xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   >
+      <documentation>WSDL File for IncaWebService</documentation>
+      <port binding="tns:IncaWS_Binding" name="IncaWS_Port">
+         <soap:address location="http://www.sapac.edu.au/incaws"/>
+      </port>
+   </service>
+
+</definitions>
