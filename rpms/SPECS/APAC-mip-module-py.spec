@@ -1,10 +1,10 @@
 %define PKG_NAME apac_py
-%define REVISION 651
+%define REVISION 660
 
 Summary:	The GridAustralia MIP module
 Name:		APAC-mip-module-py
 Version:	1.0.%{REVISION}
-Release:	14
+Release:	15
 Source:		apac_py.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -102,6 +102,8 @@ fi
 %{prefix}/mip/modules/%{PKG_NAME}/exampleSoftwareInfoProvider.ini
 
 %changelog
+* Tue Aug 12 2008 Gerson Galang
+- added HostName parameter to qstat -B -f
 * Thu Jul 31 2008 Daniel Cox
 - patch from Darran to fix log in SIP
 * Thu Jul 24 2008 Gerson Galang

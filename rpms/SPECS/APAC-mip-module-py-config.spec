@@ -1,7 +1,7 @@
 Summary:	apac_py MIP module configuration
 Name:		APAC-mip-module-py-config
 version:	0.1
-release:	3
+release:	4
 License:	GridAustralia
 Source:		apac_py-config.tar.gz
 Prefix:		/usr/local
@@ -32,6 +32,8 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/mip/config/apac_py
 
 %changelog
+* Tue Aug 12 2008 Gerson Galang
+- made ce.HostName have the value of the PBS server name instead of the cluster name
 * Thu Apr 24 2008 Gerson Galang
 - added a sample config file for vpac
 * Tue Apr 22 2008 Gerson Galang
