@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	#if config.LRMSType == "Torque" or config.LRMSType == "PBSPro" or config.LRMSType == "ANUPBS":
 	if config.LRMSType == "Torque" or config.LRMSType == "PBSPro" or config.LRMSType == "OpenPBS":
 		if config.qstat is not None and os.path.isfile(config.qstat):
-			lines = lib.run_command([config.qstat, '-B', '-f'])
+			lines = lib.run_command([config.qstat, '-B', '-f', config.HostName])
 
 			for line in lines:
 				if line.startswith('pbs_version'):
