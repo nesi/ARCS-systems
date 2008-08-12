@@ -434,7 +434,7 @@ sub make_cluster_config_pl()
 
 			foreach $q (keys %{$clusref->{'queues'}})
 			{
-				printf FH ("\t\t\"%s.%s\",\n", $q, $clusref->{'fqdn'});
+				printf FH ("\t\t\"%s.%s.%s\",\n", $q, $clusref->{'name'}, $site_info{'domain'});
 			}
 
 			printf FH ("\t\t],\n");
@@ -534,8 +534,8 @@ sub make_apac_config_py()
 
 			foreach $q (sort keys %{$clusref->{'queues'}})
 			{
-				printf FH ("computeElement = package.ComputingElement['%s.%s'] = ComputingElement()\n",
-					$q, $cluster_fqdn);
+				printf FH ("computeElement = package.ComputingElement['%s.%s.%s'] = ComputingElement()\n",
+					$q, $clusref->{'name'}, $site_info{'domain'});
 				printf FH ("\n");
 
 				printf FH ("computeElement.Name = '%s@%s'\n",
@@ -543,7 +543,7 @@ sub make_apac_config_py()
 				printf FH ("computeElement.Status = 'Production'\n");
 				printf FH ("computeElement.JobManager = '%s'\n",
 					$clusref->{'job_manager'});
-				printf FH ("computeElement.HostName = '%s'\n", $cluster_fqdn);
+				printf FH ("computeElement.HostName = '%s.%s'\n", $clusref->{'name'}, $site_info{'domain'});
 				printf FH ("computeElement.GateKeeperPort = 8443\n");
 				printf FH ("computeElement.ContactString = 'https://%s:8443/wsrf/services/ManagedJobFactoryService'\n",
 					$gateway_info{'fqdn'});
@@ -576,26 +576,26 @@ sub make_apac_config_py()
 
 					foreach $vo (@{$vos})
 					{
-						printf FH ("config['%s'].ComputingElement['%s.%s'].views['%s'] = VOView()\n",
-							$cluster, $q, $cluster_fqdn, $vo_info{$vo}{'luid'});
+						printf FH ("config['%s'].ComputingElement['%s.%s.%s'].views['%s'] = VOView()\n",
+							$cluster, $q, $clusref->{'name'}, $site_info{'domain'}, $vo_info{$vo}{'luid'});
 
-						printf FH ("config['%s'].ComputingElement['%s.%s'].views['%s'].RealUser = '%s'\n",
-							$cluster, $q, $cluster_fqdn, $vo_info{$vo}{'luid'},
+						printf FH ("config['%s'].ComputingElement['%s.%s.%s'].views['%s'].RealUser = '%s'\n",
+							$cluster, $q, $clusref->{'name'}, $site_info{'domain'}, $vo_info{$vo}{'luid'},
 							$vo_info{$vo}{'user'});
 			
 						if ( defined($clusref->{'storage'}) )
 						{
-							printf FH ("config['%s'].ComputingElement['%s.%s'].views['%s'].DefaultSE = '%s'\n",
-								$cluster, $q, $cluster_fqdn, $vo_info{$vo}{'luid'},
+							printf FH ("config['%s'].ComputingElement['%s.%s.%s'].views['%s'].DefaultSE = '%s'\n",
+								$cluster, $q, $clusref->{'name'}, $site_info{'domain'}, $vo_info{$vo}{'luid'},
 								$clusref->{'storage'});
 						}
 
-						printf FH ("config['%s'].ComputingElement['%s.%s'].views['%s'].DataDir = '%s'\n",
-							$cluster, $q, $cluster_fqdn, $vo_info{$vo}{'luid'},
+						printf FH ("config['%s'].ComputingElement['%s.%s.%s'].views['%s'].DataDir = '%s'\n",
+							$cluster, $q, $clusref->{'name'}, $site_info{'domain'}, $vo_info{$vo}{'luid'},
 							$vo_info{$vo}{'datadir'});
 
-						printf FH ("config['%s'].ComputingElement['%s.%s'].views['%s'].ACL = [ '%s' ]\n",
-							$cluster, $q, $cluster_fqdn, $vo_info{$vo}{'luid'},
+						printf FH ("config['%s'].ComputingElement['%s.%s.%s'].views['%s'].ACL = [ '%s' ]\n",
+							$cluster, $q, $clusref->{'name'}, $site_info{'domain'}, $vo_info{$vo}{'luid'},
 							$vo);
 
 						printf FH ("\n");
