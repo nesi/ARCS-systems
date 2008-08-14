@@ -66,11 +66,52 @@
           <email>joseph.antony@arcs.org.au</email>
         </sys-admin>
         <sys-admin priority="1">
-          <name>Jason Ozolins</name>
-          <phone>0261255499</phone>
-          <email>jason.ozolins@arcs.org.au</email>
+          <name>Jonathan McCabe</name>
+          <phone>0261255031</phone>
+          <email>jonathan.mccabe@arcs.org.au</email>
         </sys-admin>
       </tech-support>
+    </srb>
+    <srb type="development">
+      <zone-name>grid0.apac.edu.au</zone-name>
+      <resources>
+       	<resource primary="yes">
+      	  <resource-name>datafabric.grid0.apac.edu.au</resource-name>
+       	  <available-space>2500M</available-space>
+      	  <total-space>6700M</total-space>
+      	</resource>
+      </resources>
+      <domains>
+        <domain primary="yes">
+	      <domain-name>grid0.apac.edu.au</domain-name>
+	      <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>
+	    </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+	      <friendly-name>grid0.apac.edu.au</friendly-name>
+	      <host-name>grid0.apac.edu.au</host-name>
+	      <port-number>5544</port-number>
+	      <srb-dsi-port>2811</srb-dsi-port>
+	      <auth-schemes>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=ANU/CN=grid0.apac.edu.au">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This SRB is for testing.
+      </description>
+      <status>
+	installed
+      </status>
+      <quota>
+        Nil. 
+      </quota>
+      <backup-strategy>
+        None.
+      </backup-strategy>
     </srb>
   </srb-servers>
 </data-services>
