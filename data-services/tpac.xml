@@ -71,30 +71,30 @@
        </tech-support>
     </srb>
     <srb type="development">
-      <zone-name>ngdev2.its.utas.edu.au</zone-name>
+      <zone-name>srbdev.sf.utas.edu.au</zone-name>
       <resources>
        	<resource primary="yes">
-      	  <resource-name>datafabric.ngdev2.its.utas.edu.au</resource-name>
+      	  <resource-name>srbdev.sf.utas.edu.au</resource-name>
        	  <available-space></available-space>
       	  <total-space></total-space>
       	</resource>
       	<resource primary="no">
-      	  <resource-name>ngdev2.its.utas.edu.au</resource-name>
+      	  <resource-name>srbdev.sf.utas.edu.au</resource-name>
       	  <available-space></available-space>
       	  <total-space></total-space>
       	</resource>
       </resources>
       <domains>
         <domain primary="yes">
-	      <domain-name>ngdev2.its.utas.edu.au</domain-name>
+	      <domain-name>srbdev.sf.utas.edua.u</domain-name>
 	      <domain-admin>srbAdmin</domain-admin>
 		  <domain-test-user>pmak</domain-test-user>
 	    </domain>
 	  </domains>
 	  <hosts>
 	    <host>
-	      <friendly-name>ngdev2.its.utas.edu.au</friendly-name>
-	      <host-name>ngdev2.its.utas.edu.au</host-name>
+	      <friendly-name>srbdev.sf.utas.edu.au</friendly-name>
+	      <host-name>srbdev.sf.utas.edu.au</host-name>
 	      <port-number>5544</port-number>
 	      <srb-dsi-port>2811</srb-dsi-port>
 	      <auth-schemes>
@@ -107,7 +107,7 @@
       	This SRB is for testing.
       </description>
       <status>
-        Currently offline.
+        Currently online
       </status>
       <quota>
         Nil. 
