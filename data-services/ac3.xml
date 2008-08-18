@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="ac3">
+    <srb type="production">    <!-- refers to MCAT -->
+      <zone-name>srb.ac3.edu.au</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+        <resource primary="yes">
+          <resource-name>datafabric.srb.ac3.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>1T</total-space>
+        </resource>
+        <resource primary="no">
+          <resource-name>srb.ac3.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>5G</total-space>
+        </resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb.ac3.edu.au</domain-name>
+                  <domain-admin>srbAdmin</domain-admin>
+                  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+          </domains>
+          <hosts>
+            <host>
+                  <friendly-name>srb.ac3.edu.au</friendly-name>
+                  <host-name>srb.ac3.edu.au</host-name>
+                  <port-number>5544</port-number>
+                  <gridftp-dsi-port>2811</gridftp-dsi-port>
+              <auth-schemes>
+                        <auth-scheme dn="/C=AU/O=APACGrid/OU=ac3/CN=srb.ac3.edu.au">GSI</auth-scheme>
+                <auth-scheme>ENCRYPT1</auth-scheme>
+              </auth-schemes>
+            </host>
+          </hosts>
+      <description>
+        This SRB is part of ARCS data fabric federation, with a 1T of storage.
+      </description>
+      <status>
+        Production from 18 July 2008.
+      </status>
+      <quota>
+        25GB for all users initially. 
+      </quota>
+      <backup-strategy>
+        Nightly backup of  all stored data.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Sridhar Reddapani</name>
+          <phone>0433227489</phone>
+          <email>sridhar.reddapani@arcs.org.au</email>
+        </srb-admin>
+        <srb-admin priority="1">
+          <name>Florian Goessmann</name>
+          <phone>0417097948</phone>
+          <email>florian.goessmann@arcs.org.au</email>
+        </srb-admin>
+        <sys-admin priority="0">
+          <name>Youzhen Cheng</name>
+          <phone>0292094272</phone>
+          <email>youzhen.cheng@arcs.org.au</email>
+        </sys-admin>
+        <sys-admin priority="1">
+          <name>Sridhar Reddapani</name>
+          <phone>0292094274</phone>
+          <email>sridhar.reddapani@ac3.com.au</email>
+        </sys-admin>
+      </tech-support>
+    </srb>
+    <srb type="development">    <!-- refers to MCAT -->
+      <zone-name>srb-dev.ac3.edu.au</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+        <resource primary="yes">
+          <resource-name>srb-dev.ac3.edu.au</resource-name>
+          <available-space></available-space>
+          <total-space>1T</total-space>
+        </resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb-dev.ac3.edu.au</domain-name>
+                  <domain-admin>srbAdmin</domain-admin>
+                  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+          </domains>
+          <hosts>
+            <host>
+                  <friendly-name>srb-dev.ac3.edu.au</friendly-name>
+                  <host-name>srb-dev.ac3.edu.au</host-name>
+                  <port-number>5544</port-number>
+                  <gridftp-dsi-port>2811</gridftp-dsi-port>
+              <auth-schemes>
+                        <auth-scheme dn="/C=AU/O=APACGrid/OU=ac3/CN=srb-dev.ac3.edu.au">GSI</auth-scheme>
+                <auth-scheme>ENCRYPT1</auth-scheme>
+              </auth-schemes>
+            </host>
+          </hosts>
+      <description>
+        SRB test server at ac3.
+      </description>
+      <status>
+      </status>
+      <quota>
+      </quota>
+      <backup-strategy>
+        none.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Sridhar Reddapani</name>
+          <phone>0433227489</phone>
+          <email>sridhar.reddapani@arcs.org.au</email>
+        </srb-admin>
+      </tech-support>
+    </srb>
+  </srb-servers>
+</data-services>
+
