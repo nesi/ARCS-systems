@@ -8,7 +8,8 @@ require RPC::XML;
 require RPC::XML::Client;
 
 my $cwd = getcwd();
-my $ws = SOAP::Lite->service("file:IncaWS.wsdl"); #inca-2.3/Inca-WS-2.10611/etc/IncaWS.wsdl"); #$cwd/etc/IncaWS.wsdl");
+print "file://".$cwd."/IncaWS.wsdl\n";
+my $ws = SOAP::Lite->service("file:".$cwd."/IncaWS.wsdl"); #inca-2.3/Inca-WS-2.10611/etc/IncaWS.wsdl"); #$cwd/etc/IncaWS.wsdl");
 
 # check agent and depot are available
 #print $ws->pingAgent('hello agent'), "\n";
