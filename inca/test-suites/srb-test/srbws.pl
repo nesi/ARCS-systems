@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 use SOAP::Lite;
 use Cwd;
 use XML::DOM;
