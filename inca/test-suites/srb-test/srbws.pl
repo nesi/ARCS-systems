@@ -8,7 +8,7 @@ require RPC::XML;
 require RPC::XML::Client;
 
 my $cwd = getcwd();
-print "file://".$cwd."/IncaWS.wsdl\n";
+#print "file://".$cwd."/IncaWS.wsdl\n";
 my $ws = SOAP::Lite->service("file:".$cwd."/IncaWS.wsdl"); #inca-2.3/Inca-WS-2.10611/etc/IncaWS.wsdl"); #$cwd/etc/IncaWS.wsdl");
 
 # check agent and depot are available
@@ -39,6 +39,8 @@ for my $testid ( split(/\n/,$guid) ){
 #      print $result."\n";
       $doc = $parser->parse ($result);
       $nodeList = $doc->getElementsByTagName("srb_host");
+#      print $nodeList->getLength."\n";
+      if ($nodeList->getLength > 0){
       $srbHost = $nodeList->item(0)->getFirstChild->getNodeValue;
 #      print $nodeList->getLength."\n";
 #      print "SRB Host: ".$srbHost."\n";
@@ -67,6 +69,7 @@ for my $testid ( split(/\n/,$guid) ){
 #	print "found error($result)\n";
       }
       $results{$srbHost}=$result;
+      }
     }
   }
 }
