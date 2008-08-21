@@ -1,12 +1,15 @@
 import re
 import os
 import popen2
+from subprocess import Popen, PIPE
+from datetime import datetime
+from os import kill, waitpid, WNOHANG
+from time import sleep
+import signal
 
 #A lot of funcationality here is "borrowed/stolen" from 
 #the Taiwan scipt for usage statstics.  
 #The original is here: http://srb.grid.sinica.edu.tw/asmss/
-
-
 
 #----------------------------------------------------------------
 # CHANGELOG
@@ -30,6 +33,10 @@ import popen2
 # 2008-06-16:
 #   - users now belongs to domain, rather than zones.  Other methods
 #       have been changed acoordingly
+# 10008-08-21:
+#   - added timeout for Scommands - sometimes hosts cannot be
+#       contacted or is really erally slow.  To change the wait 
+#       time in seconds, use the value TIMEOUT_SECONDS
 #----------------------------------------------------------------
 
 #---static goodness
@@ -37,16 +44,20 @@ class Callable:
     def __init__(self, anycallable):
         self.__call__ = anycallable
 
+
+#give it a nice generous 30 seconds
+#Scommand hangs if SRB host is down.  Or just really really slow....
+TIMEOUT_SECONDS = 10
+
 #---------------------------------------------------------------------------------------------
 
-#This is thrown whenver output from an Scommand
-#cannot be read
-class SRBException(Exception):
-    def __init__(self, value):
+class SRBTimeoutException(Exception):
+    def __init__(self, cmd, value):
+        self.cmd = cmd
         self.value = value
-    
+
     def __str__(self):
-        return repr(self.value)
+        return "Time out while running: " + self.cmd + " " + self.value
 #---------------------------------------------------------------------------------------------
 
 class SRBResult(object):
@@ -76,16 +87,39 @@ class SRBResult(object):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
         lines = []
         try:
-            r, w, e = popen2.popen3(cmd)
+            FNULL = open('/dev/null', 'w')
+            #timeout code borrowed from:
+            #http://code.pui.ch/2007/02/19/set-timeout-for-a-shell-command-in-python/
+            #This will not work under Windows...
+            procStart = datetime.now()
+            proc = Popen(cmd.split(), shell=False, stdin=PIPE, stdout=PIPE, stderr=FNULL, close_fds=True)
+
+            while(proc.poll() is None):
+                #poll once a second
+                sleep(1)
+                lapsed = (datetime.now() - procStart).seconds
+                if(lapsed > TIMEOUT_SECONDS):
+                    os.kill(proc.pid, signal.SIGKILL)
+                    os.waitpid(-1, os.WNOHANG)
+                    raise SRBTimeoutException(cmd, error)
+            (r, e) = (proc.stdout, proc.stderr)
             lines = r.readlines()
-            w.close()
-            e.close()
+            r.close()
+            if(e <> None):
+                e.cloes()
+            
             #exclude lines beginning with '-'
             lines = [x for x in lines if (x[0] <> '-')]
             return lines
+        except KeyboardInterrupt:
+            #Kill them... ALLL OF THEM.....
+            os.killpg(os.getpid(), signal.SIGKILL)
         except Exception, e:
-            raise SRBException(error)
-
+            #We'll just capture the exception here...
+            #and returb an empty list.  
+            print e
+            return []
+         
     def toString(self):
         """Convinience function for printing out
             key/value pairs this SRBResult stores"""

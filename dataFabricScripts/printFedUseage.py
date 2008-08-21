@@ -14,24 +14,22 @@ from SRBWrapper import SRBWrapper
 from email.MIMEText import MIMEText
 import smtplib
 import sys
+import os
+import signal
 
 totalsList = None
 wrapper = None
 #kb, Mb, Gb
 MB = 1024 * 1024
 #QUOTA_AMOUNT = 1 * MBa
-QUOTA_AMOUNT = 1200
+QUOTA_AMOUNT = 25 * 1024 * MB
 QUOTA_IN_MB = (float)(QUOTA_AMOUNT) / MB
-ADMIN_EMAIL = "pmak@utas.edu.au"
-DB_USERNAME = "srbTest"
-DB_PASSWORD = "srbTestPass"
-DB_NAME = "testDB"
-DB_HOST = "localhost"
+ADMIN_EMAIL = "blah@blah"
   
 def init():
     global totalsList
     global wrapper
-    wrapper = SRBWrapper('ngdev2.its.utas.edu.au')
+    wrapper = SRBWrapper('srb.tpac.org.au')
     totalsList = wrapper.getTotalUsageByResourceUserZone()
 
 def printXML():

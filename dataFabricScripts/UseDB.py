@@ -445,7 +445,8 @@ if(__name__ == "__main__"):
     wrapper = SRBWrapper('ngdev2.its.utas.edu.au')
     db = UseDB()
     dbZones = []
-    if(db.connectDB('host', 'user', 'password', 'dbName')):
+    #if(db.connectDB('ngsyslog.hpcu.uq.edu.au', 'srb', 'srblog', 'srbUsage')):
+    if(db.connectDB('host', 'user', 'password', 'dbname')):
         #connected ok!
         db.initDB(wrapper)
         db.addLog(wrapper)
