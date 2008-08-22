@@ -3,7 +3,7 @@
 execute_sql()
 {
   echo $1
-#  psql -U srb MCAT "$1"
+  psql -U srb MCAT "$1"
 }
 
 if [ $# -gt 2 ]; then
