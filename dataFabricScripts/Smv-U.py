@@ -382,6 +382,7 @@ def main():
             au_id = row[0]
             if usrsDict.has_key(au_id):
                    row[0] = usrsDict.get(au_id)
+                   if row[0] == mdas_cd_user_domn_ID: row[1] = domn_id
                    rec_au_domn.append(row)
     for row in rec_au_domn:
            print row
