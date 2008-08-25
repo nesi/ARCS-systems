@@ -8,7 +8,8 @@ function usage()
 
 if [ $# -gt 0 ]; then
   if [ $1 = "-o" ]; then
-    SQL="select user_name, zone_id, priv_key from mdas_cd_user, mdas_au_auth_key where mdas_cd_user.user_id=mdas_au_auth_key.user_id and zone_id in (select zone_id from mdas_td_zone where local_zone_flag=1) and mdas_cd_user.user_id>101 and user_name not in (select zone_id from mdas_td_zone) order by mdas_cd_user.user_id"
+( mdas_cd_user.user_typ_id like '0001.0001.0001.0001.000%' or mdas_cd_user.user_typ_id = '0002') and mdas_cd_user.user_id>=100
+    SQL="select user_name, zone_id, priv_key from mdas_cd_user, mdas_au_auth_key where mdas_cd_user.user_id=mdas_au_auth_key.user_id and zone_id in (select zone_id from mdas_td_zone where local_zone_flag=1) and mdas_cd_user.user_id>101 and ( mdas_cd_user.user_typ_id like '0001.0001.0001.0001.000%' or mdas_cd_user.user_typ_id = '0002') and user_name not in (select zone_id from mdas_td_zone) order by mdas_cd_user.user_id"
     psql -U srb MCAT -F " " -A -t -c "$SQL"
   elif [ $1 = "-u" ]; then
     if [ $# -lt 2 ]; then
