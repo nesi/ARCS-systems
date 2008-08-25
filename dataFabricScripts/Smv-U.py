@@ -303,15 +303,21 @@ def main():
     print domnRec
     #dest2.insert(domnRec)
 
-    dest3 = table(dbMCAT, 'dataid')
-    dataID = dest3['last_value'][0][0]
+    dest3 = table(dbMCAT, 'mdas_td_zone')     
+    dest3.search("local_zone_flag=1")
+    mdas_td_zone = dest3["zone_id, user_id"]
+    zone_ID_DEST = mdas_td_zone[0][0]         
+    srbAdmin_ID_DEST = mdas_td_zone[0][1]
+
+    dest4 = table(dbMCAT, 'dataid')
+    dataID = dest4['last_value'][0][0]
     dataDict = {}
     _dataID = dataID
     for row in mdas_ad_guid:
         dataDict[row[0]] = _dataID
         _dataID += 1
  
-    dest4 = table(dbMCAT, 'mdas_au_info')
+    dest5 = table(dbMCAT, 'mdas_au_info')
     rec_au_info=[]
     for row in mdas_au_info:
            au_id = row[0]
@@ -320,9 +326,9 @@ def main():
                   rec_au_info.append(row)     
     for row in rec_au_info: 
            print row
-           #dest4.insert(row)
+           #dest5.insert(row)
 
-    dest5 = table(dbMCAT, 'mdas_au_mdata')
+    dest6 = table(dbMCAT, 'mdas_au_mdata')
     rec_au_mdata = []
     for row in  mdas_au_mdata:
              au_id = row[0]                 
@@ -331,9 +337,9 @@ def main():
                    rec_au_mdata.append(row)
     for row in rec_au_mdata:          
            print row
-           #dest5.insert(row)
+           #dest6.insert(row)
 
-    dest6 = table(dbMCAT, 'mdas_au_auth_key')
+    dest7 = table(dbMCAT, 'mdas_au_auth_key')
     rec_au_auth_key = []
     for row in  mdas_au_auth_key:
              au_id = row[0] 
@@ -342,9 +348,9 @@ def main():
                    rec_au_auth_key.append(row)
     for row in rec_au_auth_key:
            print row
-           #dest6.insert(row)
+           #dest7.insert(row)
 
-    dest7 = table(dbMCAT, 'mdas_au_group')
+    dest8 = table(dbMCAT, 'mdas_au_group')
     rec_au_group = []
     for row in mdas_au_group:
            au_id = row[0] 
@@ -356,20 +362,21 @@ def main():
                    rec_au_group.append(row)
     for row in rec_au_group:          
            print row
-           #dest7.insert(row)  
+           #dest8.insert(row)  
 
-    dest8 = table(dbMCAT, 'mdas_cd_user')
+    dest9 = table(dbMCAT, 'mdas_cd_user')
     rec_cd_user = []
     for row in  mdas_cd_user:
             au_id = row[0]
             if usrsDict.has_key(au_id):
                    row[0] = usrsDict.get(au_id)
+                   row[3] = zone_ID_DEST
                    rec_cd_user.append(row)     
     for row in rec_cd_user:
            print row
-           #dest8.insert(row)
+           #dest9.insert(row)
  
-    dest9 = table(dbMCAT, 'mdas_au_domn')
+    dest10 = table(dbMCAT, 'mdas_au_domn')
     rec_au_domn = []
     for row in mdas_au_domn:
             au_id = row[0]
@@ -378,9 +385,9 @@ def main():
                    rec_au_domn.append(row)
     for row in rec_au_domn:
            print row
-           #dest9.insert(row)
+           #dest10.insert(row)
 
-    dest10 = table(dbMCAT, 'mdas_au_auth_map')
+    dest11 = table(dbMCAT, 'mdas_au_auth_map')
     rec_au_auth_map = []
     for row in mdas_au_auth_map:
             au_id = row[0]                 
@@ -389,9 +396,9 @@ def main():
                    rec_au_auth_map.append(row)
     for row in rec_au_auth_map:
            print row
-           #dest10.insert(row) 
+           #dest11.insert(row) 
 
-    dest11 = table(dbMCAT, 'mdas_ad_guid')
+    dest12 = table(dbMCAT, 'mdas_ad_guid')
     rec_ad_guid = []
     for row in mdas_ad_guid:
             row[0] = dataDict.get(row[0])
@@ -400,18 +407,18 @@ def main():
             rec_ad_guid.append(row)
     for row in rec_ad_guid:
             print row                      
-            #dest11.insert(row)   
+            #dest12.insert(row)   
 
-    dest12 = table(dbMCAT, 'mdas_ad_mdata')   
+    dest13 = table(dbMCAT, 'mdas_ad_mdata')   
     rec_ad_mdata = [] 
     for row in mdas_ad_mdata:   
             row[0] = dataDict.get(row[0])
             rec_ad_mdata.append(row)
     for row in rec_ad_mdata:
             print row                        
-            #dest12.insert(row)   
+            #dest13.insert(row)   
   
-    dest13 = table(dbMCAT, 'mdas_ad_accs')
+    dest14 = table(dbMCAT, 'mdas_ad_accs')
     rec_ad_accs = []
     for row in mdas_ad_accs:
             row[0] = dataDict.get(row[0])
@@ -419,11 +426,11 @@ def main():
             rec_ad_accs.append(row)
     for row in rec_ad_accs:
             print row
-            #dest13.insert(row)
+            #dest14.insert(row)
     
-    dest14 = table(dbMCAT, 'mdas_ad_collmdata')        
-    dest14.search("data_grp_id like '0008.%'")
-    mdas_ad_collmdata_d = dest14[-1]
+    dest15 = table(dbMCAT, 'mdas_ad_collmdata')        
+    dest15.search("data_grp_id like '0008.%'")
+    mdas_ad_collmdata_d = dest15[-1]
     d_collID = mdas_ad_collmdata_d[0].split('.')[1]
      
     collDict = {}
@@ -440,13 +447,7 @@ def main():
                 rec_collmdata.append(row)              
     for row in rec_collmdata:
           print row
-          #dest14.insert(row)
-
-    dest15 = table(dbMCAT, 'mdas_td_zone')    
-    dest15.search("local_zone_flag=1")
-    mdas_td_zone = src1["zone_id, user_id"]
-    zone_ID_DEST = mdas_td_zone[0][0]
-    srbAdmin_ID_DEST = mdas_td_zone[0][1]
+          #dest15.insert(row)
 
     dest16 = table(dbMCAT, 'mdas_ad_grp_accs')
     rec_ad_grp_accs = []
