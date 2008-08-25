@@ -33,7 +33,7 @@ import signal
 # 2008-06-16:
 #   - users now belongs to domain, rather than zones.  Other methods
 #       have been changed acoordingly
-# 10008-08-21:
+# 2008-08-21:
 #   - added timeout for Scommands - sometimes hosts cannot be
 #       contacted or is really erally slow.  To change the wait 
 #       time in seconds, use the value TIMEOUT_SECONDS
@@ -95,8 +95,8 @@ class SRBResult(object):
             proc = Popen(cmd.split(), shell=False, stdin=PIPE, stdout=PIPE, stderr=FNULL, close_fds=True)
 
             while(proc.poll() is None):
-                #poll once a second
-                sleep(1)
+                #poll once every 10th of a second
+                sleep(0.1)
                 lapsed = (datetime.now() - procStart).seconds
                 if(lapsed > TIMEOUT_SECONDS):
                     os.kill(proc.pid, signal.SIGKILL)
@@ -179,7 +179,7 @@ class SRBUser(SRBResult):
         for use in usages:
             table[use.values['phy_rsrc_name']] = use
         return table
-
+    
     def getLocalHomeCollection(self):
         return self.getHomeCollection(self.values['zone_id'])
 

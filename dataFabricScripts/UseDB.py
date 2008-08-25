@@ -442,11 +442,10 @@ class UseDB:
                 dbDomain.users.append(dbUser)
 #---------------------------------------------------------------------------
 if(__name__ == "__main__"):
-    wrapper = SRBWrapper('ngdev2.its.utas.edu.au')
+    wrapper = SRBWrapper('srb.tpac.org.au')
     db = UseDB()
     dbZones = []
-    #if(db.connectDB('ngsyslog.hpcu.uq.edu.au', 'srb', 'srblog', 'srbUsage')):
-    if(db.connectDB('host', 'user', 'password', 'dbname')):
+    if(db.connectDB('host', 'user', 'password', 'dbName')):
         #connected ok!
         db.initDB(wrapper)
         db.addLog(wrapper)

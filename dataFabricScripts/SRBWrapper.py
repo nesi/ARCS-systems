@@ -113,25 +113,28 @@ class SRBWrapper:
         totalsList = {}
         #Only list zones that are "active"
         zones =  [z for z in self.knownZones if (z.values['zone_status'] == '1')]
+        
         for zone in zones:
             resourceZoneId = zone.values['zone_id']
-            for domain in self.knownDomains:
-                if(domain.hasUsers()):
-                    #yes, we want to group by resource
-                    usages = domain.getUsageForUserDomain(zone.values['zone_id'], True)
-                    if(len(usages)> 0):
-                        for use in usages:
-                            size = (long)(use.values['data_size'])
-                            key = use.values['user_name'] + "@" + domain.values['domain_desc']
-                            if(totalsList.has_key(key)):
-                                (amount, zoneGroups) = totalsList[key]
-                                amount = amount + size
-                                if(zoneGroups.has_key(resourceZoneId)):
-                                    zoneGroups[resourceZoneId].append(use)
-                                else:
-                                    zoneGroups[resourceZoneId] = [use]
-                                totalsList[key] = (amount, zoneGroups)    
+            #SgetColl /<zone>/home/user@domain for ALL users
+            #So this may be a little inefficient, but
+            #SgetCool /<zone>/home/*<domain>* takes way longer 
+            #than 10 seconds
+            for user in self.getAllKnownUsers():
+                usages = user.getUsageByResource(zone.values['zone_id'])
+                if(len(usages)> 0):
+                    for use in usages.values():
+                        size = (long)(use.values['data_size'])
+                        key = user.values['user_name'] + "@" + user.values['domain_desc']
+                        if(totalsList.has_key(key)):
+                            (amount, zoneGroups) = totalsList[key]
+                            amount = amount + size
+                            if(zoneGroups.has_key(resourceZoneId)):
+                                zoneGroups[resourceZoneId].append(use)
                             else:
-                                totalsList[key] = (size, {resourceZoneId : [use]})
+                                zoneGroups[resourceZoneId] = [use]
+                            totalsList[key] = (amount, zoneGroups)    
+                        else:
+                            totalsList[key] = (size, {resourceZoneId : [use]})
         return totalsList
                     
