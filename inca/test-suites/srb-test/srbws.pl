@@ -94,11 +94,11 @@ if ($ENV{"http_proxy"}) {
 my $return_code;
 while (($key, $value) = each %results){
   if ($value==2){
-    $return_code=$cli->send_request('send_inca_status','$key',2,'');
+    $return_code=$cli->send_request('send_inca_status',"$key",2,"");
   } elsif ($value==1){
-    $return_code=$cli->send_request('send_inca_status','$key',-1,'$info{$key}');
+    $return_code=$cli->send_request('send_inca_status',"$key",-1,"$info{$key}");
   } elsif ($value==3){
-    $return_code=$cli->send_request('send_inca_status','$key',1,'$info{$key}');
+    $return_code=$cli->send_request('send_inca_status',"$key",1,"$info{$key}");
   }
   print "sent $key with status $value, return code is $$return_code.\n";
 }
