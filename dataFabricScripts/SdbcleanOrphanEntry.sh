@@ -18,6 +18,7 @@ do
   elif [ $CURRENT = 1 ]; then
     PATH_NAME=$i
     if [ ! -f $i ]; then
+      echo "-- $PATH_NAME"
       echo "delete from mdas_ad_repl where data_id = $DATA_ID"
     fi
   fi
