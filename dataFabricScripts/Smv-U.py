@@ -1,6 +1,8 @@
 
 #!/usr/bin/python
 # Smv-U.py: Migrating users between two non-federated SRB servers by complete MCAT manipulation 
+# The script also provides a template for other cases, i.e federated SRB servers
+# You can modify it based on your situation.
 
 # The script requires the installation of postgresql-python.i386 package. Run:
 # yum install postgresql-python.i386
@@ -127,6 +129,12 @@ class db:
            q = "reindex table %s" % name
 	   e = c.execute(q)
 
+     def set_sequence(self, *item):
+         
+           c = self.obj.cursor()
+           q = "select setval('dataid', %d)" %  item
+           e = c.execute(q)
+
      def connect(self, **args):
 		self.obj = dbmod.connect(**args)
 
@@ -209,7 +217,9 @@ def main():
     mdas_cd_user = src2["*"]
     for row in mdas_cd_user:
         if row[1] == domain_ORI: mdas_cd_user_domn_ID = row[0]
+        if row[0] == mdas_td_zone[0][1]: srbAdmin_Name_ORI = row[1]
    
+    print srbAdmin_Name_ORI
     src3 = table(dbMCAT_ORI, 'mdas_au_group')
     src3.search("user_id>=100")
     mdas_au_group = src3["*"]
@@ -291,6 +301,9 @@ def main():
     for row in uidList:
        usrsDict[row] = seq_usrID
        seq_usrID += 1
+    dest1.column("cvalue")
+    print seq_usrID                
+    #dest1.update(seq_usrID)       
 
     dest2 = table(dbMCAT, 'mdas_td_domn')
     dest2.search("domain_id like '0001.0001.0001.0001.000%'")
@@ -312,11 +325,13 @@ def main():
     dest4 = table(dbMCAT, 'dataid')
     dataID = dest4['last_value'][0][0]
     dataDict = {}
-    _dataID = dataID
+    seq_dataID = dataID
     for row in mdas_ad_guid:
-        dataDict[row[0]] = _dataID
-        _dataID += 1
- 
+        dataDict[row[0]] =seq_dataID
+        seq_dataID += 1
+    print seq_dataID
+    #dbMCAT.set_sequence(seq_dataID)    
+
     dest5 = table(dbMCAT, 'mdas_au_info')
     rec_au_info=[]
     for row in mdas_au_info:
@@ -481,6 +496,7 @@ def main():
                 coll[1] = collDict.get(coll[1])
                 row[0] = '.'.join(coll)
                 if c_oid == srbAdmin_ID: row[3] = srbAdmin_ID_DEST
+                elif c_oid == 2: row[3] = 2  
                 else: row[3] = usrsDict.get(c_oid)
                 data = row[1]
                 find = string.find(data, domain_ORI)
@@ -492,10 +508,19 @@ def main():
                 if find > 0:
                      row[2] = data_p.replace(r'/'+domain_ORI,'/'+domain_DEST,1)
                      find = 0    
-                if row[3] !=None: rec_td_data_grp.append(row)
+                if row[1] == '/home/' + domain_DEST + '.groups': row[1] = '/home/' + domain_ORI + '.groups'
+                if row[1] == '/container/' + domain_DEST + '.groups': row[1] = '/container/' + domain_ORI + '.groups'
+                #if row[3] != None: rec_td_data_grp.append(row)
+                rec_td_data_grp.append(row)
+
+    ind = []
     for row in rec_td_data_grp:
-        if row[0] == '0006.000b': row[1] = '/home/' + domain_ORI + '.groups'
-        if row[0] == '0008.000b': row[1] = '/container/' + domain_ORI + '.groups'
+          find = string.find(row[1], srbAdmin_Name_ORI)
+          if find > 0: 
+                     ind.append(rec_td_data_grp.index(row))
+    for i in range(len(ind)):
+          del rec_td_data_grp[ind[len(ind)-1-i]]
+
     for row in rec_td_data_grp:
           print row
           #dest18.insert(row)
@@ -518,7 +543,7 @@ def main():
     for row in rec_ad_repl:
           print row[0], row[2], row[4], row[7], row[10], row[13]
           #dest19.insert(row)
-
+  
     dbMCAT.table_reindex("mdas_cd_user")
     dbMCAT.table_reindex("mdas_td_domn")
     dbMCAT.table_reindex("mdas_au_domn")
