@@ -1,0 +1,95 @@
+[root@ant ~]# cd /mnt/experiments/
+[root@ant experiments]# ls -lR | wc -l
+1523964
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Name:    srb.ac3.edu.au
+Address:  203.202.30.70
+
+Name:    srb.ivec.org
+Address:  192.65.130.192
+
+Name:    srb.sapac.edu.au
+Address:  129.127.96.101
+
+Name:    srb.tpac.org.au
+Address:  202.6.77.44
+
+Name:    ngsrb.hpcu.uq.edu.au
+Address:  130.102.163.156
+Aliases:  srb.hpcu.uq.edu.au
+
+
+
+15:22:27] Pauline Mak SgetColl -ef  
+[15:22:50] Pauline Mak SgetColl -ef *some_collection*
+[15:27:39] Sridhar Reddapani /srb.ac3.edu.au/projects/ANSTO
+[15:28:52] Joseph Antony jxa900
+[15:29:16] Joseph Antony srb.dc.apac.edu.au
+[15:29:16] Stephen McMahon srb.dc.apac.edu.au
+
+************************************************************************
+
+
+(3:28:43 PM) sridhar.reddapani@arcs.org.au/Home: Hi florian
+(3:29:24 PM) florian.goessmann@arcs.org.au: Hello
+(3:29:42 PM) sridhar.reddapani@arcs.org.au/Home: I have run few tests on my dev srb server and srb.ac3.edu.au
+(3:30:10 PM) sridhar.reddapani@arcs.org.au/Home: and found reason for slowness is poor performance of srb.ac3.edu.au
+(3:30:16 PM) sridhar.reddapani@arcs.org.au/Home: not ANSTO's data
+(3:30:34 PM) florian.goessmann@arcs.org.au: that was my suspicion 
+(3:30:49 PM) florian.goessmann@arcs.org.au: did you find a spcific bottlneck?
+(3:31:03 PM) sridhar.reddapani@arcs.org.au/Home: I had chat with youzhen about disks performance
+(3:31:37 PM) sridhar.reddapani@arcs.org.au/Home: yes, while running any Scommands on srb.ac3.edu.au 90+% cpu is waiting for IO
+(3:33:13 PM) sridhar.reddapani@arcs.org.au/Home: disks mounted for srb resources are from nfs, I am guessing this might be one reason for performance degrade
+(3:33:20 PM) florian.goessmann@arcs.org.au: it is
+(3:33:30 PM) florian.goessmann@arcs.org.au: i had the same problem last week with srb.ivec.org
+(3:33:41 PM) florian.goessmann@arcs.org.au: but luckily there is a fix for that
+(3:33:53 PM) sridhar.reddapani@arcs.org.au/Home: and vm itself is on machine with only 2Gb ram sharing with other 2-3 vms
+(3:34:00 PM) florian.goessmann@arcs.org.au: wow
+(3:34:18 PM) florian.goessmann@arcs.org.au: my desktop has more than that :)
+(3:35:02 PM) sridhar.reddapani@arcs.org.au/Home: same with mine as well I built my dev srb server on my desktop(3gb ram) which is running like horse
+(3:35:16 PM) sridhar.reddapani@arcs.org.au/Home: :)
+(3:35:48 PM) florian.goessmann@arcs.org.au: to fix the NFS bottleneck, you have to install a MCATless SRB server on the box that actually has the disks
+(3:36:14 PM) florian.goessmann@arcs.org.au: you then can use the SRB protocol to talk to the disks
+(3:36:20 PM) sridhar.reddapani@arcs.org.au/Home: Is there any procedure on web for that?
+(3:36:20 PM) florian.goessmann@arcs.org.au: much faster then NFS
+(3:36:29 PM) florian.goessmann@arcs.org.au: there are no instructions yet
+(3:36:32 PM) florian.goessmann@arcs.org.au: but it is easy
+(3:36:40 PM) florian.goessmann@arcs.org.au: Steve and I both run setups like this
+(3:37:05 PM) florian.goessmann@arcs.org.au: these are the steps (as Steve told me):
+
+
+
+(3:37:07 PM) florian.goessmann@arcs.org.au: 
+
+
+1. Install a non MCAT SRB server on the host with the data
+e.g. cd to SRB source dir
+./configure --enable-installdir=/opt/srb/3.5.0 --enable-gsi-auth --enable-globus-location=/opt/globus/4.0.7
+make
+make install
+I'm not sure that GSI was needed but I did it anyway
+
+
+
+2.
+edit srb install dir/data/mcatHost and set the address of the MCAT enabled host
+
+make sure that there's an srb user. Copy the .srb directory from the main server. Edit .MdasEnv file and set the srbHost to the current (new) host.
+
+start the new server with runsrb or an init script as you do the main server
+that sets up the server
+
+
+then to create resources on the new server you must first create a new location - like you do for federation
+could use Sregisterlocation or the mcatAdmin.jar file
+
+then create the resource as you do before but use the new location. As you would know the resource points to a directory which is read and writable by the local srb user
+
+####################################
+
+6th Laptop 			80.00
+8th My phone Bill 		30.00
+25th Credit Card payments
+26th Chinni phone bill
+30th Car payment 		700.00 
