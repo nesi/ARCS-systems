@@ -3,14 +3,13 @@
 import sys, os
 
 def parse_dn(dn):
-    """
-    Parse DN into a dict of arrays
-    """
-    res={}
-    for item in dn.split('/')[1:]:
-            res[item.split('=')[0]] = item.split('=')[1]
-    return res
-
+	"""
+	Parse DN into a dict of arrays
+	"""
+	res={}
+        for item in dn.split('/')[1:]:
+                res[item.split('=')[0]] = item.split('=')[1]
+	return res
 
 def getUsername(user,O):
 	if O == 'ARCS':
@@ -24,8 +23,8 @@ def getUsername(user,O):
 
 domains = {
     'iVEC':'srb.ivec.org',
-    'JCU':'srb.ivec.org',
-    'SAPAC':'srb.ivec.org'
+    #'JCU':'srb.ivec.org',
+    #'SAPAC':'srb.ivec.org'
     }
 
 if __name__ == '__main__':
@@ -35,8 +34,8 @@ if __name__ == '__main__':
 	if len(sys.argv) == 2:
 		exe, dn = sys.argv
 		comp = parse_dn(dn)
-		if domains.has_key(comp['OU'][0]):
-			user = "%s@%s"%(getUsername(comp['CN'][0],comp['O'][0]),domains[comp['OU'][0]])
+		if domains.has_key(comp['OU']):
+			user = "%s@%s"%(getUsername(comp['CN'],comp['O']),domains[comp['OU']])
 			print user
 
 	else:
