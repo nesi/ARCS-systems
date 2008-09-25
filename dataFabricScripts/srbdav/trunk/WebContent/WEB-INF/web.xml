@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	<display-name>srbdav</display-name>
+	<description>
+		a servlet that brings easy WebDAV access to any store, only 1 interface needs to be implemented
+	</description>
+	<servlet>
+		<servlet-name>webdav</servlet-name>
+		<servlet-class>
+			net.sf.webdav.WebdavServlet
+		</servlet-class>
+		<init-param>
+			<description>
+				name of the class that implements net.sf.webdav.IWebdavStorage
+			 </description>
+			<param-name>ResourceHandlerImplementation</param-name>
+			<param-value><!-- net.sf.webdav.LocalFileSystemStorage -->
+				net.sf.webdav.SRBStorage
+			</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				place where to store the webdavcontent on the filesystem
+			</description>
+			<param-name>rootpath</param-name>
+			<param-value>/Users/shundezh/tmp1/</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				triggers debug output of the ResourceHandlerImplementation
+			</description>
+			<param-name>storeDebug</param-name>
+			<param-value>0</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				triggers debug output of the ResourceHandlerImplementation
+			</description>
+			<param-name>servletDebug</param-name>
+			<param-value>1</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				server port of srb
+			</description>
+			<param-name>server-port</param-name>
+			<param-value>5544</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				server name of srb
+			</description>
+			<param-name>server-name</param-name>
+			<param-value>ngspare.sapac.edu.au</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				default domain of user
+			</description>
+			<param-name>default-domain</param-name>
+			<param-value>ngspare.sapac.edu.au</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				default resource of user
+			</description>
+			<param-name>default-resource</param-name>
+			<param-value>datafabric.ngspare.sapac.edu.au</param-value>
+		</init-param>
+	</servlet>
+	<!-- The mapping for the webdav servlet -->
+	<!-- Using /* as the mapping ensures that jasper, welcome files etc are
+		over-ridden and all requests are processed by the webdav servlet.
+		This also overcomes a number of issues with some webdav clients
+		(including MS Webfolders) that do not respond correctly
+ 		to the
+		redirects (302) that result from using a mapping of / -->
+	<servlet-mapping>
+		<servlet-name>webdav</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+	<!-- ================ Security Constraints for Testing =============== -->
+	<!--
+		<security-constraint>
+		<web-resource-collection>
+		<web-resource-name>The Entire Web Application</web-resource-name>
+		<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+		<role-name>webdav</role-name>
+		</auth-constraint>
+		</security-constraint>
+		<login-config>
+		<auth-method>BASIC</auth-method>
+		<realm-name>Tomcat Supported Realm</realm-name>
+		</login-config>
+		<security-role>
+		<description>
+		An example role defined in "conf/tomcat-users.xml"
+		</description>
+		<role-name>webdav</role-name>
+		</security-role>
+	-->
+	<welcome-file-list>
+		<welcome-file />
+	</welcome-file-list>
+</web-app>
