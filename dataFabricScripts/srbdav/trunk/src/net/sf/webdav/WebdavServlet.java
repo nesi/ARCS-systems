@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.Writer;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -53,6 +54,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.apache.tomcat.util.http.FastHttpDateFormat;
+import org.ietf.jgss.GSSCredential;
+
+import au.edu.archer.desktopshibboleth.idp.IDP;
+import au.org.mams.slcs.client.SLCSClient;
+import au.org.mams.slcs.client.SLCSConfig;
 
 import edu.sdsc.grid.io.Base64;
 import edu.sdsc.grid.io.srb.SRBAccount;
@@ -180,13 +186,6 @@ public class WebdavServlet extends HttpServlet {
 
 	private Hashtable fParameter;
 	
-	private String defaultDomain;
-	
-	private String serverName;
-	
-	private int serverPort;
-	
-	private String defaultResource;
 
 	/**
 	 * Initialize this servlet.
@@ -213,10 +212,6 @@ public class WebdavServlet extends HttpServlet {
 				String key = (String) initParameterNames.nextElement();
 				fParameter.put(key, getServletConfig().getInitParameter(key));
 			}
-			defaultDomain=getServletConfig().getInitParameter("default-domain");
-			serverPort=5544;
-			serverName=getServletConfig().getInitParameter("server-name");
-			defaultResource=getServletConfig().getInitParameter("default-resource");
 
 //				fStore = fFactory.getStore();
 				fResLocks = new ResourceLocks();
@@ -243,7 +238,16 @@ public class WebdavServlet extends HttpServlet {
 	protected void service(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		// authentication
+		String defaultDomain;
+		String serverName;
+		int serverPort;
+		String defaultResource;
+		
+		defaultDomain=getServletConfig().getInitParameter("default-domain");
+		serverPort=5544;
+		serverName=getServletConfig().getInitParameter("server-name");
+		defaultResource=getServletConfig().getInitParameter("default-resource");
+// authentication
 		
 //        String contextBase = this.contextBase;
 //        if (contextBaseHeader != null) {
@@ -270,7 +274,7 @@ public class WebdavServlet extends HttpServlet {
 //                    "Basic auth enabled over insecure requests." :
 //                            "Basic auth disabled over insecure requests.");
             System.out.println(req.isSecure() ?
-                    "This request is secure." : "This request is NOT secure.");
+                    "This request is secure(https)." : "This request is NOT secure(http).");
 //            Log.log(Log.DEBUG, usingBasic ?
 //                    "Basic auth ENABLED for this request." :
 //                            "Basic auth DISABLED for this request.");
@@ -312,17 +316,72 @@ public class WebdavServlet extends HttpServlet {
 	                    authInfo;
 	            String password = (index != -1) ?
 	                    authInfo.substring(index + 1) : "";
-	            String domain;
+	            String idpName=null;
+	            String domain=defaultDomain;
 	            if ((index = user.indexOf('\\')) != -1 ||
 	                    (index = user.indexOf('/')) != -1) {
-	                domain = user.substring(0, index);
+	            	idpName = user.substring(0, index);
 	                user = user.substring(index + 1);
-	            } else {
-	                domain = defaultDomain;
 	            }
-	            System.out.println("login: "+domain+" "+user+" "+password);
-	        	SRBAccount account = new SRBAccount( 
-				     serverName, serverPort, user, password, "", domain, defaultResource);
+	            if ((index = user.indexOf('#')) != -1) {
+	            	defaultResource=user.substring(index + 1);
+	            	user = user.substring(0, index);
+	            }
+	            if ((index = user.indexOf('@')) != -1) {
+	            	serverName=user.substring(index + 1);
+	            	user = user.substring(0, index);
+	            	domain=serverName;
+	            }
+	            if ((index = user.indexOf('.')) != -1) {
+	            	domain=user.substring(index + 1);
+	            	user = user.substring(0, index);
+	            }
+	            
+	            System.out.println("login: "+idpName+" "+user+" "+domain+" "+serverName+" "+defaultResource+" "+password);
+	        	SRBAccount account = null;
+	            if (idpName!=null){
+	            	//auth with idp
+	            	IDP idp=null;
+	            	SLCSClient client;
+					try {
+						if (fParameter.get("proxy-host")!=null&&fParameter.get("proxy-host").toString().length()>0){
+							SLCSConfig config = SLCSConfig.getInstance();
+							config.setProxyHost(fParameter.get("proxy-host").toString());
+							if (fParameter.get("proxy-port")!=null&&fParameter.get("proxy-port").toString().length()>0) 
+								config.setProxyPort(Integer.parseInt(fParameter.get("proxy-port").toString()));
+							if (fParameter.get("proxy-username")!=null&&fParameter.get("proxy-username").toString().length()>0)
+								config.setProxyUsername(fParameter.get("proxy-username").toString());
+							if (fParameter.get("proxy-password")!=null&&fParameter.get("proxy-password").toString().length()>0)
+								config.setProxyPassword(fParameter.get("proxy-password").toString());
+						}
+						client = new SLCSClient();
+		            	List<IDP> idps =client.getAvailableIDPs();
+		            	for (IDP idptmp:idps){
+		            		System.out.println("idp: "+idptmp.getName()+" "+idptmp.getProviderId());
+		            		if (idptmp.getName().equalsIgnoreCase(idpName)) {
+		            			idp=idptmp;
+		            			break;
+		            		}
+		            	}
+		            	if (idp==null){
+		            		fail(serverName, req, resp);
+		            		return;
+		            	}
+		            	GSSCredential gssCredential = client.slcsLogin(idp,user,password);
+					} catch (GeneralSecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+	            }else{
+	            	System.out.println("login using username/password");
+		        	account=new SRBAccount( 
+						     serverName, serverPort, user, password, "/"+serverName+"/home/"+user+"."+domain, domain, defaultResource);
+	            	
+	            }
 	        	String homeDir;
 	        	String redirectURL;
 	        	try{
@@ -331,7 +390,7 @@ public class WebdavServlet extends HttpServlet {
 	        		authentication=new SRBStorage(srbFileSystem);
 	        		homeDir=srbFileSystem.getHomeDirectory();
 	        		homeDir="/"+serverName+"/home/"+user+"."+serverName;
-	        		System.out.println("Authentication succeeded. home="+homeDir);
+	        		System.out.println("Authentication succeeded. home="+homeDir+" defaultRes="+account.getDefaultStorageResource());
 	        		System.out.println(req.getPathInfo()+" "+req.getServletPath());
 	        		System.out.println(req.getContextPath()+" "+req.getRequestURL());
 	        		System.out.println(req.getRequestURL().substring(0,req.getRequestURL().length()-req.getPathInfo().length()+1)+homeDir);
@@ -360,7 +419,7 @@ public class WebdavServlet extends HttpServlet {
 //	            System.out.println("redirecting to "+redirectURL);
 //	    		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher(redirectURL);
 //	    		requestDispatcher.include(req, resp);
-        		return;
+//        		return;
             }else{
                 if (authentication == null) {
                 	System.out.println( "No credentials obtained (required).");

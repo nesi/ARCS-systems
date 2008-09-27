@@ -37,7 +37,7 @@
 				triggers debug output of the ResourceHandlerImplementation
 			</description>
 			<param-name>servletDebug</param-name>
-			<param-value>1</param-value>
+			<param-value>0</param-value>
 		</init-param>
 		<init-param>
 			<description>
@@ -66,6 +66,34 @@
 			</description>
 			<param-name>default-resource</param-name>
 			<param-value>datafabric.ngspare.sapac.edu.au</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				proxy host for slcs
+			</description>
+			<param-name>proxy-host</param-name>
+			<param-value>www-proxy.sapac.edu.au</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				proxy port for slcs
+			</description>
+			<param-name>proxy-port</param-name>
+			<param-value>8080</param-value>
+		</init-param>
+		<init-param>
+			<description>
+				proxy username for slcs
+			</description>
+			<param-name>proxy-username</param-name>
+			<param-value></param-value>
+		</init-param>
+		<init-param>
+			<description>
+				proxy password for slcs
+			</description>
+			<param-name>proxy-password</param-name>
+			<param-value></param-value>
 		</init-param>
 	</servlet>
 	<!-- The mapping for the webdav servlet -->
