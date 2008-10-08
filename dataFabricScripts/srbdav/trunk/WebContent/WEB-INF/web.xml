@@ -37,7 +37,7 @@
 				triggers debug output of the ResourceHandlerImplementation
 			</description>
 			<param-name>servletDebug</param-name>
-			<param-value>0</param-value>
+			<param-value>1</param-value>
 		</init-param>
 		<init-param>
 			<description>
@@ -72,15 +72,15 @@
 				proxy host for slcs
 			</description>
 			<param-name>proxy-host</param-name>
-			<param-value>www-proxy.sapac.edu.au</param-value>
-		</init-param>
+			<param-value></param-value>
+		</init-param><!-- www-proxy.sapac.edu.au -->
 		<init-param>
 			<description>
 				proxy port for slcs
 			</description>
 			<param-name>proxy-port</param-name>
-			<param-value>8080</param-value>
-		</init-param>
+			<param-value></param-value>
+		</init-param><!-- 8080 -->
 		<init-param>
 			<description>
 				proxy username for slcs
@@ -107,6 +107,9 @@
 		<servlet-name>webdav</servlet-name>
 		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
+	<listener>
+		<listener-class>net.sf.webdav.WebdavListener</listener-class>
+	</listener>
 	<!-- ================ Security Constraints for Testing =============== -->
 	<!--
 		<security-constraint>

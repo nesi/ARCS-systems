@@ -276,4 +276,14 @@ public class LocalFileSystemStorage implements IWebdavStorage {
 		
 	}
 
+	public String getHomeDirectory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setHomeDirectory(String dir) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

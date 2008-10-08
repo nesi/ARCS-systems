@@ -55,6 +55,23 @@ public class SRBStorage implements IWebdavStorage {
 	private static SRBFileSystem srbFileSystem = null;
 
 	private static int debug = -1;
+
+	private String defaultResource;
+	
+	private String homeDirectory;
+	
+	public String getHomeDirectory() {
+		return homeDirectory;
+	}
+	public void setHomeDirectory(String homeDirectory) {
+		this.homeDirectory = homeDirectory;
+	}
+	public String getDefaultResource() {
+		return defaultResource;
+	}
+	public void setDefaultResource(String defaultResource) {
+		this.defaultResource = defaultResource;
+	}
 	public SRBStorage(){
 	}	
 	public SRBStorage(SRBFileSystem srbFileSystem){
@@ -63,6 +80,15 @@ public class SRBStorage implements IWebdavStorage {
 	
 	public void setFileSystem(Object srbFileSystem){
 		this.srbFileSystem=(SRBFileSystem)srbFileSystem;
+	}
+	
+	public void disconnect(){
+		try {
+			if (srbFileSystem.isConnected()) srbFileSystem.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void begin(Principal principal, Hashtable parameters)
@@ -167,6 +193,7 @@ public class SRBStorage implements IWebdavStorage {
 			System.out.println("LocalFileSystemStore.createResource(" + uri
 					+ ")");
 		SRBFile file = new SRBFile(srbFileSystem, uri);
+		file.setResource(defaultResource);
 		if (!file.createNewFile())
 			throw new IOException("cannot create file: " + uri);
 	}
@@ -182,6 +209,7 @@ public class SRBStorage implements IWebdavStorage {
 			System.out.println("LocalFileSystemStore.setResourceContent(" + uri
 					+ ")");
 		SRBFile file = new SRBFile(srbFileSystem, uri);
+		file.setResource(defaultResource);
 		SRBFileOutputStream os = new SRBFileOutputStream(file);
 		try {
 			int read = -1;

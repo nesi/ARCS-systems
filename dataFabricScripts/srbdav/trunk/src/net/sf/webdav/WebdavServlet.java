@@ -61,8 +61,13 @@ import au.org.mams.slcs.client.SLCSClient;
 import au.org.mams.slcs.client.SLCSConfig;
 
 import edu.sdsc.grid.io.Base64;
+import edu.sdsc.grid.io.MetaDataCondition;
+import edu.sdsc.grid.io.MetaDataRecordList;
+import edu.sdsc.grid.io.MetaDataSelect;
+import edu.sdsc.grid.io.MetaDataSet;
 import edu.sdsc.grid.io.srb.SRBAccount;
 import edu.sdsc.grid.io.srb.SRBFileSystem;
+import edu.sdsc.grid.io.srb.SRBMetaDataSet;
 /**
  * Servlet which provides support for WebDAV level 2.
  * 
@@ -114,7 +119,7 @@ public class WebdavServlet extends HttpServlet {
 	/**
 	 * Default depth is infite.
 	 */
-	private static final int INFINITY = 3; // To limit tree browsing a bit
+	private static final int INFINITY = 1; //3 To limit tree browsing a bit
 
 	/**
 	 * PROPFIND - Specify a property mask.
@@ -237,8 +242,33 @@ public class WebdavServlet extends HttpServlet {
 	 */
 	protected void service(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+System.out.println("***************");
+String method = req.getMethod();
+if (fdebug == 1) {
+//	System.out.println("-----------");
+	System.out.println("WebdavServlet\n request: method = " + method);
+//	System.out.println("Zeit: " + System.currentTimeMillis());
+//	System.out.println("-----------");
+	Enumeration e = req.getHeaderNames();
+	while (e.hasMoreElements()) {
+		String s = (String) e.nextElement();
+		System.out.println("header: " + s + " " + req.getHeader(s));
+	}
+	e = req.getAttributeNames();
+	while (e.hasMoreElements()) {
+		String s = (String) e.nextElement();
+		System.out.println("attribute: " + s + " "
+				+ req.getAttribute(s));
+	}
+	e = req.getParameterNames();
+	while (e.hasMoreElements()) {
+		String s = (String) e.nextElement();
+		System.out.println("parameter: " + s + " "
+				+ req.getParameter(s));
+	}
+}
 
-		String defaultDomain;
+String defaultDomain;
 		String serverName;
 		int serverPort;
 		String defaultResource;
@@ -273,71 +303,87 @@ public class WebdavServlet extends HttpServlet {
 //            Log.log(Log.DEBUG, insecureBasic ?
 //                    "Basic auth enabled over insecure requests." :
 //                            "Basic auth disabled over insecure requests.");
-            System.out.println(req.isSecure() ?
-                    "This request is secure(https)." : "This request is NOT secure(http).");
+//            System.out.println(req.isSecure() ?
+//                    "This request is secure(https)." : "This request is NOT secure(http).");
 //            Log.log(Log.DEBUG, usingBasic ?
 //                    "Basic auth ENABLED for this request." :
 //                            "Basic auth DISABLED for this request.");
 //        }
+		System.out.println("depth: "+req.getHeader("Depth"));
+		System.out.println("path: " + getRelativePath(req, null));
+
             SRBStorage authentication=null;
+	        String idpName=null;
+	        String user = null;
+	        String password = null;
+	        String domain=defaultDomain;
+            
+            String authorization = req.getHeader("Authorization");
+//            System.out.println("Authorization: " + authorization);
+            if (authorization != null && authorization.regionMatches(
+                    true, 0, "Basic ", 0, 6)) {
+
+		        String authInfo = new String(Base64.fromString(
+		                authorization.substring(6)), "ISO-8859-1");
+//		        System.out.println("authInfo:"+authInfo);
+		        int index = authInfo.indexOf(':');
+		        user = (index != -1) ? authInfo.substring(0, index) :
+		                authInfo;
+		        password = (index != -1) ?
+		                authInfo.substring(index + 1) : "";
+		        
+		        if ((index = user.indexOf('\\')) != -1 ||
+		                (index = user.indexOf('/')) != -1) {
+		        	idpName = user.substring(0, index);
+		            user = user.substring(index + 1);
+		        }
+		        boolean hasResource=false;
+		        if ((index = user.indexOf('#')) != -1) {
+		        	defaultResource=user.substring(index + 1);
+		        	user = user.substring(0, index);
+		        	hasResource=true;
+		        }
+		        if ((index = user.indexOf('@')) != -1) {
+		        	serverName=user.substring(index + 1);
+		        	user = user.substring(0, index);
+		        	domain=serverName;
+		        	if (!hasResource) defaultResource="";
+		        }
+		        if ((index = user.indexOf('.')) != -1) {
+		        	domain=user.substring(index + 1);
+		        	user = user.substring(0, index);
+		        }
+		        
+//		        System.out.println("login: "+idpName+" "+user+" "+domain+" "+serverName+" "+defaultResource);
+            }else{
+            	fail(serverName, req, resp);
+                return;
+            }
 
             HttpSession session = req.getSession(false);
             if (session != null) {
-            	System.out.println("Obtained handle to session "+
-                        session.getId());
+//            	System.out.println("Obtained handle to session "+session.getId());
                 Map credentials = (Map)
                         session.getAttribute(CREDENTIALS);
                 if (credentials != null) {
-                	System.out.println("Dumping credential cache:"+
-                            credentials);
+//                	System.out.println("Dumping credential cache:"+credentials);
                     authentication = (SRBStorage)
                             credentials.get(serverName);
-                    if (authentication != null) {
-                    	System.out.println(
-                                "Found cached credentials for "+serverName);
-                    } else {
-                    	System.out.println(
-                                "No cached credentials found for "+serverName);
-                    }
+//                    if (authentication != null) {
+//                    	System.out.println(
+//                                "Found cached credentials for "+serverName);
+//                    } else {
+//                    	System.out.println(
+//                                "No cached credentials found for "+serverName);
+//                    }
                 }
             }
 
-            
-            String authorization = req.getHeader("Authorization");
-            System.out.println("Authorization: " + authorization);
-            if (authentication==null && authorization != null && authorization.regionMatches(
-                            true, 0, "Basic ", 0, 6)) {
+        	String homeDir = null;
+        	String redirectURL;
 
-	            String authInfo = new String(Base64.fromString(
-	                    authorization.substring(6)), "ISO-8859-1");
-	            System.out.println("authInfo:"+authInfo);
-	            int index = authInfo.indexOf(':');
-	            String user = (index != -1) ? authInfo.substring(0, index) :
-	                    authInfo;
-	            String password = (index != -1) ?
-	                    authInfo.substring(index + 1) : "";
-	            String idpName=null;
-	            String domain=defaultDomain;
-	            if ((index = user.indexOf('\\')) != -1 ||
-	                    (index = user.indexOf('/')) != -1) {
-	            	idpName = user.substring(0, index);
-	                user = user.substring(index + 1);
-	            }
-	            if ((index = user.indexOf('#')) != -1) {
-	            	defaultResource=user.substring(index + 1);
-	            	user = user.substring(0, index);
-	            }
-	            if ((index = user.indexOf('@')) != -1) {
-	            	serverName=user.substring(index + 1);
-	            	user = user.substring(0, index);
-	            	domain=serverName;
-	            }
-	            if ((index = user.indexOf('.')) != -1) {
-	            	domain=user.substring(index + 1);
-	            	user = user.substring(0, index);
-	            }
-	            
-	            System.out.println("login: "+idpName+" "+user+" "+domain+" "+serverName+" "+defaultResource+" "+password);
+            
+            if (authentication==null){
 	        	SRBAccount account = null;
 	            if (idpName!=null){
 	            	//auth with idp
@@ -357,17 +403,38 @@ public class WebdavServlet extends HttpServlet {
 						client = new SLCSClient();
 		            	List<IDP> idps =client.getAvailableIDPs();
 		            	for (IDP idptmp:idps){
-		            		System.out.println("idp: "+idptmp.getName()+" "+idptmp.getProviderId());
+//		            		System.out.println("idp: "+idptmp.getName()+" "+idptmp.getProviderId());
 		            		if (idptmp.getName().equalsIgnoreCase(idpName)) {
 		            			idp=idptmp;
 		            			break;
 		            		}
 		            	}
 		            	if (idp==null){
+			            	for (IDP idptmp:idps){
+//			            		System.out.println("idp: "+idptmp.getName()+" "+idptmp.getProviderId());
+			            		if (idptmp.getName().startsWith(idpName)) {
+			            			idp=idptmp;
+			            			break;
+			            		}
+			            	}
+		            	}
+		            	if (idp==null){
+			            	for (IDP idptmp:idps){
+//			            		System.out.println("idp: "+idptmp.getName()+" "+idptmp.getProviderId());
+			            		if (idptmp.getName().indexOf(idpName)>-1) {
+			            			idp=idptmp;
+			            			break;
+			            		}
+			            	}
+		            		
+		            	}
+		            	if (idp==null){
 		            		fail(serverName, req, resp);
 		            		return;
 		            	}
 		            	GSSCredential gssCredential = client.slcsLogin(idp,user,password);
+//		            	System.out.println("login using idp "+idp);
+		            	account=new SRBAccount(serverName,serverPort,gssCredential);
 					} catch (GeneralSecurityException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -377,24 +444,54 @@ public class WebdavServlet extends HttpServlet {
 					}
 
 	            }else{
-	            	System.out.println("login using username/password");
+//	            	System.out.println("login using username/password");
 		        	account=new SRBAccount( 
 						     serverName, serverPort, user, password, "/"+serverName+"/home/"+user+"."+domain, domain, defaultResource);
 	            	
+	        		
 	            }
-	        	String homeDir;
-	        	String redirectURL;
 	        	try{
 	        		SRBFileSystem srbFileSystem=new SRBFileSystem(account);
 //	        	if (srbFileSystem.isConnected()){
 	        		authentication=new SRBStorage(srbFileSystem);
 	        		homeDir=srbFileSystem.getHomeDirectory();
-	        		homeDir="/"+serverName+"/home/"+user+"."+serverName;
-	        		System.out.println("Authentication succeeded. home="+homeDir+" defaultRes="+account.getDefaultStorageResource());
-	        		System.out.println(req.getPathInfo()+" "+req.getServletPath());
-	        		System.out.println(req.getContextPath()+" "+req.getRequestURL());
-	        		System.out.println(req.getRequestURL().substring(0,req.getRequestURL().length()-req.getPathInfo().length()+1)+homeDir);
-	        		redirectURL="/srb-webdav"+homeDir; //req.getRequestURL().substring(0,req.getRequestURL().length()-req.getPathInfo().length()+1)+homeDir;
+	        		if (homeDir==null) homeDir="/"+serverName+"/home/"+user+"."+serverName;
+	        		authentication.setDefaultResource(account.getDefaultStorageResource());
+	        		if (account.getDefaultStorageResource()==null||account.getDefaultStorageResource().length()==0){
+	        	        MetaDataRecordList[] resList = null;
+	        	        try {
+	        	        	resList = srbFileSystem.query(new MetaDataCondition[]{MetaDataSet.newCondition(SRBMetaDataSet.RSRC_OWNER_ZONE, MetaDataCondition.EQUAL, account.getMcatZone())},new MetaDataSelect[]{MetaDataSet.newSelection(SRBMetaDataSet.RESOURCE_NAME)});
+	        	        	resList = MetaDataRecordList.getAllResults(resList);
+	        	        	for (MetaDataRecordList res:resList){
+	        	        		if (res.getValue(SRBMetaDataSet.RESOURCE_NAME).toString().startsWith("datafabric")) {
+	        	        			account.setDefaultStorageResource(res.getValue(SRBMetaDataSet.RESOURCE_NAME).toString());
+	        	        			authentication.setDefaultResource(res.getValue(SRBMetaDataSet.RESOURCE_NAME).toString());
+	        	        		}
+	        	        	}
+	        	        	if ((account.getDefaultStorageResource()==null||account.getDefaultStorageResource().length()==0)&&resList.length>0) {
+	        	        		account.setDefaultStorageResource(resList[0].getValue(SRBMetaDataSet.RESOURCE_NAME).toString());
+	        	        		authentication.setDefaultResource(resList[0].getValue(SRBMetaDataSet.RESOURCE_NAME).toString());
+	        	        	}
+	        	        }catch(Exception e) {
+	        	            //System.out.println("An Exception is SRBQueryAdaptor:fileSystemQuery()");
+	        	            e.printStackTrace();
+	        	        }
+
+	        		}
+	                System.out.println("homedir:"+homeDir);
+	                authentication.setHomeDirectory(homeDir);
+
+//	        		srbFileSystem.set
+	        		//change resource
+//	        		srbFileSystem.close();
+//	        		srbFileSystem=new SRBFileSystem(account);
+	        		
+	        		
+	        		System.out.println("Authentication succeeded. home="+homeDir+" defaultRes="+authentication.getDefaultResource()+" zone="+account.getMcatZone());
+//	        		System.out.println(req.getPathInfo()+" "+req.getServletPath());
+//	        		System.out.println(req.getContextPath()+" "+req.getRequestURL());
+//	        		System.out.println(req.getRequestURL().substring(0,req.getRequestURL().length()-req.getPathInfo().length()+1)+homeDir);
+	        		redirectURL="/srbdav"+homeDir; //req.getRequestURL().substring(0,req.getRequestURL().length()-req.getPathInfo().length()+1)+homeDir;
 	        	}catch (Exception e){
 	        		e.printStackTrace();
 	        		System.out.println("Authentication failed.");
@@ -413,22 +510,24 @@ public class WebdavServlet extends HttpServlet {
 	                    session.setAttribute(CREDENTIALS, credentials);
 	                }
 	                credentials.put(serverName, authentication);
-	                System.out.println("Cached Credentials for "+serverName+": "+authentication);
+//	                System.out.println("Cached Credentials for "+serverName+": "+authentication);
 	                
 	            }
 //	            System.out.println("redirecting to "+redirectURL);
+//	            if (!redirectURL.endsWith(getRelativePath(req, authentication))) redirect(redirectURL,req,resp);
+//	            return;
 //	    		RequestDispatcher requestDispatcher = getServletContext().getRequestDispatcher(redirectURL);
 //	    		requestDispatcher.include(req, resp);
 //        		return;
             }else{
                 if (authentication == null) {
-                	System.out.println( "No credentials obtained (required).");
+//                	System.out.println( "No credentials obtained (required).");
                     fail(null, req, resp);
                     return;
                 }
 
             }
-            System.out.println("Using credentials: " + authentication);
+//            System.out.println("Using credentials: " + authentication);
 
 		
             if (authentication != null) {
@@ -436,32 +535,7 @@ public class WebdavServlet extends HttpServlet {
 //                fStore.setFileSystem(authentication);
             }
 
-		String method = req.getMethod();
 
-		if (fdebug == 1) {
-			System.out.println("-----------");
-			System.out.println("WebdavServlet\n request: method = " + method);
-			System.out.println("Zeit: " + System.currentTimeMillis());
-			System.out.println("path: " + getRelativePath(req));
-			System.out.println("-----------");
-			Enumeration e = req.getHeaderNames();
-			while (e.hasMoreElements()) {
-				String s = (String) e.nextElement();
-				System.out.println("header: " + s + " " + req.getHeader(s));
-			}
-			e = req.getAttributeNames();
-			while (e.hasMoreElements()) {
-				String s = (String) e.nextElement();
-				System.out.println("attribute: " + s + " "
-						+ req.getAttribute(s));
-			}
-			e = req.getParameterNames();
-			while (e.hasMoreElements()) {
-				String s = (String) e.nextElement();
-				System.out.println("parameter: " + s + " "
-						+ req.getParameter(s));
-			}
-		}
 
 		try {
 //			fStore.begin(req.getUserPrincipal(), fParameter);
@@ -508,6 +582,18 @@ public class WebdavServlet extends HttpServlet {
 			t.printStackTrace();
 		}
 
+	}
+	private void redirect(String uri, HttpServletRequest request,
+            HttpServletResponse response) throws ServletException, IOException {
+        try {
+            response.reset();
+        } catch (IllegalStateException ex) {
+        	System.out.println("Unable to reset response (already committed).");
+        }
+        response.addHeader("Location", uri);
+        response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+//        response.flushBuffer();
+        response.sendRedirect(uri);
 	}
 	
     private void fail(String server, HttpServletRequest request,
@@ -652,7 +738,7 @@ public class WebdavServlet extends HttpServlet {
 	 * @param request
 	 *            The servlet request we are processing
 	 */
-	protected String getRelativePath(HttpServletRequest request) {
+	protected String getRelativePath(HttpServletRequest request,IWebdavStorage fStore) {
 
 		// Are we being processed by a RequestDispatcher.include()?
 		if (request.getAttribute("javax.servlet.include.request_uri") != null) {
@@ -663,6 +749,7 @@ public class WebdavServlet extends HttpServlet {
 						.getAttribute("javax.servlet.include.servlet_path");
 			if ((result == null) || (result.equals("")))
 				result = "/";
+//			if (result.equals("/")) return fStore.getHomeDirectory();
 			return (result);
 		}
 
@@ -674,6 +761,7 @@ public class WebdavServlet extends HttpServlet {
 		if ((result == null) || (result.equals(""))) {
 			result = "/";
 		}
+//		if (result.equals("/")) return fStore.getHomeDirectory();
 		return (result);
 
 	}
@@ -765,7 +853,7 @@ public class WebdavServlet extends HttpServlet {
 
 //		String lockOwner = "doOptions" + System.currentTimeMillis()
 //				+ req.toString();
-		String path = getRelativePath(req);
+		String path = getRelativePath(req, fStore);
 //		if (fResLocks.lock(path, lockOwner, false, 0)) {
 //			try {
 				resp.addHeader("DAV", "1,2");
@@ -798,7 +886,7 @@ public class WebdavServlet extends HttpServlet {
 		// Retrieve the resources
 		String lockOwner = "doPropfind" + System.currentTimeMillis()
 				+ req.toString();
-		String path = getRelativePath(req);
+		String path = getRelativePath(req,fStore);
 		int depth = getDepth(req);
 //		if (fResLocks.lock(path, lockOwner, false, depth)) {
 //			try {
@@ -815,6 +903,7 @@ public class WebdavServlet extends HttpServlet {
 
 		            // Get the root element of the document
 		            Element rootElement = document.getDocumentElement();
+		            System.out.println(rootElement);
 		            NodeList childList = rootElement.getChildNodes();
 
 		            for (int i=0; i < childList.getLength(); i++) {
@@ -868,11 +957,6 @@ public class WebdavServlet extends HttpServlet {
 		        }
 
 				
-				
-				
-				
-				
-				
 				if (!fStore.objectExists(path)) {
 					resp
 							.sendError(HttpServletResponse.SC_NOT_FOUND,path);
@@ -883,8 +967,8 @@ public class WebdavServlet extends HttpServlet {
 
 //				Vector properties = null;
 //				System.out.println("b4 path:"+path);
-				path = getCleanPath(getRelativePath(req));
-//				System.out.println("path:"+path);
+				path = getCleanPath(getRelativePath(req, fStore));
+				System.out.println("propfind -- path:"+path);
 				
 
 //				Node propNode = null;
@@ -898,8 +982,11 @@ public class WebdavServlet extends HttpServlet {
 				resp.setContentType("text/xml; charset=UTF-8");
 
 				// Create multistatus object
+//				System.out.println("before writer init");
 				XMLWriter generatedXML = new XMLWriter(resp.getWriter());
+//				System.out.println("after writer init");
 				generatedXML.writeXMLHeader();
+//				System.out.println("after write header");
 				generatedXML.writeElement(null, "multistatus"
 						+ generateNamespaceDeclarations(), XMLWriter.OPENING);
 				if (depth == 0) {
@@ -981,7 +1068,7 @@ public class WebdavServlet extends HttpServlet {
 				}
 				generatedXML.writeElement(null, "multistatus",
 						XMLWriter.CLOSING);
-//				System.out.println("doPropfind:"+generatedXML.toString());
+//				if (depth==0) System.out.println("doPropfind:"+generatedXML.toString());
 				generatedXML.sendData();
 //			} finally {
 //				fResLocks.unlock(path, lockOwner);
@@ -1034,7 +1121,7 @@ public class WebdavServlet extends HttpServlet {
 
 		String lockOwner = "doGet" + System.currentTimeMillis()
 				+ req.toString();
-		String path = getRelativePath(req);
+		String path = getRelativePath(req, fStore);
 		if (fResLocks.lock(path, lockOwner, false, 0)) {
 			try {
 
@@ -1191,7 +1278,7 @@ public class WebdavServlet extends HttpServlet {
 
 			if (!readOnly) {
 				// not readonly
-				String path = getRelativePath(req);
+				String path = getRelativePath(req, fStore);
 				String parentPath = getParentPath(path);
 				String lockOwner = "doMkcol" + System.currentTimeMillis()
 						+ req.toString();
@@ -1241,7 +1328,7 @@ public class WebdavServlet extends HttpServlet {
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp, IWebdavStorage fStore) throws ServletException, IOException {
 
 		if (!readOnly) {
-			String path = getRelativePath(req);
+			String path = getRelativePath(req, fStore);
 			String lockOwner = "doDelete" + System.currentTimeMillis()
 					+ req.toString();
 			if (fResLocks.lock(path, lockOwner, true, -1)) {
@@ -1249,7 +1336,7 @@ public class WebdavServlet extends HttpServlet {
 					Hashtable errorList = new Hashtable();
 					deleteResource(path, errorList, req, resp, fStore);
 					if (!errorList.isEmpty()) {
-						sendReport(req, resp, errorList);
+						sendReport(req, resp, errorList, fStore);
 					}
 				} finally {
 					fResLocks.unlock(path, lockOwner);
@@ -1278,7 +1365,7 @@ public class WebdavServlet extends HttpServlet {
 	 */
 	protected void doPut(HttpServletRequest req, HttpServletResponse resp, IWebdavStorage fStore) throws ServletException, IOException {
 		if (!readOnly) {
-			String path = getRelativePath(req);
+			String path = getRelativePath(req, fStore);
 			String parentPath = getParentPath(path);
 			String lockOwner = "doPut" + System.currentTimeMillis()
 					+ req.toString();
@@ -1327,7 +1414,7 @@ public class WebdavServlet extends HttpServlet {
 	 */
 	protected void doCopy(HttpServletRequest req, HttpServletResponse resp, IWebdavStorage fStore) throws ServletException, IOException {
 
-		String path = getRelativePath(req);
+		String path = getRelativePath(req, fStore);
 		if (!readOnly) {
 			String lockOwner = "doCopy" + System.currentTimeMillis()
 					+ req.toString();
@@ -1362,7 +1449,7 @@ public class WebdavServlet extends HttpServlet {
 	protected void doMove(HttpServletRequest req, HttpServletResponse resp, IWebdavStorage fStore) throws ServletException, IOException {
 		if (!readOnly) {
 
-			String path = getRelativePath(req);
+			String path = getRelativePath(req, fStore);
 			String lockOwner = "doMove" + System.currentTimeMillis()
 					+ req.toString();
 			if (fResLocks.lock(path, lockOwner, false, -1)) {
@@ -1372,7 +1459,7 @@ public class WebdavServlet extends HttpServlet {
 						Hashtable errorList = new Hashtable();
 						deleteResource(path, errorList, req, resp, fStore);
 						if (!errorList.isEmpty()) {
-							sendReport(req, resp, errorList);
+							sendReport(req, resp, errorList, fStore);
 						}
 
 					} else {
@@ -1474,7 +1561,7 @@ public class WebdavServlet extends HttpServlet {
 			}
 		}
 
-		String path = getRelativePath(req);
+		String path = getRelativePath(req, fStore);
 
 		// if source = destination
 		if (path.equals(destinationPath)) {
@@ -1528,7 +1615,7 @@ public class WebdavServlet extends HttpServlet {
 				}
 				copy(path, destinationPath, errorList, req, resp, fStore);
 				if (!errorList.isEmpty()) {
-					sendReport(req, resp, errorList);
+					sendReport(req, resp, errorList, fStore);
 				}
 
 			} finally {
@@ -1781,12 +1868,12 @@ public class WebdavServlet extends HttpServlet {
 	 *            List of error to be displayed
 	 */
 	private void sendReport(HttpServletRequest req, HttpServletResponse resp,
-			Hashtable errorList) throws ServletException, IOException {
+			Hashtable errorList, IWebdavStorage fStore) throws ServletException, IOException {
 
 		resp.setStatus(WebdavStatus.SC_MULTI_STATUS);
 
 		String absoluteUri = req.getRequestURI();
-		String relativePath = getRelativePath(req);
+		String relativePath = getRelativePath(req, fStore);
 
 		XMLWriter generatedXML = new XMLWriter();
 		generatedXML.writeXMLHeader();
@@ -1821,6 +1908,7 @@ public class WebdavServlet extends HttpServlet {
 
 		Writer writer = resp.getWriter();
 		writer.write(generatedXML.toString());
+		System.out.println(generatedXML.toString());
 		writer.close();
 
 	}

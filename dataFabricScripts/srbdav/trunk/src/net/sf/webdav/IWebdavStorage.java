@@ -238,4 +238,7 @@ public interface IWebdavStorage {
      * 				if something goes wrong on the store level
      */
     void removeObject(String uri) throws IOException;
+
+	String getHomeDirectory();
+	void setHomeDirectory(String dir);
 }
