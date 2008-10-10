@@ -75,13 +75,15 @@ class SRBResult(object):
         if(result <> None):
             self.values = {}
             for line in result:
-                split = re.match(SRBResult.pattern, line)
-                if(len(split.groups()) == 2):
-                    if(self.values.has_key(split.group(1))):
-                        count = len([x for x in self.values.keys() if(x.find(split.group(1)) > -1)])
-                        self.values[split.group(1) + `count`] = split.group(2)
-                    else:
-                        self.values[split.group(1)] = split.group(2)
+                line2 = line
+                if(len(line2.strip()) > 0):
+                    split = re.match(SRBResult.pattern, line)
+                    if(len(split.groups()) == 2):
+                        if(self.values.has_key(split.group(1))):
+                            count = len([x for x in self.values.keys() if(x.find(split.group(1)) > -1)])
+                            self.values[split.group(1) + `count`] = split.group(2)
+                        else:
+                            self.values[split.group(1)] = split.group(2)
     
     def getOutputLines(cmd, error):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
