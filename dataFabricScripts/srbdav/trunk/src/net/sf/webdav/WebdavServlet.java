@@ -310,7 +310,6 @@ String defaultDomain;
 //                            "Basic auth DISABLED for this request.");
 //        }
 		System.out.println("depth: "+req.getHeader("Depth"));
-		System.out.println("path: " + getRelativePath(req, null));
 
             SRBStorage authentication=null;
 	        String idpName=null;
@@ -542,6 +541,32 @@ String defaultDomain;
 //			fStore.checkAuthentication();
 			resp.setStatus(WebdavStatus.SC_OK);
 
+//			String path = req.getRequestURL().toString();
+//			System.out.println("before executing method:"+path);
+//			if (path.indexOf("~")>-1) {
+//				System.out.println(req.getContextPath());
+//				System.out.println(req.getRequestURI());
+//				System.out.println(req.getRequestURL());
+//				System.out.println(req.getPathInfo());
+//				System.out.println(req.getServletPath());
+//				String target=req.getRequestURL().toString().replaceAll("~",authentication.getHomeDirectory().substring(1));
+//				System.out.println("redirecting to "+target);
+//				redirect(target,req,resp);
+//				return;
+//			}else if (path.indexOf("%7E")>-1) {
+//				System.out.println(req.getContextPath());
+//				System.out.println(req.getRequestURI());
+//				System.out.println(req.getRequestURL());
+//				System.out.println(req.getPathInfo());
+//				System.out.println(req.getServletPath());
+//				String target=req.getRequestURL().toString().replaceAll("%7E",authentication.getHomeDirectory().substring(1));
+//				System.out.println("redirecting to "+target);
+//				redirect(target,req,resp);
+//				return;
+//			}
+
+			System.out.println("path: " + getRelativePath(req, authentication));
+		
 			try {
 				if (method.equals(METHOD_PROPFIND)) {
 					doPropfind(req, resp, authentication);
@@ -591,9 +616,9 @@ String defaultDomain;
         	System.out.println("Unable to reset response (already committed).");
         }
         response.addHeader("Location", uri);
-        response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+        response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 //        response.flushBuffer();
-        response.sendRedirect(uri);
+//        response.sendRedirect(uri);
 	}
 	
     private void fail(String server, HttpServletRequest request,
@@ -750,6 +775,19 @@ String defaultDomain;
 			if ((result == null) || (result.equals("")))
 				result = "/";
 //			if (result.equals("/")) return fStore.getHomeDirectory();
+			
+			if (result.indexOf("~")>-1) {
+				System.out.println(request.getContextPath());
+				System.out.println(request.getRequestURI());
+				System.out.println(request.getRequestURL());
+				System.out.println(request.getPathInfo());
+				System.out.println(request.getServletPath());
+				String target=result.replaceAll("~",fStore.getHomeDirectory().substring(1));
+				System.out.println("changed path to "+target);
+				return target;
+			}
+			
+			
 			return (result);
 		}
 
@@ -762,6 +800,18 @@ String defaultDomain;
 			result = "/";
 		}
 //		if (result.equals("/")) return fStore.getHomeDirectory();
+		if (result.indexOf("~")>-1) {
+			System.out.println(request.getContextPath());
+			System.out.println(request.getRequestURI());
+			System.out.println(request.getRequestURL());
+			System.out.println(request.getPathInfo());
+			System.out.println(request.getServletPath());
+			String target=result.replaceAll("~",fStore.getHomeDirectory().substring(1));
+			System.out.println("changed path to "+target);
+			return target;
+		}
+
+		
 		return (result);
 
 	}
@@ -887,6 +937,29 @@ String defaultDomain;
 		String lockOwner = "doPropfind" + System.currentTimeMillis()
 				+ req.toString();
 		String path = getRelativePath(req,fStore);
+		
+//		System.out.println("doPropfind:"+path);
+//		if (path.indexOf("~")>-1) {
+//			System.out.println(req.getContextPath());
+//			System.out.println(req.getRequestURI());
+//			System.out.println(req.getRequestURL());
+//			System.out.println(req.getPathInfo());
+//			System.out.println(req.getServletPath());
+//			System.out.println("redirecting to "+req.getRequestURL().substring(0,req.getRequestURL().length()-4)+fStore.getHomeDirectory());
+//			redirect(req.getRequestURL().substring(0,req.getRequestURL().length()-4)+fStore.getHomeDirectory(),req,resp);
+//			return;
+//		}
+//		if (path.equals("/~/")) {
+//			System.out.println(req.getContextPath());
+//			System.out.println(req.getRequestURI());
+//			System.out.println(req.getRequestURL());
+//			System.out.println(req.getPathInfo());
+//			System.out.println(req.getServletPath());
+//			System.out.println("redirecting to "+req.getRequestURL().substring(0,req.getRequestURL().length()-2)+fStore.getHomeDirectory());
+//			redirect(req.getRequestURL().substring(0,req.getRequestURL().length()-2)+fStore.getHomeDirectory(),req,resp);
+//			return;
+//		}
+		
 		int depth = getDepth(req);
 //		if (fResLocks.lock(path, lockOwner, false, depth)) {
 //			try {

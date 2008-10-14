@@ -135,4 +135,7 @@
 	<welcome-file-list>
 		<welcome-file />
 	</welcome-file-list>
+	<session-config>
+		<session-timeout>2</session-timeout>
+	</session-config>
 </web-app>
