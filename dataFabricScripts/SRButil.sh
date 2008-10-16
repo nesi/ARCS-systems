@@ -1,9 +1,5 @@
 #!/bin/bash
-#
-# this script requires sudo access for the srb user. Add:
-# srb     srb.ivec.org=NOPASSWD: /sbin/service srb stop, /sbin/service srb start, /sbin/service srb restart
-# to /etc/sudoers
-#
+
 if [[ !$SRBROOT ]]; then
 	export SRBROOT=/usr/srb
 fi
@@ -17,7 +13,7 @@ if [[ !$MCATDATA ]]; then
 fi
 
 if [[ !$BACKUPROOT ]]; then
-	export BACKUPROOT=/var/lib/srb/pbstore-backup
+	export BACKUPROOT=./backup
 fi
 
 if [[ !$HOSTKEY ]]; then
@@ -28,17 +24,11 @@ if [[ !$HOSTCERT ]]; then
 	export HOSTCERT=$SRBHOME/hostcert.pem
 fi
 
-# list of vault locations to be backed up
-VAULTS=(/var/lib/srb/Vault /var/lib/srb/pbstore-vault)
+if [[ !$TIME_TO_KEEP ]]; then
+	export TIME_TO_KEEP=60
+fi
 
-# settings for the remote backup
-export remoteBackupZone=ngdev2.its.utas.edu.au
-export remoteBackupResource=data_fabric
-export srbAdminUser=srbAdmin
-export srbAdminDomain=srb.ivec.org
-
-export NOW=`date +%Y%m%d%H%M`
-export PAST=`date --date "now -2 days" +%Y-%m-%d-%H.%M`
+export NOW=`date +%Y%m%d%k%M`
 export HOST=`uname -n`
 
 stopSRB () {
@@ -52,39 +42,27 @@ startSRB () {
 }
 
 backup () {
-	stopSRB
-	echo "Backing up SRB configuration and Database..."
-	tar -cpPf /tmp/$1.tar $MCATDATA/
-	tar -rpPf /tmp/$1.tar $SRBHOME/.srb/
-	tar -rpPf /tmp/$1.tar $HOSTCERT
-	tar -rpPf /tmp/$1.tar $HOSTKEY
-	tar -rpPf /tmp/$1.tar $SRBHOME/.odbc.ini
-	tar -rpPf /tmp/$1.tar $SRBROOT/bin/runsrb
-	tar -rpPf /tmp/$1.tar $SRBROOT/data/host*
-	tar -rpPf /tmp/$1.tar $SRBROOT/data/mcatHost
-	tar -rpPf /tmp/$1.tar $SRBROOT/data/MdasConfig
-	tar -rpPf /tmp/$1.tar $SRBROOT/data/shibConfig
-	tar -rpPf /tmp/$1.tar $SRBROOT/globus/etc/gridftp_srb.conf
-	echo "done."
-	if [ $2 -eq 2 ]; then
-		for vault in ${VAULTS[@]}; do
-			vaultName=`echo $vault | grep -oe  '[a-zA-Z0-9_-]*$'`
-			echo "Backing up $vault..."
-			tar -cpPf /tmp/$1-$vaultName.tar $vault/
-			mv /tmp/$1-$vaultName.tar $BACKUPROOT/
-			echo 'done.'
-		done 
+	#stopSRB
+	#tar -cpPf $1 $MCATDATA/
+	pg_dump -o -f $SRBHOME/MCAT.dump MCAT
+	tar -rpPf $1 $SRBHOME/MCAT.dump
+	tar -rpPf $1 $SRBHOME/.srb/
+	tar -rpPf $1 $HOSTCERT
+	tar -rpPf $1 $HOSTKEY
+	tar -rpPf $1 $SRBHOME/.odbc.ini
+	tar -rpPf $1 $SRBROOT/bin/runsrb
+	tar -rpPf $1 $SRBROOT/data/host*
+	tar -rpPf $1 $SRBROOT/data/mcatHost
+	tar -rpPf $1 $SRBROOT/data/MdasConfig
+	tar -rpPf $1 $SRBROOT/data/shibConfig
+	if test -f $SRBROOT/globus/etc/gridftp_srb.conf; then
+		tar -rpPf $1 $SRBROOT/globus/etc/gridftp_srb.conf
 	fi
-	startSRB
-	if [ $2 -eq 1 ]; then
-		echo "Running remote backup..."
-		/usr/bin/Sinit
-		/usr/bin/Scd /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain
-		/usr/bin/Sput -S $remoteBackupResource  /tmp/$1.tar
-		/usr/bin/Sexit
-		echo "done."
-	fi
-	mv /tmp/$1.tar $BACKUPROOT/
+	#startSRB
+	rm $SRBHOME/MCAT.dump
+	echo 'moving tar ball...'
+	mv $1 $BACKUPROOT/
+	echo 'done.'
 	return $?
 }
 
@@ -92,6 +70,10 @@ restore () {
 	stopSRB
 	if test -f $1; then
 		tar -xpPf $1
+		dropdb MCAT
+		createdb MCAT
+		psql MCAT < $SRBHOME/MCAT.dump
+		rm $SRBHOME/MCAT.dump
 		if [ $? -eq 0 ]; then
 			startSRB
 		fi
@@ -100,49 +82,24 @@ restore () {
 		return 1
 }
 
-cleanOld () {
+clean () {
 	echo "Cleaning old local backups..."
-	find $BACKUPROOT -mtime +2 | xargs rm -rf
-	echo "done."
-	if [ $1 -eq 1 ]; then
-		echo "Cleaning old remote backups..."
-		/usr/bin/Sinit
-		/usr/bin/Srm -A "CTIME < $PAST"-rf /$remoteBackupZone/home/$srbAdminUser.$srbAdminDomain/*
-		/usr/bin/Sexit
-		echo "done."
-	fi	
-	return $?
+        find $BACKUPROOT -mtime +$TIME_TO_KEEP | xargs rm -rf
+        echo "done."
 }
 
 case "$1" in
 	backup)
-		case "$2" in
-			remote)
-				backup srb-backup-$HOST-$NOW 1
-				;;
-			data)
-				backup srb-backup-$HOST-$NOW 2
-				;;
-			*)
-				backup srb-backup-$HOST-$NOW 0
-				;;
-		esac
+		backup srb-backup-$HOST-$NOW.tar
 		;;
 	restore)
-		restore $2 
+		restore $2 srb-backup-$HOST-$NOW-before_restore.tar
 		;;
 	clean)
-		case "$2" in
-			remote)
-				cleanOld 1 
-				;;
-			*)
-				cleanOld 0
-				;;
-		esac
+		clean
 		;;
 *)
-	echo $"Usage: $0 {backup [remote] [data] | restore <ARCHIVE> | clean [remote]}"
+	echo $"Usage: $0 {backup|restore <ARCHIVE>|clean}"
 	exit 1
 esac
 
