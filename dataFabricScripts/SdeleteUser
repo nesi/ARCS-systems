@@ -1,0 +1,40 @@
+#!/bin/sh
+# SdeleteUser  Removes the directory of a designated user, then removes
+#              his trash and sets his Type to 'deleted'.
+#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081017
+
+# Usage checks
+if [ ! `id -un` = srb ]; then
+  echo "You must be 'root' to run this program!" >&2
+  exit 2
+fi
+if [ \( -z "$1" \) -o \( -n "$2" \) ]; then
+  ( echo "Usage: `basename $0` User"
+    echo " e.g.: `basename $0` neilclarke" ) >&2
+  exit 2
+fi
+
+# Check that user exists, then remove directory etc.
+trap 'Sexit' 0 1 2 3 14 15
+Sinit
+if SgetU "$1" >/dev/null 2>&1; then
+  Domain=`SgetU -Z $1 | awk '/^domain_desc:/ {print $2; exit}'`
+  echo "Removing directory: /$Domain/home/$1.$Domain .."
+  Srm -r /$Domain/home/$1.$Domain 2>/dev/null
+  echo "Removing trash for: $1@$Domain .."
+  Srmtrash -AU $1@$Domain 
+  for Count in `seq 50` ; do  # Dirty kludge because above doesn't always work
+    Srmtrash -A /$Domain/trash/home/$1.$Domain 2>/dev/null && Flag="Y" &&break
+  done
+  echo "Setting 'deleted' Type for: $1 in Domain: $Domain .."
+  SmodifyUser changeType $1 $Domain deleted
+  SgetU -T deleted |
+    awk '{if($1=="user_name:") if($2==U) {print U" is now deleted!"}}' U=$1
+  [ -n "$Flag" ] && exit 0
+  ( echo "Note: the directory: /$Domain/trash/home/$1.$Domain is not empty!"
+    echo "You may need to run this program again." ) >&2
+  exit 2
+else
+  echo "User: $1 .. not found!"
+  exit 1
+fi
