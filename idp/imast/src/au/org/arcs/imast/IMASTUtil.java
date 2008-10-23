@@ -35,14 +35,11 @@ public class IMASTUtil {
 
 	private static IMASTDataConnector connector = null;
 
-	// private String configFileLocation = "";
-
 	/**
 	 * @param configFileLocation
 	 * @throws AttributeResolverException
 	 */
 	public IMASTUtil() throws AttributeResolverException {
-		// TODO Auto-generated constructor stub
 	}
 
 	private void loadConfig(String configFile)
@@ -125,7 +122,6 @@ public class IMASTUtil {
 
 	public IMASTDataConnector getDataConnector(Properties imastProperties) throws IMASTException{
 		if(connector != null){
-			System.out.println("Connector is existing");
 			log.info("Connector is existing");
 			return connector;
 		}
@@ -147,14 +143,6 @@ public class IMASTUtil {
 		connector.setImastProperties(imastProperties);
 
 		return connector;
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

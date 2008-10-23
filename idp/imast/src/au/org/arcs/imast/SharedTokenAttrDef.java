@@ -3,7 +3,6 @@
  */
 package au.org.arcs.imast;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Principal;
@@ -59,7 +58,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 		String auEduPersonSharedToken;
 
-
 		try {
 			Attributes attributes = depends.getConnectorResolution("directory");
 			Attribute directoryAuEduPersonSharedToken = attributes
@@ -67,10 +65,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 			if (directoryAuEduPersonSharedToken == null) {
 				// no value in directory, so generate one
-				// String somePrivateUniqueID = attributes.get("prism").get(0);
-				// ARCS notes: use "uid" for OpenLADP
-				
-				log.info("generate a auEduPersonToken");
+				log.info("generate aEPST");
 
 				if (imastProperties == null) {
 					imastProperties = new Properties();
@@ -82,10 +77,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 				String idpIdentifier = responder;
 				String privateSeed = this.getPrivateSeed(imastProperties);
 
-				System.out.println("userIdentifier" + " : " + userIdentifier);
-				System.out.println("idpIdentifier" + " : " + idpIdentifier);
-				System.out.println("privateSeed" + " : " + privateSeed);
-				
 				log.debug("userIdentifier" + " : " + userIdentifier);
 				log.debug("idpIdentifier" + " : " + idpIdentifier);
 				log.debug("privateSeed" + " : " + privateSeed);
@@ -95,15 +86,11 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 						|| idpIdentifier.trim().equals("")
 						|| privateSeed == null || privateSeed.trim().equals("")) {
 					auEduPersonSharedToken = null;
-					System.out
-							.println("no UniqueID value in directory, so can’t generate Shared Token");
 					log
 							.warn("no UniqueID value in directory, so can’t generate Shared Token");
 				} else {
 					auEduPersonSharedToken = this.generateShareToken(
 							userIdentifier, idpIdentifier, privateSeed);
-					System.out.println("auEduPersonSharedToken : "
-							+ auEduPersonSharedToken);
 					try {
 						this.writeAttribute(auEduPersonSharedToken, principal,
 								imastProperties);
@@ -118,7 +105,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 			} else {
 				// existing directory value
-				System.out.println("aEPST is existing, get it from Ldap");
 				log.info("aEPST is existing, get it from Ldap");
 
 				auEduPersonSharedToken = (String) directoryAuEduPersonSharedToken
@@ -127,22 +113,17 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			attribute.addValue(auEduPersonSharedToken);
 
 		} catch (NamingException e) {
-			// TODO Auto-generated catch block
-			System.out.println("couldn't generate aEPST, set aEPST to null");
 			log.warn("couldn't generate aEPST, set aEPST to null");
 			auEduPersonSharedToken = null;
 
 		} catch (Exception e) {
-			System.out.println("couldn't generate aEPST, set aEPST to null");
 			log.warn("couldn't generate aEPST, set aEPST to null");
 			auEduPersonSharedToken = null;
 		}
 	}
 
 	private void getIMASTProperties(Properties imastProperties) {
-		System.out.println("start getIMASTProperties");
 		try {
-			// imastProperties.load(new FileInputStream(IMAST_PROPERTIES));
 			imastProperties.load(this.getClass().getClassLoader()
 					.getResourceAsStream(IMAST_PROPERTIES));
 			String userIdentifierConf = (String) imastProperties
@@ -151,8 +132,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 					|| userIdentifierConf.trim().equals("")) {
 				imastProperties.put("USER_IDENTIFIER",
 						DefaultProperties.USER_IDENTIFIER);
-				System.out
-						.println("can not find user identifier configuration in imast.properties, use default instead");
 				log
 						.info("can not find user identifier configuration, using default instead");
 			}
@@ -162,8 +141,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			if (privateSeed == null || privateSeed.trim().equals("")) {
 				imastProperties.put("PRIVATE_SEED",
 						DefaultProperties.PRIVATE_SEED);
-				System.out
-						.println("can not find private seed in imast.properties, use default instead");
 				log
 						.info("can not find private seed in imast.properties, use default instead");
 
@@ -174,8 +151,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			if (idpConfFile == null || idpConfFile.trim().equals("")) {
 				imastProperties.put("IDP_CONFIG_FILE",
 						DefaultProperties.IDP_CONFIG_FILE);
-				System.out
-						.println("can not find idp config file in imast.properties, use default instead");
 				log
 						.info("can not find idp config file in imast.properties, using default instead");
 
@@ -185,22 +160,16 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			// TODO Auto-generated catch block
 			log
 					.warn("The IMAST properties file is not existing, use default properities instead");
-			System.out
-					.println("The IMAST properties file is not existing, use default properities instead");
 			this.setDefaultProperties(imastProperties);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			log
 					.warn("Error to load imast.properties, use default properities instead");
-			System.out
-					.println("Error to load imast.properties, use default properities instead");
 			this.setDefaultProperties(imastProperties);
 		} catch (Exception e) {
 			log
 					.warn("Error to get imast.properties, use default properities instead");
-			System.out
-					.println("Error to get imast.properties, use default properities instead");
 			this.setDefaultProperties(imastProperties);
 
 		}
@@ -213,12 +182,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 		imastProperties.put("PRIVATE_SEED", DefaultProperties.PRIVATE_SEED);
 		imastProperties.put("IDP_CONFIG_FILE",
 				DefaultProperties.IDP_CONFIG_FILE);
-		/*
-		 * imastProperties.put("SECURITY_PRINCIPAL",
-		 * DefaultProperties.SECURITY_PRINCIPAL);
-		 * imastProperties.put("SECURITY_CREDENTIALS",
-		 * DefaultProperties.SECURITY_CREDENTIALS);
-		 */}
+	}
 
 	private String generateShareToken(String userIdentifier,
 			String idpIdentifier, String privateSeed) {
@@ -240,40 +204,28 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 		String somePrivateUniqueID = "";
 		String[] userIdentifierdArray = userIdentifierConf.split(",");
-		System.out.println("userIdentifierConf" + " : " + userIdentifierConf);
-		System.out.println(userIdentifierdArray.length);
-		System.out.println("attributes.get(uid)" + " : "
-				+ attributes.get("uid").get(0));
 		for (int i = 0; i < userIdentifierdArray.length; i++) {
-			System.out.println(userIdentifierdArray[i]);
 			if (attributes.get(userIdentifierdArray[i]) != null) {
 				somePrivateUniqueID = somePrivateUniqueID
 						.concat((String) attributes
 								.get(userIdentifierdArray[i]).get(0));
-				System.out.println("inside for somePrivateUniqueID : "
-						+ somePrivateUniqueID);
 			} else {
-				System.out
-						.println(userIdentifierdArray[i] + " is not existing");
 				log.warn(userIdentifierdArray[i] + " is not existing");
 				somePrivateUniqueID = null;
 				break;
 			}
 		}
-		System.out.println("somePrivateUniqueID" + " : " + somePrivateUniqueID);
 		return somePrivateUniqueID;
 
 	}
 
 	private String getPrivateSeed(Properties imastProperties) {
 		String seed = imastProperties.getProperty("PRIVATE_SEED");
-
 		return seed;
 	}
 
 	private void writeAttribute(String aEPST, Principal principal,
 			Properties imastProperties) throws IMASTException {
-		System.out.println("Start storeAttribute ...");
 		IMASTDataConnector connector = null;
 		try {
 			IMASTUtil util = new IMASTUtil();
@@ -312,14 +264,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 		}
 
 		return auEduPersonSharedToken;
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

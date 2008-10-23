@@ -4,7 +4,6 @@
 package au.org.arcs.imast;
 
 import java.security.Principal;
-import java.util.Enumeration;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -60,28 +59,14 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 											.getProperty("SECURITY_CREDENTIALS"));
 				}
 			}
-			
-			// testing
-			Enumeration enu = properties.keys();
-			while (enu.hasMoreElements()) {
-				String key = (String) enu.nextElement();
-				String value = properties.getProperty(key);
-				System.out.println(key + " : " + value);
-			}
 
-			System.out.println("auEduPersonSharedToken : " + aEPST);
-			log.debug("auEduPersonSharedToken : " + aEPST);
-			System.out.println("searchFilter : " + super.searchFilter);
-			log.debug("searchFilter : " + super.searchFilter);
-			System.out.println("principal : " + principal.getName());
-			log.debug("principal : " + principal.getName());
-			//
-			
 			String populatedSearch = searchFilter.replaceAll("%PRINCIPAL%",
 					principal.getName());
-			System.out.println("populatedSearch : " + populatedSearch);
+
+			log.debug("auEduPersonSharedToken : " + aEPST);
+			log.debug("searchFilter : " + super.searchFilter);
+			log.debug("principal : " + principal.getName());
 			log.debug("populatedSearch : " + populatedSearch);
-			
 
 			try {
 				DirContext dirContext = new InitialDirContext(properties);
@@ -94,32 +79,19 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 							mod0);
 					dirContext.modifyAttributes(populatedSearch, mods);
 				} catch (Exception e) {
-					//TODO should not replace, test only here
-					log.warn("aEPST is existing, replace instead");
-					System.out.println("aEPST is existing, replace instead");
+					// TODO should not replace, test only here
+					log.warn("aEPST is existing");
 					mods[0] = new ModificationItem(
 							DirContext.REPLACE_ATTRIBUTE, mod0);
-					dirContext.modifyAttributes(populatedSearch, mods);
+					//dirContext.modifyAttributes(populatedSearch, mods);
 				}
 
 			} catch (NamingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 				throw new IMASTException(e.getMessage(), e.getCause());
 			}
 		} catch (Exception e) {
 			throw new IMASTException(e.getMessage(), e.getCause());
 		}
-
-		// createDirContext()
-
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 	}
 
