@@ -1,0 +1,70 @@
+#!/bin/sh
+# SdeleteUser  Sets the Type of a designated user to 'deleted' or 'purged'.
+#              Can also be used to remove files owned by 'purged' users;
+#              files in trash are not removed.
+#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081024
+
+# Usage checks
+if [ ! `id -un` = srb ]; then
+  echo "You must be the 'srb' user to run this program!" >&2
+  #exit 2
+fi
+while getopts d:p:r  Option; do
+  case $Option in
+    d) Flag=deleted; Param=$OPTARG;;
+    p) Flag=purged ; Param=$OPTARG;;
+    r) Flag=Remove                ;;
+   \?) Bad=Y                ;;
+  esac
+done
+shift `expr $OPTIND - 1`
+if [ \( -z "$Flag" \) -o \( -n "$1" \) -o \( -n "$Bad" \) ]; then
+  ( echo "Usage: `basename $0` [-d|-p] user"
+    echo "   or: `basename $0` -r days"
+    echo " e.g.: `basename $0` -d janedoe .. sets Type 'deleted' for 'janedoe'"
+    echo "   or: `basename $0` -p janedoe .. sets Type 'purged'  for 'janedoe'"
+    echo "   or: `basename $0` -r         .. removes files of 'purged' users"
+  ) >&2
+  exit 2
+fi
+
+# Set trap, perform 'Sinit'
+trap 'Sexit' 0 1 2 3 14 15
+Sinit
+
+# Perform actions 
+case "$Flag" in 
+  
+  deleted|purged )
+    if SgetU "$Param" >/dev/null 2>&1; then
+      Domain=`SgetU -Z $Param | awk '/^domain_desc:/ {print $2; exit}'`
+      echo "Setting '$Flag' Type for User '$Param' in Domain '$Domain' .."
+      Singesttoken UserType $Flag home 2>/dev/null
+      SmodifyUser changeType $Param $Domain $Flag >/dev/null 2>&1 && exit 0
+      echo "Failed!"                                               ; exit 1 
+    else
+      echo "User '$Param' .. not found!"                           ; exit 1
+    fi
+  ;;
+
+  Remove         )
+    echo "Creating certificate which will grant access to user files .."
+    grid-proxy-init
+    Dn="`grid-proxy-info -subject`"
+    ExitCode=0
+    for User in `SgetU -T purged | awk '/^user_name:/ {print $2}'`; do
+      echo "Checking/deleting files for User: $User"
+      Domain=`SgetU -Z $User | awk '/^domain_desc:/ {print $2; exit}'`
+      SmodifyUser addDN $User $Domain "$Dn"
+      for File in `Sls -c "USER = $User"  | awk '{
+           if($1 !~ "^/"domain"/trash/") print $0}' domain="$Domain"`; do
+        echo Deleting File:  \"$File\" 
+        Srm "$File" && continue
+        echo "Failed!" || ExitCode=1
+      done
+      SmodifyUser delDN $User $Domain "$Dn"
+    done
+    exit $ExitCode
+  ;;
+
+esac
