@@ -3,8 +3,9 @@
  */
 package au.org.arcs.imast;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.Properties;
 
@@ -69,17 +70,19 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 				if (imastProperties == null) {
 					imastProperties = new Properties();
-					this.getIMASTProperties(imastProperties);
+					this.getIMASTProperties(imastProperties, responder);
 				}
 
 				String userIdentifier = this.getPrivateUniqueID(attributes,
 						imastProperties);
 				String idpIdentifier = responder;
-				String privateSeed = this.getPrivateSeed(imastProperties);
+				String privateSeed = imastProperties
+						.getProperty("PRIVATE_SEED");
 
 				log.debug("userIdentifier" + " : " + userIdentifier);
 				log.debug("idpIdentifier" + " : " + idpIdentifier);
 				log.debug("privateSeed" + " : " + privateSeed);
+				log.debug("idp configuration file : " + imastProperties.getProperty("IDP_CONFIG_FILE"));
 
 				if (userIdentifier == null || userIdentifier.trim().equals("")
 						|| idpIdentifier == null
@@ -87,20 +90,12 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 						|| privateSeed == null || privateSeed.trim().equals("")) {
 					auEduPersonSharedToken = null;
 					log
-							.warn("no UniqueID value in directory, so can’t generate Shared Token");
+							.warn("Either userIdentifier or idpIdentifier or privateSeed is missing, so can’t generate Shared Token");
 				} else {
 					auEduPersonSharedToken = this.generateShareToken(
 							userIdentifier, idpIdentifier, privateSeed);
-					try {
-						this.writeAttribute(auEduPersonSharedToken, principal,
-								imastProperties);
-					} catch (IMASTException e) {
-						// TODO Auto-generated catch block
-						// e.printStackTrace();
-						log
-								.warn("couldn't write aEPST to Ldap, set aEPST to null");
-						auEduPersonSharedToken = null;
-					}
+					this.writeAttribute(auEduPersonSharedToken, principal,
+							imastProperties);
 				}
 
 			} else {
@@ -113,75 +108,83 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			attribute.addValue(auEduPersonSharedToken);
 
 		} catch (NamingException e) {
-			log.warn("couldn't generate aEPST, set aEPST to null");
+			log.warn(e.getMessage()
+					+ ". Couldn't generate aEPST and set aEPST to null");
 			auEduPersonSharedToken = null;
 
+		} catch (IMASTException e) {
+
+			log.warn(e.getMessage()
+					+ ". Couldn't generate aEPST and set aEPST to null");
+
 		} catch (Exception e) {
-			log.warn("couldn't generate aEPST, set aEPST to null");
+			log.warn(e.getMessage()
+					+ ". Couldn't generate aEPST and set aEPST to null");
 			auEduPersonSharedToken = null;
 		}
 	}
 
-	private void getIMASTProperties(Properties imastProperties) {
+	private void getIMASTProperties(Properties imastProperties, String responder)
+			throws IMASTException {
+
 		try {
 			imastProperties.load(this.getClass().getClassLoader()
 					.getResourceAsStream(IMAST_PROPERTIES));
-			String userIdentifierConf = (String) imastProperties
-					.getProperty("USER_IDENTIFIER");
-			if (userIdentifierConf == null
-					|| userIdentifierConf.trim().equals("")) {
-				imastProperties.put("USER_IDENTIFIER",
-						DefaultProperties.USER_IDENTIFIER);
-				log
-						.info("can not find user identifier configuration, using default instead");
-			}
-
-			String privateSeed = (String) imastProperties
-					.getProperty("PRIVATE_SEED");
-			if (privateSeed == null || privateSeed.trim().equals("")) {
-				imastProperties.put("PRIVATE_SEED",
-						DefaultProperties.PRIVATE_SEED);
-				log
-						.info("can not find private seed in imast.properties, use default instead");
-
-			}
-
-			String idpConfFile = (String) imastProperties
-					.getProperty("IDP_CONFIG_FILE");
-			if (idpConfFile == null || idpConfFile.trim().equals("")) {
-				imastProperties.put("IDP_CONFIG_FILE",
-						DefaultProperties.IDP_CONFIG_FILE);
-				log
-						.info("can not find idp config file in imast.properties, using default instead");
-
-			}
-
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			log
-					.warn("The IMAST properties file is not existing, use default properities instead");
-			this.setDefaultProperties(imastProperties);
-
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			log
-					.warn("Error to load imast.properties, use default properities instead");
-			this.setDefaultProperties(imastProperties);
-		} catch (Exception e) {
+					.warn(e.getMessage()
+							+ ". couldn't find imast.properties file. try to use default properties");
+			if (imastProperties == null)
+				imastProperties = new Properties();
+		}
+
+		String userIdentifierConf = (String) imastProperties
+				.getProperty("USER_IDENTIFIER");
+
+		if (userIdentifierConf == null || userIdentifierConf.trim().equals("")) {
+			imastProperties.put("USER_IDENTIFIER",
+					DefaultProperties.USER_IDENTIFIER);
 			log
-					.warn("Error to get imast.properties, use default properities instead");
-			this.setDefaultProperties(imastProperties);
+					.info("Can not find user identifier in imast.properties, use default value instead");
+		}
+
+		String privateSeed = (String) imastProperties
+				.getProperty("PRIVATE_SEED");
+
+		String idpIdentifier = (String) imastProperties
+				.getProperty("IDP_IDENTIFIER");
+		if (idpIdentifier == null || idpIdentifier.trim().equals("")) {
+			imastProperties.put("IDP_IDENTIFIER", responder);
+			log
+					.info("Can not find idp identifier in imast.properties, use default value instead");
+		}
+
+		if (privateSeed == null || privateSeed.trim().equals("")) {
+
+			log
+					.info("Can not find private seed in imast.properties, use default value instead");
+			InetAddress thisIp = null;
+			try {
+				thisIp = InetAddress.getLocalHost();
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IMASTException(e.getMessage()
+						+ ". Can not get default private seed");
+			}
+
+			imastProperties.put("PRIVATE_SEED", thisIp.getHostAddress());
 
 		}
-	}
 
-	private void setDefaultProperties(Properties imastProperties) {
-
-		imastProperties.put("USER_IDENTIFIER",
-				DefaultProperties.USER_IDENTIFIER);
-		imastProperties.put("PRIVATE_SEED", DefaultProperties.PRIVATE_SEED);
-		imastProperties.put("IDP_CONFIG_FILE",
-				DefaultProperties.IDP_CONFIG_FILE);
+		String idpConfFile = (String) imastProperties
+				.getProperty("IDP_CONFIG_FILE");
+		if (idpConfFile == null || idpConfFile.trim().equals("")) {
+			imastProperties.put("IDP_CONFIG_FILE",
+					DefaultProperties.IDP_CONFIG_FILE);
+			log
+					.info("Can not find idp config file in imast.properties, use default value instead");
+		}
 	}
 
 	private String generateShareToken(String userIdentifier,
@@ -199,6 +202,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 	private String getPrivateUniqueID(Attributes attributes,
 			Properties imastProperties) throws NamingException {
+
 		String userIdentifierConf = imastProperties
 				.getProperty("USER_IDENTIFIER");
 
@@ -219,11 +223,6 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 	}
 
-	private String getPrivateSeed(Properties imastProperties) {
-		String seed = imastProperties.getProperty("PRIVATE_SEED");
-		return seed;
-	}
-
 	private void writeAttribute(String aEPST, Principal principal,
 			Properties imastProperties) throws IMASTException {
 		IMASTDataConnector connector = null;
@@ -233,9 +232,9 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			connector.writeAttribute(aEPST, principal);
 
 		} catch (AttributeResolverException e) {
-			throw new IMASTException(e.getMessage(), e.getCause());
+			throw new IMASTException(e.getMessage());
 		} catch (Exception e) {
-			throw new IMASTException(e.getMessage(), e.getCause());
+			throw new IMASTException(e.getMessage());
 		}
 
 	}

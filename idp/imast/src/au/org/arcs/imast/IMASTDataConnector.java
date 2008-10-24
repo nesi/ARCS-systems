@@ -39,58 +39,52 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 
 	public void writeAttribute(String aEPST, Principal principal)
 			throws IMASTException {
-		try {
-			Properties properties = super.properties;
-			if (imastProperties != null) {
-				String secPrincipal = imastProperties
-						.getProperty("SECURITY_PRINCIPAL");
-				String secCredential = imastProperties
-						.getProperty("SECURITY_CREDENTIALS");
-				if (secPrincipal != null && !secPrincipal.trim().equals("")
-						&& secCredential != null
-						&& !secCredential.trim().equals("")) {
-					// overwrite default binduser
-					properties.setProperty("java.naming.security.principal",
-							imastProperties.getProperty("SECURITY_PRINCIPAL"));
-					properties
-							.setProperty(
-									"java.naming.security.credentials",
-									imastProperties
-											.getProperty("SECURITY_CREDENTIALS"));
-				}
+		Properties properties = super.properties;
+		if (imastProperties != null) {
+			String secPrincipal = imastProperties
+					.getProperty("SECURITY_PRINCIPAL");
+			String secCredential = imastProperties
+					.getProperty("SECURITY_CREDENTIALS");
+			if (secPrincipal != null && !secPrincipal.trim().equals("")
+					&& secCredential != null
+					&& !secCredential.trim().equals("")) {
+				// overwrite default binduser
+				properties.setProperty("java.naming.security.principal",
+						imastProperties.getProperty("SECURITY_PRINCIPAL"));
+				properties.setProperty("java.naming.security.credentials",
+						imastProperties.getProperty("SECURITY_CREDENTIALS"));
 			}
+		}
 
-			String populatedSearch = searchFilter.replaceAll("%PRINCIPAL%",
-					principal.getName());
+		String populatedSearch = searchFilter.replaceAll("%PRINCIPAL%",
+				principal.getName());
 
-			log.debug("auEduPersonSharedToken : " + aEPST);
-			log.debug("searchFilter : " + super.searchFilter);
-			log.debug("principal : " + principal.getName());
-			log.debug("populatedSearch : " + populatedSearch);
+		log.debug("auEduPersonSharedToken : " + aEPST);
+		log.debug("security principal : " + imastProperties.getProperty("SECURITY_PRINCIPAL"));
+		log.debug("searchFilter : " + super.searchFilter);
+		log.debug("populatedSearch : " + populatedSearch);
+
+		try {
+			DirContext dirContext = new InitialDirContext(properties);
+			Attribute mod0 = new BasicAttribute("auEduPersonSharedToken", aEPST);
+			ModificationItem[] mods = new ModificationItem[1];
 
 			try {
-				DirContext dirContext = new InitialDirContext(properties);
-				Attribute mod0 = new BasicAttribute("auEduPersonSharedToken",
-						aEPST);
-				ModificationItem[] mods = new ModificationItem[1];
-
-				try {
-					mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE,
-							mod0);
-					dirContext.modifyAttributes(populatedSearch, mods);
-				} catch (Exception e) {
-					// TODO should not replace, test only here
-					log.warn("aEPST is existing");
-					mods[0] = new ModificationItem(
-							DirContext.REPLACE_ATTRIBUTE, mod0);
-					//dirContext.modifyAttributes(populatedSearch, mods);
-				}
-
-			} catch (NamingException e) {
-				throw new IMASTException(e.getMessage(), e.getCause());
+				mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE, mod0);
+				dirContext.modifyAttributes(populatedSearch, mods);
+				log.info("Successfully write aEPTS to Ldap");
+			} catch (Exception e) {
+				// TODO should not replace, test only here
+				log.warn("aEPST is existing");
+				throw new IMASTException(e.getMessage() + ". Couldn't add aEPST to Ldap");
+				//mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+				//		mod0);
+				// dirContext.modifyAttributes(populatedSearch, mods);
 			}
-		} catch (Exception e) {
-			throw new IMASTException(e.getMessage(), e.getCause());
+
+		} catch (NamingException e) {
+			throw new IMASTException(e.getMessage()
+					+ ", couldn't write the Ldap");
 		}
 
 	}
