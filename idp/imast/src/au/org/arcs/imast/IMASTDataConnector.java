@@ -60,7 +60,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 				principal.getName());
 
 		log.debug("auEduPersonSharedToken : " + aEPST);
-		log.debug("security principal : " + imastProperties.getProperty("SECURITY_PRINCIPAL"));
+		log.debug("security principal : " + properties.getProperty("java.naming.security.principal"));
 		log.debug("searchFilter : " + super.searchFilter);
 		log.debug("populatedSearch : " + populatedSearch);
 
