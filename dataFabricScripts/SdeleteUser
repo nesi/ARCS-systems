@@ -1,40 +1,70 @@
 #!/bin/sh
-# SdeleteUser  Removes the directory of a designated user, then removes
-#              his trash and sets his Type to 'deleted'.
-#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081017
+# SdeleteUser  Sets the Type of a designated user to 'deleted' or 'purged'.
+#              Can also be used to remove files owned by 'purged' users;
+#              files in trash are not removed.
+#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081029
 
 # Usage checks
 if [ ! `id -un` = srb ]; then
-  echo "You must be 'root' to run this program!" >&2
+  echo "You must be the 'srb' user to run this program!" >&2
   exit 2
 fi
-if [ \( -z "$1" \) -o \( -n "$2" \) ]; then
-  ( echo "Usage: `basename $0` User"
-    echo " e.g.: `basename $0` neilclarke" ) >&2
+while getopts d:p:r  Option; do
+  case $Option in
+    d) Flag=deleted; Param=$OPTARG;;
+    p) Flag=purged ; Param=$OPTARG;;
+    r) Flag=Remove                ;;
+   \?) Bad=Y                ;;
+  esac
+done
+shift `expr $OPTIND - 1`
+if [ \( -z "$Flag" \) -o \( -n "$1" \) -o \( -n "$Bad" \) ]; then
+  ( echo "Usage: `basename $0` [-d|-p] user"
+    echo "   or: `basename $0` -r days"
+    echo " e.g.: `basename $0` -d janedoe .. sets Type 'deleted' for 'janedoe'"
+    echo "   or: `basename $0` -p janedoe .. sets Type 'purged'  for 'janedoe'"
+    echo "   or: `basename $0` -r         .. removes files of 'purged' users"
+  ) >&2
   exit 2
 fi
 
-# Check that user exists, then remove directory etc.
+# Set trap, perform 'Sinit'
 trap 'Sexit' 0 1 2 3 14 15
 Sinit
-if SgetU "$1" >/dev/null 2>&1; then
-  Domain=`SgetU -Z $1 | awk '/^domain_desc:/ {print $2; exit}'`
-  echo "Removing directory: /$Domain/home/$1.$Domain .."
-  Srm -r /$Domain/home/$1.$Domain 2>/dev/null
-  echo "Removing trash for: $1@$Domain .."
-  Srmtrash -AU $1@$Domain 
-  for Count in `seq 50` ; do  # Dirty kludge because above doesn't always work
-    Srmtrash -A /$Domain/trash/home/$1.$Domain 2>/dev/null && Flag="Y" &&break
-  done
-  echo "Setting 'deleted' Type for: $1 in Domain: $Domain .."
-  SmodifyUser changeType $1 $Domain deleted
-  SgetU -T deleted |
-    awk '{if($1=="user_name:") if($2==U) {print U" is now deleted!"}}' U=$1
-  [ -n "$Flag" ] && exit 0
-  ( echo "Note: the directory: /$Domain/trash/home/$1.$Domain is not empty!"
-    echo "You may need to run this program again." ) >&2
-  exit 2
-else
-  echo "User: $1 .. not found!"
-  exit 1
-fi
+
+# Perform actions 
+case "$Flag" in 
+  
+  deleted|purged )
+    if SgetU "$Param" >/dev/null 2>&1; then
+      Domain=`SgetU -Z $Param | awk '/^domain_desc:/ {print $2; exit}'`
+      echo "Setting '$Flag' Type for User '$Param' in Domain '$Domain' .."
+      Singesttoken UserType $Flag home 2>/dev/null
+      SmodifyUser changeType $Param $Domain $Flag >/dev/null 2>&1 && exit 0
+      echo "Failed!"                                               ; exit 1 
+    else
+      echo "User '$Param' .. not found!"                           ; exit 1
+    fi
+  ;;
+
+  Remove         )
+    echo "Creating certificate which will grant access to user files .."
+    grid-proxy-init
+    Dn="`grid-proxy-info -subject`"
+    ExitCode=0
+    for User in `SgetU -T purged | awk '/^user_name:/ {print $2}'`; do
+      echo "Checking/deleting files for User: $User"
+      Domain=`SgetU -Z $User | awk '/^domain_desc:/ {print $2; exit}'`
+      SmodifyUser addDN $User $Domain "$Dn"
+      for File in `Sls -c "USER = $User"  | awk '{
+           if($1 !~ "^/"domain"/trash/") print $0}' domain="$Domain"`; do
+        echo Deleting File:  \"$File\" 
+        Srm "$File" && continue
+        echo "Failed!" || ExitCode=1
+      done
+      SmodifyUser delDN $User $Domain "$Dn"
+    done
+    exit $ExitCode
+  ;;
+
+esac
