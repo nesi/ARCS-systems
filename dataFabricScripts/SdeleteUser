@@ -1,8 +1,9 @@
 #!/bin/sh
-# SdeleteUser  Sets the Type of a designated user to 'deleted' or 'purged'.
-#              Can also be used to remove files owned by 'purged' users;
-#              files in trash are not removed.
-#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081029
+# $Id$
+# Sets the Type of a designated user to 'deleted' or 'purged'.
+# Can also be used to remove home directories of 'purged' users;
+# files in trash are not removed.
+# Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081105
 
 # Usage checks
 if [ ! `id -un` = srb ]; then
@@ -14,17 +15,17 @@ while getopts d:p:r  Option; do
     d) Flag=deleted; Param=$OPTARG;;
     p) Flag=purged ; Param=$OPTARG;;
     r) Flag=Remove                ;;
-   \?) Bad=Y                ;;
+   \?) Bad=Y                      ;;
   esac
 done
 shift `expr $OPTIND - 1`
 if [ \( -z "$Flag" \) -o \( -n "$1" \) -o \( -n "$Bad" \) ]; then
   ( echo "Usage: `basename $0` [-d|-p] user"
-    echo "   or: `basename $0` -r days"
+    echo "   or: `basename $0` -r"
     echo " e.g.: `basename $0` -d janedoe .. sets Type 'deleted' for 'janedoe'"
     echo "   or: `basename $0` -p janedoe .. sets Type 'purged'  for 'janedoe'"
-    echo "   or: `basename $0` -r         .. removes files of 'purged' users"
-  ) >&2
+    echo "   or: `basename $0` -r         .. removes localdomain files of"\
+                                                         " 'purged' users") >&2
   exit 2
 fi
 
@@ -48,21 +49,19 @@ case "$Flag" in
   ;;
 
   Remove         )
-    echo "Creating certificate which will grant access to user files .."
-    grid-proxy-init
-    Dn="`grid-proxy-info -subject`"
     ExitCode=0
+    ! MyDir="`Spwd`" && echo "Failed to find directory!" >&2 && exit 1 
     for User in `SgetU -T purged | awk '/^user_name:/ {print $2}'`; do
-      echo "Checking/deleting files for User: $User"
-      Domain=`SgetU -Z $User | awk '/^domain_desc:/ {print $2; exit}'`
-      SmodifyUser addDN $User $Domain "$Dn"
-      for File in `Sls -c "USER = $User"  | awk '{
-           if($1 !~ "^/"domain"/trash/") print $0}' domain="$Domain"`; do
-        echo Deleting File:  \"$File\" 
-        Srm "$File" && continue
-        echo "Failed!" || ExitCode=1
+      # May have janedoe@srb.vpac.org, janedoe@srb.tpac.org.au .. process all ..
+      for UserDomain in `SgetU $User| awk '/^domain_desc:/ {print $2}'`; do
+        HomeDir=`dirname $MyDir`/$User.$UserDomain
+        echo "Checking collection: $HomeDir"
+        if [ `Sls $HomeDir 2>/dev/null | wc -l` -gt 1 ]; then
+          echo "Recursively removing: $HomeDir/"
+          #Srm -r $HomeDir/ && continue
+          #echo "Failed!" >&2 || ExitCode=1
+        fi
       done
-      SmodifyUser delDN $User $Domain "$Dn"
     done
     exit $ExitCode
   ;;
