@@ -1,9 +1,8 @@
 #!/bin/sh
-# $Id$
-# Sets the Type of a designated user to 'deleted' or 'purged'.
-# Can also be used to remove home directories of 'purged' users;
-# files in trash are not removed.
-# Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081105
+# SdeleteUser  Sets the Type of a designated user to 'deleted' or 'purged'.
+#              Can also be used to remove home directories of 'purged' users;
+#              files in trash are not removed.
+#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081105
 
 # Usage checks
 if [ ! `id -un` = srb ]; then
