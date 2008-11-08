@@ -60,51 +60,5 @@
       	</srb-admin>
       </tech-support>
     </srb>
-    <srb type="development">    <!-- refers to MCAT -->
-      <zone-name>srbdev.vpac.org</zone-name>
-      <resources>    <!-- there can be one primary resource -->
-      	<resource primary="yes">
-      	  <resource-name>datafabric.srbdev.vpac.org</resource-name>
-       	  <available-space></available-space>
-      	  <total-space>500M</total-space>
-      	</resource>
-      </resources>
-      <domains>
-        <domain primary="yes">
-          <domain-name>srbdev.vpac.org</domain-name>
-		  <domain-admin>srbAdmin</domain-admin>
-		  <domain-test-user>inca</domain-test-user>
-        </domain>
-	  </domains>
-	  <hosts>
-	    <host>
-		  <friendly-name>srbdev.vpac.org</friendly-name>
-		  <host-name>srbdev.vpac.org</host-name>
-		  <port-number>5544</port-number>
-		  <gridftp-dsi-port>2811</gridftp-dsi-port>
-	      <auth-schemes>
-	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=VPAC/CN=srbdev.vpac.org">GSI</auth-scheme>
-	      	<auth-scheme>ENCRYPT1</auth-scheme>
-	      </auth-schemes>
-	    </host>
-	  </hosts>
-      <description>
-      	SRB test server at VPAC.
-      </description>
-      <status>
-      </status>
-      <quota>
-      </quota>
-      <backup-strategy>
-        none.
-      </backup-strategy>
-      <tech-support>
-      	<srb-admin priority="0">
-      	  <name>Graham Jenkins</name>
-      	  <phone>(03)99254862</phone>
-      	  <email>graham.jenkins@arcs.org.au</email>
-      	</srb-admin>
-      </tech-support>
-    </srb>
   </srb-servers>
 </data-services>
