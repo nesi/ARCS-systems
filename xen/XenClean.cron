@@ -1,0 +1,12 @@
+#!/bin/sh
+# XenClean.cron	Should be installed in /etc/cron.daily and made executable.
+#		Cleans 'dryrun' files left in directory /var/lib/xen when 
+#		service 'xendomains' is enabled. This is a workaround for
+#		http://bugs.centos.org/view.php?id=2027
+#
+#		Graham Jenkins <graham@vpac.org> May 2007; rev'd 20070510
+
+find /var/lib/xen -maxdepth 1 -type f -cmin +75        \
+  \( \( -name "vmlinu*" \) -o \( -name "initrd*" \) \) \
+  -ls -exec rm -f {} \; >/tmp/XenClean.$$ 2>&1
+exit 0
