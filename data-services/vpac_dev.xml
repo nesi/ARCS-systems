@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="vpac_dev">
+    <srb type="development">    <!-- refers to MCAT -->
+      <zone-name>srbdev.vpac.org</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>datafabric.srbdev.vpac.org</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>1G</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>srbdev.vpac.org</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>100M</total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srbdev.vpac.org</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <friendly-name>srbdev.vpac.org</friendly-name>   <!-- What you'll tell users, should be your cname -->
+		  <host-name>srbdev.vpac.org</host-name>   <!-- the real host name when you run 'hostname' on your box -->
+		  <port-number>5544</port-number>
+		  <gridftp-dsi-port>2811</gridftp-dsi-port>
+	      <auth-schemes>
+	      	<auth-scheme dn="/C=AU/O=APACGrid/OU=VPAC/CN=srbdev.vpac.org">GSI</auth-scheme>  <!-- should be the same as your cname -->
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This is a development SRB machine at VPAC.
+      </description>
+      <status>
+        Development from 10 November 2008.
+      </status>
+      <quota>
+        To be determined.
+      </quota>
+      <backup-strategy>
+        To be determined.
+      </backup-strategy>
+      <tech-support>
+      	<srb-admin priority="0">
+      	  <name>Graham Jenkins</name>
+      	  <phone>(03)99254862</phone>
+      	  <email>graham.jenkins@arcs.org.au</email>
+      	</srb-admin>
+      </tech-support>
+    </srb>
+  </srb-servers>
+</data-services>
