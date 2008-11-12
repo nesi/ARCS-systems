@@ -75,15 +75,15 @@ class SRBResult(object):
         if(result <> None):
             self.values = {}
             for line in result:
-                line2 = line
-                if(len(line2.strip()) > 0):
-                    split = re.match(SRBResult.pattern, line)
-                    if(len(split.groups()) == 2):
-                        if(self.values.has_key(split.group(1))):
-                            count = len([x for x in self.values.keys() if(x.find(split.group(1)) > -1)])
-                            self.values[split.group(1) + `count`] = split.group(2)
-                        else:
-                            self.values[split.group(1)] = split.group(2)
+                split = re.match(SRBResult.pattern, line)
+                if(len(split.groups()) == 2):
+                    if(self.values.has_key(split.group(1))):
+                        count = len([x for x in self.values.keys() if(x.find(split.group(1)) > -1)])
+                        self.values[split.group(1) + `count`] = split.group(2)
+                    else:
+                        self.values[split.group(1)] = split.group(2)
+    def insertValues(self, map):
+        self.values = map
     
     def getOutputLines(cmd, error):
         """Grabbing stuff from Scommand, stolen from ZoneUserSync """
@@ -156,6 +156,7 @@ class SRBResult(object):
                 
         return srbResults
 
+
     #-----------------------------------------------
     # "static" methods :)
     parse = Callable(parse) 
@@ -168,7 +169,7 @@ class SRBResult(object):
 class SRBUser(SRBResult):
     """No surprise here - this class represents
         a SRB user"""
-    def __init__(self, result):
+    def __init__(self, result = None):
         super(SRBUser, self).__init__(result)
 
     def getUsageByResource(self, zone_id):
@@ -188,9 +189,16 @@ class SRBUser(SRBResult):
     def getHomeCollection(self, zone_id):
         return zone_id + "/home/" + self.values['user_name'] + "." + self.values['domain_desc']
 
+#---------------------------------------------------------------------------------------------
+class SRBGroup(SRBResult):
+    """Groups"""
+    def __init__(self, result = None):
+        super(SRBGroup, self).__init__(result)
+
+
 #-----------------------------------------------------------------------------------
 class SRBDomain(SRBResult):
-    def __init__(self, result):
+    def __init__(self, result = None):
         super(SRBDomain, self).__init__(result)
         self.users = self.getAllUsers()
 
@@ -237,7 +245,7 @@ class SRBZone(SRBResult):
                     #Mb, Kb
     DISPLAY_SIZE = 1024 * 1024    
 
-    def __init__(self, result):
+    def __init__(self, result = None):
         super(SRBZone, self).__init__(result)
         self.resourceList = {}
         self.adminUser = None
