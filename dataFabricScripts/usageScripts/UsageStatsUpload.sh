@@ -67,7 +67,7 @@ if Sinit >/dev/null 2>&1; then
        #Find the old XML file createded $days ago
        find $usageDir -name \*xml -mtime +$days |xargs rm -rf
        Sput -r $2/*.xml /$zone/projects/dataFabricStats
-       Schmod a srbAdmin quest.hpcu.uq.edu.au /$zone/projects/dataFabricStats/*.xml
+       Schmod a srbAdmin srb.hpcu.uq.edu.au /$zone/projects/dataFabricStats/*.xml
 else
        echo "Can not initialise the client SRB environment session!" >> "$logDir/useLog"
        #mailOut
