@@ -111,7 +111,7 @@ class SRBResult(object):
                 e.cloes()
             
             #exclude lines beginning with '-'
-            lines = [x for x in lines if (x[0] <> '-')]
+            lines = [x for x in lines if (((x[0] <> '-')) and (len(x.strip()) > 0))]
             return lines
         except KeyboardInterrupt:
             #Kill them... ALLL OF THEM.....
