@@ -215,22 +215,24 @@ if(__name__ == "__main__"):
             path = FOLDER + "/" + zone_name
             if(not(db.checkHasValuesToday(zone_name, today))):
                 filenamesList = os.listdir(FOLDER + "/" + zone_name)
-                filenamesList.sort()
-                #since file names can be sorted by their datetime, the 
-                #newest file must also be the last item in the directory
-                #listing
-                print "\tlist of files in directory is: " + `filenamesList`
-                file_name = filenamesList[-1]
-                print "\tprocessing lastest file: " + file_name
-                path += "/" + file_name
-                timestamp = getFileTimestamp(file_name)
-                if(not (db.checkHasValuesXMLTimestamp(zone_name, timestamp))):
-                    db.addLog(zone_name, timestamp, path)
+                if(len(filenamesList) > 0):
+                    filenamesList.sort()
+                    #since file names can be sorted by their datetime, the 
+                    #newest file must also be the last item in the directory
+                    #listing
+                    print "\tlist of files in directory is: " + `filenamesList`
+                    file_name = filenamesList[-1]
+                    print "\tprocessing lastest file: " + file_name
+                    path += "/" + file_name
+                    timestamp = getFileTimestamp(file_name)
+                    if(not (db.checkHasValuesXMLTimestamp(zone_name, timestamp))):
+                        db.addLog(zone_name, timestamp, path)
+                    else:
+                        #unlikely to get called... left in for debugging purposes
+                        print """\tNo new files are found for zone - values with xml_timestamp of %s
+                        has already been added to the database"""%(timestamp)
                 else:
-                    #unlikely to get called... left in for debugging purposes
-                    print """\tNo new files are found for zone - values with xml_timestamp of %s
-                       has already been added to the database"""%(timestamp)
-            
+                    print "No files found in " + FOLDER + "/" + zone_name + "... skipping zone"
             else:
                 print "\tValues for " + zone_name + " has already been updated today (" + today + ")"
         #always close the connection!
