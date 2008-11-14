@@ -101,9 +101,9 @@ class StatsDB(StatsDBConnector):
                 DBUseLogEntry.addGroup(self, group, dbResource, (long)(amount[:-2]), (long)(count), xml_timestamp)
 
     def checkHasValuesToday(self, zone, today):
-        sql = """SELECT timestamp FROM use_log WHERE user_id 
-                IN (SELECT users.id FROM users, zones WHERE 
-                users.zone_id = zones.id and 
+        sql = """SELECT timestamp FROM use_log WHERE resource_id 
+                IN (SELECT resources.id FROM resources, zones WHERE 
+                resources.zone_id = zones.id and 
                 zones.name = '%s') and
                 DATE(timestamp) = DATE('%s')
                 LIMIT 1"""%(zone,today) 
