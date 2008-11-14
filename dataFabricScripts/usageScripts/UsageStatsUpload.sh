@@ -44,7 +44,7 @@ days=5
 echo $curTime >> "$logDir/useLog"
 
 #Start to collect usage stats from local MCAT
-python /usr/bin/usageFromMCAT.py > "$2/$zone-$curTime.xml" 2>>"$logDir/useLog"
+python /usr/srb/bin/usageScripts/usageFromMCAT.py > "$2/$zone-$curTime.xml" 2>>"$logDir/useLog"
 
 #Check if the XML file is empty
 if [ `ls -l "$2/$zone-$curTime.xml"|cut -d" " -f5` -eq 0 ]; then
