@@ -115,9 +115,9 @@ class StatsDB(StatsDBConnector):
             return True
 
     def checkHasValuesXMLTimestamp(self, zone, timestamp):
-        sql = """SELECT timestamp FROM use_log WHERE user_id 
-                IN (SELECT users.id FROM users, zones WHERE 
-                users.zone_id = zones.id and 
+        sql = """SELECT timestamp FROM use_log WHERE resource_id
+                IN (SELECT resources.id FROM resources, zones WHERE
+                resources.zone_id = zones.id and
                 zones.name = '%s') and
                 xml_timestamp = '%s'
                 LIMIT 1"""%(zone, timestamp)
@@ -207,7 +207,7 @@ if(__name__ == "__main__"):
     dbZones = []
     if(db.connectDB('dbhost', 'dbuser', 'dbpassword', 'dbname')):
         #connected ok!
-        print "StatsDB.py: last modified 12th Nov 2008"
+        print "StatsDB.py: last modified 17th Nov 2008"
         db.initDB(wrapper)
         today = "-".join(map(repr, datetime.now().timetuple()[:3]))
         for zone_name in os.listdir(FOLDER):
