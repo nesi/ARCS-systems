@@ -36,10 +36,10 @@
 	    </host>
 	  </hosts>
       <description>
-      	This SRB is part of ARCS data fabric federation, with a 12T disk array attached.
+      	This SRB is part of ARCS data fabric federation, with the CSIRO ASC datastore attached.
       </description>
       <status>
-        Production from 16 September 2008.
+        Production from November 2008.
       </status>
       <quota>
         To be determined.
@@ -49,14 +49,19 @@
       </backup-strategy>
       <tech-support>
       	<srb-admin priority="0">
-      	  <name>Graham Jenkins</name>
-      	  <phone>(03)99254862</phone>
-      	  <email>graham.jenkins@arcs.org.au</email>
+      	  <name>Gareth Williams</name>
+      	  <phone>(03)86013804</phone>
+      	  <email>gareth.williams@arcs.org.au</email>
       	</srb-admin>
       	<srb-admin priority="1">
-      	  <name>Sam Morrison</name>
-      	  <phone>(03)99258372</phone>
-      	  <email>sam.morrison@arcs.org.au</email>
+      	  <name>Joel Ludbey-Bruhwel</name>
+      	  <phone>(03)86013814</phone>
+      	  <email>Joel.Ludbey-Bruhwel@arcs.org.au</email>
+      	</srb-admin>
+      	<srb-admin priority="1">
+      	  <name>ASC/HPCCC heldesk</name>
+      	  <phone>(03)96698103</phone>
+      	  <email>hpchelp@csiro.au</email>
       	</srb-admin>
       </tech-support>
     </srb>
