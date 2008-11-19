@@ -8,7 +8,7 @@
       	<resource primary="yes">
       	  <resource-name>datafabric.srb.hpsc.csiro.au</resource-name>
        	  <available-space></available-space>
-      	  <total-space>1T</total-space>
+      	  <total-space>500M</total-space>
       	</resource>
       	<resource primary="no">
       	  <resource-name>srb.hpsc.csiro.au</resource-name>
@@ -53,16 +53,16 @@
       	  <phone>(03)86013804</phone>
       	  <email>gareth.williams@arcs.org.au</email>
       	</srb-admin>
-      	<srb-admin priority="1">
+      	<sys-admin priority="0">
       	  <name>Joel Ludbey-Bruhwel</name>
       	  <phone>(03)86013814</phone>
       	  <email>Joel.Ludbey-Bruhwel@arcs.org.au</email>
-      	</srb-admin>
-      	<srb-admin priority="1">
+      	</sys-admin>
+      	<sys-admin priority="1">
       	  <name>ASC/HPCCC heldesk</name>
       	  <phone>(03)96698103</phone>
       	  <email>hpchelp@csiro.au</email>
-      	</srb-admin>
+      	</sys-admin>
       </tech-support>
     </srb>
   </srb-servers>
