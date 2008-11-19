@@ -8,7 +8,7 @@
       	<resource primary="yes">
       	  <resource-name>datafabric.srb.hpsc.csiro.au</resource-name>
        	  <available-space></available-space>
-      	  <total-space>12T</total-space>
+      	  <total-space>1T</total-space>
       	</resource>
       	<resource primary="no">
       	  <resource-name>srb.hpsc.csiro.au</resource-name>
