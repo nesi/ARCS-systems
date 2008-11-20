@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!-- collectionHome = /${ZONE}/home/${USERNAME}.${DOMAIN} -->
+<data-services>
+  <srb-servers site="bestgrid">
+    <srb type="production">    <!-- refers to MCAT -->
+      <zone-name>srb.bestgrid.org.nz</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>datafabric.srb.bestgrid.org.nz</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>3T</total-space>
+      	</resource>
+      	<resource primary="no">
+      	  <resource-name>srb.bestgrid.org.nz</resource-name>
+      	  <available-space></available-space>
+      	  <total-space>15G</total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srb.bestgrid.org.nz</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <friendly-name>srb.canterbury.ac.nz</friendly-name>
+		  <host-name>ngdata.canterbury.ac.nz</host-name>
+		  <port-number>5544</port-number>
+		  <gridftp-dsi-port>2811</gridftp-dsi-port>
+	      <auth-schemes>
+			<auth-scheme dn="/C=NZ/O=BeSTGRID/OU=University of Canterbury/CN=ngdata.canterbury.ac.nz">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	This SRB is part of ARCS data fabric federation, with a 3T of storage.
+      </description>
+      <status>
+        Production from 20 November 2008.
+      </status>
+      <quota>
+        25GB for all users initially. 
+      </quota>
+      <backup-strategy>
+        Nightly backup of SRB installation and all stored data.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Vladimir Mencl</name>
+          <phone>+6433642987 ext 3012</phone>
+          <email>vladimir.mencl@canterbury.ac.nz</email>
+        </srb-admin>
+      </tech-support>
+    </srb>
+    <srb type="development">    <!-- refers to MCAT -->
+      <zone-name>srbdev.bestgrid.org.nz</zone-name>
+      <resources>    <!-- there can be one primary resource -->
+      	<resource primary="yes">
+      	  <resource-name>srbdev.bestgrid.org.nz</resource-name>
+       	  <available-space></available-space>
+      	  <total-space>3G</total-space>
+      	</resource>
+      </resources>
+      <domains>    <!-- like a group; there can be one primary domain -->
+        <domain primary="yes">
+          <domain-name>srbdev.bestgrid.org.nz</domain-name>
+		  <domain-admin>srbAdmin</domain-admin>
+		  <domain-test-user>inca</domain-test-user>   <!-- a user that my inca test script will use to test your srb -->
+        </domain>
+	  </domains>
+	  <hosts>
+	    <host>
+		  <friendly-name>gridgwtest.canterbury.ac.nz</friendly-name>
+		  <host-name>gridgwtest.canterbury.ac.nz</host-name>
+		  <port-number>5544</port-number>
+		  <gridftp-dsi-port>5000</gridftp-dsi-port>
+	      <auth-schemes>
+			<auth-scheme dn="/C=NZ/O=BeSTGRID/OU=University of Canterbury/CN=gridgwtest.canterbury.ac.nz">GSI</auth-scheme>
+	      	<auth-scheme>ENCRYPT1</auth-scheme>
+	      </auth-schemes>
+	    </host>
+	  </hosts>
+      <description>
+      	SRB test server at University of Canterbury - part of BeSTGRID NZ.
+      </description>
+      <status>
+      </status>
+      <quota>
+      </quota>
+      <backup-strategy>
+        none.
+      </backup-strategy>
+      <tech-support>
+        <srb-admin priority="0">
+          <name>Vladimir Mencl</name>
+          <phone>+6433642987 ext 3012</phone>
+          <email>vladimir.mencl@canterbury.ac.nz</email>
+        </srb-admin>
+      </tech-support>
+    </srb>
+  </srb-servers>
+</data-services>
