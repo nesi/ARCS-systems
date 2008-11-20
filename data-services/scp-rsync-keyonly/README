@@ -1,0 +1,40 @@
+# to make scp-ft.pl work for a specific unattended data transfer solution
+
+#1 customize allowed paths in scp-ft.pl
+
+#2 put the script somewhere convenient and make it executable
+
+#3 generate a key-pair (openssh 2 example) with empty passphrase
+# alternatively, get the remote user to create a keypair and supply 
+  you with the public key
+
+ssh-keygen -t rsa -N "" -f scp-ft-key
+
+#4 add the public key to .ssh/authorized keys in the user@host account hosting the service
+
+cat scp-ft-key.pub >> ~/.ssh/authorized_keys
+
+#5 edit authorized_keys to include a command and possibly other restrictions
+# line becomes:
+command="/path/to/scp-ft.pl -v" ssh-rsa AAAAB3Nz...
+
+other restrictions might include:
+ no-port-forwarding
+ no-X11-forwarding
+ no-agent-forwarding
+ no-pty
+
+#6 include -v if you want the user to get feedback - otherwise it will be very secretive
+
+#7 provide the private key (scp-ft-key) to the down/up loader and tell them to upload download with
+# (where user and host are the place where the authorized_keys file is...)
+
+scp -i scp-ft-key localfile user@host:destination/
+scp -i scp-ft-key -rp localdir user@host:destination/
+scp -i scp-ft-key -rp localdir/. user@host:destination/
+
+# or
+
+scp -i scp-ft-key user@host:sourcedir/file localdest
+scp -i scp-ft-key -rp user@host:sourcedir localdest/
+scp -i scp-ft-key -rp user@host:sourcedir/ localdest/
