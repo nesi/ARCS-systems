@@ -20,6 +20,11 @@ def find_zone(doc,site_name,svr_type):
 		if string.lower(srb_svr.getAttribute(str("type"))) == string.lower(svr_type):
 		    return srb_svr
 
+def find_domain(domains):
+    for domain in domains:
+        if string.lower(str(domain.getAttribute("primary"))) == "yes":
+	    return domain
+
 def run_cmd(cmd):
     print "Executing: "+cmd
     result=commands.getstatusoutput(cmd)
@@ -49,8 +54,15 @@ def federate(site_name,svr_type):
     if host is None:
 	print "No host is found!"
 	return 1
+    zone_name=srb_zone.getElementsByTagName("zone-name")[0].childNodes[0].nodeValue
     cname=host.getElementsByTagName("friendly-name")[0].childNodes[0].nodeValue
     hostname=host.getElementsByTagName("host-name")[0].childNodes[0].nodeValue
+    domain=find_domain(srb_zone.getElementsByTagName("domain"))
+    if domain is None:
+	print "Domain is not found!"
+	return 1
+    domain_name=domain.getElementsByTagName("domain-name")[0].childNodes[0].nodeValue
+
 #    print host.getElementsByTagName("host-name")[0]
     if hostname is None:
 	print "Cannot find hostname!"
@@ -60,11 +72,11 @@ def federate(site_name,svr_type):
     if run_cmd("Sinit")!=0:
 	print "Cannot initiate SRB session."
 	return 1
-    run_cmd("Singesttoken Domain "+cname+" home")
-    run_cmd("Singestuser srbAdmin wabkusbdkweu "+cname+" sysadmin '' '' '' ENCRPYT1 ''")
-    run_cmd("Sregisterlocation "+cname+" "+hostname+" home srbAdmin "+cname)
-    run_cmd("Szone -r "+cname+" "+cname+" 5544 srbAdmin@"+cname+" '' ''")
-    run_cmd("SmodifyUser changeZone srbAdmin "+cname+" "+cname)
+    run_cmd("Singesttoken Domain "+domain_name+" home")
+    run_cmd("Singestuser srbAdmin wabkusbdkweu "+domain_name+" sysadmin '' '' '' ENCRPYT1 ''")
+    run_cmd("Sregisterlocation "+cname+" "+hostname+" home srbAdmin "+domain_name)
+    run_cmd("Szone -r "+zone_name+" "+cname+" 5544 srbAdmin@"+domain_name+" '' ''")
+    run_cmd("SmodifyUser changeZone srbAdmin "+domain_name+" "+domain_name)
     print "Federation with "+site_name+" is created. Please run 'Szonesync.pl -u' after "+site_name+" creates federation with you."
     return 0
 
