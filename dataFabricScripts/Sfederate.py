@@ -73,7 +73,7 @@ def federate(site_name,svr_type):
 	print "Cannot initiate SRB session."
 	return 1
     run_cmd("Singesttoken Domain "+domain_name+" home")
-    run_cmd("Singestuser srbAdmin wabkusbdkweu "+domain_name+" sysadmin '' '' '' ENCRPYT1 ''")
+    run_cmd("Singestuser srbAdmin wabkusbdkweu "+domain_name+" sysadmin '' '' '' ENCRYPT1 ''")
     run_cmd("Sregisterlocation "+cname+" "+hostname+" home srbAdmin "+domain_name)
     run_cmd("Szone -r "+zone_name+" "+cname+" 5544 srbAdmin@"+domain_name+" '' ''")
     run_cmd("SmodifyUser changeZone srbAdmin "+domain_name+" "+domain_name)
