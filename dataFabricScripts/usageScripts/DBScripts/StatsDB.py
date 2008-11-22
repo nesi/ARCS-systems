@@ -165,7 +165,7 @@ class StatsDB(StatsDBConnector):
         for z in self.zones:
             srbZone = wrapper.getZone(z.fields['name'])
             if(srbZone.values['zone_status'] == '1'):
-                srbRsList = srbZone.getResources()
+                srbRsList = srbZone.getResources(False)
                 dbRsList = z.getResources()
                 for rs in self.notInDB(srbRsList.values(), dbRsList,
                                 ['rsrc_name', 'phy_rsrc_name'],
@@ -205,9 +205,9 @@ if(__name__ == "__main__"):
     wrapper = SRBWrapper(LOCAL_ZONE)
     db = StatsDB()
     dbZones = []
-    if(db.connectDB('dbhost', 'dbuser', 'dbpassword', 'dbname')):
+    if(db.connectDB('ngsyslog.hpcu.uq.edu.au', 'srb', 'UsageSRb', 'srbUsage')):
         #connected ok!
-        print "StatsDB.py: last modified 17th Nov 2008"
+        print "StatsDB.py: last modified 12th Nov 2008"
         db.initDB(wrapper)
         today = "-".join(map(repr, datetime.now().timetuple()[:3]))
         for zone_name in os.listdir(FOLDER):

@@ -272,7 +272,10 @@ class SRBZone(SRBResult):
 
         #first line of output says QueryZone = blah       
 
-        list = SRBResult.parseAsType(lines[1:], 21, lambda x: SRBResourceFactory(self, x))
+	if(onlineOnly):
+        	list = SRBResult.parseAsType(lines[1:], 21, lambda x: SRBResourceFactory(self, x))
+	else:
+		list = SRBResult.parseAsType(lines[1:], 12, lambda x: SRBResourceFactory(self, x))
         for rs in list:
             if(rs.values['rsrc_typ_name'] == 'logical'):
                 if(self.resourceList.has_key(rs.values['rsrc_name'])):
