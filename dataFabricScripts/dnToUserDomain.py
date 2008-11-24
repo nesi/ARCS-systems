@@ -26,7 +26,7 @@ def checkLength(user, username, domain):
     else:
         newUsername = ''
         newUsername = reduce(lambda x, y: x + "." +  y, map(lambda x: x[0].lower(), user[:-1]))
-        newUsername = newUsername + "." + user[-1]
+        newUsername = newUsername + "." + user[-1].lower()
         if(len(newUsername + "@" + domain) < 36):
             return newUsername
         else:
