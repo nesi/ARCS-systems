@@ -7,6 +7,10 @@
 #             Also making sure if a user in the same domain has
 #             the same name.  If so, will suffix the name with a 
 #             psuedo random number (no longer than 3 characters)
+# 26-11-2008: Bug fixes courtesy of Vlad :)  The script is now
+#             free of debug statements, can handle misformatted
+#             DNs and also cope with noraml X509 DNs.  It also
+#             accepts the BeSTGRID DN.
 #------------------------------------------------------------------
 import sys, os
 import popen2
@@ -57,15 +61,25 @@ def checkExisting(username, domain):
         return newName
 
 def isSlcs1(dn):
-    if((dn.find('/DC=au') >= 0) and (dn.find('/DC=arcs') >= 0)):
+    if( ((dn.find('/DC=au') >= 0) and (dn.find('/DC=arcs') >= 0)) or 
+        ((dn.find('/DC=nz') >= 0) and (dn.find('/DC=bestgrid') >= 0)) ):
         if((dn.find('/DC=org') >= 0) and (dn.find('/DC=slcs') >= 0)):
             return True
     return False
-    
-def getUsernameSlcs1(user, dn, domain):
+
+def isApacGridCA(dn):
+    if( ((dn.find('/C=AU') >= 0) and (dn.find('/O=APACGrid') >= 0)) or 
+        ((dn.find('/C=NZ') >= 0) and (dn.find('/O=BeSTGRID') >= 0)) ):
+        return True
+    return False
+
+def getUsername(user, dn, domain):
     #the DC stuff has to be at the start of the string??
-    if(isSlcs1(dn)):
-        user = user.split(' ')[:-1]
+    if(isSlcs1(dn) or isApacGridCA(dn)):
+        if(isSlcs1(dn)):
+            user = user.split(' ')[:-1]
+        else:
+            user = user.split(' ')
         username = ''
         for string in user:
             username += string.lower()
@@ -73,24 +87,32 @@ def getUsernameSlcs1(user, dn, domain):
         #username = checkExisting(username, domain)
         return username
     else:
-        return user.replace(' ','').lower()
+        return None
 
 domains = {
-    'TPAC':'srbdev.sf.utas.edu.au',
+    'University of Canterbury':'srbdev.bestgrid.org.nz',
+    'The University of Auckland':'srbdev.bestgrid.org.nz',
+    'University of Canterbury':'srbdev.bestgrid.org.nz',
+    'University of Otago':'srbdev.bestgrid.org.nz',
+    'Victoria University of Wellington':'srbdev.bestgrid.org.nz',
     }
 
 if __name__ == '__main__':
     f = open ('/tmp/output','a')
-    f.write(str(sys.argv))
+    f.write(str(sys.argv)+"\n")
     f.close()
     if len(sys.argv) == 2:
         exe, dn = sys.argv
         comp = parse_dn(dn)
+        username = None
         if(comp.has_key('DC') and domains.has_key(comp['O'])):
-            username = getUsernameSlcs1(comp['CN'],dn,domains[comp['O']])
+            username = getUsername(comp['CN'],dn,domains[comp['O']])
             domain = domains[comp['O']]
-            if(username <> None):
-                print username + "@" + domain
+        if(comp.has_key('O') and comp.has_key('OU') and domains.has_key(comp['OU'])):
+            username = getUsername(comp['CN'],dn,domains[comp['OU']])
+            domain = domains[comp['OU']]
+	if(username <> None):
+	    print username + "@" + domain
     else:
         print "dnToUserDomain.py <dn>"
 
