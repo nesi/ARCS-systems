@@ -14,6 +14,7 @@
 #------------------------------------------------------------------
 import sys, os
 import popen2
+from DNCONFIG import *
 
 def parse_dn(dn):
 	"""
@@ -89,13 +90,6 @@ def getUsername(user, dn, domain):
     else:
         return None
 
-domains = {
-    'University of Canterbury':'srbdev.bestgrid.org.nz',
-    'The University of Auckland':'srbdev.bestgrid.org.nz',
-    'University of Canterbury':'srbdev.bestgrid.org.nz',
-    'University of Otago':'srbdev.bestgrid.org.nz',
-    'Victoria University of Wellington':'srbdev.bestgrid.org.nz',
-    }
 
 if __name__ == '__main__':
     f = open ('/tmp/output','a')
