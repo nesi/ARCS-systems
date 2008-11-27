@@ -2,7 +2,7 @@
 # SdeleteUser  Sets the Type of a designated user to 'deleted' or 'purged'.
 #              Can also be used to remove home directories of 'purged' users;
 #              files in trash are not removed.
-#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081105
+#              Graham Jenkins <graham@vpac.org> Oct. 2008. Rev: 20081128
 
 # Usage checks
 if [ ! `id -un` = srb ]; then
@@ -57,8 +57,8 @@ case "$Flag" in
         echo "Checking collection: $HomeDir"
         if [ `Sls $HomeDir 2>/dev/null | wc -l` -gt 1 ]; then
           echo "Recursively removing: $HomeDir/"
-          #Srm -r $HomeDir/ && continue
-          #echo "Failed!" >&2 || ExitCode=1
+          Srm -r $HomeDir/ && continue
+          echo "Failed!" >&2 || ExitCode=1
         fi
       done
     done
