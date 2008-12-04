@@ -7,7 +7,7 @@
 	<property name="conf" value="${basedir}/conf" />
 	<property name="dist" value="${basedir}/dist" />
 	<property name="projectname" value="arcs-imast" />
-	<property name="version" value="0.1.0" />
+	<property name="version" value="0.3.0" />
 
 	<description>
 		Ant script to package a jar file for arcs-imast source code
