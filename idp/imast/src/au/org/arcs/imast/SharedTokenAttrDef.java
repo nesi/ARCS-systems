@@ -82,7 +82,9 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 				log.debug("userIdentifier" + " : " + userIdentifier);
 				log.debug("idpIdentifier" + " : " + idpIdentifier);
 				log.debug("privateSeed" + " : " + privateSeed);
-				log.debug("idp configuration file : " + imastProperties.getProperty("IDP_CONFIG_FILE"));
+				log.debug("idp configuration file : "
+						+ imastProperties.getProperty("IDP_CONFIG_FILE"));
+				log.debug("work_mode : " + imastProperties.getProperty("WORK_MODE"));
 
 				if (userIdentifier == null || userIdentifier.trim().equals("")
 						|| idpIdentifier == null
@@ -94,8 +96,20 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 				} else {
 					auEduPersonSharedToken = this.generateShareToken(
 							userIdentifier, idpIdentifier, privateSeed);
-					this.writeAttribute(auEduPersonSharedToken, principal,
-							imastProperties);
+					log.info("auEduPersonSharedToken : " + auEduPersonSharedToken);
+					String workMode = imastProperties.getProperty("WORK_MODE");
+					if(workMode != null && !workMode.trim().equals("")){
+						if(workMode.equals("ODP")){
+							this.writeAttribute(auEduPersonSharedToken, principal,
+									imastProperties);
+							log.info("On-Demand Provisioning - generate aEPST and write into Ldap");
+							
+						}else if(workMode.equals("PNP")){
+							log.info("Partial or No Provisioning - generate aEPST and does not write into Ldap");
+						}
+					}else{
+						log.warn("No WORK_MODE set up. Partial or No Provisioning - generate aEPST and does not write into Ldap");
+					}
 				}
 
 			} else {
@@ -185,13 +199,21 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			log
 					.info("Can not find idp config file in imast.properties, use default value instead");
 		}
+
+		String workMode = (String) imastProperties.getProperty("WORK_MODE");
+		if (workMode == null || workMode.trim().equals("")) {
+			imastProperties.put("WORK_MODE", DefaultProperties.WORK_MODE);
+			log
+					.info("Can not find WORK_MODE in imast.properties, use default value instead");
+		}
+
 	}
 
 	private String generateShareToken(String userIdentifier,
 			String idpIdentifier, String privateSeed) {
 		String globalUniqueID = userIdentifier + idpIdentifier + privateSeed;
 
-		System.out.println("globalUniqueID : " + globalUniqueID);
+		log.debug("globalUniqueID : " + globalUniqueID);
 		byte[] hashValue = DigestUtils.sha(globalUniqueID);
 		byte[] encodedValue = Base64.encodeBase64(hashValue);
 		String auEduPersonSharedToken = new String(encodedValue);

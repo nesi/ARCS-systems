@@ -198,7 +198,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 		String populatedSearch = searchFilter.replaceAll("%PRINCIPAL%",
 				principal.getName());
 
-		log.debug("auEduPersonSharedToken : " + aEPST);
+		//log.debug("auEduPersonSharedToken : " + aEPST);
 		log.debug("java.naming.provider.url : " + properties.getProperty("java.naming.provider.url") );
 		log.debug("java.naming.security.principal : "
 				+ properties.getProperty("java.naming.security.principal"));

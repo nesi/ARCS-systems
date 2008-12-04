@@ -12,6 +12,11 @@ public class IMASTException extends Exception {
 	/**
 	 * 
 	 */
+	private static final long serialVersionUID = 6770913913328751887L;
+
+	/**
+	 * 
+	 */
 	public IMASTException() {
 		// TODO Auto-generated constructor stub
 	}
