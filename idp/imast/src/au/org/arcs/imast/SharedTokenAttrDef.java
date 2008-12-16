@@ -75,7 +75,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 
 				String userIdentifier = this.getPrivateUniqueID(attributes,
 						imastProperties);
-				String idpIdentifier = responder;
+				String idpIdentifier = imastProperties.getProperty("IDP_IDENTIFIER");
 				String privateSeed = imastProperties
 						.getProperty("PRIVATE_SEED");
 
