@@ -205,7 +205,7 @@ if(__name__ == "__main__"):
     wrapper = SRBWrapper(LOCAL_ZONE)
     db = StatsDB()
     dbZones = []
-    if(db.connectDB('ngsyslog.hpcu.uq.edu.au', 'srb', 'UsageSRb', 'srbUsage')):
+    if(db.connectDB('DB Host', 'srb', 'password', 'srbUsage')):
         #connected ok!
         print "StatsDB.py: last modified 12th Nov 2008"
         db.initDB(wrapper)
