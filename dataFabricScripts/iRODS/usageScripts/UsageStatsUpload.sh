@@ -52,7 +52,7 @@ echo "Unsuccessful in collecting usage stats! Please check the logs." |mail -s "
 echo $curTime >> "$logDir/useLog"
 
 #Start to collect usage stats from local ICAT
-python usageFromICAT.py > "$2/$zone-$curTime.xml" 2>>"$logDir/useLog"
+python $IRODS_HOME/server/bin/usageScripts/usageFromICAT.py > "$2/$zone-$curTime.xml" 2>>"$logDir/useLog"
 
 #Check if the XML file is empty
 if [ `ls -l "$2/$zone-$curTime.xml"|cut -d" " -f5` -eq 0 ]; then
