@@ -75,4 +75,4 @@ find $2 -name \*xml -daystart -mtime +$days|xargs rm -rf
 iput -r $2/*.xml /$zone/projects/dataFabricStats
 
 #The ownership is granted to rods@irods.hpcu.uq.edu.au 
-ichmod -r own rods#irods.hpcu.uq.edu.au /$zone/projects/dataFabricStats
+ichmod -r own rods#quest.hpcu.uq.edu.au /$zone/projects/dataFabricStats
