@@ -65,8 +65,9 @@ else
 fi
 
 #Remove the directory of storing usage stats in data fabric if it exists
-irm -rf /$zone/projects/dataFabricStats
-imkdir -p /$zone/projects/dataFabricStats
+if ! irm -rf /$zone/projects/dataFabricStats >/dev/null 2>&1; then
+   imkdir -p /$zone/projects/dataFabricStats
+fi
 
 #Find the old XML file createded $days+1 ago
 find $2 -name \*xml -daystart -mtime +$days|xargs rm -rf
