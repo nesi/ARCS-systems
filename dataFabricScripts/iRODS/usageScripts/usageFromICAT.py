@@ -84,7 +84,6 @@ class StatsExporter:
                     dataTable.data_owner_zone = userTable.zone_name and
                     (collTable.coll_name like '/%/home/%' and  not (collTable.coll_name like '/%/projects/%')) and
                     dataTable.coll_id = collTable.coll_id and
-                    dataTable.data_owner_name = collTable.coll_owner_name and
                     resourceTable.resc_name = dataTable.resc_name 
                     group by userTable.user_name, userTable.zone_name,  resourceTable.resc_name
                     order by userTable.user_name, userTable.zone_name, resourceTable.resc_name""" 
