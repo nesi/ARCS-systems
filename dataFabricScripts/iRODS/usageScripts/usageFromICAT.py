@@ -11,7 +11,7 @@ import xml.dom.minidom
 
 class StatsExporter:
     def __init__(self, _zone):
-        self.dbConn = pgdb.connect(dsn = 'localhost:ICAT:rods')
+        self.dbConn = pgdb.connect(dsn = 'localhost:vpac_ICAT:rods:july7923')
         self.doc = xml.dom.minidom.Document()
         self.root = self.doc.createElement('usages')
         self.doc.appendChild(self.root)
@@ -72,21 +72,21 @@ class StatsExporter:
 
     def work(self):
         query = """select userTable.user_name, userTable.zone_name,
-                    resourceTable.resc_name, 
+                    resourceTable.resc_name,
                     sum(dataTable.data_size), count(dataTable.data_id)
                     from
                     r_user_main as userTable,
+                    r_objt_access as accessTable,
                     r_data_main as dataTable,
-                    r_coll_main as collTable,
                     r_resc_main as resourceTable
-                    where
-                    dataTable.data_owner_name = userTable.user_name and
-                    dataTable.data_owner_zone = userTable.zone_name and
-                    (collTable.coll_name like '/%/home/%' and  not (collTable.coll_name like '/%/projects/%')) and
-                    dataTable.coll_id = collTable.coll_id and
-                    resourceTable.resc_name = dataTable.resc_name 
-                    group by userTable.user_name, userTable.zone_name,  resourceTable.resc_name
-                    order by userTable.user_name, userTable.zone_name, resourceTable.resc_name""" 
+                    WHERE
+                    userTable.user_type_name = 'rodsuser' and
+                    userTable.user_id = accessTable.user_id and
+                    accessTable.object_id = dataTable.data_id and
+                    dataTable.resc_name = resourceTable.resc_name and
+                    dataTable.data_owner_zone = userTable.zone_name
+                    group by userTable.user_name, userTable.zone_name, resourceTable.resc_name
+                    order by userTable.user_name, userTable.zone_name, resourceTable.resc_name"""
         self.addRecordToDoc(query, 'users')
 
         query = """select userTable.user_name, userTable.zone_name,
