@@ -80,9 +80,17 @@ class StatsExporter:
                     r_data_main as dataTable,
                     r_resc_main as resourceTable
                     WHERE
-                    userTable.user_type_name = 'rodsuser' and
+                    (userTable.user_type_name = 'rodsuser' or userTable.user_type_name = 'rodsadmin') and
                     userTable.user_id = accessTable.user_id and
                     accessTable.object_id = dataTable.data_id and
+                    accessTable.object_id NOT IN
+                          ( select accessTable.object_id 
+                            FROM 
+                            r_objt_access as accessTable, 
+                            r_user_main as userTable 
+                            WHERE 
+                            userTable.user_type_name = 'rodsgroup' and  
+                            userTable.user_id = accessTable.user_id ) and
                     dataTable.resc_name = resourceTable.resc_name and
                     dataTable.data_owner_zone = userTable.zone_name
                     group by userTable.user_name, userTable.zone_name, resourceTable.resc_name
