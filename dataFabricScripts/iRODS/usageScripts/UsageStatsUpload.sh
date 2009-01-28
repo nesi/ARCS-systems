@@ -64,9 +64,15 @@ else
    find $2 -name $zone-$today\* ! -name *$curTime.xml|xargs rm -rf
 fi
 
+#Ensure that iinit is already run
+#There are two approaches to run iinit automatically and please choose one of them
+#(1)run iinit <password>
+#(2)run iinit < [file] - a text file with stored password 
+#For approach 2, the full path of that file needs to be provided
+
 #Remove the directory of storing usage stats in data fabric if it exists
 if ! irm -rf /$zone/projects/dataFabricStats >/dev/null 2>&1; then
-   imkdir -p /$zone/projects/dataFabricStats
+   imkdir /$zone/projects/dataFabricStats
 fi
 
 #Find the old XML file createded $days+1 ago
@@ -76,4 +82,4 @@ find $2 -name \*xml -daystart -mtime +$days|xargs rm -rf
 iput -r $2/*.xml /$zone/projects/dataFabricStats
 
 #The ownership is granted to rods@irods.hpcu.uq.edu.au 
-ichmod -r own rods#quest.hpcu.uq.edu.au /$zone/projects/dataFabricStats
+ichmod -r read rods#quest.hpcu.uq.edu.au /$zone/projects/dataFabricStats
