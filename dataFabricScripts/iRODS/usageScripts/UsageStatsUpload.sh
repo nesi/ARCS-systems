@@ -6,10 +6,13 @@
 #   @ the zone usage stats is located in the path $IRODS_HOME/server/bin/usageScripts/xml
 #   @ the log file of usage stats is located in the path $IRODS_HOME/server/log
 # ----------------------------------------------------------------------------------------
+# Notes that the path may be changed for the future iRODS installation in the production machine  
 
 #!/bin/sh
 # Uploading the usage stat of local site to iRODS
 
+IRODS_HOME="/opt/iRODS-2.0v/iRODS"
+IRODS_CLIENTS="$IRODS_HOME/clients/icommands/bin"
 logDir="$IRODS_HOME/server/log"
 curTime=`date '+%Y-%m-%d-%H-%M-%S'`
 today=`date '+%Y-%m-%d'`
@@ -71,15 +74,14 @@ fi
 #For approach 2, the full path of that file needs to be provided
 
 #Remove the directory of storing usage stats in data fabric if it exists
-if ! irm -rf /$zone/projects/dataFabricStats >/dev/null 2>&1; then
-   imkdir /$zone/projects/dataFabricStats
-fi
+$IRODS_CLIENTS/irm -rf /$zone/projects/dataFabricStats >/dev/null 2>&1
+$IRODS_CLIENTS/imkdir /$zone/projects/dataFabricStats
 
 #Find the old XML file createded $days+1 ago
 find $2 -name \*xml -daystart -mtime +$days|xargs rm -rf
 
 #upload usage stats to local iRODS
-iput -r $2/*.xml /$zone/projects/dataFabricStats
+$IRODS_CLIENTS/iput -r $2/*.xml /$zone/projects/dataFabricStats
 
-#The ownership is granted to rods@irods.hpcu.uq.edu.au 
-ichmod -r read rods#quest.hpcu.uq.edu.au /$zone/projects/dataFabricStats
+#The ownership is granted to rods@QUEST.hpcu.uq.edu.au 
+$IRODS_CLIENTS/ichmod -r read rods#quest.hpcu.uq.edu.au /$zone/projects/dataFabricStats
