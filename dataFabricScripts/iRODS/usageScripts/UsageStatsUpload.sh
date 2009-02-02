@@ -69,8 +69,8 @@ fi
 
 #Ensure that iinit is already run
 #There are two approaches to run iinit automatically and please choose one of them
-#(1)run iinit <password>
-#(2)run iinit < [file] - a text file with stored password 
+#(1)run: $IRODS_CLIENTS/iinit <password>
+#(2)run: $IRODS_CLIENTS/iinit < [file] - a text file with stored password 
 #For approach 2, the full path of that file needs to be provided
 
 #Remove the directory of storing usage stats in data fabric if it exists
