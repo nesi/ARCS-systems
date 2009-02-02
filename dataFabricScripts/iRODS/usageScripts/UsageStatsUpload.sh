@@ -75,7 +75,7 @@ fi
 
 #Remove the directory of storing usage stats in data fabric if it exists
 $IRODS_CLIENTS/irm -rf /$zone/projects/dataFabricStats >/dev/null 2>&1
-$IRODS_CLIENTS/imkdir -p /$zone/projects
+$IRODS_CLIENTS/imkdir -p /$zone/projects >/dev/null 2>&1
 $IRODS_CLIENTS/imkdir /$zone/projects/dataFabricStats
 
 #Find the old XML file createded $days+1 ago
