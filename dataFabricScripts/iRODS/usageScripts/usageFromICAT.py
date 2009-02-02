@@ -11,7 +11,9 @@ import xml.dom.minidom
 
 class StatsExporter:
     def __init__(self, _zone):
-        self.dbConn = pgdb.connect(dsn = 'localhost:ICAT:rods')
+
+        self.pgAuth = os.popen("cat ~/.pgpass").readlines()[0].split(':')
+        self.dbConn = pgdb.connect(host=self.pgAuth[0] + ':'+ self.pgAuth[1], user=self.pgAuth[3], database=self.pgAuth[2], password=self.pgAuth[4][:-1])
         self.doc = xml.dom.minidom.Document()
         self.root = self.doc.createElement('usages')
         self.doc.appendChild(self.root)
@@ -120,9 +122,9 @@ class StatsExporter:
 
 if(__name__ == "__main__"):
     #getResources()
-    lines = os.popen("ienv|grep 'irodsZone'").readlines()
+    lines = os.popen("cat ~/.irods/.irodsEnv|grep 'irodsZone'").readlines()
     if(len(lines) == 1):
-        zone = lines[0][len('NOTICE: irodsZone='):].strip()
+        zone = lines[0].split("'")[1]
         exporter = StatsExporter(zone)
         exporter.work()
         exporter.prettyPrint()
