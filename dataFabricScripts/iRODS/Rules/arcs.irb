@@ -5,6 +5,7 @@ acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,"*arg",null,null,null,*OUT)|nop
 acPostProcForPut|$objPath like /ARCS/home/*|delayExec(<PLUSET>10s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 acPostProcForCopy|$objPath like /ARCS/home/*|delayExec(<PLUSET>10s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
+acSetRescSchemeForCreate|$userNameClient == guest|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 #acSetNumThreads||msiSetNumThreads(default,1,default)|nop
