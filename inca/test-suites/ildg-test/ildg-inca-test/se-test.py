@@ -12,7 +12,7 @@ tmp_file="file:////tmp/_copy_test_tmp_file_ildg"
 xml_file=os.path.dirname(os.path.abspath(sys.argv[0]))+"/file-transfer-test.xml"
 #print os.path.dirname(os.path.abspath(sys.argv[0]))
 
-def transfer_test(fileurl,md5chksum):
+def transfer_test(fileurl,protocol_version,md5chksum):
 #    os.system("rm -rf /tmp/_copy_test_tmp_file")
 #    t1=time.time()
     if fileurl.startswith("gsiftp"):
@@ -23,7 +23,11 @@ def transfer_test(fileurl,md5chksum):
 #	sys.stderr.write(output)
 #	print output
     if fileurl.startswith("srm"):
-	command=srm_cmd+fileurl+" "+tmp_file
+ 	command=srm_cmd
+ 	if protocol_version == "2":
+ 	    command=command+"-srm_protocol_version=2 "
+ 	command=command+fileurl+" "+tmp_file
+#	command=srm_cmd+fileurl+" "+tmp_file
 	print command
 #	output=commands.getoutput(command)
 #	sys.stderr.write("Executing: "+command+"\n")
@@ -56,11 +60,14 @@ def unit_test(test_grid,test_se,protocol):
 #       print filetest.getElementsByTagName("se")[0].childNodes[0].nodeValue
         grid_name=filetest.getElementsByTagName("grid")[0].childNodes[0].nodeValue
         se_name=filetest.getElementsByTagName("se")[0].childNodes[0].nodeValue
+ 	protocol_version=""
+ 	if filetest.getElementsByTagName("protocol").length > 0:
+ 	    protocol_version=filetest.getElementsByTagName("protocol")[0].childNodes[0].nodeValue
         file_url=filetest.getElementsByTagName("url")[0].childNodes[0].nodeValue
 #       print filetest.getElementsByTagName("md5").length
         if filetest.getElementsByTagName("md5").length > 0: md5_chksum=filetest.getElementsByTagName("md5")[0].childNodes[0].nodeValue
         if grid_name == test_grid and filetest.getElementsByTagName("accessDeny").length == 0 and file_url.startswith(protocol) and se_name == test_se:
-            result=transfer_test(file_url,md5_chksum)
+            result=transfer_test(file_url,protocol_version,md5_chksum)
             if result == -1:
 		return -1
 	    else:

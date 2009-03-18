@@ -24,7 +24,7 @@
 		<surl>srm://dcache.fz-juelich.de/pnfs/fz-juelich.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</surl>
 		<surl>srm://dcache.zib.de/pnfs/zib.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</surl>
 		<surl>srm://globe-door.ifh.de/pnfs/ifh.de/acs/qcdsf/pleiter1/ukqcdsf/b5p20/kp13420-16x32/confs-ildg/ape.001.000305.dat</surl>
-		<surl>srm://grid-se3.desy.de/pnfs/desy.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</surl>
+		<surl>srm://grid-se2.pr.infn.it/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</surl>
             </surls>
         </test-unit>
     </fc>
@@ -35,8 +35,8 @@
         <test-unit>
             <lfn>lfn://ukqcd/DWF/ensemble3.2900</lfn>
             <surls>
-                <surl>gsiftp://qcdocx.epcc.ed.ac.uk:2811/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/DWF/ensemble3.2900</surl>
-                <surl>gsiftp://tps1.ph.liv.ac.uk:2811/home/qcdgrid/qcdgrid/DiGS/data3/lfn:/ukqcd/DWF/ensemble3.2900</surl>
+		<surl>gsiftp://pytier2.swan.ac.uk:2811/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/DWF/ensemble3.2900</surl>
+		<surl>gsiftp://tps1.ph.liv.ac.uk:2811/home/qcdgrid/DiGS/data3/lfn:/ukqcd/DWF/ensemble3.2900</surl>
 		<surl>gsiftp://ukqcd.iridis.soton.ac.uk:2811/opt/src/DiGS-v2.0-src/data5/lfn:/ukqcd/DWF/ensemble3.2900</surl>
             </surls>
         </test-unit>
@@ -57,8 +57,8 @@
         <test-unit>
             <lfn>lfn://JLDG/CP-PACS/RCNF2/RC12x24-B1800K014090C1600-A-00210</lfn>
             <surls>
-                <surl>gsiftp://www.jldg.org/nfs/jldg-fs1/htdocs/JLDG/CP-PACS/RCNF2/RC12x24-B1800K014090C1600-A-00210</surl>
-                <surl>http://www.jldg.org/JLDG/CP-PACS/RCNF2/RC12x24-B1800K014090C1600-A-00210</surl>
+		<surl>gsiftp://www.jldg.org/gfarm/public/ILDG/JLDG/CP-PACS/RCNF2/RC12x24-B1800/K014090/RC12x24-B1800K014090C1600-A-00210</surl>
+		<surl>http://www.jldg.org/public/ILDG/JLDG/CP-PACS/RCNF2/RC12x24-B1800/K014090/RC12x24-B1800K014090C1600-A-00210</surl>
             </surls>
         </test-unit>
     </fc>

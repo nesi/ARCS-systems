@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- $Id: file-transfer-test.xml,v 1.7 2008/06/18 01:39:40 shundezh Exp $ -->
+<!-- $Id: file-transfer-test.xml,v 1.10 2009/01/13 23:40:23 shundezh Exp $ -->
 
 <!-- 
 
@@ -56,12 +56,12 @@ USQCD_SE: usqcd_fnal.gov_srm
 
   <!-- LDG/DESY-Hamburg (Germany) -->
   <!-- 37M -->
-  <file>
+<!--  <file>
     <grid>ldg</grid>
     <se>desy.de</se>
     <url>srm://grid-se3.desy.de:8443/pnfs/desy.de/data/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
     <md5>e4c7b6773771bae7034cb37176729e88</md5>
-  </file>
+  </file> -->
 
   <!-- LDG/Juelich (Germany) -->
   <!-- 37M -->
@@ -90,6 +90,15 @@ USQCD_SE: usqcd_fnal.gov_srm
     <md5>e4c7b6773771bae7034cb37176729e88</md5>
   </file>
 
+  <file>
+    <grid>ldg</grid>
+    <se>infn.it</se>
+    <protocol>2</protocol>
+    <url>srm://grid-se2.pr.infn.it:8444/ildg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
+
   <!-- UKQCD/Edinburgh (Scotland) -->
   <!-- 80M -->
   <file>
@@ -98,6 +107,21 @@ USQCD_SE: usqcd_fnal.gov_srm
     <url>gsiftp://qcdocx.epcc.ed.ac.uk/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
     <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
   </file>
+
+  <file>
+    <grid>ukqcd</grid>
+    <se>ph.liv.ac.uk</se>
+    <url>gsiftp://tps1.ph.liv.ac.uk:2811/home/qcdgrid/qcdgrid/DiGS/data6/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
+    <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
+  </file>
+
+  <file>
+    <grid>ukqcd</grid>
+    <se>iridis.soton.ac.uk</se>
+    <url>gsiftp://ukqcd.iridis.soton.ac.uk:2811/opt/src/DiGS-v2.0-src/data5/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
+    <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
+  </file>
+
 
   <!--  file>
     <grid>ukqcd</grid>
@@ -116,3 +140,4 @@ USQCD_SE: usqcd_fnal.gov_srm
   </file>
 
 </fileTransferTest>
+
