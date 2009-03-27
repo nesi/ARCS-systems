@@ -2,8 +2,8 @@
 # Default-resource must be set appropriately for your site (e.g. arcs-df.vpac.org)
 #
 acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,"*arg",null,null,null,*OUT)|nop
-acPostProcForPut|($objPath like /ARCS/home/*)|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
-acPostProcForCopy|($objPath like /ARCS/home/*)|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
+#acPostProcForPut|($objPath like /ARCS/home/*)|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
+#acPostProcForCopy|($objPath like /ARCS/home/*)|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate|$userNameClient == guest|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
