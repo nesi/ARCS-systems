@@ -103,15 +103,15 @@ USQCD_SE: usqcd_fnal.gov_srm
   <!-- 80M -->
   <file>
     <grid>ukqcd</grid>
-    <se>epcc.ed.ac.uk</se>
-    <url>gsiftp://qcdocx.epcc.ed.ac.uk/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
+    <se>swan.ac.uk</se>
+    <url>gsiftp://pytier2.swan.ac.uk/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
     <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
   </file>
 
   <file>
     <grid>ukqcd</grid>
     <se>ph.liv.ac.uk</se>
-    <url>gsiftp://tps1.ph.liv.ac.uk:2811/home/qcdgrid/qcdgrid/DiGS/data6/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
+    <url>gsiftp://tps1.ph.liv.ac.uk:2811/home/qcdgrid/DiGS/data6/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
     <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
   </file>
 
