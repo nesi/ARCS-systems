@@ -64,7 +64,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 
 	boolean useExternalAuth = false;
 
-	private SSLSocketFactory sslsf;
+	private SSLSocketFactory sslsf_imast;
 
 	private Properties imastProperties = null;
 
@@ -122,7 +122,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 				SSLContext sslc = SSLContext.getInstance("TLS");
 				sslc.init(new KeyManager[] { keyManager }, null,
 						new SecureRandom());
-				sslsf = sslc.getSocketFactory();
+				sslsf_imast = sslc.getSocketFactory();
 
 				log
 						.debug("Attempting to connect to JNDI directory source as a sanity check.");
@@ -157,7 +157,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			}
 			StartTlsResponse tls = (StartTlsResponse) ((LdapContext) context)
 					.extendedOperation(new StartTlsRequest());
-			tls.negotiate(sslsf);
+			tls.negotiate(sslsf_imast);
 			if (useExternalAuth) {
 				context.addToEnvironment(Context.SECURITY_AUTHENTICATION,
 						"EXTERNAL");
@@ -188,6 +188,8 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 		}
 		try {
 			dirContext = this.initConnection();
+			
+		
 		} catch (ResolutionPlugInException e1) {
 			throw new IMASTException(e1.getMessage());
 		} catch (NamingException e1) {
