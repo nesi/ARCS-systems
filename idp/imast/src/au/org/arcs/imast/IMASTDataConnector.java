@@ -170,6 +170,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			throws IMASTException {
 		// Properties properties = super.properties;
 		DirContext dirContext;
+		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
 		if (imastProperties != null) {
 			String secPrincipal = imastProperties
 					.getProperty("SECURITY_PRINCIPAL");
@@ -214,7 +215,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			log.info("Successfully write aEPTS to Ldap");
 		} catch (Exception e) {
 			// TODO should not replace, test only here
-			log.warn("aEPST is existing");
+			//log.warn("aEPST is existing");
 			throw new IMASTException(e.getMessage()
 					+ ". Couldn't add aEPST to Ldap");
 			// mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
