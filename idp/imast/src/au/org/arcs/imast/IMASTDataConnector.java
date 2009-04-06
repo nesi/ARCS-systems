@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright [2005] [University Corporation for Advanced Internet Development, Inc.]
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,7 +64,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 
 	boolean useExternalAuth = false;
 
-	private SSLSocketFactory sslsf_imast;
+	private SSLSocketFactory sslsf;
 
 	private Properties imastProperties = null;
 
@@ -122,7 +122,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 				SSLContext sslc = SSLContext.getInstance("TLS");
 				sslc.init(new KeyManager[] { keyManager }, null,
 						new SecureRandom());
-				sslsf_imast = sslc.getSocketFactory();
+				sslsf = sslc.getSocketFactory();
 
 				log
 						.debug("Attempting to connect to JNDI directory source as a sanity check.");
@@ -157,7 +157,11 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			}
 			StartTlsResponse tls = (StartTlsResponse) ((LdapContext) context)
 					.extendedOperation(new StartTlsRequest());
-			tls.negotiate(sslsf_imast);
+			tls.negotiate(sslsf);
+			// Once tls estableished, the ealier authentication is considered unsecure and reverts to anonymours, 
+			// so need to re-connect to ldap over tls (rebind)
+			((LdapContext)context).reconnect(null);
+
 			if (useExternalAuth) {
 				context.addToEnvironment(Context.SECURITY_AUTHENTICATION,
 						"EXTERNAL");
@@ -170,7 +174,6 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			throws IMASTException {
 		// Properties properties = super.properties;
 		DirContext dirContext;
-		properties.put(Context.SECURITY_AUTHENTICATION, "simple");
 		if (imastProperties != null) {
 			String secPrincipal = imastProperties
 					.getProperty("SECURITY_PRINCIPAL");
@@ -188,8 +191,6 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 		}
 		try {
 			dirContext = this.initConnection();
-			
-		
 		} catch (ResolutionPlugInException e1) {
 			throw new IMASTException(e1.getMessage());
 		} catch (NamingException e1) {
@@ -217,7 +218,7 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			log.info("Successfully write aEPTS to Ldap");
 		} catch (Exception e) {
 			// TODO should not replace, test only here
-			//log.warn("aEPST is existing");
+			log.warn("aEPST is existing");
 			throw new IMASTException(e.getMessage()
 					+ ". Couldn't add aEPST to Ldap");
 			// mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
