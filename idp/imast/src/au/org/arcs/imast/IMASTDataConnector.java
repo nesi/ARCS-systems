@@ -158,13 +158,16 @@ public class IMASTDataConnector extends JNDIDirectoryDataConnector {
 			StartTlsResponse tls = (StartTlsResponse) ((LdapContext) context)
 					.extendedOperation(new StartTlsRequest());
 			tls.negotiate(sslsf);
-			// Once tls estableished, the ealier authentication is considered unsecure and reverts to anonymours, 
-			// so need to re-connect to ldap over tls (rebind)
-			((LdapContext)context).reconnect(null);
 
 			if (useExternalAuth) {
 				context.addToEnvironment(Context.SECURITY_AUTHENTICATION,
 						"EXTERNAL");
+			}else{
+				// When activating startTls, the ealier authentication is considered unsecure and reverts to anonymours. 
+				// IdP1.3 seems to only accept useExternalAuth.
+				//Should we recover simple authentication for the following transactions? - Damien
+				context.addToEnvironment(Context.SECURITY_AUTHENTICATION, "simple");
+				
 			}
 		}
 		return context;
