@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schema targetNamespace="urn:mace:arcs.org.au:shibboleth:2.0:resolver:dc" xmlns="http://www.w3.org/2001/XMLSchema"
+    xmlns:dc="urn:mace:shibboleth:2.0:resolver:dc" xmlns:resolver="urn:mace:shibboleth:2.0:resolver"
+    xmlns:sec="urn:mace:shibboleth:2.0:security" xmlns:arcs="urn:mace:arcs.org.au:shibboleth:2.0:resolver:dc" elementFormDefault="qualified">
+
+    <import namespace="urn:mace:shibboleth:2.0:resolver"
+        schemaLocation="classpath:/schema/shibboleth-2.0-attribute-resolver.xsd" />
+        
+    <import namespace="urn:mace:shibboleth:2.0:security"
+        schemaLocation="classpath:/schema/shibboleth-2.0-security.xsd" />
+
+ 
+    <import namespace="urn:mace:shibboleth:2.0:resolver:dc"
+        schemaLocation="classpath:/schema/shibboleth-2.0-attribute-resolver-dc.xsd" />
+
+    
+    <complexType name="SharedToken">
+        <annotation>
+            <documentation>
+                A connector that either generates a persistent ID by hashing or by looking it up in a database.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="resolver:BaseDataConnectorType">
+                <!--          
+            	<choice>
+                    <element ref="arcs:LDAPConnection">
+                        <annotation>
+                            <documentation>
+                                A connection, or pool of connections, to the database managed by the application
+                                container.
+                            </documentation>
+                        </annotation>
+                    </element>
+                    <element ref="arcs:DBConnection">
+                        <annotation>
+                            <documentation>
+                                A connection, or pool of connections, to the database managed by the data connector.
+                            </documentation>
+                        </annotation>
+                    </element>
+                </choice>
+                -->
+                <attribute name="generatedAttributeID" type="string">
+                    <annotation>
+                        <documentation>
+                            The name of the attribute which should be used to as input to the computed ID.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="sourceAttributeID" type="string" use="required">
+                    <annotation>
+                        <documentation>
+                            The name of the attribute which should be used to as input to the computed ID.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="salt" type="string" use="required">
+                    <annotation>
+                        <documentation>
+                            A salt, of at least 16 bytes, used in the computed ID.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                
+
+            </extension>
+        </complexContent>
+    </complexType>
+    
+    <element name="LDAPConnection" type="arcs:LDAPConnectionType">
+        <annotation>
+            <documentation>
+                Describes a database connection source that is managed by the application container.
+            </documentation>
+        </annotation>
+    </element>
+    <complexType name="LDAPConnectionType">
+        <sequence>
+            <element name="JNDIConnectionProperty" type="dc:PropertyType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>
+                        A property used when constructing a JNDI initial context which in turn is used to lookup the
+                        database DataSource.
+                    </documentation>
+                </annotation>
+            </element>
+        </sequence>
+        <attribute name="resourceName" type="string" use="optional">
+            <annotation>
+                <documentation>The resource name the DataSource is bound to in the JNDI tree.</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
+    <element name="DBConnection" type="arcs:DBConnectionType">
+        <annotation>
+            <documentation>
+                Describes a database connection source that is managed by the application container.
+            </documentation>
+        </annotation>
+    </element>
+    <complexType name="DBConnectionType">
+        <attribute name="resourceName" type="string" use="optional">
+            <annotation>
+                <documentation>The resource name the DataSource is bound to in the JNDI tree.</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+</schema>
