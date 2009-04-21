@@ -37,4 +37,4 @@ cp $TF /usr/local/lib/gridpulse/system_packages.pulse
 %changelog
 * Tue Apr 21 2009 Darran Carey <darran.carey@arcs.org.au>
 - changed email address from grid_pulse@vpac.org to
-  grid_pulse@arcs.org.au in /etc/logrotate.d/grid
+  grid_pulse@arcs.org.au in /etc/logrotate.d/grid.
