@@ -12,7 +12,7 @@ public interface DefaultProperties {
 	/**
 	 * 
 	 */
-	public final static String USER_IDENTIFIER = "uid,mail";
+	public final static String USER_IDENTIFIER = "uid";
 
 	// public final static String PRIVATE_SEED = "ihHkOYigjIYBNmygbLSUn";
 
