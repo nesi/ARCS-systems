@@ -35,6 +35,16 @@ public class UnitTest extends TestCase {
 
 	public void testSTPS() {
 		try {
+			StatementBean sb = new StatementBean();
+			sb.setExpiresOn("2009-07-05T09:27:05Z");
+			sb.setIssuedOn("2009-04-05T09:22:05Z");
+			sb.setIssuer("https://idp.ramp.org.au/idp/shibboleth");
+			sb.setRecipient("https://idp.arcs.org.au/idp/shibboleth");
+			sb.setStatementID("abcdefg");
+			sb.setReferenceNo("1234567");
+			sb.setSubject("CN=Bruce Lee,OU=ARCS,O=APACGrid,C=AU");
+			sb.setSharedToken("uN4KqMe6u1_JDTZc9m_4ZG_xG_k");
+			
 			Document domDoc = null;
 			DocumentUtils du = new DocumentUtils();
 			Encrypter encrypter = new Encrypter();
@@ -42,8 +52,11 @@ public class UnitTest extends TestCase {
 			Signer signer = new Signer();
 			Verifier verifier = new Verifier();
 
-			domDoc = du.createRawDoc();
+			domDoc = du.createRawDoc(sb);
+			
 			du.jdomWriteToFile(domDoc, path + "statement.xml");
+			
+			
 			domDoc = encrypter.encrypt(domDoc);
 			du.jdomWriteToFile(domDoc, path + "encStatement.xml");
 			domDoc = signer.sign(domDoc);
@@ -51,6 +64,7 @@ public class UnitTest extends TestCase {
 			domDoc = verifier.verify(domDoc);
 			domDoc = decrypter.decrypt(domDoc);
 			du.jdomWriteToFile(domDoc, path + "decStatement.xml");
+			
 
 
 /*			
