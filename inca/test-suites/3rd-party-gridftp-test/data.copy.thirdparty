@@ -15,7 +15,7 @@ sub cleanTmpFile($$$) {
 
 my $reporter = new Inca::Reporter::Performance(
   name => 'data.copy.thirdparty',
-  version => 2.7,
+  version => 2.8,
   description => 'third party copy test of data services',
   url => 'http://www.sapac.edu.au/inca',
   measurement_name => 'data_third_party_copy_test'
@@ -78,7 +78,7 @@ my $benchmark = $reporter->addNewBenchmark($sourceServer);
 
 if ($source!~$dest && $sourceEndpoint !~ /Query did not return any results\./ && $destEndpoint !~ /Query did not return any results\./) {
 
-  my $guc = "globus-url-copy $tempSource $sourceURL 2>&1";
+  my $guc = "globus-url-copy -fast $tempSource $sourceURL 2>&1";
 #  $error_msg.="Executed Command: ".$guc."\n";
   `echo "Executing: $guc" 1>&2`;
 #print $guc."\n";
