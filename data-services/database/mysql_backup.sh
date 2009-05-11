@@ -1,29 +1,32 @@
 #!/bin/bash
 # msyql_backup.sh
 # script to backup the mysql server
+# $Id$
+# $HeadURL$
 
 MODE=$1
 MYSQLUSER=backup
-BINLOGPATH=/data/mysql
+BINLOGPATH=/data/mysql/m3306
 BINLOGNAME=mysqld-bin
-ARCHIVEPATH=/data/backups/mysql
+ARCHIVEPATH=/data/mysql/backups/m3306
+SOCKET=$BINLOGPATH/mysql.sock
 
-setRead() {
-    # change properties on binlog path
-    sudo chmod o+rx $BINLOGPATH
-    sudo chmod o+r $BINLOGPATH/*
-}
-
-resetRead() {
-    # restore properties on binlog path
-    sudo chmod o-r $BINLOGPATH/*
-    sudo chmod o-rx $BINLOGPATH
-}
+#setRead() {
+#    # change properties on binlog path
+#    sudo /bin/chmod o+rx $BINLOGPATH
+#    sudo /bin/chmod o+r $BINLOGPATH/*
+#}
+#
+#resetRead() {
+#    # restore properties on binlog path
+#    sudo /bin/chmod o-r $BINLOGPATH/*
+#    sudo /bin/chmod o-rx $BINLOGPATH
+#}
 
 copyBinlogs() {
     # copy binlogs to archive dir
     echo "Copying binlogs"
-    setRead;
+#    setRead;
     pushd $BINLOGPATH
     for FILE in `cat $BINLOGPATH/$BINLOGNAME.index`
       do
@@ -36,7 +39,7 @@ copyBinlogs() {
       fi
     done
     popd
-    resetRead;
+#    resetRead;
 }
 
 saveBinlogs() {
@@ -61,7 +64,8 @@ case "$MODE" in
 	then
 	    mkdir -p $ARCHIVEPATH/$DATE
 	fi
-	mysqldump -u $MYSQLUSER --single-transaction --flush-logs --master-data=2 \
+	mysqldump -u $MYSQLUSER -S $SOCKET \
+            --single-transaction --flush-logs --master-data=2 \
 	    --all-databases | gzip > $ARCHIVEPATH/$DATE/full-$DATE.sql.gz
 	copyBinlogs;
 	saveBinlogs;
@@ -72,7 +76,7 @@ case "$MODE" in
     # - flush logs
     # - copy all bin logs to backup directory if not already done
 	echo "Mysql daily backup"
-	mysqladmin -u $MYSQLUSER flush-logs
+	mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs
 	copyBinlogs;
 	;;
     
