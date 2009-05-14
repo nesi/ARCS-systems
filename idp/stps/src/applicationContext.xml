@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:stps.properties</value>
+			</list>
+		</property>
+	</bean>
+
+
+	<bean id="keyDiscovery"
+		class="au.org.arcs.stps.impl.KeyDiscoveryImpl">
+	</bean>
+
+	<bean id="certResolver"
+		class="au.org.arcs.stps.impl.CertificateResolverImpl">
+	</bean>
+
+	<bean id="authenticator"
+		class="au.org.arcs.stps.impl.AuthenticatorImpl">
+		<property name="ldapUrl" value="${ldapUrl}" />
+		<property name="baseDN" value="${baseDN}" />
+		<property name="useStartTLS" value="${useStartTLS}" />
+		<property name="searchFilterSpec" value="${searchFilterSpec}" />
+	</bean>
+	
+	<bean id="configBean"
+		class="au.org.arcs.stps.ConfigBean">
+		<property name="slcsCAPath" value="${slcs-ca}" />
+	</bean>
+
+	<bean id="stPopulator"
+		class="au.org.arcs.stps.impl.SharedTokenPopulatorImpl">
+		<property name="ldapUrl" value="${ldapUrl}" />
+		<property name="baseDN" value="${baseDN}" />
+		<property name="principal" value="${principal}" />
+		<property name="credentials" value="${credentials}" />
+		<property name="searchFilterSpec" value="${searchFilterSpec}" />
+		<property name="useStartTLS" value="${useStartTLS}" />
+	</bean>
+
+	<!-- 
+		
+		<bean id="localLogin" class="melcoe.asm.locallogin.LocalLoginLdapImpl">
+		<property name="authNUser">
+		<ref bean="authNUser" />
+		</property>
+		</bean>
+		
+		<bean id="authNUser" class="melcoe.asm.locallogin.AuthNUserLdapImpl">
+		<property name="authLDAPHost" value="${LDAP_HOST}"/>
+		<property name="authLDAPPort" value="${LDAP_PORT}"/>
+		</bean>
+	-->
+
+</beans>
+
