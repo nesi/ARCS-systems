@@ -80,7 +80,7 @@ public class SubmitAction extends ActionSupport {
 
 			String attrName = "auEduPersonSharedToken";
 
-			//stPopulator.populate(attrName, sharedToken, username);
+			stPopulator.populate(attrName, sharedToken, username);
 
 			userCertFis.close();
 			caFis.close();
