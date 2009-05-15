@@ -1,7 +1,7 @@
 Summary:	The ARCS health reporting tool.
 Name:		APAC-gateway-gridpulse
 Version:	0.3
-Release:	2
+Release:	3
 Source:		gridpulse.tar.gz
 License:	GPL
 Group:		Applications/Internet
@@ -46,7 +46,7 @@ echo %{name} >> $RPM_INSTALL_PREFIX0/lib/gridpulse/system_packages.pulse
 
 # if the root crontab doesn't exist or doesn't contain gridpulse add it.
 if [ ! -e /var/spool/cron/root ] || ! grep -q $RPM_INSTALL_PREFIX0/bin/gridpulse /var/spool/cron/root; then
-	echo "3,23,43 * * * * $RPM_INSTALL_PREFIX0/bin/gridpulse grid_pulse@arcs.org.au >/dev/null 2>&1" >> /var/spool/cron/root
+	echo "3,23,43 * * * * $RPM_INSTALL_PREFIX0/bin/gridpulse grid_pulse@lists.arcs.org.au >/dev/null 2>&1" >> /var/spool/cron/root
 /etc/init.d/crond status >> /dev/null
 	# if cron isn't running just start it
 	if [ "$?" -eq "3" ]
@@ -74,6 +74,8 @@ fi
 
 
 %changelog
+* Fri May 15 2009 Darran carey
+- changed mailing address to grid_pulse@lists.arcs.org.au
 * Tue Apr 22 2008 Daniel Cox
 - use grid_pulse@arcs.org.au
 * Mon Mar 17 2008 Darran Carey
