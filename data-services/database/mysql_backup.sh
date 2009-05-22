@@ -11,22 +11,9 @@ BINLOGNAME=mysqld-bin
 ARCHIVEPATH=/data/mysql/backups/m3306
 SOCKET=$BINLOGPATH/mysql.sock
 
-#setRead() {
-#    # change properties on binlog path
-#    sudo /bin/chmod o+rx $BINLOGPATH
-#    sudo /bin/chmod o+r $BINLOGPATH/*
-#}
-#
-#resetRead() {
-#    # restore properties on binlog path
-#    sudo /bin/chmod o-r $BINLOGPATH/*
-#    sudo /bin/chmod o-rx $BINLOGPATH
-#}
-
 copyBinlogs() {
     # copy binlogs to archive dir
     echo "Copying binlogs"
-#    setRead;
     pushd $BINLOGPATH
     for FILE in `cat $BINLOGPATH/$BINLOGNAME.index`
       do
@@ -34,12 +21,11 @@ copyBinlogs() {
       if [ ! -f $ARCHIVEPATH/$SFILE.gz ]
 	  then
 	  echo "- binlog $SFILE"
-	  cp $FILE $ARCHIVEPATH
+	  cp -p $FILE $ARCHIVEPATH
 	  gzip $ARCHIVEPATH/$SFILE
       fi
     done
     popd
-#    resetRead;
 }
 
 saveBinlogs() {
@@ -59,6 +45,7 @@ case "$MODE" in
     # - copy all bin logs to backup directory
     # - clean path of backup directory
 	echo "Weekly backup"
+        date
 	DATE=`date +%Y%m%d`
 	if [ ! -d $ARCHIVEPATH/$DATE ]
 	then
@@ -76,6 +63,7 @@ case "$MODE" in
     # - flush logs
     # - copy all bin logs to backup directory if not already done
 	echo "Mysql daily backup"
+        date
 	mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs
 	copyBinlogs;
 	;;
