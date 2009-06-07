@@ -21,5 +21,5 @@ acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 #acTrashPolicy|$objPath like /temp/home/ARCS-EXEC-COMM|msiNoTrashCan|nop
 #acTrashPolicy|$objPath like /temp/home/ACNFP|msiNoTrashCan|nop
 #acTrashPolicy|$objPath like /temp/home/CFT|msiNoTrashCan|nop
-acDataDeletePolicy|$userNameClient != dataOwner|msiDeleteDisallowed|nop
+acDataDeletePolicy|$userNameClient != $dataOwner|msiDeleteDisallowed|nop
 #acSetNumThreads||msiSetNumThreads(default,1,default)|nop
