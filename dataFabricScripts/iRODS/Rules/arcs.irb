@@ -2,24 +2,7 @@
 # Default-resource must be set appropriately for your site (e.g. arcs-df.vpac.org)
 #
 acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,"*arg",null,null,null,*OUT)|nop
-#acPostProcForPut|($objPath like /ARCS/home/*)|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
-#acPostProcForCopy|($objPath like /ARCS/home/*)|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
-acSetRescSchemeForCreate|$userNameClient == guest|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.ivec.org-BACKUP_SPACE)|nop
+acSetRescSchemeForCreate|$userNameClient == guest|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
-#acTrashPolicy|$objPath like /temp/home/public|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/BLUEPRINT|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/ARCS|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/ARCS-DATA|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/ARCS-MANAGEMENT|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/ANSTO|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/METABOLOME-EXPRESS|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/NEAT-STEERING-COMMITEE|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/MWA-SHI|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like '/temp/home/HEARing CRC'|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/ARCS-EXEC-COMM|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/ACNFP|msiNoTrashCan|nop
-#acTrashPolicy|$objPath like /temp/home/CFT|msiNoTrashCan|nop
-#acDataDeletePolicy|$userNameClient != $dataOwner|msiDeleteDisallowed|nop
-#acSetNumThreads||msiSetNumThreads(default,1,default)|nop
