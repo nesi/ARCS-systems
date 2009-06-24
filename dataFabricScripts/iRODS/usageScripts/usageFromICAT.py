@@ -73,48 +73,36 @@ class StatsExporter:
 # ----------------------------------------------------------------------------------
 
     def work(self):
-        query = """select userTable.user_name, userTable.zone_name,
-                    resourceTable.resc_name,
-                    sum(dataTable.data_size), count(dataTable.data_id)
-                    from
-                    r_user_main as userTable,
-                    r_objt_access as accessTable,
-                    r_data_main as dataTable,
-                    r_resc_main as resourceTable
-                    WHERE
-                    (userTable.user_type_name = 'rodsuser' or userTable.user_type_name = 'rodsadmin') and
-                    userTable.user_id = accessTable.user_id and
-                    accessTable.object_id = dataTable.data_id and
-                    accessTable.object_id NOT IN
-                          ( select accessTable.object_id 
-                            FROM 
-                            r_objt_access as accessTable, 
-                            r_user_main as userTable 
-                            WHERE 
-                            userTable.user_type_name = 'rodsgroup' and  
-                            userTable.user_id = accessTable.user_id ) and
-                    dataTable.resc_name = resourceTable.resc_name and
-                    dataTable.data_owner_zone = userTable.zone_name
-                    group by userTable.user_name, userTable.zone_name, resourceTable.resc_name
-                    order by userTable.user_name, userTable.zone_name, resourceTable.resc_name"""
+
+        query = """SELECT dataTable.data_owner_name, dataTable.data_owner_zone,
+                    dataTable.resc_name,
+                    SUM(dataTable.data_size), COUNT(dataTable.data_id)
+                    FROM
+                    (SELECT object_id FROM r_objt_access WHERE access_type_id = 1200
+                    EXCEPT  
+                    (SELECT object_id FROM r_objt_access WHERE user_id IN
+                    (SELECT user_id FROM r_user_main WHERE user_type_name = 'rodsgroup'))) AS accessTable
+                    INNER JOIN
+                    (SELECT data_id, data_size, data_owner_name, data_owner_zone, resc_name FROM r_data_main ) AS dataTable
+                    ON
+                    accessTable.object_id = dataTable.data_id
+                    GROUP BY dataTable.data_owner_name, dataTable.data_owner_zone, dataTable.resc_name
+                    ORDER BY dataTable.data_owner_name, dataTable.data_owner_zone, dataTable.resc_name"""
         self.addRecordToDoc(query, 'users')
 
-        query = """select userTable.user_name, userTable.zone_name,
-                    resourceTable.resc_name,
-                    sum(dataTable.data_size), count(dataTable.data_id)
-                    from
+        query = """SELECT userTable.user_name, dataTable.data_owner_zone,
+                    dataTable.resc_name,
+                    SUM(dataTable.data_size), COUNT(dataTable.data_id)
+                    FROM
                     r_user_main as userTable,
                     r_objt_access as accessTable,
-                    r_data_main as dataTable,
-                    r_resc_main as resourceTable
+                    r_data_main as dataTable
                     WHERE
-                    userTable.user_type_name = 'rodsgroup' and
-                    userTable.user_id = accessTable.user_id and
-                    accessTable.object_id = dataTable.data_id and
-                    dataTable.resc_name = resourceTable.resc_name and
-                    dataTable.data_owner_zone = userTable.zone_name
-                    group by userTable.user_name, userTable.zone_name, resourceTable.resc_name
-                    order by userTable.user_name, userTable.zone_name, resourceTable.resc_name"""
+                    userTable.user_type_name = 'rodsgroup' AND
+                    userTable.user_id = accessTable.user_id AND
+                    accessTable.object_id = dataTable.data_id 
+                    GROUP BY userTable.user_name, dataTable.data_owner_zone, dataTable.resc_name
+                    ORDER BY userTable.user_name, dataTable.data_owner_zone, dataTable.resc_name"""
         self.addRecordToDoc(query, 'projects')
 
     def prettyPrint(self):
