@@ -1,0 +1,24 @@
+#ARGO rules
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/ARGO/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+
+#NOTE!!!  This will only work IF AND ONLY IF the client hasn't set a default resource.
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/SOOP/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/SOTS/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/ANFOG/*|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/AUV/*|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/ANMN/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/ACORN/*|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/AATAMS/*|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/FAIMMS/*|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/eMII/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/archive/SRS/*|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
+
+#by the time these rules are call,ed the archive rules would have been activated.#which laves opendap and public
+#opendap and public rules for SOOP
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/SOOP/XBT/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/SOOP/CO2/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/SST/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/ASF/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/SOTS/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/ANMN/SOOC/*|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|$objPath like /ARCS/projects/IMOS/*/FAIMMS/*|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
