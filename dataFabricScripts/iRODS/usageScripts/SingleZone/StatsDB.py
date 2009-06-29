@@ -79,6 +79,11 @@ class StatsDB(StatsDBConnector):
             for rsc in grp.resourceList:
                 (resourceName, amount, count) = rsc
                 dbResource = self.getZone(zone.fields['name']).getResource(resourceName)
+                if dbResource == None:
+                   rList = []
+                   rList.append(zName)
+                   rList.append(resourceName)
+                   dbResource = DBResource.add(self, rList)
                 DBUseLogEntry.addGroup(self, group, dbResource, (long)(amount[:-2]), (long)(count), xml_timestamp)
        
     def checkHasValuesToday(self, zone, today):
