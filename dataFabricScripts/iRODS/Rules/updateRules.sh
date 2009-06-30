@@ -1,7 +1,7 @@
 #!/bin/sh
 # updateRules.sh	Downloads ARCS-specific rules files for iRODS; should
 #			be invoked periodically via 'cron'.
-#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20090630
+#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20090630A
 
 
 # Usage, destination directory
@@ -48,6 +48,6 @@ esac
 for File in arcs imos ; do
   getfile "$File""$Extn" _SCRATCH                                      || continue
   [ "$File" = "arcs" ] && sed -i -e "s/DEFAULT_RESOURCE/$1/g" _SCRATCH || fail "Bad edit!"
-  mv -f _SCRATCH "$File""$Extn" 2>/dev/null                            || fail "Bad rename!"
+  mv -f _SCRATCH "$File".irb 2>/dev/null                               || fail "Bad rename!"
 done
 exit 0
