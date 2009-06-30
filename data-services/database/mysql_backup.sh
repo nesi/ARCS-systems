@@ -54,6 +54,11 @@ case "$MODE" in
 	mysqldump -u $MYSQLUSER -S $SOCKET \
             --single-transaction --flush-logs --master-data=2 \
 	    --all-databases | gzip > $ARCHIVEPATH/$DATE/full-$DATE.sql.gz
+	STATUS=${PIPESTATUS[0]}
+	if [ "$STATUS" -ne "0" ]; then
+		echo mysqldump failed
+		exit $STATUS
+	fi
 	copyBinlogs;
 	saveBinlogs;
 	;;
@@ -65,11 +70,24 @@ case "$MODE" in
 	echo "Mysql daily backup"
         date
 	mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs
+	STATUS=$?
+	if [ $STATUS -ne 0 ]; then
+		echo mysqladmin flush logs failed
+		exit $STATUS
+	fi
 	copyBinlogs;
 	;;
     
     *)
 	echo "Usage: mysql_backup [full|incremental]"
+	exit 1
 	;;
     
 esac
+echo "Copy mysql dump to data fabric"
+/opt/iRODS/iRODS/clients/icommands/bin/irsync -rvs $ARCHIVEPATH i:`hostname -s`.m3306
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+	echo copy mysql dump to data fabric failed
+	exit $STATUS
+fi
