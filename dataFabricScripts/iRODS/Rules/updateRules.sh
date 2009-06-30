@@ -30,8 +30,8 @@ cd server/config/reConfigs 2>/dev/null               || fail "Directory change f
 # If there's a new version of this program, install it and exit
 getfile updateRules.sh _SCRATCH
 if [ -s _SCRATCH ] ; then
-  if ! cmp _SCRATCH updateRules.sh >/dev/null 2>&1 ; then
-    Des="`cd ../../bin/local && pwd`"
+  Des="`cd ../../bin/local && pwd`"
+  if ! cmp _SCRATCH "$Des"/updateRules.sh >/dev/null 2>&1 ; then
     chmod a+rx _SCRATCH && exec mv -f "$PWD"/_SCRATCH "$Des"/updateRules.sh
   fi
 fi
