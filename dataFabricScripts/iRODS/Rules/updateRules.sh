@@ -48,7 +48,7 @@ esac
 # Get files and edit as appropriate, then exit
 for File in arcs imos ; do
   getfile "$File""$Extn" _SCRATCH                                      || continue
-  [ "$File" = "arcs" ] && sed -i -e "s/DEFAULT_RESOURCE/$1/g" _SCRATCH || fail "Bad edit!"
+  [ "$File" = "arcs" ] && sed -i -e "s/DEFAULT_RESOURCE/$1/g" _SCRATCH
   mv -f _SCRATCH "$File".irb 2>/dev/null                               || fail "Bad rename!"
 done
 exit 0
