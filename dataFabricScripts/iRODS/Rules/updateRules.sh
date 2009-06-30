@@ -1,7 +1,7 @@
 #!/bin/sh
 # updateRules.sh	Downloads ARCS-specific rules files for iRODS; should
 #			be invoked periodically via 'cron'.
-#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20090630A
+#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20090630B
 
 
 # Usage, destination directory
@@ -31,7 +31,8 @@ cd server/config/reConfigs 2>/dev/null               || fail "Directory change f
 getfile updateRules.sh _SCRATCH
 if [ -s _SCRATCH ] ; then
   if ! cmp _SCRATCH updateRules.sh >/dev/null 2>&1 ; then
-    chmod a+rx _SCRATCH && exec mv -f "$PWD"/_SCRATCH "$PWD"/updateRules.sh
+    Des="`cd ../../bin/local && pwd`"
+    chmod a+rx _SCRATCH && exec mv -f "$PWD"/_SCRATCH "$Des"/updateRules.sh
   fi
 fi
 
