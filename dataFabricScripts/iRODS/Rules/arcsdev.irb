@@ -1,7 +1,7 @@
-# iRODS local rules for ARCSDEV sites
+# iRODS local rules for ARCSDEV sites, revised 20090701
 # Default-resource must be set appropriately for your site (e.g. irodsdev.vpac.org)
 #
-acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,"*arg",null,null,null,*OUT)|nop
+acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,'"*arg"',null,null,null,*OUT)|nop
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 #acSetRescSchemeForCreate|$userNameClient == guest|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.ivec.org-BACKUP_SPACE)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
