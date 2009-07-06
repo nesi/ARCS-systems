@@ -1,6 +1,17 @@
 #ARGO rules
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/ARGO/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/SOOP/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/SOTS/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/ANFOG/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/AUV/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/ANMN/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/ACORN/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/AATAMS/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/FAIMMS/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/eMII/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/staging/SRS/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
+
 #NOTE!!!  This will only work IF AND ONLY IF the client hasn't set a default resource.
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/archive/SOOP/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/archive/SOTS/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
