@@ -1,1 +1,41 @@
-#This is a dummy to be used for testing purposes
+#ARGO rules
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/ARGO/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+
+#NOTE!!!  This will only work IF AND ONLY IF the client hasn't set a default resource.
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/SOOP/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/SOTS/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/ANFOG/*'|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/AUV/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/ANMN/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/ACORN/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/AATAMS/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/FAIMMS/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/eMII/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/staging/SRS/*'|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+
+
+#NOTE!!!  This will only work IF AND ONLY IF the client hasn't set a default resource.
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/SOOP/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/SOTS/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/ANFOG/*'|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/AUV/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/ANMN/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/ACORN/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/AATAMS/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/FAIMMS/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/eMII/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/archive/SRS/*'|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+
+#by the time these rules are call,ed the archive rules would have been activated.#which laves opendap and public
+#opendap and public rules for SOOP
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/SOOP/XBT/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/SOOP/CO2/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/SST/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/ASF/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/SOTS/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/ANMN/SOOC/*'|msiSetDefaultResc(irodsdev.vpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|'$objPath' like '/ARCSDEV/projects/IMOS/*/FAIMMS/*'|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
+
+
+
+
