@@ -28,12 +28,12 @@
 
 #by the time these rules are call,ed the archive rules would have been activated.#which laves opendap and public
 #opendap and public rules for SOOP
-acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SOOP/XBT/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SOOP/CO2/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SST/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/ASF/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SOTS/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/ANMN/SOOC/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SOOP/XBT/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SOOP/CO2/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SST/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/ASF/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/SOTS/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/ANMN/SOOC/*"|msiSetDefaultResc(data-dev.ersa.edu.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCSDEV/projects/IMOS/*/FAIMMS/*"|msiSetDefaultResc(ngdata-dev.hpcu.uq.edu.au,preferred)|nop
 
 
