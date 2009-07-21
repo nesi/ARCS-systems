@@ -120,7 +120,7 @@ public class MailUtil {
 			String value = (String) attrMap.get(key);
 		
 			if(value.equals("missing")){
-				msgContent = msgContent.concat("<b>" + key + ":  </b> " + MISSING_VALUE);
+				msgContent = msgContent.concat("<b>" + key + ":  </b> " + "<b> missing </b>");
 			}else{
 			msgContent = msgContent.concat("<b>" + key + ":  </b> " + value);
 			}
