@@ -16,7 +16,7 @@
 				<tr>
 					<td>
 						<a href="http://www.arcs.org.au"><img
-								src="images/arcs-general.png" width="300" height="160"
+								src="images/arcs-logo.jpg" width="300" height="160"
 								alt="ARCS Logo" style="border-style: none" /> </a>
 					</td>
 					<td>
