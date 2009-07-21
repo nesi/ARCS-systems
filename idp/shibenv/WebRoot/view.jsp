@@ -98,7 +98,7 @@
 						</tr>
 					</c:forEach>
 				</table>
-				
+
 				<br>
 
 				<table class="aafTable" border="1" cellpadding="5">
@@ -131,13 +131,16 @@
 						href="http://www.aaf.edu.au/docs/Institution_managed_auEduPersonSharedToken_v01.2.doc">IMAST</a>.
 				</p>
 				<br>
+				<p>
+					<b> Please anwser the following questions: </b>
+				</p>
 
 				<input type="checkbox" name="imastAlg" value="Yes">
 				auEduPersonSharedToken is generated using the IMAST default
 				algorithm
 				<br>
 				<br>
-				The local unique, persistent attribute used to generate aEPST is 
+				The local unique, persistent attribute used to generate aEPST is
 				<input type="text" size="8" name="uniqueAttr" value="">
 				<br>
 				<br>
@@ -204,7 +207,7 @@
 						</tr>
 					</c:forEach>
 				</table>
-				
+
 				<br>
 
 				<h3>
