@@ -8,7 +8,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -43,9 +44,8 @@ public class MailUtil {
 	private String subject;
 
 	private String realSubject;
-	
-	private static String MISSING_VALUE = "<b>missing</b>";
 
+	private static String MISSING_VALUE = "<b>missing</b>";
 
 	public void sendMail(String entityID, Timestamp timestamp) throws Exception {
 
@@ -109,8 +109,6 @@ public class MailUtil {
 		return msgContent;
 	}
 
-
-	
 	private String addAttrList(String heading, Map attrMap, String msgContent) {
 		msgContent = msgContent.concat("<h2>" + heading + "</h2>");
 		msgContent = msgContent.concat("<br>");
@@ -118,11 +116,13 @@ public class MailUtil {
 		while (it.hasNext()) {
 			String key = (String) it.next();
 			String value = (String) attrMap.get(key);
-		
-			if(value.equals("missing")){
-				msgContent = msgContent.concat("<b>" + key + ":  </b> " + "<i> missing </i>");
-			}else{
-			msgContent = msgContent.concat("<b>" + key + ":  </b> " + value);
+
+			if (value.equals("missing")) {
+				msgContent = msgContent.concat("<b>" + key + ":  </b> "
+						+ "<i> missing </i>");
+			} else {
+				msgContent = msgContent
+						.concat("<b>" + key + ":  </b> " + value);
 			}
 			msgContent = msgContent.concat("<br>");
 		}
@@ -133,7 +133,29 @@ public class MailUtil {
 	private void send(String msgContent) throws Exception {
 		try {
 			boolean sessionDebug = false;
-			// Create some properties and get the default Session.
+
+			ArrayList<String> arrayTo = new ArrayList<String>();
+			StringTokenizer stTo = new StringTokenizer(to, ",");
+			while (stTo.hasMoreTokens())
+				arrayTo.add(stTo.nextToken());
+			int sizeTo = arrayTo.size();
+			InternetAddress[] addressTo = new InternetAddress[sizeTo];
+			for (int i = 0; i < sizeTo; i++) {
+				log.debug("to : " + arrayTo.get(i).toString());
+				addressTo[i] = new InternetAddress(arrayTo.get(i).toString());
+			}
+
+			ArrayList<String> arrayCc = new ArrayList<String>();
+			StringTokenizer stCc = new StringTokenizer(cc, ",");
+			while (stCc.hasMoreTokens())
+				arrayCc.add(stCc.nextToken());
+			int sizeCc = arrayCc.size();
+			InternetAddress[] addressCc = new InternetAddress[sizeCc];
+			for (int i = 0; i < sizeCc; i++) {
+				log.debug("cc : " + arrayCc.get(i).toString());
+				addressCc[i] = new InternetAddress(arrayCc.get(i).toString());
+			}
+
 			Properties props = System.getProperties();
 			props.put("mail.host", smtpHost);
 			props.put("mail.transport.protocol", "smtp");
@@ -149,11 +171,9 @@ public class MailUtil {
 				// required information.
 				Message msg = new MimeMessage(session);
 				msg.setFrom(new InternetAddress(from));
-				InternetAddress[] address = { new InternetAddress(to) };
-				msg.setRecipients(Message.RecipientType.TO, address);
 
-				msg.setRecipients(Message.RecipientType.CC, InternetAddress
-						.parse(cc, false));
+				msg.setRecipients(Message.RecipientType.TO, addressTo);
+				msg.setRecipients(Message.RecipientType.CC, addressCc);
 
 				msg.setSubject(realSubject);
 				msg.setSentDate(new Date());
