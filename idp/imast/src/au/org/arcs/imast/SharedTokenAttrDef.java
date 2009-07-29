@@ -12,11 +12,13 @@ import java.util.Properties;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.sql.DataSource;
 
 import org.w3c.dom.Element;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.log4j.Logger;
 
 import edu.internet2.middleware.shibboleth.aa.attrresolv.AttributeResolverException;
@@ -57,85 +59,130 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			String requester, String responder, Dependencies depends)
 			throws ResolutionPlugInException {
 
-		String auEduPersonSharedToken;
+		String auEPST = null;
 
 		try {
 			Attributes attributes = depends.getConnectorResolution("directory");
-			Attribute directoryAuEduPersonSharedToken = attributes
-					.get("auEduPersonSharedToken");
 
-			if (directoryAuEduPersonSharedToken == null) {
-				// no value in directory, so generate one
-				log.info("generate aEPST");
+			if (imastProperties == null) {
+				imastProperties = new Properties();
+				this.getIMASTProperties(imastProperties, responder);
+			}
 
-				if (imastProperties == null) {
-					imastProperties = new Properties();
-					this.getIMASTProperties(imastProperties, responder);
-				}
+			String useDB = imastProperties.getProperty("USE_DB");
 
-				String userIdentifier = this.getPrivateUniqueID(attributes,
-						imastProperties);
-				String idpIdentifier = imastProperties.getProperty("IDP_IDENTIFIER");
-				String privateSeed = imastProperties
-						.getProperty("PRIVATE_SEED");
+			if (useDB.equals("true")) {
 
-				log.debug("userIdentifier" + " : " + userIdentifier);
-				log.debug("idpIdentifier" + " : " + idpIdentifier);
-				log.debug("privateSeed" + " : " + privateSeed);
-				log.debug("idp configuration file : "
-						+ imastProperties.getProperty("IDP_CONFIG_FILE"));
-				log.debug("work_mode : " + imastProperties.getProperty("WORK_MODE"));
+				log
+				.info("USE_DB=true, try to get the SharedToken from database");
+				DataSource ds = getDataSource(imastProperties);
 
-				if (userIdentifier == null || userIdentifier.trim().equals("")
-						|| idpIdentifier == null
-						|| idpIdentifier.trim().equals("")
-						|| privateSeed == null || privateSeed.trim().equals("")) {
-					auEduPersonSharedToken = null;
+				SharedTokenStore stStore = new SharedTokenStore(ds);
+				auEPST = stStore.getSharedToken(principal.getName());
+
+				if (auEPST == null) {
 					log
-							.warn("Either userIdentifier or idpIdentifier or privateSeed is missing, so can’t generate Shared Token");
-				} else {
-					auEduPersonSharedToken = this.generateShareToken(
-							userIdentifier, idpIdentifier, privateSeed);
-					log.info("auEduPersonSharedToken : " + auEduPersonSharedToken);
-					String workMode = imastProperties.getProperty("WORK_MODE");
-					if(workMode != null && !workMode.trim().equals("")){
-						if(workMode.equals("ODP")){
-							this.writeAttribute(auEduPersonSharedToken, principal,
-									imastProperties);
-							log.info("On-Demand Provisioning - generate aEPST and write into Ldap");
-							
-						}else if(workMode.equals("PNP")){
-							log.info("Partial or No Provisioning - generate aEPST and does not write into Ldap");
-						}
-					}else{
-						log.warn("No WORK_MODE set up. Partial or No Provisioning - generate aEPST and does not write into Ldap");
+							.info("the SharedToken does not exist, try to generate it");
+					auEPST = this.generateShareToken(imastProperties,
+							attributes);
+					if (auEPST != null) {
+						log.info("Store it in the database");
+						stStore.storeSharedToken(principal.getName(), auEPST);
+					} else {
+						log.error("Couldn't resolve the SharedToken");
 					}
 				}
-
 			} else {
-				// existing directory value
-				log.info("aEPST is existing, get it from Ldap");
+				log.info("USE_DB=false, try to get the SharedToken from LDAP");
 
-				auEduPersonSharedToken = (String) directoryAuEduPersonSharedToken
-						.get(0);
+				Attribute directoryAuEduPersonSharedToken = attributes
+						.get("auEduPersonSharedToken");
+
+				if (directoryAuEduPersonSharedToken == null) {
+					// no value in directory, so generate one
+					log
+							.info("the SharedToken does not exist, try to generate it");
+
+					auEPST = this.generateShareToken(imastProperties,
+							attributes);
+					if (auEPST != null) {
+						String workMode = imastProperties
+								.getProperty("WORK_MODE");
+						if (workMode != null && !workMode.trim().equals("")) {
+							if (workMode.equals("ODP")) {
+								log
+										.info("On-Demand Provisioning - generate aEPST and write into Ldap");
+								this.writeAttribute(auEPST, principal,
+										imastProperties);
+
+							} else if (workMode.equals("PNP")) {
+								log
+										.info("Partial or No Provisioning - generate aEPST and does not write into Ldap");
+							} else {
+								log.warn("Unkown WORK_MODE value");
+							}
+						} else {
+							log
+									.warn("No WORK_MODE set up. Partial or No Provisioning - generate aEPST and does not write into Ldap");
+						}
+					} else {
+						log.error("Couldn't resolve the SharedToken");
+					}
+
+				} else {
+					// existing directory value
+					log.info("aEPST is existing, get it from Ldap");
+
+					auEPST = (String) directoryAuEduPersonSharedToken.get(0);
+				}
 			}
-			attribute.addValue(auEduPersonSharedToken);
+			attribute.addValue(auEPST);
 
 		} catch (NamingException e) {
-			log.warn(e.getMessage()
-					+ ". Couldn't generate aEPST and set aEPST to null");
-			auEduPersonSharedToken = null;
+			log.warn(e.getMessage() + "\n Couldn't resove aEPST");
 
 		} catch (IMASTException e) {
-
-			log.warn(e.getMessage()
-					+ ". Couldn't generate aEPST and set aEPST to null");
+			log.warn(e.getMessage() + "\n Couldn't resove aEPST");
 
 		} catch (Exception e) {
-			log.warn(e.getMessage()
-					+ ". Couldn't generate aEPST and set aEPST to null");
-			auEduPersonSharedToken = null;
+			log.warn(e.getMessage() + "\n Couldn't resove aEPST");
 		}
+	}
+
+	private DataSource getDataSource(Properties imastProperties)
+			throws IMASTException {
+		
+		log.info("getting data source");
+
+		BasicDataSource dataSource = new BasicDataSource();
+		String jdbcDriver = imastProperties.getProperty("JDBC_DRIVER");
+		String jdbcURL = imastProperties.getProperty("JDBC_URL");
+		String jdbcUsername = imastProperties.getProperty("JDBC_USERNAME");
+		String jdbcPassword = imastProperties.getProperty("JDBC_PASSWORD");
+		
+		log.debug("JDBC_DRIVER : " + jdbcDriver);
+		log.debug("JDBC_URL : " + jdbcURL);
+		log.debug("JDBC_USERNAME : " + jdbcUsername);
+		log.debug("JDBC_PASSWORD : " + "******");
+
+		if (jdbcDriver == null || jdbcDriver.equals("")) {
+			throw new IMASTException("missing property: JDBC_DRIVER is null ");
+		}
+		if (jdbcURL == null || jdbcURL.equals("")) {
+			throw new IMASTException("missing property: JDBC_URL is null ");
+		}
+		if (jdbcUsername == null || jdbcUsername.equals("")) {
+			throw new IMASTException("missing property: JDBC_USERNAME is null ");
+		}
+		if (jdbcPassword == null || jdbcPassword.equals("")) {
+			throw new IMASTException("missing property: JDBC_PASSWORD is null ");
+		}
+		dataSource.setDriverClassName(jdbcDriver);
+		dataSource.setUrl(jdbcURL);
+		dataSource.setUsername(jdbcUsername);
+		dataSource.setPassword(jdbcPassword);
+
+		return dataSource;
 	}
 
 	private void getIMASTProperties(Properties imastProperties, String responder)
@@ -159,7 +206,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			imastProperties.put("USER_IDENTIFIER",
 					DefaultProperties.USER_IDENTIFIER);
 			log
-					.info("Can not find user identifier in imast.properties, use default value instead");
+					.debug("Can not find user identifier in imast.properties, defaults to " +  DefaultProperties.USER_IDENTIFIER);
 		}
 
 		String privateSeed = (String) imastProperties
@@ -170,13 +217,11 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 		if (idpIdentifier == null || idpIdentifier.trim().equals("")) {
 			imastProperties.put("IDP_IDENTIFIER", responder);
 			log
-					.info("Can not find idp identifier in imast.properties, use default value instead");
+					.info("Can not find idp identifier in imast.properties, defaults to " + responder);
 		}
 
 		if (privateSeed == null || privateSeed.trim().equals("")) {
 
-			log
-					.info("Can not find private seed in imast.properties, use default value instead");
 			InetAddress thisIp = null;
 			try {
 				thisIp = InetAddress.getLocalHost();
@@ -188,6 +233,8 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			}
 
 			imastProperties.put("PRIVATE_SEED", thisIp.getHostAddress());
+			log
+			.debug("Can not find private seed in imast.properties, defaults to " + thisIp.getHostAddress());
 
 		}
 
@@ -197,16 +244,52 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			imastProperties.put("IDP_CONFIG_FILE",
 					DefaultProperties.IDP_CONFIG_FILE);
 			log
-					.info("Can not find idp config file in imast.properties, use default value instead");
+					.debug("Can not find idp config file in imast.properties, defaults to " + DefaultProperties.IDP_CONFIG_FILE);
 		}
 
 		String workMode = (String) imastProperties.getProperty("WORK_MODE");
 		if (workMode == null || workMode.trim().equals("")) {
 			imastProperties.put("WORK_MODE", DefaultProperties.WORK_MODE);
 			log
-					.info("Can not find WORK_MODE in imast.properties, use default value instead");
+					.debug("Can not find WORK_MODE in imast.properties, defaults to ODP");
+		}
+		String useDB = (String) imastProperties.getProperty("USE_DB");
+		if (useDB == null || useDB.trim().equals("")) {
+			imastProperties.put("USE_DB", "false");
+			log
+					.debug("Can not find USE_DB in imast.properties, defaults to false");
 		}
 
+		
+	}
+
+	private String generateShareToken(Properties imastProperties,
+			Attributes attributes) throws NamingException {
+
+		String auEPST = null;
+		String userIdentifier = this.getPrivateUniqueID(attributes,
+				imastProperties);
+		String idpIdentifier = imastProperties.getProperty("IDP_IDENTIFIER");
+		String privateSeed = imastProperties.getProperty("PRIVATE_SEED");
+
+		log.debug("userIdentifier" + " : " + userIdentifier);
+		log.debug("idpIdentifier" + " : " + idpIdentifier);
+		log.debug("privateSeed" + " : " + privateSeed);
+		log.debug("idp configuration file : "
+				+ imastProperties.getProperty("IDP_CONFIG_FILE"));
+
+		if (userIdentifier == null || userIdentifier.trim().equals("")
+				|| idpIdentifier == null || idpIdentifier.trim().equals("")
+				|| privateSeed == null || privateSeed.trim().equals("")) {
+			auEPST = null;
+			log
+					.warn("Either userIdentifier or idpIdentifier or privateSeed is missing, so can’t generate Shared Token");
+		} else {
+			auEPST = this.generateShareToken(userIdentifier, idpIdentifier,
+					privateSeed);
+			log.info("auEduPersonSharedToken : " + auEPST);
+		}
+		return auEPST;
 	}
 
 	private String generateShareToken(String userIdentifier,
