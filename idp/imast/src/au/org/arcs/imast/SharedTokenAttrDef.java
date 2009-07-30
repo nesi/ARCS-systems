@@ -74,7 +74,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			if (useDB.equals("true")) {
 
 				log
-				.info("USE_DB=true, try to get the SharedToken from database");
+						.info("USE_DB=true, try to get the SharedToken from database");
 				DataSource ds = getDataSource(imastProperties);
 
 				SharedTokenStore stStore = new SharedTokenStore(ds);
@@ -86,7 +86,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 					auEPST = this.generateShareToken(imastProperties,
 							attributes);
 					if (auEPST != null) {
-						log.info("Store it in the database");
+						log.info("Store the SharedToken in the database");
 						stStore.storeSharedToken(principal.getName(), auEPST);
 					} else {
 						log.error("Couldn't resolve the SharedToken");
@@ -139,19 +139,19 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			attribute.addValue(auEPST);
 
 		} catch (NamingException e) {
-			log.warn(e.getMessage() + "\n Couldn't resove aEPST");
+			log.error(e.getMessage() + "\n Couldn't resove aEPST");
 
 		} catch (IMASTException e) {
-			log.warn(e.getMessage() + "\n Couldn't resove aEPST");
+			log.error(e.getMessage() + "\n Couldn't resove aEPST");
 
 		} catch (Exception e) {
-			log.warn(e.getMessage() + "\n Couldn't resove aEPST");
+			log.error(e.getMessage() + "\n Couldn't resove aEPST");
 		}
 	}
 
 	private DataSource getDataSource(Properties imastProperties)
 			throws IMASTException {
-		
+
 		log.info("getting data source");
 
 		BasicDataSource dataSource = new BasicDataSource();
@@ -159,7 +159,7 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 		String jdbcURL = imastProperties.getProperty("JDBC_URL");
 		String jdbcUsername = imastProperties.getProperty("JDBC_USERNAME");
 		String jdbcPassword = imastProperties.getProperty("JDBC_PASSWORD");
-		
+
 		log.debug("JDBC_DRIVER : " + jdbcDriver);
 		log.debug("JDBC_URL : " + jdbcURL);
 		log.debug("JDBC_USERNAME : " + jdbcUsername);
@@ -206,7 +206,8 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			imastProperties.put("USER_IDENTIFIER",
 					DefaultProperties.USER_IDENTIFIER);
 			log
-					.debug("Can not find user identifier in imast.properties, defaults to " +  DefaultProperties.USER_IDENTIFIER);
+					.debug("Couldn't find user identifier in imast.properties, defaults to "
+							+ DefaultProperties.USER_IDENTIFIER);
 		}
 
 		String privateSeed = (String) imastProperties
@@ -217,7 +218,8 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 		if (idpIdentifier == null || idpIdentifier.trim().equals("")) {
 			imastProperties.put("IDP_IDENTIFIER", responder);
 			log
-					.info("Can not find idp identifier in imast.properties, defaults to " + responder);
+					.info("Couldn't find idp identifier in imast.properties, defaults to "
+							+ responder);
 		}
 
 		if (privateSeed == null || privateSeed.trim().equals("")) {
@@ -229,12 +231,13 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new IMASTException(e.getMessage()
-						+ ". Can not get default private seed");
+						+ ". Couldn't get default private seed");
 			}
 
 			imastProperties.put("PRIVATE_SEED", thisIp.getHostAddress());
 			log
-			.debug("Can not find private seed in imast.properties, defaults to " + thisIp.getHostAddress());
+					.debug("Couldn't find private seed in imast.properties, defaults to "
+							+ thisIp.getHostAddress());
 
 		}
 
@@ -244,23 +247,23 @@ public class SharedTokenAttrDef extends SimpleAttributeDefinition {
 			imastProperties.put("IDP_CONFIG_FILE",
 					DefaultProperties.IDP_CONFIG_FILE);
 			log
-					.debug("Can not find idp config file in imast.properties, defaults to " + DefaultProperties.IDP_CONFIG_FILE);
+					.debug("Couldn't find idp config file in imast.properties, defaults to "
+							+ DefaultProperties.IDP_CONFIG_FILE);
 		}
 
 		String workMode = (String) imastProperties.getProperty("WORK_MODE");
 		if (workMode == null || workMode.trim().equals("")) {
 			imastProperties.put("WORK_MODE", DefaultProperties.WORK_MODE);
 			log
-					.debug("Can not find WORK_MODE in imast.properties, defaults to ODP");
+					.debug("Couldn't find WORK_MODE in imast.properties, defaults to ODP");
 		}
 		String useDB = (String) imastProperties.getProperty("USE_DB");
 		if (useDB == null || useDB.trim().equals("")) {
 			imastProperties.put("USE_DB", "false");
 			log
-					.debug("Can not find USE_DB in imast.properties, defaults to false");
+					.debug("Couldn't find USE_DB in imast.properties, defaults to false");
 		}
 
-		
 	}
 
 	private String generateShareToken(Properties imastProperties,

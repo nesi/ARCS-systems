@@ -31,7 +31,7 @@ public class SharedTokenStore {
 	}
 
 	public String getSharedToken(String uid) throws IMASTException {
-		log.debug("calling getSharedToken ...");
+		log.info("calling getSharedToken ...");
 
 		Connection conn = null;
 		String sharedToken = null;
@@ -71,14 +71,14 @@ public class SharedTokenStore {
 
 		}
 		
-		log.info("SharedToken : " + sharedToken);
+		log.info("get the SharedToken from database : " + sharedToken);
 
 		return sharedToken;
 	}
 
 	public void storeSharedToken(String uid, String sharedToken)
 			throws IMASTException {
-		log.debug("calling storeSharedToken ...");
+		log.info("calling storeSharedToken ...");
 		Connection conn = null;
 		PreparedStatement st = null;
 
@@ -93,7 +93,7 @@ public class SharedTokenStore {
 				log.debug("REPLACE INTO tb_st SET SharedToken = " + sharedToken
 						+ ", uid = " + uid);
 				int rows = st.executeUpdate();
-				log.debug("Successfully store the SharedToken in the database");
+				log.info("Successfully store the SharedToken in the database");
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw new IMASTException(e.getMessage());
