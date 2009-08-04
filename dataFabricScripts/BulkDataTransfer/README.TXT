@@ -6,4 +6,9 @@ Ref: http://fasterdata.es.net/
 These scripts were developed for high-speed transfer of telescope and
 pulsar data from remote and other-capital sites to Perth.
 
-GKJ-20090728
+Note that fdtPut7.sh was upgraded 20090804 so as to transfer batches of files
+instead of individual files; when tested with "-b 32" this gave a 15 times
+performance increase in local VPAC tests.  It's performance is still only
+about 30% of that delivered by "gloPut7.sh -u".
+
+GKJ-20090804
