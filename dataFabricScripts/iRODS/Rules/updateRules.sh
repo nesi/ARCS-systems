@@ -53,4 +53,5 @@ for File in arcs imos emxray ; do
   [ "$File" = "arcs" ] && sed -i -e "s/DEFAULT_RESOURCE/$1/g" _SCRATCH
   mv -f _SCRATCH "$File".irb 2>/dev/null                               || fail "Bad rename!"
 done
+rm -f _SCRATCH
 exit 0
