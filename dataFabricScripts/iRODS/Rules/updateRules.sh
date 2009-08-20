@@ -1,7 +1,7 @@
 #!/bin/sh
 # updateRules.sh	Downloads ARCS-specific rules files for iRODS; should
 #			be invoked periodically via 'cron'.
-#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20090819
+#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20090820
 
 
 # Usage, destination directory
@@ -14,10 +14,10 @@ fail () {
 }
 
 # 'getfile' function.  Usage: getfile remote-name local-name
-getfile () {
+getfile () {         # Note:  wget uses revision-no to force proxy-cache reload
   rm -f $2                                             || fail "File removal failed!"
   wget -O $2 \
-    http://projects.arcs.org.au/svn/systems/trunk/dataFabricScripts/iRODS/Rules/$1 2>/dev/null &
+    http://projects.arcs.org.au/svn/systems/trunk/dataFabricScripts/iRODS/Rules/${1}"?q=$$" 2>/dev/null &
   sleep 10
   kill $! 2>/dev/null                                  && fail "Timed out!"
   [ -s $2 ] && return 0                                || return 1
