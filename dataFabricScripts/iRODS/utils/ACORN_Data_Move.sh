@@ -1,6 +1,9 @@
 #!/bin/sh
 
+logDir="$IRODS_HOME/server/log"
 today=`date '+%Y-%m-%d'`
+curTime=`date '+%Y-%m-%d-%H-%M-%S'`
+echo $curTime >> "$logDir/ACORN-Moving-Data"
 
 icp -rf -R arcs-df.qcif.edu.au /ARCS/projects/IMOS/staging/ACORN/range-time-series /ARCS/projects/IMOS/archive/ACORN
 # icp -rf -R arcs-df.qcif.edu.au /ARCS/projects/IMOS/staging/ACORN/calibration-time-series /ARCS/projects/IMOS/archive/ACORN
