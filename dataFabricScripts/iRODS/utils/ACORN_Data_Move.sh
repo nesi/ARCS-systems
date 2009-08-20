@@ -2,10 +2,10 @@
 
 today=`date '+%Y-%m-%d'`
 
-icp -rf /ARCS/projects/IMOS/staging/ACORN/range-time-series /ARCS/projects/IMOS/archive/ACORN
-# icp -rf /ARCS/projects/IMOS/staging/ACORN/calibration-time-series /ARCS/projects/IMOS/archive/ACORN
-icp -rf /ARCS/projects/IMOS/staging/ACORN/radial /ARCS/projects/IMOS/opendap/ACORN
-icp -rf /ARCS/projects/IMOS/staging/ACORN/sea-state /ARCS/projects/IMOS/opendap/ACORN
+icp -rf -R arcs-df.qcif.edu.au /ARCS/projects/IMOS/staging/ACORN/range-time-series /ARCS/projects/IMOS/archive/ACORN
+# icp -rf -R arcs-df.qcif.edu.au /ARCS/projects/IMOS/staging/ACORN/calibration-time-series /ARCS/projects/IMOS/archive/ACORN
+icp -rf -R arcs-df.qcif.edu.au /ARCS/projects/IMOS/staging/ACORN/radial /ARCS/projects/IMOS/opendap/ACORN
+icp -rf -R arcs-df.qcif.edu.au /ARCS/projects/IMOS/staging/ACORN/sea-state /ARCS/projects/IMOS/opendap/ACORN
 
 for collName in `yes|iquest "SELECT COLL_NAME WHERE COLL_NAME like '/ARCS/projects/IMOS/staging/ACORN%'" |grep COLL_NAME |cut -d' ' -f3`
 do
