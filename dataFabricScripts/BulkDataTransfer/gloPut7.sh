@@ -2,7 +2,7 @@
 # gloPut7.sh   Copies files in a designated directory to a remote server.
 #              Version 7 uses globus-url-copy with sshftp to transfer
 #              files concurrently with log-monitoring for time-out purposes.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20090722
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20090827
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -72,10 +72,10 @@ doGlobus() {
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
 }
 
-# Create destination directory if required, 
+# Create destination directory if required, ensure that we can write to it 
 ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
 ssu $2 "mkdir -p -m 775 $3"   2>/dev/null || fail 1 "Remote-directory problem"
-ssu $2 "chmod 775 `dirname $3`" 2>/dev/null 
+ssu $2 "chmod 775       $3"   2>/dev/null
 
 # Create temporary files
 TmpFil=`mktemp` && chmod a+x $TmpFil      || fail 1 "Temporary file problem"
@@ -107,5 +107,6 @@ while [ -n "$Flag" ] ; do
   [ "`cat $LisFil 2>/dev/null | wc -l`" != 0 ] && doGlobus $LisFil
 done
 
-# All done
+# All done, adjust permissions and exit
+ssu $2 "chmod -R g+rw $3" 2>/dev/null
 fail 0 "No more files to be copied!"
