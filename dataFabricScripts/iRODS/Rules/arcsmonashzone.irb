@@ -1,4 +1,4 @@
-# iRODS local rules for 'monash' sites, Revised 20090831.
+# iRODS local rules for 'monashzone' sites, Revised 20090831.
 # Default-resource must be set appropriately for your site (e.g. srbdev.vpac.org)
 #
 acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,'"*arg"',null,null,null,*OUT)|nop
