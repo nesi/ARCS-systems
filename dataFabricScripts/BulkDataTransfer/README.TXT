@@ -11,4 +11,7 @@ instead of individual files; when tested with "-b 32" this gave a 15 times
 performance increase in local VPAC tests.  It's performance is still only
 about 30% of that delivered by "gloPut7.sh -u".
 
-GKJ-20090804
+Also note that gloPut8.sh was instantiated 20090902 on recommendation of
+developers .. uses '-rst' for stall detection.  Doesn't work in practise!
+
+GKJ-20090902
