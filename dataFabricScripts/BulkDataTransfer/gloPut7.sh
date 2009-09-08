@@ -2,7 +2,7 @@
 # gloPut7.sh   Copies files in a designated directory to a remote server.
 #              Version 7 uses globus-url-copy with sshftp to transfer
 #              files concurrently with log-monitoring for time-out purposes.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20090827
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20090908
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -77,15 +77,18 @@ ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
 ssu $2 "mkdir -p -m 775 $3"   2>/dev/null || fail 1 "Remote-directory problem"
 ssu $2 "chmod 775       $3"   2>/dev/null
 
-# Create temporary files
+# Create temporary files, set traps
 TmpFil=`mktemp` && chmod a+x $TmpFil      || fail 1 "Temporary file problem"
 LisFil=`mktemp`                           || fail 1 "Temporary file problem"
 LogFil=`mktemp`                           || fail 1 "Temporary file problem"
 trap "" 0 1 2 3 4 14 15
-trap "chmod a-x $TmpFil; echo Break detected .. wait" 18
+trap "chmod a-x $TmpFil; echo Break detected .. wait" CONT
+trap 'Udt=""           ; echo Switched to TCP..'      USR1
+trap 'Udt="-udt"       ; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
-echo "To Terminate gracefully, enter: kill -18 $$"
+echo "To Terminate gracefully,  enter: kill -CONT $$"
+echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
 Flag=Y
 while [ -n "$Flag" ] ; do
   Flag=
