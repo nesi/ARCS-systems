@@ -26,10 +26,7 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/archive/SRS/*"|msi
 
 #by the time these rules are call,ed the archive rules would have been activated.#which laves opendap and public
 #opendap and public rules for SOOP
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOOP/XBT/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOOP/CO2/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOOP/SST/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOOP/ASF/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOOP/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOTS/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/ANMN/SOOC/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/FAIMMS/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
