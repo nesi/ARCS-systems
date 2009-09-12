@@ -7,3 +7,4 @@ acSetRescSchemeForCreate|$userNameClient == guest)%%($userNameClient == anonymou
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acAclPolicy||msiAclPolicy(STRICT)|nop
+acTrashPolicy||nop|nop
