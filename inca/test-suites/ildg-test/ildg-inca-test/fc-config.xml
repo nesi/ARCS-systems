@@ -58,7 +58,7 @@
             <lfn>lfn://JLDG/CP-PACS/RCNF2/RC12x24-B1800K014090C1600-A-00210</lfn>
             <surls>
 		<surl>gsiftp://www.jldg.org/gfarm/public/ILDG/JLDG/CP-PACS/RCNF2/RC12x24-B1800/K014090/RC12x24-B1800K014090C1600-A-00210</surl>
-		<surl>http://www.jldg.org/public/ILDG/JLDG/CP-PACS/RCNF2/RC12x24-B1800/K014090/RC12x24-B1800K014090C1600-A-00210</surl>
+<!--		<surl>http://www.jldg.org/public/ILDG/JLDG/CP-PACS/RCNF2/RC12x24-B1800/K014090/RC12x24-B1800K014090C1600-A-00210</surl>   -->
             </surls>
         </test-unit>
     </fc>
