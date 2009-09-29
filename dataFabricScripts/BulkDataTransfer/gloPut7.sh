@@ -2,7 +2,8 @@
 # gloPut7.sh   Copies files in a designated directory to a remote server.
 #              Version 7 uses globus-url-copy with sshftp to transfer
 #              files concurrently with log-monitoring for time-out purposes.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20090908
+#              Zombie-killing is now enabled, probably should run continually.
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20090929
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -35,18 +36,6 @@ fail() {
   echo "$@"; exit $Code
 }
 
-# Progressive kill function; parameters are Pid and wait-time after each signal
-doKill() {
-  for Signal in 2 15 ; do
-    echo " .. doing:  kill -$Signal $1"
-    kill -$Signal $1 2>/dev/null
-    for Seq in `seq $2`; do
-      ps -f -p $1 >/dev/null 2>&1 || return
-    done
-  done
-  kill -9 $1 2>/dev/null
-}
-
 # Globus-URL-Copy function; file list is 1st param
 doGlobus() {
   globus-url-copy -vb $Udt -pp -p 4 -cc 2 -f $1 >$LogFil&
@@ -65,10 +54,14 @@ doGlobus() {
     [ "$Rate"    != "0.00"     ] && Rcoun=0 || Rcoun=`expr 1 + $Rcoun`  
     # echo "DB1:  Rate: $Rate  NewSize: $NewSize  Rcoun: $Rcoun  Scoun: $Scoun"
     [ $Rcoun -le  60           ] && [ $Scoun -le 60 ] && continue
-    echo "Timeout! Killing Pid: $!"; doKill $! 60 ; break
+    echo "Timeout! Killing Pid: $!"; kill -9 $!; break
   done
   echo
   >$1
+  # Kill parents of defunct (zombie) processes
+  for Parent in `ps -f -u $LOGNAME|grep defunc[t]|awk '{print $3}'|sort|uniq`;do
+    [ -n "$LOGNAME" ] && [ "$LOGNAME" != root ] &&kill -9 $Parent>/dev/null 2>&1
+  done
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
 }
 

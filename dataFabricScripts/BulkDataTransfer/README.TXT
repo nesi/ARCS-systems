@@ -17,4 +17,9 @@ developers .. uses '-rst' for stall detection.  Doesn't work in practise!
 On 20090908, gloPut7.sh was enhanced so as to detect SIGUSR1 and SIGUSR2
 for on-the-fly switching between TCP and UDT modes.
 
-GKJ-20090908
+On 20090929, gloPut7.sh was further enhanced by replacing the progressive
+kill function with 'kill -9', and adding a kill-zombie-parents capability.
+In a future release, the zombie-parent-killer will run continuously in
+background.
+
+GKJ-20090929
