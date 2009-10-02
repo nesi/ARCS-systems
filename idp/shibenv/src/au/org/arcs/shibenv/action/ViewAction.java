@@ -203,9 +203,9 @@ public class ViewAction extends ActionSupport {
 
 			String l = request.getHeader(mapper.getL());
 			if (l != null && !l.equals("")) {
-				slcsMap.put("l", l);
+				//slcsMap.put("l", l);
 			} else {
-				slcsMap.put("l", MISSING_VALUE);
+				//slcsMap.put("l", MISSING_VALUE);
 			}
 
 			String homeOrganization = request.getHeader(mapper
