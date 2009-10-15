@@ -28,9 +28,9 @@ __ http://www.arcs.org.au
 
 an image
 
-.. image:: images/WAYF.bmp
+.. image:: images/WAYF.png
 
-.. image:: images/auth_prompt.bmp
+.. image:: images/auth_prompt.png
 
-.. image:: http://intra.hpsc.csiro.au/images/GarethWilliams.jpg
+.. .. image:: http://intra.hpsc.csiro.au/images/GarethWilliams.jpg
 
