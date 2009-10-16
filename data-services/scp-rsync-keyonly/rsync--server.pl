@@ -9,6 +9,8 @@
 # parses $SSH_ORIGINAL_COMMAND and only allows rsync --server
 #   with --sender if the -s option is given
 # with a limited range of paths
+#
+# Oct 2009, allow path in rsync command
 
 use strict;
 use warnings;
@@ -75,7 +77,9 @@ my @cmdlist = @ARGV;
 
 # the first word is the command - should be rsync
 my $cmd = shift @ARGV;
-$cmd eq 'rsync' or &bailout("SSH_ORIGINAL_COMMAND not 'rsync'\n");
+$cmd =~ /rsync$/ or &bailout("SSH_ORIGINAL_COMMAND not 'rsync'\n");
+# only run the default rsync from PATH
+$cmdlist[0] = 'rsync';
 
 # the second word should be --server
 my $flag = shift @ARGV;
