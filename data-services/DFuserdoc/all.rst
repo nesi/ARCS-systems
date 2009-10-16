@@ -25,20 +25,20 @@ manage files from a familiar and widely available iterface (a web browser).
 This interface has limitations supporting large files and bulk operations.
 Ther are also limitations with the authentication setup as we need to provide a
 secure, stronly authenticated environment and it is difficult to not compromise
-useability in this context.  See `known issues`_.
+useability in this context.  See `known issues <http://www.arcs.org.au/products-services/data-services/arcs-data-fabric-1/arcs-data-fabric-1>`_.
 
 We also support a webdav interface, for which there is a wide variety of client
 software available, but some is quite tricky to setup and use, particularly
 with the stromg authentication and encryption we require.  Software is
 available to 'mount' the ARCS data fabric to make it available like a
 filesystem or shared drive. Webdav and mounting the data fabric also have
-problems with large file support.  iThey also have issues with authentication
+problems with large file support.  They also have issues with authentication
 timing out (and not offering graceful options for re-authenticating) and there
 being no way of setting access permissions.
 
 The underlying technology for the Data Fabric is iRODS, and command line
 clients can also be setup to use the full functionality of that system.  With
-the authentication systems we are using this is non-trivial and most usesr will
+the authentication systems we are using this is non-trivial and most users will
 not use this interface and it is not mentioned further in this guide.  Feel
 free to contact help@arcs.org.au for more information.
 
@@ -49,9 +49,11 @@ free to contact help@arcs.org.au for more information.
 Register for ARCS Services
 +++++++++++++++++++++++++++++
 
-You have to register for ARCS Services prior to using the ARCS Data Fabric. If
+You have to register_ for ARCS Services prior to using the ARCS Data Fabric. If
 you have not registered yet, please do so at the ARCS Services registry.
 Otherwise go to the next step.
+
+.. _register: http://services.arcs.org.au/
 
 Accessing the ARCS Data Fabric using a web browser
 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -75,6 +77,8 @@ will be redirected to an AAF WAYF service to choose your IdP and then be
 prompted to authenticate to your home institution.  If your institution does
 not yet have an AAF federated IdP service, you can register_ to use the `ARCS
 IdP`_.
+
+.. _`ARCS IdP`: http://idp.arcs.org.au/
 
 For access to services by clients that are not web browsers (or an ARCS
 provided tool such as grix), shibboleth is unsuitable on it's own but ARCS
