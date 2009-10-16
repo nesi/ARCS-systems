@@ -81,12 +81,12 @@ IdP`_.
 .. _`ARCS IdP`: http://idp.arcs.org.au/
 
 For access to services by clients that are not web browsers (or an ARCS
-provided tool such as slix_), shibboleth is unsuitable on it's own but ARCS
+provided tool such as |slix|), shibboleth is unsuitable on it's own but ARCS
 anables you to authenticate to AAF to create a proxy credential which can be
 held by an ARCS myproxy service, and you can use that for non-browser access to
 ARCS services such as the Data Fabric.
 
-.. |slix| replace:: slix
+.. |slix| replace:: ``slix``
 
 _`ARCS myproxy service`
 -----------------------
@@ -98,22 +98,24 @@ with short-lived proxy credentials that you get from using shibboleth/AAF
 authentication to the ARCS slcs service. The easiest way to do this for most
 people is to use grix.
 
-To access the ARCS slcs service (with slix_), you need to have an account with
+To access the ARCS slcs service (with |slix|), you need to have an account with
 an Identity Provider (IdP).  To login, you will need to know the name of your
 IdP, you username on the IdP and your password.  Please contact |arcshelp| if 
 you have trouble with your IdP and we can redirect you to your institutes IdP 
 maintainer or otherwise help.
 
-You can create a MyProxy credential by using the slix_ tool as follows:
+.. |arcshelp|:: help@arcs.org.au
+
+You can create a MyProxy credential by using the |slix| tool as follows:
 
 1.  Download: http://staff.vpac.org/~markus/slix.jar
-#. Run: ``java -jar slix.jar`` to start slix (if your browser did not do this automatically).
+#. Run: ``java -jar slix.jar`` to start |slix| (if your browser did not do this automatically).
 #. Select your IdP and enter your Username and Password.
 #. Also provide a suitable MyProxy-Username and MyProxy-Password (should not be 
    the same password you use to access your institution!).
 #. Push the "Create MyProxy" button.
 
-slix_ creates a MyProxy credential that lasts for 10 days before expiring.
+|slix| creates a MyProxy credential that lasts for 10 days before expiring.
 
 Once your MyProxy credential has been created, you can instruct the ARCS Data
 Fabric to use if by entering the MyProxy-Username you declared in the form:
