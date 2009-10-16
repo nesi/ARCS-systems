@@ -104,7 +104,7 @@ IdP, you username on the IdP and your password.  Please contact |arcshelp| if
 you have trouble with your IdP and we can redirect you to your institutes IdP 
 maintainer or otherwise help.
 
-.. |arcshelp|:: help@arcs.org.au
+.. |arcshelp| replace:: help@arcs.org.au
 
 You can create a MyProxy credential by using the |slix| tool as follows:
 
