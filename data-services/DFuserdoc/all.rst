@@ -81,10 +81,12 @@ IdP`_.
 .. _`ARCS IdP`: http://idp.arcs.org.au/
 
 For access to services by clients that are not web browsers (or an ARCS
-provided tool such as grix), shibboleth is unsuitable on it's own but ARCS
+provided tool such as slix_), shibboleth is unsuitable on it's own but ARCS
 anables you to authenticate to AAF to create a proxy credential which can be
-help by an ARCS myproxy service, and you can use that for non-browser access to
+held by an ARCS myproxy service, and you can use that for non-browser access to
 ARCS services such as the Data Fabric.
+
+.. |slix| replace:: slix
 
 _`ARCS myproxy service`
 -----------------------
@@ -96,38 +98,25 @@ with short-lived proxy credentials that you get from using shibboleth/AAF
 authentication to the ARCS slcs service. The easiest way to do this for most
 people is to use grix.
 
-To access the ARCS slcs service (with grix), you need to have an account with
+To access the ARCS slcs service (with slix_), you need to have an account with
 an Identity Provider (IdP).  To login, you will need to know the name of your
-IdP, you username on the IdP and your password.  ARCS currently supports the
-follow IdPs:
+IdP, you username on the IdP and your password.  Please contact |arcshelp| if 
+you have trouble with your IdP and we can redirect you to your institutes IdP 
+maintainer or otherwise help.
 
-* ac3 Research
-* ANSTO NBI
-* ARCS IdP
-* eResearchSA
-* iVEC IdP
-* TPAC
-* University of Queensland
-* University of Canterbury
-* VPAC
+You can create a MyProxy credential by using the slix_ tool as follows:
 
-You can create a MyProxy certificate by using the Grix tool as follows:
+1.  Download: http://staff.vpac.org/~markus/slix.jar
+#. Run: ``java -jar slix.jar`` to start slix (if your browser did not do this automatically).
+#. Select your IdP and enter your Username and Password.
+#. Also provide a suitable MyProxy-Username and MyProxy-Password (should not be 
+   the same password you use to access your institution!).
+#. Push the "Create MyProxy" button.
 
-1.  Visit: http://grix.arcs.org.au/downloads/webstart/grix.jnlp
+slix_ creates a MyProxy credential that lasts for 10 days before expiring.
 
-#. When the Grix window opens (image Grix Step 1), click the Authentication
-tab, select Shibboleth, select your IdP, enter your Username and Password, then
-Push the "Authenticate" button (image Grix Step 2)
-
-#. In the small window which will then appear, declare a username and password
-which you will use subsequently to access your MyProxy Certificate (image Grix
-Step 3)
-
-By default, a MyProxy certificate is valid for 12 hours from the time of
-creation.
-
-Once your MyProxy certificate has been created, you can instruct the ARCS Data
-Fabric to use if by entering the username you declared in the form:
+Once your MyProxy credential has been created, you can instruct the ARCS Data
+Fabric to use if by entering the MyProxy-Username you declared in the form:
 ``myproxy\grahamj`` together with your chosen password. It should be noted that in
 this context the username is case-insensitive, and a forward slash is an
 acceptable alternative to the backslash character.
