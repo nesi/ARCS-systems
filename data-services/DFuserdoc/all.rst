@@ -21,9 +21,9 @@ amount of functionality or ease of use.  There are important differences with:
 
 The main interface we are promoting for general usage is a web interface to a
 custom service written by ARCS staff, which provides rich access to browse and
-manage files from a familiar and widely available iterface (a web browser).
+manage files from a familiar and widely available interface (a web browser).
 This interface has limitations supporting large files and bulk operations.
-Ther are also limitations with the authentication setup as we need to provide a
+There are also limitations with the authentication setup as we need to provide a
 secure, stronly authenticated environment and it is difficult to not compromise
 useability in this context.  See `known issues <http://www.arcs.org.au/products-services/data-services/arcs-data-fabric-1/arcs-data-fabric-1>`_.
 
