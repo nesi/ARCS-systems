@@ -8,7 +8,7 @@ ARCS Data Fabric - Step-by-Step Guide
 
 .. sectnum::
 
-.. rubric:: Step by Step Guide to get started using the ARCS Data Fabric.
+.. .. rubric:: Step by Step Guide to get started using the ARCS Data Fabric.
 
 The ARCS Data Fabric can be used to store and share file based data.  A number
 of different forms of access are possible, and they do not all offer the same
@@ -92,11 +92,11 @@ _`ARCS myproxy service`
 -----------------------
  .. |pleasemyproxy| replace:: Please use the `ARCS myproxy service`_
 
-Unless you are using shibboleth authentication in a web browser you should use
+Unless you are using shibboleth authentication in a web browser you should 
 use the ARCS myproxy service. You will need to pre-load the myproxy service
 with short-lived proxy credentials that you get from using shibboleth/AAF
 authentication to the ARCS slcs service. The easiest way to do this for most
-people is to use grix.
+people is to use |slix|.
 
 To access the ARCS slcs service (with |slix|), you need to have an account with
 an Identity Provider (IdP).  To login, you will need to know the name of your
@@ -183,7 +183,8 @@ On Windows
 Connecting to the ARCS Data Fabric on Windows XP
 ................................................
 
-Windows Explorer is a WebDAV client and no extra software is needed to connect
+Windows Explorer is a WebDAV client (though has limited functionality) 
+and no extra software is needed to connect
 to the ARCS Data Fabric.
 
 To connect to the ARCS Data Fabric:
@@ -200,6 +201,8 @@ To connect to the ARCS Data Fabric:
 * Click on OK - the connection has been created! 
     - You should see a new folder in "My Network Places"
 * You can simply drag and drop files into the ARCS Data Fabric like any other local folder!
+* You may not be able to directly open or save files in teh Data Fabric - you will need to work with a local copy.
+* MS Office offers some extra webdav support but has been observed to corrupt files. ARCS recommends that you work on a local copy of any documents.
 
  
 Connecting to the ARCS Data Fabric on Windows Vista and Windows 7 BETA
