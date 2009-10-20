@@ -89,11 +89,11 @@ public class ViewAction extends ActionSupport {
 			if (o != null && !o.equals("")) {
 				aafMap.put("o", o);
 				aafMap1.put("o", o);
-				slcsMap.put("o", o);
+				//slcsMap.put("o", o);
 			} else {
 				aafMap.put("o", MISSING_VALUE);
 				aafMap1.put("o", MISSING_VALUE);
-				slcsMap.put("o", MISSING_VALUE);
+				//slcsMap.put("o", MISSING_VALUE);
 			}
 
 			String eduPersonAssurance = request.getHeader(mapper

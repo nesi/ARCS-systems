@@ -122,7 +122,7 @@ public class MailUtil {
 						+ "<i> missing </i>");
 			} else {
 				msgContent = msgContent
-						.concat("<b>" + key + ":  </b> " + value);
+						.concat("<b>" + key + ":  </b> " + "fine");
 			}
 			msgContent = msgContent.concat("<br>");
 		}
