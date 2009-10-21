@@ -118,7 +118,7 @@ public class ViewAction extends ActionSupport {
 			} else {
 				aafMap.put("auEduPersonSharedToken", MISSING_VALUE);
 				aafMap2.put("auEduPersonSharedToken", MISSING_VALUE);
-				slcsMap.put("auEduPersonSharedToken", auEduPersonSharedToken);
+				slcsMap.put("auEduPersonSharedToken", MISSING_VALUE);
 			}
 
 			String eduPersonTargetedID = request.getHeader(mapper
@@ -163,7 +163,7 @@ public class ViewAction extends ActionSupport {
 				aafMap.put("mail", MISSING_VALUE);
 				aafMap2.put("mail", MISSING_VALUE);
 				slcsMap.put("mail", MISSING_VALUE);
-				rrMap.put("mail", mail);
+				rrMap.put("mail", MISSING_VALUE);
 			}
 
 			String eduPersonAffiliation = request.getHeader(mapper
