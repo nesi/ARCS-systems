@@ -19,6 +19,7 @@ manage files from a familiar and widely available interface (a web browser).
 This interface has limitations supporting large files and bulk operations.
 
 Other interfaces have differences in:
+
 * authentication (and how long you stay authenticated)
 * the way you work with files (up/download, view/edit),
 * setting permissions on file sharing and
