@@ -25,7 +25,7 @@ Other interfaces have differences in:
 * setting permissions on file sharing and
 * controlling replication and other high level management of how files are stored.
 
-See `known issues <http://www.arcs.org.au/products-services/data-services/arcs-data-fabric-1/arcs-data-fabric-1>`_.
+.. See `known issues <http://www.arcs.org.au/products-services/data-services/arcs-data-fabric-1/arcs-data-fabric-1>`_.
 
 We also support a webdav interface, for which there is a wide variety of client
 software available, but some is quite tricky to setup and use, particularly
