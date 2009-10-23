@@ -11,21 +11,20 @@ ARCS Data Fabric - Step-by-Step Guide
 .. .. rubric:: Step by Step Guide to get started using the ARCS Data Fabric.
 
 The ARCS Data Fabric can be used to store and share file based data.  A number
-of different forms of access are possible, and they do not all offer the same
-amount of functionality or ease of use.  There are important differences with:
+of different forms of access are possible to suit a range of different usage needs.
 
-* authentication (and how it times out!),
+The main interface we are promoting for general usage is a web interface to a
+custom service written by ARCS, which provides rich access to browse and
+manage files from a familiar and widely available interface (a web browser).
+This interface has limitations supporting large files and bulk operations.
+
+Other interfaces have differences in:
+* authentication (and how long you stay authenticated)
 * the way you work with files (up/download, view/edit),
 * setting permissions on file sharing and
 * controlling replication and other high level management of how files are stored.
 
-The main interface we are promoting for general usage is a web interface to a
-custom service written by ARCS staff, which provides rich access to browse and
-manage files from a familiar and widely available interface (a web browser).
-This interface has limitations supporting large files and bulk operations.
-There are also limitations with the authentication setup as we need to provide a
-secure, stronly authenticated environment and it is difficult to not compromise
-useability in this context.  See `known issues <http://www.arcs.org.au/products-services/data-services/arcs-data-fabric-1/arcs-data-fabric-1>`_.
+See `known issues <http://www.arcs.org.au/products-services/data-services/arcs-data-fabric-1/arcs-data-fabric-1>`_.
 
 We also support a webdav interface, for which there is a wide variety of client
 software available, but some is quite tricky to setup and use, particularly
@@ -34,7 +33,9 @@ available to 'mount' the ARCS data fabric to make it available like a
 filesystem or shared drive. Webdav and mounting the data fabric also have
 problems with large file support.  They also have issues with authentication
 timing out (and not offering graceful options for re-authenticating) and there
-being no way of setting access permissions.
+being no way of setting access permissions. If you can work with these limitations,
+webdav and mounting the data fabric offer a powerful means of easily interacting 
+with your data fabric holdings as if they are local files.
 
 The underlying technology for the Data Fabric is iRODS, and command line
 clients can also be setup to use the full functionality of that system.  With
