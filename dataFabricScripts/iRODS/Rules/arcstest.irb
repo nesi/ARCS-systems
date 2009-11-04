@@ -8,5 +8,5 @@ acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acTrashPolicy||nop|nop
-acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>10s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),msiExecCmd()|nop
-acPostProcForCopy|"$objPath" not like "/ARCSTESt/trash/*"|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
+acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),msiExecCmd()|nop
+acPostProcForCopy|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>10m</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
