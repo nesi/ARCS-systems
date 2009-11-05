@@ -9,5 +9,5 @@ acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acAclPolicy||msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 #Adding rules to replicate
-acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|msiSysReplDataObj(ARCS-FABRIC,null)|nop
-acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|msiSysReplDataObj(ARCS-FABRIC,null)|nop
+#acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|msiSysReplDataObj(ARCS-FABRIC,null)|nop
+#acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|msiSysReplDataObj(ARCS-FABRIC,null)|nop
