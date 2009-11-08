@@ -30,7 +30,7 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOOP/*"|msiSetDe
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/SOTS/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/ANMN/SOOC/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/ANMN/SA/*"|msiSetDefaultResc(arcs-df.eresearchsa.edu.au,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/ANMN/NRS/NRSMAI/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/ANMN/NRS/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/FAIMMS/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/AUV/Tasmania"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/AUV/SouthAustralia"|msiSetDefaultResc(arcs-df.eresearchsa.edu.au,preferred)|nop
