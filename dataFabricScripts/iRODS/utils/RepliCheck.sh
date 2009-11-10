@@ -1,7 +1,7 @@
 #!/bin/sh
 # RepliCheck.sh  Replica confirmation script; prints names of files which don't
 #                have replicas.
-#                Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091110
+#                Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091111
 
 # Usage check
 [ -z "$1" ] &&
@@ -9,7 +9,7 @@
     echo " e.g.: `basename $0` \"/ARCS/projects/Large Apes\""
     echo 
     echo "Note : To replicate files found by this script, pipe its output thus:"
-    echo "     .. | sed 's/^/irepl -MBTQv -R ARCS-FABRIC /' | sh"
+    echo "     .. | sed 's/^/irepl -MBTQv -R ARCS-REPLISET /' | sh"
   ) >&2 &&exit 2
 ! iadmin lu >/dev/null 2>&1 &&
   echo "It seems that you don't have 'iadmin' execute rights; this will" &&
