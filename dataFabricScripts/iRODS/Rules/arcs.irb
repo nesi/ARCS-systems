@@ -9,5 +9,5 @@ acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acAclPolicy||msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 #Adding rules to replicate
-acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
-acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
+#acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
+#acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
