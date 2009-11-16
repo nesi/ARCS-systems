@@ -2,7 +2,7 @@
 # iupdate  Updates ~irods/.irodsEnv by querying the iRODS Host defined therein
 #          to determine an appropriate value for 'irodsUserName' based on the
 #          user's GSI credentials.
-#          Graham Jenkins <graham@vpac.org> Jan. 2009. Rev: 20091111
+#          Graham Jenkins <graham@vpac.org> Jan. 2009. Rev: 20091117
 
 # MyProxy Server
 [ -z "$MYPROXY_SERVER" ] && export MYPROXY_SERVER=myproxy2.arcs.org.au
@@ -22,8 +22,8 @@ shift `expr $OPTIND - 1`
 # If requested, get a proxy
 if [ -n "$User" ] ; then
   echo "Getting Proxy for User: $User from Server: $MYPROXY_SERVER .."
-  myproxy-info -l "$User" 2>/dev/null | awk '{if($1=="timeleft:")print $0}'
   ! myproxy-logon -l "$User" -t 9999 && echo "Failed!"             >&2 && exit 1
+  myproxy-info -l "$User" 2>/dev/null | awk '{if($1=="timeleft:")print $0}'
 fi
 
 # If we have a proxy identity, use it to get our iRODS username
