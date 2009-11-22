@@ -1,1 +1,0 @@
-acPostProcForPut|"$objPath" like "/ARCSTEST/home/_INBOX/*"|msiExecCmd(chgInboxPerm,$objPath $userNameProxy,null,null,null,*OUT)|nop
