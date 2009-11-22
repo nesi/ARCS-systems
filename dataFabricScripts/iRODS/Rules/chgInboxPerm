@@ -1,0 +1,12 @@
+#!/bin/sh
+
+receiver=`echo $1|cut -d'/' -f5`
+
+collName="/ARCSTEST/home/_INBOX/$receiver"
+
+sender=$2
+
+#ichmod -r own $receiver $collName
+#ichmod -r null $sender $collName
+
+ichmod null public "$1"
