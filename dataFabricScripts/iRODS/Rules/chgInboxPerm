@@ -1,0 +1,3 @@
+#!/bin/sh
+
+ichmod null public "$1"
