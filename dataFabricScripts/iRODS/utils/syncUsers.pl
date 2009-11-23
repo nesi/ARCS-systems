@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add iRODS users as
 #                 appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091103
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091123
 use strict;
 use warnings;
 use File::Basename;
@@ -14,7 +14,7 @@ use vars qw($VERSION);
 $VERSION="2.01";
 
 # Adjust this value as appropriate; should end with '?q=$$' to foil caching
-my $URL="http://irodsdev.vpac.org/XmlList-ARCSTEST.txt";
+my $URL="http://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
@@ -63,6 +63,8 @@ for (my $k=1;$k<=$j;$k++) {
   if ($?) {
     `iadmin mkuser $username[$k] rodsuser >/dev/null 2>&1`;
     if ( ! $? ) { $message.="Added user: ".$username[$k]."\n" }
+    `/usr/local/bin/createInbox.sh -u $username[$k] >/dev/null 2>&1`;
+    if ( ! $? ) { $message.="Created inbox etc/ for: ".$username[$k]."\n" }
   } 
   $olddn=`iquest "SELECT USER_DN where USER_NAME = $userplus" | \
          sed -n "1s/^USER_DN = //p"`;
