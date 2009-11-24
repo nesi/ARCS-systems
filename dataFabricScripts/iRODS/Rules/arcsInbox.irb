@@ -1,0 +1,2 @@
+acPostProcForPut|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"' $userNameProxy,null,null,null,*OUT)|nop
+acPostProcForCopy|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"' $userNameProxy,null,null,null,*OUT)|nop
