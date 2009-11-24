@@ -8,5 +8,7 @@ acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acTrashPolicy||nop|nop
+acPostProcForPut|"$objPath" like "/ARCSTEST/home/_INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
+acPostProcForCopy|"$objPath" like "/ARCSTEST/home/_INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
 acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
 acPostProcForCopy|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
