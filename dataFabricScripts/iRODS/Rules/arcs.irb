@@ -3,12 +3,13 @@
 #
 acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,'"*arg"',null,null,null,*OUT)|nop
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
-acSetRescSchemeForCreate|$userNameClient == guest)%%($userNameClient == anonymous)|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au%emii.resource.tpac.org.au%arcs-df.eresearchsa.edu.au)|nop
+acSetRescSchemeForCreate|($userNameClient == guest)%%($userNameClient == anonymous)|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au%emii.resource.tpac.org.au%arcs-df.eresearchsa.edu.au)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/charlie.bond/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acAclPolicy||msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 #Adding rules to replicate
-acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
-acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 50 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
+acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
+acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 acSetReServerNumProc||msiSetReServerNumProc(4)|nop
