@@ -1,6 +1,6 @@
 .. vim: set tw=78 ts=4 sw=4 et ft=rst:
-.. $Id:$
-.. $HeadURL:$
+.. $Id$
+.. $HeadURL$
 
 =====================================
 ARCS Data Fabric - Step-by-Step Guide
@@ -110,7 +110,7 @@ maintainer or otherwise help.
 
 You can create a MyProxy credential by using the |slix| tool as follows:
 
-1.  Download: http://staff.vpac.org/~markus/slix.jar
+1.  Download: http://projects.arcs.org.au/svn/systems/trunk/dataFabricScripts/iRODS/utils/slix.jar
 #. Run: ``java -jar slix.jar`` to start |slix| (if your browser did not do this automatically).
 #. Select your IdP and enter your Username and Password.
 #. Also provide a suitable MyProxy-Username and MyProxy-Password (should not be 
