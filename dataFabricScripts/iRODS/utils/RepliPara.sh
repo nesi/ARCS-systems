@@ -1,6 +1,6 @@
 #!/bin/sh
 # RepliPara  Performs parallel replication of files not currently replicated.
-#            Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091130
+#            Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091201
 
 # Path, options, usage
 Count=8                 # Default; adjust as appropriate
@@ -21,19 +21,19 @@ if [ \( -n "$Bad" \) -o \( -z "$1" \) ] ; then
   exit 2
 fi
 
-# Create flag-file, set trap for signal to remove it, swallow other signals
+# Set trap for graceful termination
 FlagFile=`mktemp`
-trap ""                                            0 1 2 3 4 15
-trap "rm -f $FlagFile; echo Break detected .. wait" USR1 
+trap "Count=-1; echo Break detected .. wait" 1 2 3 15
 
 # Process each nominated collection
 for Collection in "$@" ; do
   echo "Replicating: $Collection   with: $Count parallel replications"
-  echo "to resource: $Resou .. For graceful termination, do:  kill -USR1 $$"
+  echo "to resource: $Resou .. "
   RepliCheck.sh "$Collection" |
   while read Line ; do
-    [ ! -f $FlagFile ] && wait && exit 0
-    eval irepl -MBTv $Quick -R $Resou "$Line" &
+    [ $Count -lt 0 ] && break 2
+    echo "Replicating: $Line"
+    eval irepl -MBT $Quick -R $Resou "$Line" &
     while  [ `jobs | wc -l` -gt $Count ] ; do
       sleep 1
     done
@@ -42,7 +42,6 @@ for Collection in "$@" ; do
 done
 wait
 
-# All done, remove flag-file and exit
+# All done, exit
 echo
-rm -f $FlagFile
 exit 0
