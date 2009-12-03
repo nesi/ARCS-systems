@@ -1,19 +1,21 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy (GT 5.x.x); uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091117
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091203
 
 # Default-batch-size, stall-timeout and environment
 BATCH=16       # Adjust as appropriate
 STALL=60
-export GLOBUS_LOCATION=/opt/globus-5 PATH=/opt/globus-5/bin:$PATH
-export GLOBUS_TCP_PORT_RANGE=40000,41000 GLOBUS_UDP_PORT_RANGE=40000,41000
+export GLOBUS_LOCATION=/opt/globus-5
+export GLOBUS_TCP_PORT_RANGE=40000,40100 GLOBUS_UDP_PORT_RANGE=40000,40100
+export PATH=$GLOBUS_LOCATION/bin:$PATH GLOBUS_CALLBACK_POLLING_THREADS=1
 
 # Usage, alias
+Params="-pp -p 4"
 while getopts b:us Option; do
   case $Option in
     b) BATCH=$OPTARG;;
-    u) Udt="-udt";;
+    u) Params="-udt -p 1";;
     s) Skip="Y";;
   esac
 done
@@ -39,7 +41,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -st $STALL $Udt -pp -p 4 -cc 2 -f $1
+  globus-url-copy -q -st $STALL $Params -cc 2 -f $1
   echo
   >$1
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
@@ -54,9 +56,9 @@ ssu $2 "chmod 775       $3"   2>/dev/null
 TmpFil=`mktemp` && chmod a+x $TmpFil      || fail 1 "Temporary file problem"
 LisFil=`mktemp`                           || fail 1 "Temporary file problem"
 trap "" 0 1 2 3 4 14 15
-trap "chmod a-x $TmpFil; echo Break detected .. wait" CONT
-trap 'Udt=""           ; echo Switched to TCP..'      USR1
-trap 'Udt="-udt"       ; echo Switched to UDT..'      USR2
+trap "chmod a-x $TmpFil ; echo Break detected .. wait" CONT
+trap 'Params="-pp  -p 4"; echo Switched to TCP..'      USR1
+trap 'Params="-udt -p 1"; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -CONT $$"
