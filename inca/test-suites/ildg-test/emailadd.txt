@@ -2,4 +2,4 @@ CSSM shunde.zhang@adelaide.edu.au
 LDG ldg-adm@desy.de
 UKQCD ukqcd-grid-admin@epcc.ed.ac.uk
 JLDG ildg-jp@ccs.tsukuba.ac.jp
-
+USQCD bjoo@jlab.org simone@fnal.gov
