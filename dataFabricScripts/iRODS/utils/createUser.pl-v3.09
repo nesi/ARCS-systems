@@ -4,7 +4,7 @@
 #                words in the Common Name (with a period separator),
 #                then mapping to lower-case. An integer is appended if
 #                necessary to split duplicates. 
-#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20091202
+#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20091204
 
 use strict;      # This version has been patched so that quotes around the DN
 use warnings;    # can be omitted provided DN doesn't contain adjacent spaces.
@@ -97,16 +97,25 @@ my ($param1,$param2)=("moduser","DN");
 if ($?) { ($param1,$param2)=("aua","") }       # For iRODS 2.2 or later
 
 # If the DN starts in "/" & contains a SharedToken we may have to update record
-# NOTE: This only works for iRODS 2.1; for 2.2 we would need to remove DN first!
 my $dn_plus = "'".$ARGV[0]."'";
-if ( ($st_count == 1) && ($ARGV[0] =~ m/^\057/) && ($param1 eq "moduser") ) {
-  `$path/iquest "select USER_NAME
+if ( ($st_count == 1) && ($ARGV[0] =~ m/^\057/) ) {
+  my $u1=`$path/iquest "select USER_NAME
                  where  USER_INFO like $st_plus
                  and    USER_DN   <>   $dn_plus"  2>/dev/null |
-   awk '/^USER_NAME/ {print \$3}' |
-   while read U; do
-     $path/iadmin $param1 \$U $param2 $dn_plus >/dev/null 2>&1
-   done`
+    awk '/^USER_NAME/ {print \$3; exit}'`;
+  chomp($u1);
+  if ( "$u1" ne "" ) {
+    my ($lua,$luaplus);
+    while ( $param1 eq "aua") {
+      $lua=`$path/iadmin lua $u1 2>/dev/null | 
+            sed -e 's/$u1 //' -e 's/ \$//' | head -1`;
+      chomp($lua);
+      if ( (! defined($lua)) || ($lua eq "No rows found") ) {last} 
+      $luaplus="'".$lua."'";
+      `$path/iadmin rua $u1 $luaplus`;
+    }
+    `$path/iadmin $param1 $u1 $param2 $dn_plus >/dev/null 2>&1`;
+  }
 }
 
 # If the ST is attached to an existing iRODS username, update password and exit
