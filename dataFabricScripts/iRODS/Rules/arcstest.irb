@@ -8,7 +8,12 @@ acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acTrashPolicy||nop|nop
+# INBOX rule
 acPostProcForPut|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
 acPostProcForCopy|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
+# Automatic replication rule
 acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
 acPostProcForCopy|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
+# Resource monitoring rules
+acServerMonPerf||delayExec(< EF >10m< /EF >,msiServerMonPerf(default, default),nop)|nop
+acFlushStat||delayExec(< EF >1h< /EF >,msiFlushMonStat(24,serverload)##msiFlushMonStat(24,serverloaddigest),nop)|nop
