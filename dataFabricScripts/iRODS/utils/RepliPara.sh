@@ -1,6 +1,6 @@
 #!/bin/sh
 # RepliPara  Performs parallel replication of files not currently replicated.
-#            Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091201
+#            Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091208
 
 # Path, options, usage
 Count=8                 # Default; adjust as appropriate
@@ -16,8 +16,9 @@ while getopts Qp:R:h Option; do
 done
 shift `expr $OPTIND - 1`
 if [ \( -n "$Bad" \) -o \( -z "$1" \) ] ; then
+  Zon="`ienv | awk -F= '/irodsZone/ {print \$NF}'`"; [ -z "$Zon" ] && Zon=ARCS
   echo "Usage: `basename $0` [-Q] [-p count] [-R resource] Coll1 [Coll2 ..]">&2
-  echo " e.g.: `basename $0` -p $Count -R $Resou /ARCS/home /ARCS/projects" >&2
+  echo " e.g.: `basename $0` -p $Count -R $Resou /$Zon/home /$Zon/projects" >&2
   exit 2
 fi
 
@@ -34,7 +35,7 @@ for Collection in "$@" ; do
     [ $Count -lt 0 ] && break 2
     echo "Replicating: $Line"
     eval irepl -MBT $Quick -R $Resou "$Line" &
-    while  [ `jobs | wc -l` -gt $Count ] ; do
+    while [ `jobs | wc -l` -ge $Count ] ; do
       sleep 1
     done
   done
