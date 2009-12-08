@@ -1,6 +1,6 @@
 #!/bin/sh
 # RepliPara  Performs parallel replication of files not currently replicated.
-#            Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091208
+#            Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091209
 
 # Path, options, usage
 Count=8                 # Default; adjust as appropriate
@@ -23,7 +23,6 @@ if [ \( -n "$Bad" \) -o \( -z "$1" \) ] ; then
 fi
 
 # Set trap for graceful termination
-FlagFile=`mktemp`
 trap "Count=-1; echo Break detected .. wait" 1 2 3 15
 
 # Process each nominated collection
