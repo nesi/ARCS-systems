@@ -15,6 +15,6 @@ acPostProcForCopy|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInbox
 acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
 acPostProcForCopy|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
 # Resource monitoring rules
-acServerMonPerf||delayExec(PLUSET>1m</PLUSET><EF>10m</EF>,msiServerMonPerf(default, default),nop)|nop
-acFlushStat||delayExec(PLUSET>1m</PLUSET><EF>1h</EF>,msiFlushMonStat(24,serverload)##msiFlushMonStat(24,serverloaddigest),nop)|nop
+# acServerMonPerf||delayExec(PLUSET>1m</PLUSET><EF>10m</EF>,msiServerMonPerf(default, default),nop)|nop
+# acFlushStat||delayExec(PLUSET>1m</PLUSET><EF>1h</EF>,msiFlushMonStat(24,serverload)##msiFlushMonStat(24,serverloaddigest),nop)|nop
 
