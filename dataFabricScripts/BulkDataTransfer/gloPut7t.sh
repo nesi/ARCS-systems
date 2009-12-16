@@ -2,16 +2,17 @@
 # gloPut7t.sh  Copies files in a designated directory to a remote server.
 #              Version 7 uses globus-url-copy with sshftp. Timeout parameter
 #              and stall-time limit are used to circumvent extended lockups.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091216
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091217
 
 # Default-batch-size, environment
-BATCH=16       # Adjust as appropriate
-STALL=60
+BATCH=16       # Batch size; adjust as appropriate
+#STALL=60      # Stall timeout (sec); comment or specify as appropriate
 export GLOBUS_LOCATION=/opt/globus-4.2.1
 export GLOBUS_TCP_PORT_RANGE=40000,40100 GLOBUS_UDP_PORT_RANGE=40000,40100
 export PATH=$GLOBUS_LOCATION/bin:$PATH GLOBUS_CALLBACK_POLLING_THREADS=1
 
 # Usage, alias
+[ -n "$STALL" ] && Stall="-st $STALL"
 Params="-pp -p 4"
 while getopts b:us Option; do
   case $Option in
@@ -45,7 +46,7 @@ doGlobus() {
   [ -z "$Udt" ] && Secs=`expr $Secs + $Secs`
   echo "`date '+%a %T'` .. Pid: $$ .. Limit: `expr $Secs / 60` mins .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -t $Secs -st $STALL $Params -cc 2 -f $1
+  globus-url-copy -q -t $Secs -st $Stall $Params -cc 2 -f $1
   echo
   >$1
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
