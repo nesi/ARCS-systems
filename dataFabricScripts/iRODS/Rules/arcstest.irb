@@ -9,9 +9,9 @@ acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acTrashPolicy||nop|nop
 # INBOX rule
-acPostProcForPut|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
-acPostProcForCopy|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
+#acPostProcForPut|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
+#acPostProcForCopy|"$objPath" like "/ARCSTEST/home/__INBOX/*"|msiExecCmd(chgInboxPerm,'"$objPath"',null,null,null,*OUT)|nop
 # Automatic replication rule
-acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
-acPostProcForCopy|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
+#acPostProcForPut|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
+#acPostProcForCopy|"$objPath" not like "/ARCSTEST/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL 5 TIMES</EF>,msiSysReplDataObj(ARCSTEST-FABRIC,null),nop)|nop
 
