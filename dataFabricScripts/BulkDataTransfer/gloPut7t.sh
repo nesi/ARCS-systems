@@ -43,7 +43,7 @@ fail() {
 doGlobus() {
   Secs=`wc -c \`awk '{print $1}'<$1|cut -c 8-\`|
         awk 'END {print int(60+$(NF-1)/10000000)}'`
-  [ -z "$Udt" ] && Secs=`expr $Secs + $Secs`
+  echo "$Params" | grep pp >/dev/null && Secs=`expr $Secs + $Secs`
   echo "`date '+%a %T'` .. Pid: $$ .. Limit: `expr $Secs / 60` mins .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
   globus-url-copy -q -t $Secs -st $Stall $Params -cc 2 -f $1
