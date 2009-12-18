@@ -46,7 +46,7 @@ doGlobus() {
   echo "$Params" | grep pp >/dev/null && Secs=`expr $Secs + $Secs`
   echo "`date '+%a %T'` .. Pid: $$ .. Limit: `expr $Secs / 60` mins .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -t $Secs -st $Stall $Params -cc 2 -f $1
+  globus-url-copy -q -t $Secs $Stall $Params -cc 2 -f $1
   echo
   >$1
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
