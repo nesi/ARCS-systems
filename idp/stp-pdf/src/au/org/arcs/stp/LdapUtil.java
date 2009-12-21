@@ -20,7 +20,6 @@ import javax.naming.directory.SearchResult;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import au.org.arcs.stp.test.Test;
 
 /**
  * @author Damien Chen
@@ -28,7 +27,7 @@ import au.org.arcs.stp.test.Test;
  */
 public class LdapUtil {
 
-	private static Log log = LogFactory.getLog(Test.class);
+	private static Log log = LogFactory.getLog(LdapUtil.class);
 
 	private static String TRUST_STORE = "javax.net.ssl.trustStore";
 
