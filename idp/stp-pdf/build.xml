@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="stpUtil" default="jar" basedir=".">
+
+	<property name="src" value="${basedir}/src" />
+	<property name="lib" value="${basedir}/lib" />
+	<property name="bin" value="${basedir}/bin" />
+	<property name="conf" value="${basedir}/conf" />
+	<property name="dist" value="${basedir}/dist" />
+	<property name="projectname" value="stpUtil" />
+	<property name="version" value="0.0.1" />
+
+	<description>
+		Ant script to package a jar file for genPDF source code
+    </description>
+
+	
+	  <pathconvert property="libs.project" pathsep=" ">
+	    <mapper>
+	      <chainedmapper>
+	        <!-- remove absolute path -->
+	        <flattenmapper />
+	        <!-- add lib/ prefix -->
+	        <globmapper from="*" to="lib/*" />
+	      </chainedmapper>
+	    </mapper>
+	    <path>
+	      <!-- lib.home contains all jar files, in several subdirectories -->
+	      <fileset dir="${lib}">
+	        <include name="**/*.jar" />
+	      </fileset>
+	    </path>
+	  </pathconvert>
+
+	<path id="compile.classpath">
+
+		<fileset dir="${lib}">
+			<include name="*.jar" />
+		</fileset>
+
+	</path>
+	<property name="jar.class.path" value="../lib/itext-2.1.7.jar" />
+
+	<target name="prep" description="prepare for a build">
+		<mkdir dir="bin" />
+	</target>
+
+	<target name="clean" description="remove all build-generated stuff">
+		<delete dir="${bin}" />
+		<delete dir="${dist}" />
+	</target>
+
+	<target name="compile" depends="prep" description="compile all java classes into bin/">
+		<javac debug="true" destdir="${bin}">
+			<src path="${src}" />
+			<classpath refid="compile.classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="clean,compile" description="--> description">
+		<copy file="${conf}/stp-pdf.properties" todir="${bin}" />
+		<jar destfile="${basedir}/${projectname}-${version}.jar" basedir="${bin}">
+			<manifest>
+				<attribute name="Main-Class" value="au.org.arcs.stp.STP" />
+				<attribute name="Class-Path" value="${libs.project}" />
+			</manifest>
+		</jar>
+	</target>
+
+</project>
