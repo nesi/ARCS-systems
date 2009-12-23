@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class STP {
 
-	static String attributes = "auEduPersonSharedToken,uid,cn";
+	static String attributes = "auEduPersonSharedToken,uid,cn,mail";
 
 	/**
 	 * @param args
@@ -26,7 +26,7 @@ public class STP {
 		String uid = null;
 
 		try {
-			
+
 			if (null == args || args.length < 1) {
 				InputStreamReader inp = new InputStreamReader(System.in);
 				BufferedReader br = new BufferedReader(inp);
@@ -39,12 +39,10 @@ public class STP {
 						.println("will generate a signed SharedToken PDF document for "
 								+ uid);
 
-				System.out.println(uid);
-			
 			} else if (args.length > 1) {
 				System.out.println("too many arguments");
 				System.exit(1);
-			}else{
+			} else {
 				uid = args[0];
 			}
 
@@ -65,7 +63,7 @@ public class STP {
 			String cert = props.getProperty("CERTIFICATE");
 			String password = props.getProperty("PASSWORD");
 			String location = props.getProperty("LOCATION");
-			
+
 			String entityID = props.getProperty("ENTITY_ID");
 
 			String originalPDFDir = props.getProperty("ORIGINAL_PDF");
@@ -74,6 +72,7 @@ public class STP {
 			LdapUtil ldapUtil = new LdapUtil(ldapURL, principal,
 					principalCredential, baseDN, searchFilter, attributes,
 					keyStore);
+
 			Map<String, Set<String>> attrMap = ldapUtil.getUserAttributes(uid);
 
 			PdfUtil pdfUtil = new PdfUtil();
