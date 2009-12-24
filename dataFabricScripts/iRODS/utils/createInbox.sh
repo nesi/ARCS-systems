@@ -3,7 +3,7 @@
 #                /$irodsZone/home/__INBOX/jane.doe for each of one or all users.                
 #                Also creates a publicly-readable collection with a name like:
 #                /$irodsZone/home/__PUBLIC/jane.doe for each of those users.
-#                Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091123
+#                Graham Jenkins <graham@vpac.org> Nov. 2009. Rev: 20091224
 
 # Usage check
 while getopts hau: Option; do
@@ -23,15 +23,15 @@ fail() {
   exit 1
 }
 
-# Process each user, skipping 'rods', 'anonymous'. etc.
+# Process each user, skipping 'rods', 'anonymous', 'rodsBoot' etc.
 for User in $Users ; do
   Username=`iadmin lu $User | awk '{if($1=="user_name:")print $2}'`
   Zonename=`iadmin lu $User | awk '{if($1=="zone_name:")print $2}'`
   [ \( -z "$Username" \) -o \( -z "$Zonename" \) ] && 
     fail "Couldn't ascertain Username and/or Zonename for: $User"
   case "$Username" in
-    [a-z]*.[a-z]* )          ;;
-                * ) continue ;;
+    [a-z]*.[a-z]* )          ;; # Note: some legitimate usernames like
+                * ) continue ;; # 'madonna' will have to be processed manually!
   esac
   #
   imkdir -p "/$Zonename/home/__INBOX/$Username"               ||
