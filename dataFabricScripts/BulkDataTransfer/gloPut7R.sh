@@ -1,9 +1,9 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files in a designated directory to a remote
 #              Server using sshftp. Requires threaded globus-url-copy (GT 5).
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091203
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091225
 
-# Default-batch-size, environment
+# Default-batch-size, stall-timeout and environment
 BATCH=16       # Adjust as appropriate
 STALL=60
 export GLOBUS_LOCATION=/opt/globus-5
@@ -11,7 +11,7 @@ export GLOBUS_TCP_PORT_RANGE=40000,40100 GLOBUS_UDP_PORT_RANGE=40000,40100
 export PATH=$GLOBUS_LOCATION/bin:$PATH GLOBUS_CALLBACK_POLLING_THREADS=1
 
 # Usage, alias
-Params="-pp -p 4"
+Params="-p 4"
 while getopts b:us Option; do
   case $Option in
     b) BATCH=$OPTARG;;
@@ -54,9 +54,8 @@ ssu $2 "chmod 775       $3"   2>/dev/null
 
 TmpFil=`mktemp` && chmod a+x $TmpFil      || fail 1 "Temporary file problem"
 LisFil=`mktemp`                           || fail 1 "Temporary file problem"
-trap "" 0 1 2 3 4 14 15
 trap "chmod a-x $TmpFil ; echo Break detected .. wait" CONT
-trap 'Params="-pp  -p 4"; echo Switched to TCP..'      USR1
+trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
 trap 'Params="-udt -p 1"; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied

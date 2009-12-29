@@ -1,11 +1,11 @@
 #!/bin/sh
-# gloPut7T.sh  Copies files in a designated directory to a remote server.
-#              Requires threaded globus-url-copy (GT 5.x.x); uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091225
+# gloPut7z.sh  Copies files in a designated directory to a remote server.
+#              Requires threaded globus-url-copy; uses sshftp and
+#              incorporates a background zombie manager.
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091224
 
-# Default-batch-size, stall-timeout and environment
+# Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
-STALL=60
 export GLOBUS_LOCATION=/opt/globus-5
 export GLOBUS_TCP_PORT_RANGE=40000,40100 GLOBUS_UDP_PORT_RANGE=40000,40100
 export PATH=$GLOBUS_LOCATION/bin:$PATH GLOBUS_CALLBACK_POLLING_THREADS=1
@@ -39,9 +39,9 @@ fail() {
 
 # Globus-URL-Copy function; file list is 1st param
 doGlobus() {
-  echo "`date '+%a %T'` .. Pid: $$ .. Files:"
+  echo "`date '+%a %T'` .. Pid: $$  Zombie-Mgr: $! .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -st $STALL $Params -cc 2 -f $1
+  globus-url-copy -q $Params -cc 2 -f $1
   echo
   >$1
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
@@ -58,6 +58,14 @@ LisFil=`mktemp`                           || fail 1 "Temporary file problem"
 trap "chmod a-x $TmpFil ; echo Break detected .. wait" CONT
 trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
 trap 'Params="-udt -p 1"; echo Switched to UDT..'      USR2
+
+# Start the zombie manager
+while `ps -p $$ >/dev/null` ; do
+  for Parent in `ps -f -u $LOGNAME|grep defunc[t]|awk '{print $3}'|sort|uniq`;do
+    [ -n "$LOGNAME" ] && [ "$LOGNAME" != root ] &&kill -9 $Parent>/dev/null 2>&1
+  done
+  sleep 120
+done &
 
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -CONT $$"
