@@ -20,9 +20,14 @@ for on-the-fly switching between TCP and UDT modes.
 On 20090929, gloPut7.sh was further enhanced by replacing the progressive
 kill function with 'kill -9', and adding a kill-zombie-parents capability.
 
-On 20091006, gloPut7t.sh and gloPut7r were introduced. These use a computed
+On 20091006, gloPut7t.sh and gloPut7r.sh were introduced. These use a computed
 time-limit value fed to globus-url-copy instead of a log-watch timing loop,
 and are less likely to create zombies and hang. gloPut7r.sh does a recursive
 copy of files which changed in the last 299 days.
 
-GKJ-20091006
+On 20091229 gloPut7T.sh and gloPut7R.sh were introduced; these use the
+stall-timeout parameter available in Globus-5. gloPut7z.sh was also
+introduced; this is a version of gloPut7T.sh modified through the
+inclusion of a Zombie-manager capability.
+
+GKJ-20091229
