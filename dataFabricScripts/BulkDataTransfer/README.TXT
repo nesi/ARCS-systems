@@ -25,9 +25,12 @@ time-limit value fed to globus-url-copy instead of a log-watch timing loop,
 and are less likely to create zombies and hang. gloPut7r.sh does a recursive
 copy of files which changed in the last 299 days.
 
-On 20091229 gloPut7T.sh and gloPut7R.sh were introduced; these use the
+On 20091229, gloPut7T.sh and gloPut7R.sh were introduced; these use the
 stall-timeout parameter available in Globus-5. gloPut7z.sh was also
 introduced; this is a version of gloPut7T.sh modified through the
 inclusion of a Zombie-manager capability.
 
-GKJ-20091229
+On 20091230, gloPut7R.sh was simplified by removal of the create-subdirectories 
+section; it now relies on the "-cd" parameter for globus-url-copy for this.
+
+GKJ-20091230

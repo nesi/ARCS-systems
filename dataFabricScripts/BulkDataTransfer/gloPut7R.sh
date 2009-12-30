@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files in a designated directory to a remote
 #              Server using sshftp. Requires threaded globus-url-copy (GT 5).
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091225
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091230
 
 # Default-batch-size, stall-timeout and environment
 BATCH=16       # Adjust as appropriate
@@ -41,7 +41,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -st $STALL $Params -cc 2 -f $1
+  globus-url-copy -q -cd -st $STALL $Params -cc 2 -f $1
   echo
   >$1
   [ -x "$TmpFil" ]                        || fail 0 "Graceful Termination"
@@ -64,9 +64,6 @@ echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
 Flag=Y
 while [ -n "$Flag" ] ; do
   Flag=
-  echo; echo "Making destination directories .."
-  find $1 -type d -exec echo mkdir -p -m 775 $3/{} \; 2>/dev/null |
-     ssu $2 2>/dev/null     || fail 1 "Remote-directory problem"
   echo "Generating a list of files to be copied .. wait .."
   # Generate a list of the files already copied successfully
   ssu $2 "cd $3 && find . -type f -exec wc -c {} \; 2>/dev/null" |
