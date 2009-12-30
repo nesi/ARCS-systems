@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
-#                 Access Service, and uses its content to add iRODS users as
-#                 appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091123
+#                 Access Service, and uses its content to add, modify or
+#                 de-activate iRODS users as appropriate.
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091231
 use strict;
 use warnings;
 use File::Basename;
@@ -11,7 +11,7 @@ use Sys::Syslog;
 use XML::XPath;  # You may need to do: yum install perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.01";
+$VERSION="2.02";
 
 # Adjust this value as appropriate; should end with '?q=$$' to foil caching
 my $URL="http://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
@@ -64,9 +64,9 @@ for (my $k=1;$k<=$j;$k++) {
     `iadmin mkuser $username[$k] rodsuser >/dev/null 2>&1`;
     if ( ! $? ) { $message.="Added user: ".$username[$k]."\n" }
     `/usr/local/bin/createInbox.sh -u $username[$k] >/dev/null 2>&1`;
-    if ( ! $? ) { $message.="Created inbox etc/ for: ".$username[$k]."\n" }
+    if ( ! $? ) { $message.="Created inbox etc. for: ".$username[$k]."\n" }
   } 
-  $olddn=`iquest "SELECT USER_DN where USER_NAME = $userplus" | \
+  $olddn=`iquest "select USER_DN where USER_NAME = $userplus" | \
          sed -n "1s/^USER_DN = //p"`;
   chomp ($olddn);
   if ( $distiname[$k] ne $olddn ) {
@@ -74,7 +74,7 @@ for (my $k=1;$k<=$j;$k++) {
     `iadmin moduser $username[$k] DN $dnplus`;
     if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$username[$k]."\n"}
   }
-  $oldst=`iquest "SELECT USER_INFO where USER_NAME = $userplus" | \
+  $oldst=`iquest "select USER_INFO where USER_NAME = $userplus" | \
          sed -n "1s/^USER_INFO = //p"`;
   chomp ($oldst);
   if (length($sharedtoken[$k])<1) { $stplus="\"\"" }
@@ -86,7 +86,17 @@ for (my $k=1;$k<=$j;$k++) {
   }
 }
 
-# We may wish to process inactivated users here (e.g. remove DN)
+# De-activate unlisted users by removing their DNs
+L:foreach my $existing (`iquest "SELECT USER_NAME where USER_DN <> ''" | \
+                                               awk '{if(NF>2)print \$3}'`) {
+  chomp($existing);
+  if ( $existing !~ m/^[a-z]+\./ ) { next }
+  for (my $k=1;$k<=$j;$k++) {
+    next L if $username[$k] eq $existing;
+  }
+  `iadmin moduser $existing DN ""`;
+  if(! $?){$message.="Removed DN for user: ".$existing."\n"}
+}
 
 # Send email and exit
 mail_mess($ARGV[0], $message) if defined $message;
