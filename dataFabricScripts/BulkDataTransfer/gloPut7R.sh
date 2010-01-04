@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files in a designated directory to a remote
 #              Server using sshftp. Requires threaded globus-url-copy (GT 5).
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20091230
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100104
 
 # Default-batch-size, stall-timeout and environment
 BATCH=16       # Adjust as appropriate
@@ -68,11 +68,13 @@ while [ -n "$Flag" ] ; do
   # Generate a list of the files already copied successfully
   ssu $2 "cd $3 && find . -type f -exec wc -c {} \; 2>/dev/null" |
     sed 's_./_/_' >$TmpFil 2>/dev/null||fail 1 "Remote lst prob"
-  for File in `[ -z "$Skip" ] && find $1 -type f -mtime -299 2>/dev/null \
-                 || find $1 -type f -mtime -299 ! -name ".*" 2>/dev/null`; do
+  for File in `find $1 -type f -mtime -90 2>/dev/null` ; do
     [ -r "$File" ] || continue
     case "$File" in 
       *%* ) continue ;;
+    esac
+    case "`basename $File`" in
+      .*  ) [ -n "$Skip" ] && continue ;;
     esac
     LocSize=`wc -c $File 2>/dev/null | awk '{print $1}'`
     RemSize=`awk '{if($NF==locname){print $1;exit 0}}' locname=$File<$TmpFil`
