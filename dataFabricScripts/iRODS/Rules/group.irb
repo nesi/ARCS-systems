@@ -1,0 +1,3 @@
+#group rules - generally one liners.  If rules for groups a more complicated, create an individual file...
+
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/SSNTCP/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
