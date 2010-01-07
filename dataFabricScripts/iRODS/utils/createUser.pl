@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 # createUser     Creates a new password for an iRODS user during "Real-Shib"
 #                login. Exits with error if the user does not exist.
-#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20091103
+#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20100107
 
 use strict;
 use warnings;
@@ -9,6 +9,7 @@ use File::Basename;
 use Sys::Syslog;
 use vars qw($VERSION);
 $VERSION = "4.01";
+my $debug="Y";   # Set to "Y" or "N" as appropriate
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
@@ -35,6 +36,8 @@ log_and_die("Username not found for: ".$cn." ".$ARGV[$#ARGV-1]." xxxx")
   if (length($username)<1);
 
 # Set the password for the matching username and exit
+syslog("info","iadmin moduser $username password $ARGV[$#ARGV] "."[pid=".$$."]")
+  if $debug eq "Y";
 `iadmin moduser $username password $ARGV[$#ARGV]`;
 log_and_die("Failed to set password for user: ".$username) if ($?);
 exit(0)
