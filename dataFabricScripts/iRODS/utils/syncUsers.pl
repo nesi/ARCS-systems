@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20091231
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100108
 use strict;
 use warnings;
 use File::Basename;
@@ -11,7 +11,7 @@ use Sys::Syslog;
 use XML::XPath;  # You may need to do: yum install perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.02";
+$VERSION="2.03";
 
 # Adjust this value as appropriate; should end with '?q=$$' to foil caching
 my $URL="http://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
@@ -86,7 +86,7 @@ for (my $k=1;$k<=$j;$k++) {
   }
 }
 
-# De-activate unlisted users by removing their DNs
+# Remove DNs for unlisted users so they can't do GSI logins or Davis
 L:foreach my $existing (`iquest "SELECT USER_NAME where USER_DN <> ''" | \
                                                awk '{if(NF>2)print \$3}'`) {
   chomp($existing);
@@ -96,6 +96,24 @@ L:foreach my $existing (`iquest "SELECT USER_NAME where USER_DN <> ''" | \
   }
   `iadmin moduser $existing DN ""`;
   if(! $?){$message.="Removed DN for user: ".$existing."\n"}
+}
+
+# Mangle ST records for unlisted users so they can't do Real-Shib (http)
+M:foreach my $existing(`iquest "SELECT USER_NAME where USER_INFO like '%<ST>%'"|
+                                               awk '{if(NF>2)print \$3}'`) {
+  chomp($existing);
+  if ( $existing !~ m/^[a-z]+\./ ) { next }
+  for (my $k=1;$k<=$j;$k++) {
+    next M if $username[$k] eq $existing;
+  }
+  $oldst=`iquest "select USER_INFO where USER_NAME = '$existing'" | \
+         sed -n "1s/^USER_INFO = //p"`;
+  chomp ($oldst);
+  if( $oldst =~ m/<ST>/ ) {
+    $oldst =~ s/ST>/st>/g;
+    `iadmin moduser $existing info "$oldst"`;
+    if(! $?){$message.="Changed INFO for user: ".$existing."  to: ".$oldst."\n"}
+  }
 }
 
 # Send email and exit
