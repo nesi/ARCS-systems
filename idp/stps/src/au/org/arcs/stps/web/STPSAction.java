@@ -39,6 +39,7 @@ public class STPSAction extends ActionSupport {
 	public String execute() throws Exception {
 		ByteArrayOutputStream unsignedOs = null;
 		ByteArrayOutputStream signedOs = null;
+		String cn = null;
 
 		try {
 
@@ -119,7 +120,7 @@ public class STPSAction extends ActionSupport {
 				log.error(msg);
 				throw new STPSException(msg);
 			}
-			String cn = attrMap.get(httpHeaderNameCn);
+			cn = attrMap.get(httpHeaderNameCn);
 			if(cn == null || cn.trim().equals("")){
 				String msg = "Couldn't get the attribute cn from the IdP.";
 				log.error(msg);
@@ -169,9 +170,7 @@ public class STPSAction extends ActionSupport {
 				signedOs.close();
 		}
 		
-		HttpServletRequest request = ServletActionContext.getRequest();
-		String remoteUser = request.getRemoteUser();
-		String msg = remoteUser + "has obtained the SharedToken document."; 
+		String msg = cn + " has obtained the SharedToken document."; 
 		log.info(msg);
 
 		return NONE;
