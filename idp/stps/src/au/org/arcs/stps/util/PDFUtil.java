@@ -5,21 +5,23 @@ package au.org.arcs.stps.util;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+
+import org.apache.log4j.Logger;
+
+import au.org.arcs.stps.STPSException;
+import au.org.arcs.stps.web.STPSAction;
 
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.Paragraph;
@@ -37,11 +39,17 @@ import com.lowagie.text.pdf.PdfWriter;
  */
 public class PDFUtil {
 
-	public OutputStream genPDF(String entityID, String sharedToken,
-			String cn, String mail) {
+	private static Logger log = Logger.getLogger(STPSAction.class.getName());
+
+	public OutputStream genPDF(String sourceIdP, String issuer,
+			String sharedToken, String cn, String mail) throws STPSException,
+			Exception {
+
+		log.debug("Calling genPDF()...");
+
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
+
 		try {
-			System.out.println("calling genPDF()...");
 
 			Document document = new Document();
 
@@ -55,8 +63,18 @@ public class PDFUtil {
 			p.add(new Chunk("SharedToken Statement", new Font(Font.TIMES_ROMAN,
 					20)));
 
-			document.add(p);
-			document.add(Chunk.NEWLINE);
+			try {
+				document.add(p);
+			} catch (DocumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				document.add(Chunk.NEWLINE);
+			} catch (DocumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			PdfPTable table = new PdfPTable(2);
 
@@ -76,10 +94,15 @@ public class PDFUtil {
 									0, 0, 0)))));
 			table.addCell(mail);
 
-			table.addCell(new Phrase(18, new Chunk("Issuer EntityID",
-					FontFactory.getFont(FontFactory.TIMES_ROMAN, 14, Font.BOLD,
-							new Color(0, 0, 0)))));
-			table.addCell(entityID);
+			table.addCell(new Phrase(18, new Chunk("Source IdP", FontFactory
+					.getFont(FontFactory.TIMES_ROMAN, 14, Font.BOLD, new Color(
+							0, 0, 0)))));
+			table.addCell(sourceIdP);
+
+			table.addCell(new Phrase(18, new Chunk("Issuer", FontFactory
+					.getFont(FontFactory.TIMES_ROMAN, 14, Font.BOLD, new Color(
+							0, 0, 0)))));
+			table.addCell(issuer);
 
 			table.addCell(new Phrase(18, new Chunk("Issue Date", FontFactory
 					.getFont(FontFactory.TIMES_ROMAN, 14, Font.BOLD, new Color(
@@ -89,40 +112,55 @@ public class PDFUtil {
 			document.add(table);
 
 			document.close();
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (DocumentException e) {
+			String msg = "Couldn't generate the PDF document. The reason is: "
+					+ e.getMessage();
+			log.warn(msg);
+			throw new STPSException(msg);
 		}
 
 		return os;
 	}
 
-	public ByteArrayOutputStream signPDF(String cert, String password, InputStream is) {
-		System.out.println("signing PDF document ...");
+	public ByteArrayOutputStream signPDF(String cert, String password,
+			InputStream is) throws STPSException{
+		
+		log.debug("Calling signPDF()...");
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		try {
-			KeyStore ks = KeyStore.getInstance("pkcs12");
-			ks.load(new FileInputStream(cert), password.toCharArray());
+		
+			try {
+				KeyStore ks = KeyStore.getInstance("pkcs12");
+				InputStream fis = null;
+				try {
+					fis = new FileInputStream(cert);
+				} catch (FileNotFoundException e) {
+					String msg = "Couldn't find the certificate: " + cert;
+					log.error(msg);
+					e.printStackTrace();
+					throw new STPSException(msg);
+				}
 
-			String alias = (String) ks.aliases().nextElement();
-			PrivateKey key = (PrivateKey) ks.getKey(alias, password
-					.toCharArray());
-			Certificate[] chain = ks.getCertificateChain(alias);
+					ks.load(fis, password.toCharArray());
 
-			PdfReader reader = new PdfReader(is);
+				String alias = (String) ks.aliases().nextElement();
+				PrivateKey key = (PrivateKey) ks.getKey(alias, password.toCharArray());
+				Certificate[] chain = ks.getCertificateChain(alias);
 
-			PdfStamper stp = PdfStamper.createSignature(reader, os, '\0');
-			PdfSignatureAppearance sap = stp.getSignatureAppearance();
-			sap.setCrypto(key, chain, null,
-					PdfSignatureAppearance.WINCER_SIGNED);
-			// sap.setReason(reason);
-			// comment next line to have an invisible signature
-			sap.setVisibleSignature(new Rectangle(100, 100, 200, 200), 1, null);
-			stp.close();
+				PdfReader reader = new PdfReader(is);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+				PdfStamper stp = PdfStamper.createSignature(reader, os, '\0');
+				PdfSignatureAppearance sap = stp.getSignatureAppearance();
+				sap.setCrypto(key, chain, null, PdfSignatureAppearance.WINCER_SIGNED);
+				// comment next line to have an invisible signature
+				sap.setVisibleSignature(new Rectangle(100, 100, 200, 200), 1, null);
+				stp.close();
+			} catch (Exception e) {
+				String msg = "Failed to sign the document. The error is: " + e.getMessage();
+				log.error(msg);
+				e.printStackTrace();
+				throw new STPSException(msg);
+			} 
+
 		return os;
 	}
 }

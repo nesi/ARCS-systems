@@ -77,7 +77,8 @@ public class STP {
 			String password = props.getProperty("PASSWORD");
 			String location = props.getProperty("LOCATION");
 
-			String entityID = props.getProperty("ENTITY_ID");
+			String sourceIdP = props.getProperty("SOURCE_IDP");
+			String issuer = props.getProperty("ISSUER");
 
 			String originalPDFDir = props.getProperty("ORIGINAL_PDF");
 			String signedPDFDir = props.getProperty("SIGNED_PDF");
@@ -94,7 +95,7 @@ public class STP {
 
 			PDFUtil pdfUtil = new PDFUtil();
 			
-			ByteArrayOutputStream unsignedOs = (ByteArrayOutputStream)pdfUtil.genPDF(entityID, sharedToken, cn, mail);
+			ByteArrayOutputStream unsignedOs = (ByteArrayOutputStream)pdfUtil.genPDF(sourceIdP, issuer, sharedToken, cn, mail);
 			ByteArrayOutputStream signedOs = pdfUtil.signPDF(cert, password, new ByteArrayInputStream(unsignedOs.toByteArray()));
 			String filePath = originalPDFDir + "/" + uid + ".pdf";
 			OutputStream fileOs = new FileOutputStream(new File(filePath));
