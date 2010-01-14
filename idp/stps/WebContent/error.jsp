@@ -14,7 +14,7 @@
 			<s:iterator value="actionErrors">
 				<tr>
 					<td class="error"><img alt="error message"
-						src="images/error.png" width="10" height="10" />&nbsp;<s:property
+						src="images/error.png" width="15" height="15" />&nbsp;<s:property
 						escape="false" /></td>
 				</tr>
 			</s:iterator>
