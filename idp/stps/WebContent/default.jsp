@@ -7,6 +7,12 @@
 <title>SharedToken Portability Service</title>
 </head>
 <body>
+<p>
+<a href="http://www.arcs.org.au"><img
+			src="images/arcs-logo.jpg" width="300" height="160" alt="ARCS Logo"
+			style="border-style: none" /> </a>
+			</p>
+			
 <A href="download.action">Download signed SharedToken PDF document</A>
 </body>
 </html>

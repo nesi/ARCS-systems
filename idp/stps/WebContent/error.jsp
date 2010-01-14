@@ -8,13 +8,20 @@
 <title>SharedToken Portability Service</title>
 </head>
 <body>
-<table align="center" width="70%" class="stats">
+
+
+<p><a href="http://www.arcs.org.au"><img
+	src="images/arcs-logo.jpg" width="300" height="160" alt="ARCS Logo"
+	style="border-style: none" /> </a></p>
+	
+	
+<table align="left" width="70%">
 	<tr>
 		<s:if test="hasActionErrors()">
 			<s:iterator value="actionErrors">
 				<tr>
 					<td class="error"><img alt="error message"
-						src="images/error.png" width="15" height="15" />&nbsp;<s:property
+						src="images/error.png" width="30" height="30" />&nbsp;<s:property
 						escape="false" /></td>
 				</tr>
 			</s:iterator>
