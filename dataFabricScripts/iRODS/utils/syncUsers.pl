@@ -2,16 +2,17 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100108
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100114
 use strict;
 use warnings;
 use File::Basename;
 use LWP::Simple;
 use Sys::Syslog;
-use XML::XPath;  # You may need to do: yum install perl-XML-XPath
+use XML::XPath;           # You may need to do: yum install perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.03";
+$VERSION="2.04";
+my $Deactivate="N";       # Set this to "Y" to enable user de-activation
 
 # Adjust this value as appropriate; should end with '?q=$$' to foil caching
 my $URL="http://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
@@ -85,8 +86,9 @@ for (my $k=1;$k<=$j;$k++) {
                                                                            "\n"}
   }
 }
+goto Z unless $Deactivate eq "Y";
 
-# Remove DNs for unlisted users so they can't do GSI logins or Davis
+# Remove DNs for unlisted users so they can't do GSI logins
 L:foreach my $existing (`iquest "SELECT USER_NAME where USER_DN <> ''" | \
                                                awk '{if(NF>2)print \$3}'`) {
   chomp($existing);
@@ -98,7 +100,7 @@ L:foreach my $existing (`iquest "SELECT USER_NAME where USER_DN <> ''" | \
   if(! $?){$message.="Removed DN for user: ".$existing."\n"}
 }
 
-# Mangle ST records for unlisted users so they can't do Real-Shib (http)
+# Mangle ST records for unlisted users so they can't do Shibboleth logins
 M:foreach my $existing(`iquest "SELECT USER_NAME where USER_INFO like '%<ST>%'"|
                                                awk '{if(NF>2)print \$3}'`) {
   chomp($existing);
@@ -117,4 +119,4 @@ M:foreach my $existing(`iquest "SELECT USER_NAME where USER_INFO like '%<ST>%'"|
 }
 
 # Send email and exit
-mail_mess($ARGV[0], $message) if defined $message;
+Z:mail_mess($ARGV[0], $message) if defined $message;
