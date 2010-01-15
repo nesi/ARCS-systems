@@ -95,7 +95,7 @@ public class STP {
 
 			PDFUtil pdfUtil = new PDFUtil();
 			
-			ByteArrayOutputStream unsignedOs = (ByteArrayOutputStream)pdfUtil.genPDF(sourceIdP, issuer, sharedToken, cn, mail);
+			ByteArrayOutputStream unsignedOs = (ByteArrayOutputStream)pdfUtil.genPDF(sourceIdP, issuer, sharedToken, cn, mail,null);
 			ByteArrayOutputStream signedOs = pdfUtil.signPDF(cert, password, new ByteArrayInputStream(unsignedOs.toByteArray()));
 			String filePath = originalPDFDir + "/" + uid + ".pdf";
 			OutputStream fileOs = new FileOutputStream(new File(filePath));
