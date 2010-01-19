@@ -2,20 +2,23 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100114
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100119
 use strict;
 use warnings;
 use File::Basename;
-use LWP::Simple;
 use Sys::Syslog;
-use XML::XPath;           # You may need to do: yum install perl-XML-XPath
+use LWP::UserAgent;       # You may need to do:
+use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
 $VERSION="2.04";
 my $Deactivate="N";       # Set this to "Y" to enable user de-activation
 
-# Adjust this value as appropriate; should end with '?q=$$' to foil caching
-my $URL="http://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
+# Adjust these as appropriate:
+$ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
+$ENV{HTTPS_CERT_FILE} = "/etc/grid-security/irodscert.pem";
+$ENV{HTTPS_KEY_FILE}  = "/etc/grid-security/irodskey.pem";
+my $URL="https://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
@@ -41,7 +44,9 @@ die "Usage: ".basename($0)." email-addrs\n".
     " e.g.: ".basename($0)." arcs-data\@lists.arcs.org.au\n" if $#ARGV != 0;
 `iadmin lu >/dev/null 2>&1`;
 log_and_die("Failed to execute 'iadmin lu'") if $?;
-my $string=get($URL);
+my $agent = LWP::UserAgent->new;
+my $response = $agent->get($URL);
+my $string=$response->content; # if $response->is_success;
 my $xp = XML::XPath->new(xml=>$string) if defined($string); 
 log_and_die("Failed to get XML file") if ! defined($xp);
 
