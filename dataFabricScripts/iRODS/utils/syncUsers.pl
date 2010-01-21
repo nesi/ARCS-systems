@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100119
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100121
 use strict;
 use warnings;
 use File::Basename;
@@ -11,8 +11,8 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.04";
-my $Deactivate="N";       # Set this to "Y" to enable user de-activation
+$VERSION="2.05";
+my $Deactivate="Y";       # Set this to "N" to enable user de-activation
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -69,8 +69,8 @@ for (my $k=1;$k<=$j;$k++) {
   if ($?) {
     `iadmin mkuser $username[$k] rodsuser >/dev/null 2>&1`;
     if ( ! $? ) { $message.="Added user: ".$username[$k]."\n" }
-    `/usr/local/bin/createInbox.sh -u $username[$k] >/dev/null 2>&1`;
-    if ( ! $? ) { $message.="Created inbox etc. for: ".$username[$k]."\n" }
+    # `/usr/local/bin/createInbox.sh -u $username[$k] >/dev/null 2>&1`;
+    # if ( ! $? ) { $message.="Created inbox etc. for: ".$username[$k]."\n" }
   } 
   $olddn=`iquest "select USER_DN where USER_NAME = $userplus" | \
          sed -n "1s/^USER_DN = //p"`;
