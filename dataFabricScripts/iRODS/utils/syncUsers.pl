@@ -2,16 +2,17 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100121
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100122
 use strict;
 use warnings;
 use File::Basename;
+use File::Spec;
 use Sys::Syslog;
 use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.05";
+$VERSION="2.06";
 my $Deactivate="Y";       # Set this to "N" to enable user de-activation
 
 # Adjust these as appropriate:
@@ -47,7 +48,20 @@ log_and_die("Failed to execute 'iadmin lu'") if $?;
 my $agent = LWP::UserAgent->new;
 my $response = $agent->get($URL);
 my $string=$response->content; # if $response->is_success;
-my $xp = XML::XPath->new(xml=>$string) if defined($string); 
+
+# If user-list hasn't changed, exit; else decode XML
+my $xp;
+if ( defined($string) ) {
+  my $oldsum=-1;
+  my $newsum=unpack("%32C*",$string) % 65535;
+  if ( my @p=getpwnam( $ENV{LOGNAME} ) ) {
+    my $sumfile=File::Spec->catdir($p[7],".".basename($0).".sum");
+    if ( open( CF,      $sumfile ) ) { $oldsum=<CF>;     close(CF) }
+    if ( open( CF,'+>', $sumfile ) ) { print CF $newsum; close(CF) }
+  }
+  exit(0) if $newsum == $oldsum;
+  $xp = XML::XPath->new(xml=>$string);
+}
 log_and_die("Failed to get XML file") if ! defined($xp);
 
 # Validate the XML by ensuring that we get a complete list of valid usernames
