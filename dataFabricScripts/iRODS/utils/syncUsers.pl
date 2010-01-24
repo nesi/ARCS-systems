@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100122
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100125
 use strict;
 use warnings;
 use File::Basename;
@@ -12,7 +12,7 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.06";
+$VERSION="2.07";
 my $Deactivate="Y";       # Set this to "N" to enable user de-activation
 
 # Adjust these as appropriate:
@@ -49,17 +49,19 @@ my $agent = LWP::UserAgent->new;
 my $response = $agent->get($URL);
 my $string=$response->content; # if $response->is_success;
 
-# If user-list hasn't changed, exit; else decode XML
-my $xp;
-if ( defined($string) ) {
-  my $oldsum=-1;
+# If the checksum on the user-list string hasn't changed, exit; else decode XML.
+my $xp;                    # Note that we add a small fraction to the saved sum
+if ( defined($string) ) {  # at each fast-exit and compare integer parts of sum
+  my $oldsum=-1;           # only; this will eventually force a complete decode.
   my $newsum=unpack("%32C*",$string) % 65535;
+  my $savsum=$newsum;
   if ( my @p=getpwnam( $ENV{LOGNAME} ) ) {
     my $sumfile=File::Spec->catdir($p[7],".".basename($0).".sum");
     if ( open( CF,      $sumfile ) ) { $oldsum=<CF>;     close(CF) }
-    if ( open( CF,'+>', $sumfile ) ) { print CF $newsum; close(CF) }
+    if ( $newsum == int($oldsum) )   { $savsum=$oldsum + 0.1       }
+    if ( open( CF,'+>', $sumfile ) ) { print CF $savsum; close(CF) }
   }
-  exit(0) if $newsum == $oldsum;
+  exit(0) if $newsum == int($oldsum);
   $xp = XML::XPath->new(xml=>$string);
 }
 log_and_die("Failed to get XML file") if ! defined($xp);
