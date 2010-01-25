@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,12 +32,13 @@ import com.opensymphony.xwork2.ActionSupport;
  */
 public class STPSAction extends ActionSupport {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2398665094703829495L;
 
 	private static Logger log = Logger.getLogger(STPSAction.class.getName());
+
+	private String title;
+
+	private String note;
 
 	@Override
 	public String execute() throws Exception {
@@ -148,21 +150,19 @@ public class STPSAction extends ActionSupport {
 			HttpServletRequest request = ServletActionContext.getRequest();
 			String imagePath = request.getSession().getServletContext()
 					.getRealPath("/images/arcs-logo.jpg");
-			System.out.println("real path: " + imagePath);
 
 			File imageFile = null;
 			byte[] imageByteArray = null;
-			if(imagePath != null){
+			if (imagePath != null) {
 				imageFile = new File(imagePath);
-				if(imageFile != null){
+				if (imageFile != null) {
 					imageByteArray = this.getBytesFromFile(imageFile);
-					}else{
-						log.warn("Couldn't load the logo image file");
-					}
-			}else{
+				} else {
+					log.warn("Couldn't load the logo image file");
+				}
+			} else {
 				log.warn("Couldn't find the logo image file");
 			}
-
 
 			HttpServletResponse response = ServletActionContext.getResponse();
 			response.setContentType("application/pdf");
@@ -170,7 +170,7 @@ public class STPSAction extends ActionSupport {
 			PDFUtil pdfUtil = new PDFUtil();
 
 			unsignedOs = (ByteArrayOutputStream) pdfUtil.genPDF(sourceIdP,
-					issuer, sharedToken, cn, mail, imageByteArray);
+					issuer, sharedToken, cn, mail, imageByteArray, title, note);
 
 			signedOs = pdfUtil.signPDF(cert, password,
 					new ByteArrayInputStream(unsignedOs.toByteArray()));
@@ -229,43 +229,65 @@ public class STPSAction extends ActionSupport {
 		return attrMap;
 	}
 
-	public byte[] getBytesFromFile(File file) throws IOException {
+	public byte[] getBytesFromFile(File file) throws STPSException {
 
-		InputStream is = new FileInputStream(file);
-		System.out.println("\nDEBUG: FileInputStream is " + file);
+		byte[] bytes = null;
+		try {
 
-		// Get the size of the file
-		long length = file.length();
-		System.out.println("DEBUG: Length of " + file + " is " + length + "\n");
+			InputStream is = new FileInputStream(file);
+			log.debug("FileInputStream is " + file);
 
-		/*
-		 * You cannot create an array using a long type. It needs to be an int
-		 * type. Before converting to an int type, check to ensure that file is
-		 * not loarger than Integer.MAX_VALUE;
-		 */
-		if (length > Integer.MAX_VALUE) {
-			System.out.println("File is too large to process");
-			return null;
+			// Get the size of the file
+			long length = file.length();
+			System.out.println("DEBUG: Length of " + file + " is " + length
+					+ "\n");
+
+			if (length > Integer.MAX_VALUE) {
+				System.out.println("File is too large to process");
+				return null;
+			}
+
+			// Create the byte array to hold the data
+			bytes = new byte[(int) length];
+
+			// Read in the bytes
+			int offset = 0;
+			int numRead = 0;
+			while ((offset < bytes.length)
+					&& ((numRead = is
+							.read(bytes, offset, bytes.length - offset)) >= 0)) {
+				offset += numRead;
+			}
+
+			// Ensure all the bytes have been read in
+			if (offset < bytes.length) {
+				throw new IOException("Could not completely read file "
+						+ file.getName());
+			}
+
+			is.close();
+		} catch (IOException e) {
+			throw new STPSException(e.getMessage()
+					+ "/n couldn't read the logo image file.");
 		}
 
-		// Create the byte array to hold the data
-		byte[] bytes = new byte[(int) length];
-
-		// Read in the bytes
-		int offset = 0;
-		int numRead = 0;
-		while ((offset < bytes.length)
-				&& ((numRead = is.read(bytes, offset, bytes.length - offset)) >= 0)) {
-			offset += numRead;
-		}
-
-		// Ensure all the bytes have been read in
-		if (offset < bytes.length) {
-			throw new IOException("Could not completely read file "
-					+ file.getName());
-		}
-
-		is.close();
 		return bytes;
 	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 }
