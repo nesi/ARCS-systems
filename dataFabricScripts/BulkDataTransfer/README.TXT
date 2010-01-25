@@ -33,4 +33,7 @@ inclusion of a Zombie-manager capability.
 On 20091230, gloPut7R.sh was simplified by removal of the create-subdirectories 
 section; it now relies on the "-cd" parameter for globus-url-copy for this.
 
-GKJ-20091230
+On 20100125, STALL and POLLING_THREADS things were removed from both
+gloPut7T.sh and gloPut7R.sh ..
+
+GKJ-20100125
