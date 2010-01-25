@@ -19,25 +19,6 @@
 	<property name="debuglevel" value="source,lines,vars" />
 
 
-	<pathconvert property="libs.project" pathsep=" ">
-		<mapper>
-			<chainedmapper>
-				<!-- remove absolute path -->
-				<flattenmapper />
-				<!-- add lib/ prefix -->
-				<globmapper from="*" to="${lib}/*" />
-			</chainedmapper>
-		</mapper>
-		<path>
-			<!-- lib.home contains all jar files, in several subdirectories -->
-			<fileset dir="${lib}">
-				<include name="**/*.jar" />
-			</fileset>
-
-		</path>
-	</pathconvert>
-
-
 	<path id="class.path">
 		<fileset dir="${lib}">
 			<include name="**/*.jar" />
@@ -54,9 +35,9 @@
 
 	<target name="clean" description="remove all build-generated stuff">
 		<delete dir="${build}" />
-		<!--
+	
 		<delete dir="${dist}" />
-		-->
+
 	</target>
 
 	<target name="compile" description="build all java classes into build/">
@@ -65,24 +46,6 @@
 			<src path="${src}" />
 			<classpath refid="class.path" />
 		</javac>
-	</target>
-
-	<target name="jar" depends="clean,prep,compile" description="build the jar package">
-		<jar destfile="${dist}/${projectname}.jar" basedir="${build}/classes">
-			<exclude name="${build}/classes/*.*" />
-		</jar>
-	</target>
-
-	<target name="jar-cl" depends="clean,prep,compile" description="--> description">
-
-		<copy file="${config}/stps-cl.properties" todir="${build}/classes" />
-
-		<jar destfile="${dist}/${projectname}-cl-${version}.jar" basedir="${build}/classes">
-			<manifest>
-				<attribute name="Main-Class" value="au.org.arcs.stps.cl.STP" />
-				<attribute name="Class-Path" value="${libs.project}" />
-			</manifest>
-		</jar>
 	</target>
 
 	<target name="war" depends="clean,prep,compile" description="Build the war package/">
