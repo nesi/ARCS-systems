@@ -1,13 +1,13 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy (GT 5.x.x); uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100125
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100127
 
-# Default-batch-size, stall-timeout and environment
+# Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
 export GLOBUS_LOCATION=/opt/globus-5
-[ -d /opt/globus-5 ] && export GLOBUS_LOCATION=/opt/globus-5 \
-                     || export GLOBUS_LOCATION=/opt/globus-4.2.1
+[ -d /opt/globus-5/bin ] && export GLOBUS_LOCATION=/opt/globus-5 \
+                         || export GLOBUS_LOCATION=/opt/globus-4.2.1
 export GLOBUS_TCP_PORT_RANGE=40000,40100 GLOBUS_UDP_PORT_RANGE=40000,40100
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
