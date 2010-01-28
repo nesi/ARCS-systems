@@ -36,10 +36,6 @@ public class STPSAction extends ActionSupport {
 
 	private static Logger log = Logger.getLogger(STPSAction.class.getName());
 
-	private String title;
-
-	private String note;
-
 	@Override
 	public String execute() throws Exception {
 		ByteArrayOutputStream unsignedOs = null;
@@ -119,8 +115,8 @@ public class STPSAction extends ActionSupport {
 				throw new STPSException(msg);
 			}
 
-			Map<String, String> attrMap = this.getAttributes();
-			//Map<String, String> attrMap = this.getAttributesMock();
+			// Map<String, String> attrMap = this.getAttributes();
+			Map<String, String> attrMap = this.getAttributesMock();
 
 			String sharedToken = attrMap.get(httpHeaderNameSharedToken);
 			if (sharedToken == null || sharedToken.trim().equals("")) {
@@ -170,7 +166,7 @@ public class STPSAction extends ActionSupport {
 			PDFUtil pdfUtil = new PDFUtil();
 
 			unsignedOs = (ByteArrayOutputStream) pdfUtil.genPDF(sourceIdP,
-					issuer, sharedToken, cn, mail, imageByteArray, title, note);
+					issuer, sharedToken, cn, mail, imageByteArray);
 
 			signedOs = pdfUtil.signPDF(cert, password,
 					new ByteArrayInputStream(unsignedOs.toByteArray()));
@@ -239,8 +235,6 @@ public class STPSAction extends ActionSupport {
 
 			// Get the size of the file
 			long length = file.length();
-			System.out.println("DEBUG: Length of " + file + " is " + length
-					+ "\n");
 
 			if (length > Integer.MAX_VALUE) {
 				System.out.println("File is too large to process");
@@ -272,22 +266,6 @@ public class STPSAction extends ActionSupport {
 		}
 
 		return bytes;
-	}
-
-	public String getNote() {
-		return note;
-	}
-
-	public void setNote(String note) {
-		this.note = note;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
 	}
 
 }
