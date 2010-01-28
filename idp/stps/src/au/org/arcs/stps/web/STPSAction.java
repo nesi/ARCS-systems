@@ -115,8 +115,8 @@ public class STPSAction extends ActionSupport {
 				throw new STPSException(msg);
 			}
 
-			// Map<String, String> attrMap = this.getAttributes();
-			Map<String, String> attrMap = this.getAttributesMock();
+			Map<String, String> attrMap = this.getAttributes();
+			//Map<String, String> attrMap = this.getAttributesMock();
 
 			String sharedToken = attrMap.get(httpHeaderNameSharedToken);
 			if (sharedToken == null || sharedToken.trim().equals("")) {
