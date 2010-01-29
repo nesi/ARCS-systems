@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 
+import au.org.arcs.stps.AppConfig;
 import au.org.arcs.stps.STPSException;
 import au.org.arcs.stps.util.PDFUtil;
 
@@ -42,22 +43,30 @@ public class STPSAction extends ActionSupport {
 		ByteArrayOutputStream unsignedOs = null;
 		ByteArrayOutputStream signedOs = null;
 		String cn = null;
+		Properties props = null;
 
 		try {
-
-			Properties props = new Properties();
-
-			InputStream is = this.getClass().getResourceAsStream(
-					"/stps-web.properties");
-
-			if (is == null) {
-				String msg = "Couldn't find the properties file: stps-web.properties.";
+			/*
+			 * 
+			 * Properties props = new Properties();
+			 * 
+			 * InputStream is = this.getClass().getResourceAsStream(
+			 * "/stps-web.properties");
+			 * 
+			 * 
+			 * 
+			 * if (is == null) { String msg =
+			 * "Couldn't find the properties file"; log.error(msg); throw new
+			 * STPSException(msg); }
+			 * 
+			 * props.load(is);
+			 */
+			props = AppConfig.getProperties();
+			if(props == null || props.isEmpty()){
+				String msg = "Coldn't get the properties file or the file is empty";
 				log.error(msg);
 				throw new STPSException(msg);
 			}
-
-			props.load(is);
-
 			String cert = props.getProperty("CERTIFICATE");
 			if (cert == null || cert.trim().equals("")) {
 				String msg = "The signing certificate is not specified in the properties file.";
