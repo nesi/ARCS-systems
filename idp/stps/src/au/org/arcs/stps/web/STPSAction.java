@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -68,14 +69,6 @@ public class STPSAction extends ActionSupport {
 
 			if (password == null || password.trim().equals("")) {
 				String msg = "The password of the signing key is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-
-			String issuer = props.getProperty("ISSUER");
-
-			if (issuer == null || issuer.trim().equals("")) {
-				String msg = "The issuer is not specified in the properties file.";
 				log.error(msg);
 				throw new STPSException(msg);
 			}
@@ -166,7 +159,7 @@ public class STPSAction extends ActionSupport {
 			PDFUtil pdfUtil = new PDFUtil();
 
 			unsignedOs = (ByteArrayOutputStream) pdfUtil.genPDF(sourceIdP,
-					issuer, sharedToken, cn, mail, imageByteArray);
+					sharedToken, cn, mail, imageByteArray, cert, password);
 
 			signedOs = pdfUtil.signPDF(cert, password,
 					new ByteArrayInputStream(unsignedOs.toByteArray()));
