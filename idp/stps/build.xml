@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="stps" default="war" basedir=".">
+
+	<description>
+		Ant script to package war file for STPS source code
+    </description>
+
+
+	<property name="src" value="${basedir}/src" />
+	<property name="webapp" value="${basedir}/WebContent" />
+	<property name="lib" value="${webapp}/WEB-INF/lib" />
+	<property name="tools.lib" value="${basedir}/tools.lib" />
+	<property name="build" value="${basedir}/build" />
+	<property name="dist" value="${basedir}/share/webapps" />
+	<property name="doc" value="${basedir}/doc" />
+	<property name="projectname" value="stps" />
+	<property name="version" value="0.0.1" />
+	<property name="debuglevel" value="source,lines,vars" />
+
+
+	<path id="class.path">
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${tools.lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="prep" description="prepare for a build">
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
+	</target>
+
+	<target name="clean" description="remove all build-generated stuff">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="compile" description="build all java classes into build/">
+		<mkdir dir="${build}/classes" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${build}/classes">
+			<src path="${src}" />
+			<classpath refid="class.path" />
+		</javac>
+	</target>
+
+	<target name="war" depends="clean,prep,compile" description="Build the war package/">
+	<mkdir dir="${build}/webapp/WEB-INF/classes" />
+		<mkdir dir="${build}/webapp/WEB-INF/lib" />
+		<copy todir="${build}/webapp">
+			<fileset dir="${webapp}">
+				<exclude name="${webapp}/classes" />
+			</fileset>
+		</copy>
+		<copy todir="${build}/webapp/WEB-INF/classes">
+			<fileset dir="${build}/classes" />
+		</copy>
+		<copy todir="${build}/webapp/WEB-INF/classes">
+			<fileset dir="${src}" />
+		</copy>
+		<copy todir="${build}/webapp/WEB-INF/lib">
+			<fileset dir="${lib}" />
+		</copy>
+		<jar jarfile="${dist}/${projectname}.war" basedir="${build}/webapp" />
+	</target>
+
+</project>
