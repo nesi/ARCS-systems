@@ -11,8 +11,7 @@
 	<property name="lib" value="${webapp}/WEB-INF/lib" />
 	<property name="tools.lib" value="${basedir}/tools.lib" />
 	<property name="build" value="${basedir}/build" />
-	<property name="dist" value="${basedir}/dist" />
-	<property name="config" value="${src}" />
+	<property name="dist" value="${basedir}/share/webapps" />
 	<property name="doc" value="${basedir}/doc" />
 	<property name="projectname" value="stps" />
 	<property name="version" value="0.0.1" />
@@ -29,15 +28,12 @@
 	</path>
 
 	<target name="prep" description="prepare for a build">
-		<mkdir dir="build" />
-		<mkdir dir="dist" />
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}" />
 	</target>
 
 	<target name="clean" description="remove all build-generated stuff">
 		<delete dir="${build}" />
-	
-		<delete dir="${dist}" />
-
 	</target>
 
 	<target name="compile" description="build all java classes into build/">
@@ -49,8 +45,7 @@
 	</target>
 
 	<target name="war" depends="clean,prep,compile" description="Build the war package/">
-		<mkdir dir="dist" />
-		<mkdir dir="${build}/webapp/WEB-INF/classes" />
+	<mkdir dir="${build}/webapp/WEB-INF/classes" />
 		<mkdir dir="${build}/webapp/WEB-INF/lib" />
 		<copy todir="${build}/webapp">
 			<fileset dir="${webapp}">
@@ -61,7 +56,7 @@
 			<fileset dir="${build}/classes" />
 		</copy>
 		<copy todir="${build}/webapp/WEB-INF/classes">
-			<fileset dir="${config}" />
+			<fileset dir="${src}" />
 		</copy>
 		<copy todir="${build}/webapp/WEB-INF/lib">
 			<fileset dir="${lib}" />
