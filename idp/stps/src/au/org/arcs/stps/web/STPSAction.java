@@ -7,10 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,10 +17,12 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.apache.struts2.ServletActionContext;
 
-import au.org.arcs.stps.AppConfig;
+import au.org.arcs.stps.STPSConfiguration;
 import au.org.arcs.stps.STPSException;
 import au.org.arcs.stps.util.PDFUtil;
 
@@ -36,7 +36,7 @@ public class STPSAction extends ActionSupport {
 
 	private static final long serialVersionUID = -2398665094703829495L;
 
-	private static Logger log = Logger.getLogger(STPSAction.class.getName());
+	private static Log log = LogFactory.getLog(STPSAction.class);
 
 	@Override
 	public String execute() throws Exception {
@@ -46,23 +46,11 @@ public class STPSAction extends ActionSupport {
 		Properties props = null;
 
 		try {
-			/*
-			 * 
-			 * Properties props = new Properties();
-			 * 
-			 * InputStream is = this.getClass().getResourceAsStream(
-			 * "/stps-web.properties");
-			 * 
-			 * 
-			 * 
-			 * if (is == null) { String msg =
-			 * "Couldn't find the properties file"; log.error(msg); throw new
-			 * STPSException(msg); }
-			 * 
-			 * props.load(is);
-			 */
-			props = AppConfig.getProperties();
-			if(props == null || props.isEmpty()){
+
+			STPSConfiguration.initialize(ServletActionContext
+					.getServletContext());
+			props = STPSConfiguration.getInstance().getProperties();
+			if (props == null || props.isEmpty()) {
 				String msg = "Coldn't get the properties file or the file is empty";
 				log.error(msg);
 				throw new STPSException(msg);
@@ -118,7 +106,7 @@ public class STPSAction extends ActionSupport {
 			}
 
 			Map<String, String> attrMap = this.getAttributes();
-			//Map<String, String> attrMap = this.getAttributesMock();
+			// Map<String, String> attrMap = this.getAttributesMock();
 
 			String sharedToken = attrMap.get(httpHeaderNameSharedToken);
 			if (sharedToken == null || sharedToken.trim().equals("")) {
@@ -146,21 +134,28 @@ public class STPSAction extends ActionSupport {
 			}
 
 			HttpServletRequest request = ServletActionContext.getRequest();
-			String imagePath = request.getSession().getServletContext()
-					.getRealPath("/images/arcs-logo.jpg");
 
-			File imageFile = null;
+			InputStream imageIs = request.getSession().getServletContext()
+					.getResourceAsStream("/images/arcs-logo.jpg");
 			byte[] imageByteArray = null;
-			if (imagePath != null) {
-				imageFile = new File(imagePath);
-				if (imageFile != null) {
-					imageByteArray = this.getBytesFromFile(imageFile);
-				} else {
-					log.warn("Couldn't load the logo image file");
-				}
+			if (imageIs != null) {
+				imageByteArray = this.inputStreamToBytes(imageIs);
 			} else {
-				log.warn("Couldn't find the logo image file");
+				log.warn("Couldn't load the logo image");
 			}
+
+			/*
+			 * String imagePath = request.getSession().getServletContext()
+			 * .getRealPath("/images/arcs-logo.jpg");
+			 * 
+			 * File imageFile = null; byte[] imageByteArray = null; if
+			 * (imagePath != null) { imageFile = new File(imagePath); if
+			 * (imageFile != null) { imageByteArray =
+			 * this.getBytesFromFile(imageFile); } else {
+			 * log.warn("Couldn't load the logo image file from " + imagePath);
+			 * } } else { log.warn("Couldn't find the logo image file from " +
+			 * imagePath); }
+			 */
 
 			HttpServletResponse response = ServletActionContext.getResponse();
 			response.setContentType("application/pdf");
@@ -227,12 +222,40 @@ public class STPSAction extends ActionSupport {
 		return attrMap;
 	}
 
+	public byte[] inputStreamToBytes(InputStream in) {
+
+		ByteArrayOutputStream out = null;
+
+		try {
+
+			out = new ByteArrayOutputStream(1024);
+
+			byte[] buffer = new byte[1024];
+			int len;
+
+			while ((len = in.read(buffer)) >= 0)
+				out.write(buffer, 0, len);
+
+			in.close();
+			out.close();
+		} catch (Exception e) {
+			log
+					.debug("error when converting inputstream to byte array, ignore the log image");
+		}
+
+		if (out != null)
+			return out.toByteArray();
+		else
+			return null;
+	}
+
 	public byte[] getBytesFromFile(File file) throws STPSException {
 
 		byte[] bytes = null;
 		try {
 
 			InputStream is = new FileInputStream(file);
+
 			log.debug("FileInputStream is " + file);
 
 			// Get the size of the file

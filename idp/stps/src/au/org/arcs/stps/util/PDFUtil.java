@@ -3,7 +3,6 @@
  */
 package au.org.arcs.stps.util;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,11 +14,9 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.apache.log4j.Logger;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import au.org.arcs.stps.STPSException;
-import au.org.arcs.stps.web.STPSAction;
-
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -42,8 +39,7 @@ import com.lowagie.text.pdf.PdfWriter;
 
 public class PDFUtil {
 
-	private static Logger log = Logger.getLogger(STPSAction.class.getName());
-
+	private static Log log = LogFactory.getLog(PDFUtil.class);
 	int defautFontSize = 12;
 	int topPadding = 5;
 	int bottomPadding = 5;
@@ -95,6 +91,8 @@ public class PDFUtil {
 			PdfWriter.getInstance(document, os);
 
 			document.open();
+			
+			try{
 
 			if (imageByteArray != null) {
 				Image image = Image.getInstance(imageByteArray);
@@ -108,7 +106,10 @@ public class PDFUtil {
 				logoTable.addCell(" ");
 				document.add(logoTable);
 			} else {
-				log.warn("Couldn't find the logo image");
+				log.warn("Couldn't find the logo image, just ignore");
+			}
+			}catch(Exception e){
+				log.warn("Couldn't find the logo image, just ignore");
 			}
 
 			Paragraph pTitle = new Paragraph();
@@ -255,7 +256,7 @@ public class PDFUtil {
 
 			ks.load(fis, password.toCharArray());
 
-			String alias = (String) ks.aliases().nextElement();
+			String alias = ks.aliases().nextElement();
 			PrivateKey key = (PrivateKey) ks.getKey(alias, password
 					.toCharArray());
 			Certificate[] chain = ks.getCertificateChain(alias);
@@ -304,7 +305,7 @@ public class PDFUtil {
 			InputStream certIs = getCertIs(cert);
 			KeyStore ks = KeyStore.getInstance("pkcs12");
 			ks.load(certIs, password.toCharArray());
-			String alias = (String) ks.aliases().nextElement();
+			String alias = ks.aliases().nextElement();
 			X509Certificate xcert = (X509Certificate) ks.getCertificate(alias);
 			subjectDN = xcert.getSubjectDN().getName();
 			subjectDN = subjectDN.substring(subjectDN.indexOf("=") + 1);
