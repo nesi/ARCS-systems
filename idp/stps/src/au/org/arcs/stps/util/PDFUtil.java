@@ -91,24 +91,27 @@ public class PDFUtil {
 			PdfWriter.getInstance(document, os);
 
 			document.open();
-			
-			try{
 
-			if (imageByteArray != null) {
-				Image image = Image.getInstance(imageByteArray);
-				PdfPTable logoTable = new PdfPTable(2);
-				logoTable.setTotalWidth(0);
-				logoTable.getDefaultCell().setBorder(
-						com.lowagie.text.Rectangle.NO_BORDER);
-				logoTable.addCell(image);
-				logoTable.addCell(" ");
-				logoTable.addCell(" ");
-				logoTable.addCell(" ");
-				document.add(logoTable);
-			} else {
-				log.warn("Couldn't find the logo image, just ignore");
-			}
-			}catch(Exception e){
+			try {
+
+				if (imageByteArray != null) {
+
+					Image image = Image.getInstance(imageByteArray);
+					PdfPTable logoTable = new PdfPTable(3);
+					logoTable.setTotalWidth(0);
+					logoTable.getDefaultCell().setBorder(
+							com.lowagie.text.Rectangle.NO_BORDER);
+					logoTable.addCell(image);
+					logoTable.addCell(" ");
+					logoTable.addCell(" ");
+					logoTable.addCell(" ");
+					logoTable.addCell(" ");
+					logoTable.addCell(" ");
+					document.add(logoTable);
+				} else {
+					log.warn("Couldn't find the logo image, just ignore");
+				}
+			} catch (Exception e) {
 				log.warn("Couldn't find the logo image, just ignore");
 			}
 

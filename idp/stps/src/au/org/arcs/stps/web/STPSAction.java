@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,10 @@ public class STPSAction extends ActionSupport {
 	private static final long serialVersionUID = -2398665094703829495L;
 
 	private static Log log = LogFactory.getLog(STPSAction.class);
+
+	private static String arcsLogoUrl = "http://static.arcs.org.au/arcs_media/img/arcs-logo.png";
+
+	private static String arcsLogoDefaultPath = "/images/arcs-logo.png";
 
 	@Override
 	public String execute() throws Exception {
@@ -132,30 +138,32 @@ public class STPSAction extends ActionSupport {
 				log.warn(msg);
 				mail = "unknown";
 			}
+			// get arcs logo image
+			InputStream imageIs = null;
+			boolean isAvailable = true;
 
-			HttpServletRequest request = ServletActionContext.getRequest();
+			try {
+				URL url = new URL(arcsLogoUrl);
+				URLConnection uc = url.openConnection();
+				imageIs = uc.getInputStream();
+			} catch (Exception e) {
+				isAvailable = false;
+			}
 
-			InputStream imageIs = request.getSession().getServletContext()
-					.getResourceAsStream("/images/arcs-logo.jpg");
+			if (!isAvailable || imageIs == null) {
+				log.warn("Couldn't get ARCS logo image from the URL : "
+						+ arcsLogoUrl + ", get it locally instead.");
+				HttpServletRequest request = ServletActionContext.getRequest();
+				imageIs = request.getSession().getServletContext()
+						.getResourceAsStream(arcsLogoDefaultPath);
+			}
+
 			byte[] imageByteArray = null;
 			if (imageIs != null) {
 				imageByteArray = this.inputStreamToBytes(imageIs);
 			} else {
 				log.warn("Couldn't load the logo image");
 			}
-
-			/*
-			 * String imagePath = request.getSession().getServletContext()
-			 * .getRealPath("/images/arcs-logo.jpg");
-			 * 
-			 * File imageFile = null; byte[] imageByteArray = null; if
-			 * (imagePath != null) { imageFile = new File(imagePath); if
-			 * (imageFile != null) { imageByteArray =
-			 * this.getBytesFromFile(imageFile); } else {
-			 * log.warn("Couldn't load the logo image file from " + imagePath);
-			 * } } else { log.warn("Couldn't find the logo image file from " +
-			 * imagePath); }
-			 */
 
 			HttpServletResponse response = ServletActionContext.getResponse();
 			response.setContentType("application/pdf");
