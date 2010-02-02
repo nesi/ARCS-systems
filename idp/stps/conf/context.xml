@@ -1,6 +1,6 @@
 <!--
 
-Copy this context.xml file in $CATALANIA_HOME/conf/[enginename]/[hostname]/[webappname].xml
+Copy this context.xml file in $CATALINA_HOME/conf/[enginename]/[hostname]/[webappname].xml
 i.e. /opt/tomcat6/Catalina/localhost/stps.xml to deploy as the webapps as /stps
 
 IMPORTANT NOTICE:
