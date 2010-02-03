@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,124 +47,37 @@ public class STPSAction extends ActionSupport {
 
 	@Override
 	public String execute() throws Exception {
+
 		ByteArrayOutputStream unsignedOs = null;
 		ByteArrayOutputStream signedOs = null;
-		String cn = null;
 		Properties props = null;
+		String cn = null;
+		String sharedToken = null;
+		String mail = null;
+		String sourceIdP = null;
 
 		try {
 
 			STPSConfiguration.initialize(ServletActionContext
 					.getServletContext());
-			props = STPSConfiguration.getInstance().getProperties();
-			if (props == null || props.isEmpty()) {
-				String msg = "Coldn't get the properties file or the file is empty";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-			String cert = props.getProperty("CERTIFICATE");
-			if (cert == null || cert.trim().equals("")) {
-				String msg = "The signing certificate is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
+			STPSConfiguration config = STPSConfiguration.getInstance();
+			config.checkProperties();
+			props = config.getProperties();
 
+			String cert = props.getProperty("CERTIFICATE");
 			String password = props.getProperty("PASSWORD");
 
-			if (password == null || password.trim().equals("")) {
-				String msg = "The password of the signing key is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-
-			String httpHeaderNameSharedToken = props
-					.getProperty("HTTP_HEADER_NAME_SHAREDTOKEN");
-
-			if (httpHeaderNameSharedToken == null
-					|| httpHeaderNameSharedToken.trim().equals("")) {
-				String msg = "The http header's name for the SharedToken is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-
-			String httpHeaderNameCn = props.getProperty("HTTP_HEADER_NAME_CN");
-
-			if (httpHeaderNameCn == null || httpHeaderNameCn.trim().equals("")) {
-				String msg = "The http header's name for the cn is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-			String httpHeaderNameMail = props
-					.getProperty("HTTP_HEADER_NAME_MAIL");
-
-			if (httpHeaderNameMail == null
-					|| httpHeaderNameMail.trim().equals("")) {
-				String msg = "The http header's name for the mail is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-			String httpHeaderNameProviderID = props
-					.getProperty("HTTP_HEADER_NAME_PROVIDER_ID");
-			if (httpHeaderNameProviderID == null
-					|| httpHeaderNameProviderID.trim().equals("")) {
-				String msg = "The http header's name for the Shibboleth ProviderID is not specified in the properties file.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-
-			Map<String, String> attrMap = this.getAttributes();
+			Map<String, String> attrMap = this.getShibAttributes(props);
 			// Map<String, String> attrMap = this.getAttributesMock();
 
-			String sharedToken = attrMap.get(httpHeaderNameSharedToken);
-			if (sharedToken == null || sharedToken.trim().equals("")) {
-				String msg = "Couldn't get the attribute auEduPersonSharedToken from the IdP.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-			cn = attrMap.get(httpHeaderNameCn);
-			if (cn == null || cn.trim().equals("")) {
-				String msg = "Couldn't get the attribute cn from the IdP.";
-				log.error(msg);
-				throw new STPSException(msg);
-			}
-			String mail = attrMap.get(httpHeaderNameMail);
-			if (mail == null || mail.trim().equals("")) {
-				String msg = "Couldn't get the attribute mail from the IdP.";
-				log.warn(msg);
-				mail = "unknown";
-			}
-			String sourceIdP = attrMap.get(httpHeaderNameProviderID);
-			if (sourceIdP == null || sourceIdP.trim().equals("")) {
-				String msg = "Couldn't get the header Shib-Identity-Provider from the IdP.";
-				log.warn(msg);
-				mail = "unknown";
-			}
-			// get arcs logo image
-			InputStream imageIs = null;
-			boolean isAvailable = true;
+			sharedToken = attrMap.get(props
+					.getProperty("HTTP_HEADER_NAME_SHAREDTOKEN"));
+			cn = attrMap.get(props.getProperty("HTTP_HEADER_NAME_CN"));
+			mail = attrMap.get(props.getProperty("HTTP_HEADER_NAME_MAIL"));
+			sourceIdP = attrMap.get(props
+					.getProperty("HTTP_HEADER_NAME_PROVIDER_ID"));
 
-			try {
-				URL url = new URL(arcsLogoUrl);
-				URLConnection uc = url.openConnection();
-				imageIs = uc.getInputStream();
-			} catch (Exception e) {
-				isAvailable = false;
-			}
-
-			if (!isAvailable || imageIs == null) {
-				log.warn("Couldn't get ARCS logo image from the URL : "
-						+ arcsLogoUrl + ", get it locally instead.");
-				HttpServletRequest request = ServletActionContext.getRequest();
-				imageIs = request.getSession().getServletContext()
-						.getResourceAsStream(arcsLogoDefaultPath);
-			}
-
-			byte[] imageByteArray = null;
-			if (imageIs != null) {
-				imageByteArray = this.inputStreamToBytes(imageIs);
-			} else {
-				log.warn("Couldn't load the logo image");
-			}
+			byte[] imageByteArray = this.getLogoImage();
 
 			HttpServletResponse response = ServletActionContext.getResponse();
 			response.setContentType("application/pdf");
@@ -183,11 +97,15 @@ public class STPSAction extends ActionSupport {
 
 		} catch (STPSException e) {
 			this.addActionError(e.getMessage());
-			e.printStackTrace();
+			// e.printStackTrace();
+			log.info(cn + " is failed to obtain the SharedToken document from "
+					+ sourceIdP + " at " + new Date().toString());
 			return ERROR;
 		} catch (Exception e) {
 			this.addActionError(e.getMessage());
-			e.printStackTrace();
+			// e.printStackTrace();
+			log.info(cn + " is failed to obtain the SharedToken document from "
+					+ sourceIdP + " at " + new Date().toString());
 			return ERROR;
 		} finally {
 			if (unsignedOs != null)
@@ -196,27 +114,61 @@ public class STPSAction extends ActionSupport {
 				signedOs.close();
 		}
 
-		String msg = cn + " has obtained the SharedToken document.";
+		String msg = cn + " is successfull to obtain the SharedToken document from "
+				+ sourceIdP + " at " + new Date().toString();
 		log.info(msg);
 
 		return NONE;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, String> getAttributes() {
+	private Map<String, String> getShibAttributes(Properties props)
+			throws STPSException {
 
 		HttpServletRequest request = ServletActionContext.getRequest();
-		HashMap<String, String> map = new HashMap<String, String>();
+		HashMap<String, String> attrMap = new HashMap<String, String>();
 
 		for (Enumeration<String> e = request.getHeaderNames(); e
 				.hasMoreElements();) {
 			String key = e.nextElement();
 			String value = request.getHeader(key);
-			map.put(key, value);
+			attrMap.put(key, value);
 		}
-		String uid = request.getRemoteUser();
-		map.put("uid", uid);
-		return map;
+
+		String httpHeaderNameSharedToken = props
+				.getProperty("HTTP_HEADER_NAME_SHAREDTOKEN");
+		String httpHeaderNameCn = props.getProperty("HTTP_HEADER_NAME_CN");
+		String httpHeaderNameMail = props.getProperty("HTTP_HEADER_NAME_MAIL");
+		String httpHeaderNameProviderID = props
+				.getProperty("HTTP_HEADER_NAME_PROVIDER_ID");
+
+		String sharedToken = attrMap.get(httpHeaderNameSharedToken);
+
+		if (sharedToken == null || sharedToken.trim().equals("")) {
+			String msg = "Couldn't get the attribute auEduPersonSharedToken from the IdP.";
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+		String cn = attrMap.get(httpHeaderNameCn);
+		if (cn == null || cn.trim().equals("")) {
+			String msg = "Couldn't get the attribute cn from the IdP.";
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+		String mail = attrMap.get(httpHeaderNameMail);
+		if (mail == null || mail.trim().equals("")) {
+			String msg = "Couldn't get the attribute mail from the IdP.";
+			log.warn(msg);
+			mail = "unknown";
+		}
+		String sourceIdP = attrMap.get(httpHeaderNameProviderID);
+		if (sourceIdP == null || sourceIdP.trim().equals("")) {
+			String msg = "Couldn't get the header Shib-Identity-Provider from the IdP.";
+			log.warn(msg);
+			mail = "unknown";
+		}
+
+		return attrMap;
 	}
 
 	private Map<String, String> getAttributesMock() {
@@ -230,7 +182,37 @@ public class STPSAction extends ActionSupport {
 		return attrMap;
 	}
 
-	public byte[] inputStreamToBytes(InputStream in) {
+	private byte[] getLogoImage() {
+		// get arcs logo image
+		InputStream imageIs = null;
+		boolean isAvailable = true;
+
+		try {
+			URL url = new URL(arcsLogoUrl);
+			URLConnection uc = url.openConnection();
+			imageIs = uc.getInputStream();
+		} catch (Exception e) {
+			isAvailable = false;
+		}
+
+		if (!isAvailable || imageIs == null) {
+			log.warn("Couldn't get ARCS logo image from the URL : "
+					+ arcsLogoUrl + ", get it locally instead.");
+			HttpServletRequest request = ServletActionContext.getRequest();
+			imageIs = request.getSession().getServletContext()
+					.getResourceAsStream(arcsLogoDefaultPath);
+		}
+
+		byte[] imageByteArray = null;
+		if (imageIs != null) {
+			imageByteArray = this.inputStreamToBytes(imageIs);
+		} else {
+			log.warn("Couldn't load the logo image");
+		}
+		return imageByteArray;
+	}
+
+	private byte[] inputStreamToBytes(InputStream in) {
 
 		ByteArrayOutputStream out = null;
 
@@ -248,57 +230,13 @@ public class STPSAction extends ActionSupport {
 			out.close();
 		} catch (Exception e) {
 			log
-					.debug("error when converting inputstream to byte array, ignore the log image");
+					.warn("Error when converting inputstream to byte array, ignore the log image");
 		}
 
 		if (out != null)
 			return out.toByteArray();
 		else
 			return null;
-	}
-
-	public byte[] getBytesFromFile(File file) throws STPSException {
-
-		byte[] bytes = null;
-		try {
-
-			InputStream is = new FileInputStream(file);
-
-			log.debug("FileInputStream is " + file);
-
-			// Get the size of the file
-			long length = file.length();
-
-			if (length > Integer.MAX_VALUE) {
-				System.out.println("File is too large to process");
-				return null;
-			}
-
-			// Create the byte array to hold the data
-			bytes = new byte[(int) length];
-
-			// Read in the bytes
-			int offset = 0;
-			int numRead = 0;
-			while ((offset < bytes.length)
-					&& ((numRead = is
-							.read(bytes, offset, bytes.length - offset)) >= 0)) {
-				offset += numRead;
-			}
-
-			// Ensure all the bytes have been read in
-			if (offset < bytes.length) {
-				throw new IOException("Could not completely read file "
-						+ file.getName());
-			}
-
-			is.close();
-		} catch (IOException e) {
-			throw new STPSException(e.getMessage()
-					+ "/n couldn't read the logo image file.");
-		}
-
-		return bytes;
 	}
 
 }

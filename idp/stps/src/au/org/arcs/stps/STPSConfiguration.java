@@ -27,11 +27,6 @@ public class STPSConfiguration {
 	static private String CONFIGURATION_FILE_KEY = "STPSConfigurationFile";
 
 	/**
-	 * Default configuration filename
-	 */
-	static private String DEFAULT_CONFIGURATION_FILE = "/stps.properties";
-
-	/**
 	 * Singelton pattern
 	 */
 	static private STPSConfiguration SINGLETON = null;
@@ -40,50 +35,50 @@ public class STPSConfiguration {
 
 	static public synchronized void initialize(ServletContext ctxt)
 			throws STPSException {
-		// first configure Log4J with the external log4j config file
+
+		log.debug("Initializing STPSConfiguration ...");
 		Log4JConfiguration.configure(ctxt);
-		// and the SLCS server
-		log.debug("initialize STPSConfiguration(ServletContext)...");
-		String filename = DEFAULT_CONFIGURATION_FILE;
+		String filename = null;
 		if (ctxt.getInitParameter(CONFIGURATION_FILE_KEY) != null) {
 			filename = ctxt.getInitParameter(CONFIGURATION_FILE_KEY);
 		} else {
-			log.warn("Parameter " + CONFIGURATION_FILE_KEY
-					+ " not found in the Servlet context, using default file: "
-					+ filename);
+			String msg = "Couldn't get STPSConfigurationFile path from the servlet initial parameter";
+			log.error(msg);
+			throw new STPSException(msg);
 		}
 		initialize(filename);
 	}
 
 	/**
-	 * Initializes the singleton SLCSServerConfiguration object loaded with the
+	 * Initializes the singleton STPSConfiguration object loaded with the
 	 * given XML filename.
 	 * 
 	 * @param filename
 	 *            The XML filename.
-	 * @throws SLCSConfigurationException
+	 * @throws STPSConfigurationException
 	 *             If an error occurs.
 	 */
 	static public synchronized void initialize(String filename)
 			throws STPSException {
-		log.info(CONFIGURATION_FILE_KEY + "=" + filename);
+		log.debug(CONFIGURATION_FILE_KEY + "=" + filename);
 		if (SINGLETON == null) {
-			log.info("create new SLCSServerConfiguration");
+			log.debug("create new STPSConfiguration");
 			SINGLETON = new STPSConfiguration(filename);
 		} else {
-			log.info("SLCSServerConfiguration already initialized");
+			log.debug("STPSConfiguration already initialized");
 		}
 	}
 
 	/**
-	 * Returns the singleton instance of the SLCSServerConfiguration.
+	 * Returns the singleton instance of the STPSConfiguration.
 	 * 
-	 * @return The SLCSServerConfiguration singleton.
+	 * @return The STPSConfiguration singleton.
 	 */
-	static public synchronized STPSConfiguration getInstance() {
+	static public synchronized STPSConfiguration getInstance()
+			throws STPSException {
 		if (SINGLETON == null) {
-			throw new IllegalStateException(
-					"Not initialized: call SLCSServerConfiguration.initialize(...) first.");
+			throw new STPSException(
+					"Not initialized: call STPSConfiguration.initialize(...) first.");
 		}
 		return SINGLETON;
 	}
@@ -94,7 +89,7 @@ public class STPSConfiguration {
 	 * 
 	 * @param filename
 	 *            The Properties file based configuration file.
-	 * @throws SLCSConfigurationException
+	 * @throws ConfigurationException
 	 *             If a configuration error occurs while loading the
 	 *             configuration file or checking the configuration.
 	 * @see #initialize(ServletContext)
@@ -102,14 +97,10 @@ public class STPSConfiguration {
 	 */
 	protected STPSConfiguration(String filename) throws STPSException {
 
-		log.info("Properties file =" + filename);
-
-		// load the attribute definitions
 		loadProperties(filename);
 	}
 
 	private void loadProperties(String filename) throws STPSException {
-		log.info("load property file");
 
 		properties = new Properties();
 
@@ -129,7 +120,68 @@ public class STPSConfiguration {
 
 	}
 
-	public Properties getProperties(){
+	public Properties getProperties() {
 		return properties;
+	}
+
+	public void checkProperties() throws STPSException {
+
+		String msgTmp = " is not specified in the properties file.";
+
+		if (properties == null || properties.isEmpty()) {
+			String msg = "Coldn't get the properties file or the file is empty";
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+
+		String cert = properties.getProperty("CERTIFICATE");
+		if (cert == null || cert.trim().equals("")) {
+			String msg = "The signing certificate" + msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+
+		String password = properties.getProperty("PASSWORD");
+
+		if (password == null || password.trim().equals("")) {
+			String msg = "The password of the signing key" + msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+
+		String httpHeaderNameSharedToken = properties
+				.getProperty("HTTP_HEADER_NAME_SHAREDTOKEN");
+
+		if (httpHeaderNameSharedToken == null
+				|| httpHeaderNameSharedToken.trim().equals("")) {
+			String msg = "The http header's name for the SharedToken" + msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+
+		String httpHeaderNameCn = properties.getProperty("HTTP_HEADER_NAME_CN");
+
+		if (httpHeaderNameCn == null || httpHeaderNameCn.trim().equals("")) {
+			String msg = "The http header's name for the cn" + msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+		String httpHeaderNameMail = properties
+				.getProperty("HTTP_HEADER_NAME_MAIL");
+
+		if (httpHeaderNameMail == null || httpHeaderNameMail.trim().equals("")) {
+			String msg = "The http header's name for the mail" + msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+		String httpHeaderNameProviderID = properties
+				.getProperty("HTTP_HEADER_NAME_PROVIDER_ID");
+		if (httpHeaderNameProviderID == null
+				|| httpHeaderNameProviderID.trim().equals("")) {
+			String msg = "The http header's name for the Shibboleth ProviderID"
+					+ msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
 	}
 }

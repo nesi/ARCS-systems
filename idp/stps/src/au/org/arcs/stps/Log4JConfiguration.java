@@ -4,6 +4,9 @@
 package au.org.arcs.stps;
 
 import javax.servlet.ServletContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
 
@@ -13,6 +16,11 @@ import org.apache.log4j.xml.DOMConfigurator;
  */
 
 public class Log4JConfiguration {
+
+	/**
+	 * Logger
+	 */
+	public static Log log = LogFactory.getLog(Log4JConfiguration.class);
 
 	/**
 	 * Parameter name in the context or in the web.xml file
@@ -38,19 +46,14 @@ public class Log4JConfiguration {
 			if (ctxt.getInitParameter(LOG4J_CONFIGURATION_FILE_KEY) != null) {
 				String log4jConfig = ctxt
 						.getInitParameter(LOG4J_CONFIGURATION_FILE_KEY);
-				System.out.println("INFO: "
-						+ Log4JConfiguration.class.getName() + ": load "
-						+ LOG4J_CONFIGURATION_FILE_KEY + "=" + log4jConfig);
+				log.debug("load " + log4jConfig);
 				if (log4jConfig.endsWith(".xml")) {
 					DOMConfigurator.configure(log4jConfig);
 				} else {
 					PropertyConfigurator.configure(log4jConfig);
 				}
 			} else {
-				System.err.println("WARN: "
-						+ Log4JConfiguration.class.getName() + ": Parameter "
-						+ LOG4J_CONFIGURATION_FILE_KEY
-						+ " not found in the Servlet context.");
+				log.warn(LOG4J_CONFIGURATION_FILE_KEY + " not found.");
 
 			}
 			LOG4J_CONFIGURED = true;
