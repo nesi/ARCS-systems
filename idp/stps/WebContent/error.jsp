@@ -11,7 +11,7 @@
 
 
 <p><a href="http://www.arcs.org.au"><img
-	src="images/arcs-logo.png" width="100" height="50" alt="ARCS Logo"
+	src="http://static.arcs.org.au/arcs_media/img/arcs-logo.png" alt="ARCS Logo"
 	style="border-style: none" /> </a></p>
 	
 	
