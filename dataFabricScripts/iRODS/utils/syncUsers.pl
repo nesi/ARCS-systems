@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100125
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100205
 use strict;
 use warnings;
 use File::Basename;
@@ -12,14 +12,15 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.07";
+$VERSION="2.08";
 my $Deactivate="Y";       # Set this to "N" to enable user de-activation
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
 $ENV{HTTPS_CERT_FILE} = "/etc/grid-security/irodscert.pem";
 $ENV{HTTPS_KEY_FILE}  = "/etc/grid-security/irodskey.pem";
-my $URL="https://auth14.ac3.edu.au/AccessService/service/list.html?serviceId=3";
+$ENV{HTTPS_DEBUG} = 0;    # Set to "1" to enable debug
+my $URL="https://access.arcs.org.au/service/list.html?serviceId=3";
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
