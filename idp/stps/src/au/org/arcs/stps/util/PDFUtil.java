@@ -95,19 +95,13 @@ public class PDFUtil {
 			try {
 
 				if (imageByteArray != null) {
-
 					Image image = Image.getInstance(imageByteArray);
-					PdfPTable logoTable = new PdfPTable(3);
-					logoTable.setTotalWidth(0);
+					PdfPTable logoTable = new PdfPTable(1);
 					logoTable.getDefaultCell().setBorder(
 							com.lowagie.text.Rectangle.NO_BORDER);
-					logoTable.addCell(image);
-					logoTable.addCell(" ");
-					logoTable.addCell(" ");
-					logoTable.addCell(" ");
-					logoTable.addCell(" ");
-					logoTable.addCell(" ");
+					logoTable.addCell(new Phrase(new Chunk(image,0,0)));
 					document.add(logoTable);
+					document.add(new Paragraph(" "));
 				} else {
 					log.warn("Couldn't find the logo image, just ignore");
 				}
