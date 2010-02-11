@@ -1,0 +1,30 @@
+#!/bin/bash
+# replicator	Start/stop script for irods replication
+#		Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100105
+#
+# chkconfig:	345 99 01
+# description:	replication daemon
+
+IRODS_USER=rods	                        # iRODS User
+IRODS_HOME=/opt/iRODS/iRODS             # iRODS Home
+RESOURCE_GROUP=ARCS-REPLISET            # Resource Group
+PROGRAM=/usr/local/bin/replicator.sh    # Replicator program
+COLLECTIONS="/ARCS/home /ARCS/projects/IMOS"
+
+. /etc/init.d/functions
+RETVAL=0
+
+case "$1" in
+  start )
+    daemon --user $IRODS_USER +19 \
+                     "$PROGRAM $RESOURCE_GROUP $COLLECTIONS 2>/dev/null &"
+    RETVAL=$?; echo; [ $RETVAL -eq 0 ] && touch /var/lock/subsys/`basename $0`
+    exit $RETVAL ;;
+  stop )
+    pkill `basename $PROGRAM`
+    rm -f  /var/lock/subsys/`basename $0`
+    exit 0 ;;
+  * )
+    echo "Usage: $0 {start|stop}"
+    exit 2 ;;
+esac

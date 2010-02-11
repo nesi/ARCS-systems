@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100205
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100211
 use strict;
 use warnings;
 use File::Basename;
@@ -12,7 +12,7 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.08";
+$VERSION="2.09";
 my $Deactivate="Y";       # Set this to "N" to enable user de-activation
 
 # Adjust these as appropriate:
@@ -48,7 +48,7 @@ die "Usage: ".basename($0)." email-addrs\n".
 log_and_die("Failed to execute 'iadmin lu'") if $?;
 my $agent = LWP::UserAgent->new;
 my $response = $agent->get($URL);
-my $string=$response->content; # if $response->is_success;
+my $string=$response->content if $response->is_success;
 
 # If the checksum on the user-list string hasn't changed, exit; else decode XML.
 my $xp;                    # Note that we add a small fraction to the saved sum
