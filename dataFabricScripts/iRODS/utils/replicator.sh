@@ -1,7 +1,7 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100211
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100216
 
 # Batch size, path, usage check
 BATCH=16
@@ -36,7 +36,15 @@ while : ; do
   
   # Process the list records in batches, flush when end marker seen
   while read Line ; do
-    [ -n "$ListOnly" ] && echo "$Line" && continue
+    if [ -n "$Line" ] ; then
+      # Skip files which changed during the last 60 minutes
+      ChangeDate=`eval ils -l "$Line" | awk '{print $5; exit}'`
+      ChangeDate=`echo $ChangeDate | sed 's/\./ /'`
+      ChangeDate=`date -d "$ChangeDate" +%s`     || continue
+      NowDate=`date +%s`
+      [ `expr $NowDate - $ChangeDate` -le 3600 ] && continue
+      [ -n "$ListOnly" ]         && echo "$Line" && continue
+    fi
     J=`expr 1 + $J`
     [ -n "$Line" ] && String="$String $Line" || J=999
     if [ $J -ge $BATCH ] ; then
