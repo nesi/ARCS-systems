@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100211
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100217
 use strict;
 use warnings;
 use File::Basename;
@@ -12,8 +12,7 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.09";
-my $Deactivate="Y";       # Set this to "N" to enable user de-activation
+$VERSION="2.10";
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -68,12 +67,13 @@ if ( defined($string) ) {  # at each fast-exit and compare integer parts of sum
 log_and_die("Failed to get XML file") if ! defined($xp);
 
 # Validate the XML by ensuring that we get a complete list of valid usernames
-my (@username,@distiname,@sharedtoken);
+my (@username,@distiname,@sharedtoken,@email);
 my $j=0;
 foreach my $user ($xp->find('//User')->get_nodelist) {
   $username[++$j] =$user->find('ARCSUserName/@Name')."";
   $distiname[$j]  =$user->find('DistinguishedName/@DN')."";
-  $sharedtoken[$j]=$user->find('SharedToken/@Value').""
+  $sharedtoken[$j]=$user->find('SharedToken/@Value')."";
+  $email[$j]      =$user->find('Email/@Address').""
 }                # Note: Stored list elements must be strings for later use
 log_and_die("Username list is suspect") if $j < 1;
 
@@ -85,9 +85,12 @@ for (my $k=1;$k<=$j;$k++) {
   `iquest "select USER_NAME where USER_NAME = $userplus" >/dev/null 2>&1`;
   if ($?) {
     `iadmin mkuser $username[$k] rodsuser >/dev/null 2>&1`;
-    if ( ! $? ) { $message.="Added user: ".$username[$k]."\n" }
-    # `/usr/local/bin/createInbox.sh -u $username[$k] >/dev/null 2>&1`;
-    # if ( ! $? ) { $message.="Created inbox etc. for: ".$username[$k]."\n" }
+    if ( ! $? ) {
+      $message.="Added user: ".$username[$k]."\n";
+      mail_mess($email[$k],
+        "An ARCS-DF user-environment has been created for: ".$username[$k]."\n".
+        "You can now use the ARCS Data Fabric!\n" ) if length($email[$k]) > 0
+    }
   } 
   $olddn=`iquest "select USER_DN where USER_NAME = $userplus" | \
          sed -n "1s/^USER_DN = //p"`;
@@ -108,7 +111,6 @@ for (my $k=1;$k<=$j;$k++) {
                                                                            "\n"}
   }
 }
-goto Z unless $Deactivate eq "Y";
 
 # Remove DNs for unlisted users so they can't do GSI logins
 L:foreach my $existing (`iquest "SELECT USER_NAME where USER_DN <> ''" | \
@@ -141,4 +143,4 @@ M:foreach my $existing(`iquest "SELECT USER_NAME where USER_INFO like '%<ST>%'"|
 }
 
 # Send email and exit
-Z:mail_mess($ARGV[0], $message) if defined $message;
+mail_mess($ARGV[0], $message) if defined $message;
