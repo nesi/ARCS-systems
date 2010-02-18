@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100217
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100218
 use strict;
 use warnings;
 use File::Basename;
@@ -12,7 +12,7 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.10";
+$VERSION="2.11";
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -49,21 +49,8 @@ my $agent = LWP::UserAgent->new;
 my $response = $agent->get($URL);
 my $string=$response->content if $response->is_success;
 
-# If the checksum on the user-list string hasn't changed, exit; else decode XML.
-my $xp;                    # Note that we add a small fraction to the saved sum
-if ( defined($string) ) {  # at each fast-exit and compare integer parts of sum
-  my $oldsum=-1;           # only; this will eventually force a complete decode.
-  my $newsum=unpack("%32C*",$string) % 65535;
-  my $savsum=$newsum;
-  if ( my @p=getpwnam( $ENV{LOGNAME} ) ) {
-    my $sumfile=File::Spec->catdir($p[7],".".basename($0).".sum");
-    if ( open( CF,      $sumfile ) ) { $oldsum=<CF>;     close(CF) }
-    if ( $newsum == int($oldsum) )   { $savsum=$oldsum + 0.1       }
-    if ( open( CF,'+>', $sumfile ) ) { print CF $savsum; close(CF) }
-  }
-  exit(0) if $newsum == int($oldsum);
-  $xp = XML::XPath->new(xml=>$string);
-}
+# Decode XML.
+my $xp = XML::XPath->new(xml=>$string);
 log_and_die("Failed to get XML file") if ! defined($xp);
 
 # Validate the XML by ensuring that we get a complete list of valid usernames
@@ -77,38 +64,43 @@ foreach my $user ($xp->find('//User')->get_nodelist) {
 }                # Note: Stored list elements must be strings for later use
 log_and_die("Username list is suspect") if $j < 1;
 
+# Get the current users and their attributes
+my (%user_dn,%user_info,@field,$u);
+foreach my $line
+  (split ("\n",`iquest "select USER_NAME,USER_DN,USER_INFO" 2>/dev/null`) ) {
+  @field=split(" ",$line);
+  next if ! defined $field[2];
+  if    ( $field[0] eq "USER_NAME" ) { 
+    $u=$field[2]; $user_info{$u}=$user_dn{$u}=""
+  }
+  elsif ( $field[0] eq "USER_INFO" ) { $user_info{$u}=$field[2]            }
+  elsif ( $field[0] eq "USER_DN"   ) { $user_dn{$u}  =substr($line,10)     }
+}
+
 # Add users we don't already have, insert new DN and ST values where necessary
-my ($userplus,$olddn,$dnplus,$oldst,$stplus,$message);
+my ($message,$dnplus,$stplus,$oldst);
 for (my $k=1;$k<=$j;$k++) {
-  next if length($username[$k]) < 1;
-  $userplus="'".$username[$k]."'";
-  `iquest "select USER_NAME where USER_NAME = $userplus" >/dev/null 2>&1`;
-  if ($?) {
-    `iadmin mkuser $username[$k] rodsuser >/dev/null 2>&1`;
+  $u=$username[$k];
+  next if length($u) < 1;
+  if ( ! defined $user_info{$u} ) {
+    `iadmin mkuser $u rodsuser >/dev/null 2>&1`;
     if ( ! $? ) {
-      $message.="Added user: ".$username[$k]."\n";
+      $user_info{$u}=$user_dn{$u}="";
+      $message.="Added user: ".$u."\n";
       mail_mess($email[$k],
-        "An ARCS-DF user-environment has been created for: ".$username[$k]."\n".
+        "An ARCS-DF user-environment has been created for: ".$u."\n".
         "You can now use the ARCS Data Fabric!\n" ) if length($email[$k]) > 0
     }
   } 
-  $olddn=`iquest "select USER_DN where USER_NAME = $userplus" | \
-         sed -n "1s/^USER_DN = //p"`;
-  chomp ($olddn);
-  if ( $distiname[$k] ne $olddn ) {
+  if ( $distiname[$k] ne $user_dn{$u} ) {
     $dnplus="\"".$distiname[$k]."\"";
     `iadmin moduser $username[$k] DN $dnplus`;
-    if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$username[$k]."\n"}
+    if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$u."\n"}
   }
-  $oldst=`iquest "select USER_INFO where USER_NAME = $userplus" | \
-         sed -n "1s/^USER_INFO = //p"`;
-  chomp ($oldst);
-  if (length($sharedtoken[$k])<1) { $stplus="\"\"" }
-  else                            { $stplus="\"<ST>".$sharedtoken[$k]."</ST>\""}
-  if ( $stplus ne "\"".$oldst."\"" ) {
-    `iadmin moduser $username[$k] info $stplus`;
-    if(! $?){$message.="Inserted INFO: ".$stplus." for user: ".$username[$k].
-                                                                           "\n"}
+  $stplus="\"<ST>".$sharedtoken[$k]."</ST>\"";
+  if ( $stplus ne "\"".$user_info{$u}."\"" ) {
+    `iadmin moduser $u info $stplus`;
+    if(! $?){$message.="Inserted INFO: ".$stplus." for user: ".$u."\n"}
   }
 }
 
