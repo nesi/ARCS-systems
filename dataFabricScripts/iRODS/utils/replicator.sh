@@ -1,7 +1,7 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100216
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100223
 
 # Batch size, path, usage check
 BATCH=16
@@ -30,7 +30,7 @@ while : ; do
           if(amperpos>0) print "\""Dir"/"substr($0,amperpos+3)"\""
         }
       }
-    }' | sort | uniq -u | sed 's/\$/\\\\$/g'
+    }' | uniq -u | sed 's/\$/\\\\$/g'
   echo                  # Append empty line to mark end of list
   ) | 
   
