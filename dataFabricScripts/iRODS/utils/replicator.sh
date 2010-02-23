@@ -20,7 +20,7 @@ while : ; do
   # List all files with full collection path, print those that appear only once
   logger -i "Replicating to $Resource .. $@"
   J=0
-  ( ils -lr "$@" | awk '{
+  ( nice ils -lr "$@" | awk '{
       if ($1~"^/") {    # Extract collection names from records starting in "/".
         Dir=substr($0,1,length-1)
       }
@@ -53,7 +53,7 @@ while : ; do
     fi
   done
 
-  # Ten-minute pause
-  [ -n "$ListOnly" ] && exit 0 || sleep 600
+  # Sixty-minute pause
+  [ -n "$ListOnly" ] && exit 0 || sleep 3600
 
 done
