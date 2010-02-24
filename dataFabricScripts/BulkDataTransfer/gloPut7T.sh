@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy (GT 5.x.x); uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100129
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100224
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -12,11 +12,11 @@ export GLOBUS_TCP_PORT_RANGE=40000,40100 GLOBUS_UDP_PORT_RANGE=40000,40100
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
-Params="-p 4"
+Params="-pp -p 4"
 while getopts b:us Option; do
   case $Option in
     b) BATCH=$OPTARG;;
-    u) Params="-udt -p 1";;
+    u) Params="-udt -pp -p 2";;
     s) Skip="Y";;
   esac
 done
@@ -56,9 +56,9 @@ ssu $2 "chmod 775       $3"   2>/dev/null
 # Create temporary files, set traps
 TmpFil=`mktemp` && chmod a+x $TmpFil      || fail 1 "Temporary file problem"
 LisFil=`mktemp`                           || fail 1 "Temporary file problem"
-trap "chmod a-x $TmpFil ; echo Break detected .. wait" CONT
-trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
-trap 'Params="-udt -p 1"; echo Switched to UDT..'      USR2
+trap "chmod a-x $TmpFil ; echo Break detected .. wait"     CONT
+trap 'Params="     -pp -p 4"; echo Switched to TCP..'      USR1
+trap 'Params="-udt -pp -p 2"; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -CONT $$"
