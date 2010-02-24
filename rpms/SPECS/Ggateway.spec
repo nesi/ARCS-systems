@@ -1,7 +1,7 @@
 Summary:	APAC-specific configuration files and scripts for Grid Gateways
 Name:		Ggateway
-Version:	1.0.1
-Release:	11
+Version:	1.0.2
+Release:	1
 License:	GNU
 Group:		Grid/Deployment
 BuildRoot:	%{_tmppath}
@@ -35,6 +35,9 @@ grep -v "^Ggateway$" </usr/local/lib/gridpulse/system_packages.pulse >$TF 2>/dev
 cp $TF /usr/local/lib/gridpulse/system_packages.pulse
 
 %changelog
+* Wed Feb 24 2010 Vladimir Mencl <vladimir.mencl@canterbury.ac.nz>
+- patched auditquery to report only completed jobs (not to break Globus 4.0.8)
+- bumped up version # to 1.0.2
 * Tue Apr 21 2009 Darran Carey <darran.carey@arcs.org.au>
 - changed email address from grid_pulse@vpac.org to
   grid_pulse@arcs.org.au in /etc/logrotate.d/grid.
