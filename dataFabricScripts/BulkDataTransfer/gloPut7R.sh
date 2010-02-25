@@ -15,7 +15,7 @@ Params="-pp -p 4"
 while getopts b:us Option; do
   case $Option in
     b) BATCH=$OPTARG;;
-    u) Params="-udt -pp -p 4";;
+    u) Params="-udt -pp -p 2";;
     s) Skip="Y";;
   esac
 done
@@ -56,7 +56,7 @@ TmpFil=`mktemp` && chmod a+x $TmpFil      || fail 1 "Temporary file problem"
 LisFil=`mktemp`                           || fail 1 "Temporary file problem"
 trap "chmod a-x $TmpFil ; echo Break detected .. wait"     CONT
 trap 'Params="     -pp -p 4"; echo Switched to TCP..'      USR1
-trap 'Params="-udt -pp -p 4"; echo Switched to UDT..'      USR2
+trap 'Params="-udt -pp -p 2"; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -CONT $$"
