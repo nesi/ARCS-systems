@@ -1,7 +1,7 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100223
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100225
 
 # Batch size, path, usage check
 BATCH=16
@@ -20,7 +20,7 @@ while : ; do
   # List all files with full collection path, print those that appear only once
   logger -i "Replicating to $Resource .. $@"
   J=0
-  ( nice ils -lr "$@" | awk '{
+  ( ils -lr "$@" | awk '{
       if ($1~"^/") {    # Extract collection names from records starting in "/".
         Dir=substr($0,1,length-1)
       }
@@ -37,13 +37,10 @@ while : ; do
   # Process the list records in batches, flush when end marker seen
   while read Line ; do
     if [ -n "$Line" ] ; then
-      # Skip files which changed during the last 60 minutes
-      ChangeDate=`eval ils -l "$Line" | awk '{print $5; exit}'`
-      ChangeDate=`echo $ChangeDate | sed 's/\./ /'`
-      ChangeDate=`date -d "$ChangeDate" +%s`     || continue
-      NowDate=`date +%s`
-      [ `expr $NowDate - $ChangeDate` -le 3600 ] && continue
-      [ -n "$ListOnly" ]         && echo "$Line" && continue
+      # Skip files whose size is non-positive
+      FileSize=`eval ils -l "$Line" | awk '{print $4; exit}'`
+      [ $FileSize -le 0 ]                 && continue
+      [ -n "$ListOnly"  ] && echo "$Line" && continue
     fi
     J=`expr 1 + $J`
     [ -n "$Line" ] && String="$String $Line" || J=999
@@ -54,6 +51,9 @@ while : ; do
   done
 
   # Sixty-minute pause
-  [ -n "$ListOnly" ] && exit 0 || sleep 3600
+  [ -n "$ListOnly" ] && exit 0
+  logger -i "Replication pass completed!"
+  echo "Replication pass completed!" >&2
+  sleep 3600
 
 done
