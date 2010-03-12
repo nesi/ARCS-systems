@@ -1,7 +1,7 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100225
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100312
 
 # Batch size, path, usage check
 BATCH=16
@@ -39,7 +39,7 @@ while : ; do
     if [ -n "$Line" ] ; then
       # Skip files whose size is non-positive
       FileSize=`eval ils -l "$Line" | awk '{print $4; exit}'`
-      [ $FileSize -le 0 ]                 && continue
+      [ `expr $FileSize + 0` -le 0 ]      && continue
       [ -n "$ListOnly"  ] && echo "$Line" && continue
     fi
     J=`expr 1 + $J`
