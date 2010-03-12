@@ -1,0 +1,34 @@
+#!/bin/sh
+# gridftp       Start/stop script for gridftp
+#               Graham Jenkins <graham@vpac.org> Feb. 2010. Rev: 20100312
+#
+# chkconfig:    345 99 5
+# description:  gridftp startup script
+
+export GLOBUS_LOCATION=/opt/globus-5             # Adjust as appropriate 
+export GLOBUS_TCP_PORT_RANGE=40000,40100
+export GLOBUS_UDP_PORT_RANGE=40000,40100
+export LD_LIBRARY_PATH=$GLOBUS_LOCATION/lib
+PORT=2811
+
+. /etc/rc.d/init.d/functions
+RETVAL=0
+
+case "$1" in
+  start) echo -n "Starting GridFTP server: "
+         [ -f $GLOBUS_LOCATION/sbin/globus-gridftp-server ] || exit 1
+         $GLOBUS_LOCATION/sbin/globus-gridftp-server -S -p $PORT \
+                                                     -dc-whitelist udt,gsi,tcp
+         RETVAL=$?
+         echo
+         [ $RETVAL -eq 0 ] && touch /var/lock/subsys/gridftp ;;
+  stop ) echo -n "Shutting down GridFTP server: "
+         killproc globus-gridftp-server
+         RETVAL=$?
+         echo
+         [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/gridftp ;;
+  *    ) echo "Usage: $0 {start|stop}"
+	 exit 2                                              ;;
+esac
+
+exit $RETVAL

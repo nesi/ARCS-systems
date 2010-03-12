@@ -1,0 +1,23 @@
+#!/bin/sh
+# gridftp-killer  Kills "feral" gridftp server processes owned by unpriveleged
+#                 users. A job is judged to be "feral" if it is present during
+#                 during 2 successive invocations, and the number of seconds
+#                 is unchanged.
+#                 Should be called from root cron at 20-min intervals.
+#                 Graham Jenkins <graham@vpac.org> March 2010. Rev: 20100312
+
+PATH=/bin:/usr/bin; export PATH
+ps -ef | awk '{if ($1 != "root") if ($8 ~ "/globus-gridftp-serve[r]$") print $0
+                                                       }' > ~/.`basename $0`.new
+
+if [ -f ~/.`basename $0`.old ]; then
+  for P in `cat ~/.\`basename $0\`.old ~/.\`basename $0\`.new | sort | uniq -d |
+    awk '{print $2}'` ; do
+    U="`ps -p $P -o user | tail -1`"
+    echo "`basename $0` is killing PID: $P (user: $U)"
+    kill $P
+  done
+fi
+
+mv -f ~/.`basename $0`.new ~/.`basename $0`.old
+exit 0
