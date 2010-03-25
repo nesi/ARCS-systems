@@ -2,7 +2,7 @@
 # opendap_acl.sh  Sets ACLs for IMOS files/directories so that the OpenDAP
 #                 application can access them.
 #                 Pauline Mak, Sep. 2009.
-#                 graham@vpac.org Rev: 20100323 
+#                 graham@vpac.org Rev: 20100325 
 
 # Anti-simultaneity check
 ShortName=`basename $0 | cut -c 1-15`
@@ -26,16 +26,16 @@ user=jetty
 
 # Set ACLs
 for dir in $tree ; do
-  cd $vaultDir
+  cd $vaultDir || exit 1
   setfacl -m u:$user:--x $dir
   vaultDir=$dir
 done
 
-cd IMOS
+cd IMOS || exit 1
 setfacl -m u:$user:r-x -m m::r-x opendap
 setfacl -d -m u:$user:r-x -m m::r-x opendap
 
-cd opendap
+cd opendap || exit 1
 find -newer $StampFile |
 while read Object ; do
   if   [ -f "$Object" ] ; then
