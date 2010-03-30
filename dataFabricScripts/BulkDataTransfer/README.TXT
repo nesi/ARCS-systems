@@ -36,4 +36,9 @@ section; it now relies on the "-cd" parameter for globus-url-copy for this.
 On 20100125, STALL and POLLING_THREADS things were removed from both
 gloPut7T.sh and gloPut7R.sh ..
 
-GKJ-20100125
+On 20100330, a number of superseded scripts were removed from this directory;
+many of the problems referenced above have been addressed by gridftp-killer,
+and it is expected that this may not be required after the introduction of
+GT 5.0.1 ..
+
+GKJ-20100330
