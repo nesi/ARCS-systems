@@ -98,6 +98,14 @@ USQCD_SE: usqcd_fnal.gov_srm
     <md5>e4c7b6773771bae7034cb37176729e88</md5>
   </file>
 
+  <file>
+    <grid>ldg</grid>
+    <se>rug.nl</se>
+    <protocol>2</protocol>
+    <url>srm://se.grid.rug.nl/pnfs/grid.rug.nl/data/ildg/ldg/qcdsf/clover_nf2/b5p20kp13420-16x32/ape.001.000305.dat</url>
+    <md5>e4c7b6773771bae7034cb37176729e88</md5>
+  </file>
+
 
   <!-- UKQCD/Edinburgh (Scotland) -->
   <!-- 80M -->
