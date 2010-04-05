@@ -41,4 +41,7 @@ many of the problems referenced above have been addressed by gridftp-killer,
 and it is expected that this may not be required after the introduction of
 GT 5.0.1 ..
 
-GKJ-20100330
+On 20100405, gloPut7T.sh was enhanced through the use of filename/size
+couplets in a sorted list; this made it both shorter and faster.
+
+GKJ-20100405
