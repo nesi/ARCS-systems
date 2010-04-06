@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy (GT 5.x.x); uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100405
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100407
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -51,7 +51,7 @@ doGlobus() {
 # Create destination directory if required, ensure that we can write to it 
 ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
 ssu $2 "mkdir -p -m 775 $3"   2>/dev/null || fail 1 "Remote-directory problem"
-ssu $2 "chmod 775       $3"   2>/dev/null
+ssu $2 "chmod u+rw      $3"   2>/dev/null || fail 1 "Remote-directory problem"
 
 # Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
