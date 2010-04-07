@@ -51,7 +51,7 @@ doGlobus() {
 # Create destination directory if required, ensure that we can write to it 
 ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
 ssu $2 "mkdir -p -m 775 $3"   2>/dev/null || fail 1 "Remote-directory problem"
-ssu $2 "chmod u+rw      $3"   2>/dev/null || fail 1 "Remote-directory problem"
+ssu $2 "test -w         $3"   2>/dev/null || fail 1 "Remote-directory problem"
 
 # Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
