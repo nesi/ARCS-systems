@@ -14,27 +14,8 @@ SOCKET=$BINLOGPATH/mysql.sock
 copyBinlogs() {
     # copy binlogs to archive dir
     echo "Copying binlogs"
-    pushd $BINLOGPATH
-    for FILE in `cat $BINLOGPATH/$BINLOGNAME.index`
-      do
-      SFILE=(${FILE/*\//})
-      if [ ! -f $ARCHIVEPATH/$SFILE.gz ]
-	  then
-	  echo "- binlog $SFILE"
-	  cp -p $FILE $ARCHIVEPATH
-	  gzip $ARCHIVEPATH/$SFILE
-      fi
-    done
-    popd
-}
-
-saveBinlogs() {
-   # move latest binlogs to savedir
-    echo "Saving binlogs"
-    SAVEDIR=`date +%Y%m%d`
-    echo $SAVEDIR
-    mkdir -p $ARCHIVEPATH/$SAVEDIR
-    mv $ARCHIVEPATH/*.gz $ARCHIVEPATH/$SAVEDIR
+    rsync -av $BINLOGPATH/$BINLOGNAME.* $ARCHIVEPATH/
+    echo "binlogs copied"
 }
 
 # --- Main ---
@@ -44,50 +25,53 @@ case "$MODE" in
     # Weekly backup
     # - copy all bin logs to backup directory
     # - clean path of backup directory
-	echo "Weekly backup"
+        echo "mysql Weekly backup"
         date
-	DATE=`date +%Y%m%d`
-	if [ ! -d $ARCHIVEPATH/$DATE ]
-	then
-	    mkdir -p $ARCHIVEPATH/$DATE
-	fi
-	mysqldump -u $MYSQLUSER -S $SOCKET \
+        DATE=`date +%Y%m%d`
+        if [ ! -d $ARCHIVEPATH/$DATE ]
+        then
+            mkdir -p $ARCHIVEPATH/$DATE
+        fi
+        mysqldump -u $MYSQLUSER -S $SOCKET \
             --single-transaction --flush-logs --master-data=2 \
-	    --all-databases | gzip > $ARCHIVEPATH/$DATE/full-$DATE.sql.gz
-	STATUS=${PIPESTATUS[0]}
-	if [ "$STATUS" -ne "0" ]; then
-		echo mysqldump failed
-		exit $STATUS
-	fi
-	copyBinlogs;
-	saveBinlogs;
-	;;
+            --all-databases | gzip > $ARCHIVEPATH/$DATE/full-$DATE.sql.gz
+        STATUS=${PIPESTATUS[0]}
+        if [ "$STATUS" -ne "0" ]; then
+                echo error: mysqldump failed
+                exit $STATUS
+        fi
+        copyBinlogs;
+        cp -p $BINLOGPATH/$BINLOGNAME.index $ARCHIVEPATH/$DATE
+        ;;
 
     'incremental')
     # Daily backup
     # - flush logs
     # - copy all bin logs to backup directory if not already done
-	echo "Mysql daily backup"
+        echo "mysql Daily backup"
         date
-	mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs
-	STATUS=$?
-	if [ $STATUS -ne 0 ]; then
-		echo mysqladmin flush logs failed
-		exit $STATUS
-	fi
-	copyBinlogs;
-	;;
+        mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs
+        STATUS=$?
+        if [ $STATUS -ne 0 ]; then
+                echo error: mysqladmin flush logs failed
+                exit $STATUS
+        else
+                echo mysqladmin flush complete
+        fi
+        copyBinlogs;
+        ;;
     
     *)
-	echo "Usage: mysql_backup [full|incremental]"
-	exit 1
-	;;
+        echo "Usage: mysql_backup [full|incremental]"
+        exit 1
+        ;;
     
 esac
-echo "Copy mysql dump to data fabric"
-/opt/iRODS/iRODS/clients/icommands/bin/irsync -rvs $ARCHIVEPATH i:`hostname -s`.m3306
+echo "Copy mysql backup to data fabric"
+IRSYNC=/opt/iCommands/iRODS/clients/icommands/bin/irsync
+$IRSYNC -rs $ARCHIVEPATH i:`hostname -s`.m3306
 STATUS=$?
 if [ $STATUS -ne 0 ]; then
-	echo copy mysql dump to data fabric failed
-	exit $STATUS
+        echo warning: irsync mysql dump to data fabric failed
+        exit $STATUS
 fi
