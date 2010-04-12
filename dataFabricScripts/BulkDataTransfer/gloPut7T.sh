@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy (GT 5.x.x); uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100407
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100412
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -68,9 +68,9 @@ while [ -n "$Flag" ] ; do
   echo "Generating a list of files to be copied .. wait .."
   # List filename/size couplets in remote and local directories; if a couplet
   # appears once then it hasn't been copied properly, so add filename to list
-  for File in `( ssu $2 "ls -l$Skip $3 2>/dev/null"
-                         ls -l$Skip $1 2>/dev/null ) |
-      awk '{print \$9, \$5}' | sort | uniq -u | awk '{print \$1}' | uniq`; do
+  for File in `( ssu $2 "ls -lL$Skip $3 2>/dev/null"
+                         ls -lL$Skip $1 2>/dev/null ) |
+      awk '{print \$NF, \$5}' | sort | uniq -u | awk '{print \$1}' | uniq`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     Flag=Y
     echo "file://$1/$File sshftp://$2$3/" >> $LisFil
