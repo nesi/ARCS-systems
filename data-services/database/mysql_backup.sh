@@ -25,8 +25,11 @@ case "$MODE" in
     # Weekly backup
     # - copy all bin logs to backup directory
     # - clean path of backup directory
+        echo ""
+	echo "==================="
         echo "mysql Weekly backup"
         date
+	echo "==================="
         DATE=`date +%Y%m%d`
         if [ ! -d $ARCHIVEPATH/$DATE ]
         then
@@ -48,8 +51,11 @@ case "$MODE" in
     # Daily backup
     # - flush logs
     # - copy all bin logs to backup directory if not already done
+        echo ""
+	echo "==================="
         echo "mysql Daily backup"
         date
+	echo "==================="
         mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs
         STATUS=$?
         if [ $STATUS -ne 0 ]; then
