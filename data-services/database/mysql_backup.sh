@@ -42,6 +42,8 @@ case "$MODE" in
         if [ "$STATUS" -ne "0" ]; then
                 echo error: mysqldump failed
                 exit $STATUS
+        else
+                echo mysqldump complete
         fi
         copyBinlogs;
         cp -p $BINLOGPATH/$BINLOGNAME.index $ARCHIVEPATH/$DATE
@@ -80,4 +82,6 @@ STATUS=$?
 if [ $STATUS -ne 0 ]; then
         echo warning: irsync mysql dump to data fabric failed
         exit $STATUS
+else
+        echo irsync mysql backup to data fabric done
 fi
