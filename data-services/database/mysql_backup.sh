@@ -27,7 +27,7 @@ case "$MODE" in
     # - clean path of backup directory
         echo ""
 	echo "==================="
-        echo "mysql Weekly backup"
+        echo "mysql Weekly full backup"
         date
 	echo "==================="
         DATE=`date +%Y%m%d`
@@ -55,7 +55,7 @@ case "$MODE" in
     # - copy all bin logs to backup directory if not already done
         echo ""
 	echo "==================="
-        echo "mysql Daily backup"
+        echo "mysql Daily incremental backup"
         date
 	echo "==================="
         mysqladmin -u $MYSQLUSER -S $SOCKET flush-logs

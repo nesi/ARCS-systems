@@ -8,7 +8,7 @@ MODE=$1
 TMPDIR=/tmp
 fail_address=arcs-data@arcs.org.au
 #success_address=florian.goessmann@arcs.org.au
-success_address=gareth.williams@arcs.org.au,florian.goessmann@arcs.org.au
+success_address=pauline.mak@arcs.org.au,florian.goessmann@arcs.org.au
 
 /usr/local/bin/mysql_backup.sh $MODE > $TMPDIR/mysql_backup.log 2>&1
 STATUS=$?
