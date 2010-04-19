@@ -1,8 +1,8 @@
 #!/bin/bash
 # msyql_backup_driver.sh
 # script to drive the backup the mysql server
-# $Id: mysql_backup.sh 1429 2010-04-07 01:49:30Z gareth.williams@csiro.au $
-# $HeadURL: https://projects.arcs.org.au/svn/systems/trunk/data-services/database/mysql_backup.sh $
+# $Id$
+# $HeadURL$
 
 MODE=$1
 TMPDIR=/tmp
