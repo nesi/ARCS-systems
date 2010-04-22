@@ -1,10 +1,9 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100415
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100422
 
-# Batch size, path, usage check
-BATCH=16
+# Path, usage check
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
 [ "$1" = "-n" ] && ListOnly=Y && shift
@@ -14,13 +13,16 @@ PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
     echo " Note: Use option '-n' to show what would be done, then exit"
   ) >&2 && exit 2
 
+# A list-file is used to reduced elapsed time taken by 'ils -lr'
+TempFile=`mktemp` || exit 1
+trap "rm -f $TempFile; exit 0" 0 1 2 3 4 14 15
+
 # Extract resource-name, loop forever
 Resource="$1"; shift
 while : ; do
   # List all files with full collection path, print those that appear only once
   logger -i "Replicating to $Resource .. $@"
-  J=0
-  ( ils -lr "$@" | awk '{
+  ( ils -lr "$@" 2>/dev/null | awk '{
       if ($1~"^/") {    # Extract collection names from records starting in "/".
         Dir=substr($0,1,length-1)
       }
@@ -31,29 +33,21 @@ while : ; do
         }
       }
     }' | uniq -u | sed 's/\$/\\\\$/g'
-  echo                  # Append empty line to mark end of list
   ) | 
   
-  # Process the list records in batches, flush when end marker seen
+  # Process the list records
   while read Line ; do
-    if [ -n "$Line" ] ; then
       # Skip files whose size is non-positive
       FileSize=`eval ils -l "$Line" | awk '{print $4; exit}'`
       [ `expr $FileSize + 0` -le 0 ]      && continue
       [ -n "$ListOnly"  ] && echo "$Line" && continue
-    fi
-    J=`expr 1 + $J`
-    [ -n "$Line" ] && String="$String $Line" || J=999
-    if [ $J -ge $BATCH ] ; then
-      [ -n "$String" ] && eval irepl -MBT -R $Resource "$String" 
-      J=0 ; String=""
-    fi
+      eval irepl -MBT -R $Resource "$Line" 
   done
 
-  # Six-hour pause
+  # 18-hour pause
   [ -n "$ListOnly" ] && exit 0
   logger -i "Replication pass completed!"
   echo "Replication pass completed!" >&2
-  sleep 21600
+  sleep 64800
 
 done
