@@ -27,5 +27,12 @@ WEB-INF/web.xml file.
         value="/opt/stps/conf/log4j.xml"
         override="false"
         type="java.lang.String"/>
-      
+
+    <!-- Context parameter: absolute location of the secret key file -->
+     
+    <Parameter
+        name="SecretKeyFile"
+        value="/opt/stps/conf/secret.key"
+        override="false"
+        type="java.lang.String"/>      
 </Context>

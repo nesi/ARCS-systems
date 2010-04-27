@@ -12,6 +12,7 @@
 	<property name="tools.lib" value="${basedir}/tools.lib" />
 	<property name="build" value="${basedir}/build" />
 	<property name="dist" value="${basedir}/share/webapps" />
+	<property name="bin" value="${basedir}/bin" />
 	<property name="doc" value="${basedir}/doc" />
 	<property name="projectname" value="stps" />
 	<property name="version" value="0.0.1" />
@@ -30,10 +31,12 @@
 	<target name="prep" description="prepare for a build">
 		<mkdir dir="${build}" />
 		<mkdir dir="${dist}" />
+		<mkdir dir="${bin}" />
 	</target>
 
 	<target name="clean" description="remove all build-generated stuff">
 		<delete dir="${build}" />
+		<delete dir="${bin}" />
 	</target>
 
 	<target name="compile" description="build all java classes into build/">
@@ -44,7 +47,19 @@
 		</javac>
 	</target>
 
-	<target name="war" depends="clean,prep,compile" description="Build the war package/">
+	<target name="crypto" depends="clean,prep,compile" description="--> description">
+		<!--
+		<copy file="${conf}/stpUtil.properties" todir="${bin}" />
+		-->
+		<jar destfile="${basedir}/bin/${projectname}-crypto.jar" basedir="${build}/classes">
+			<manifest>
+				<attribute name="Main-Class" value="au.org.arcs.stps.crypto.CryptoUtils" />
+				<attribute name="Class-Path" value="${libs.project}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="war" depends="clean,prep,compile,crypto" description="Build the war package/">
 	<mkdir dir="${build}/webapp/WEB-INF/classes" />
 		<mkdir dir="${build}/webapp/WEB-INF/lib" />
 		<copy todir="${build}/webapp">

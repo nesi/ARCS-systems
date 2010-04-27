@@ -27,6 +27,7 @@ import org.apache.struts2.ServletActionContext;
 
 import au.org.arcs.stps.STPSConfiguration;
 import au.org.arcs.stps.STPSException;
+import au.org.arcs.stps.crypto.CryptoUtils;
 import au.org.arcs.stps.util.PDFUtil;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -63,9 +64,15 @@ public class STPSAction extends ActionSupport {
 			STPSConfiguration config = STPSConfiguration.getInstance();
 			config.checkProperties();
 			props = config.getProperties();
+			
+			String keyFile = STPSConfiguration.getKeyFile();
+			
 
 			String cert = props.getProperty("CERTIFICATE");
-			String password = props.getProperty("PASSWORD");
+			String encrypedPass = props.getProperty("PASSWORD");
+			
+			String decrypedPass = CryptoUtils.decrypt(encrypedPass, new File(keyFile));
+
 
 			Map<String, String> attrMap = this.getShibAttributes(props);
 			// Map<String, String> attrMap = this.getAttributesMock();
@@ -85,9 +92,9 @@ public class STPSAction extends ActionSupport {
 			PDFUtil pdfUtil = new PDFUtil();
 
 			unsignedOs = (ByteArrayOutputStream) pdfUtil.genPDF(sourceIdP,
-					sharedToken, cn, mail, imageByteArray, cert, password);
+					sharedToken, cn, mail, imageByteArray, cert, decrypedPass);
 
-			signedOs = pdfUtil.signPDF(cert, password,
+			signedOs = pdfUtil.signPDF(cert, decrypedPass,
 					new ByteArrayInputStream(unsignedOs.toByteArray()));
 
 			signedOs.writeTo(response.getOutputStream());
@@ -97,13 +104,13 @@ public class STPSAction extends ActionSupport {
 
 		} catch (STPSException e) {
 			this.addActionError(e.getMessage());
-			// e.printStackTrace();
+			e.printStackTrace();
 			log.info(cn + " is failed to obtain the SharedToken document from "
 					+ sourceIdP + " at " + new Date().toString());
 			return ERROR;
 		} catch (Exception e) {
 			this.addActionError(e.getMessage());
-			// e.printStackTrace();
+			e.printStackTrace();
 			log.info(cn + " is failed to obtain the SharedToken document from "
 					+ sourceIdP + " at " + new Date().toString());
 			return ERROR;
