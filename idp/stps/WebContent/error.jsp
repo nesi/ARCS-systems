@@ -10,7 +10,7 @@
 <body>
 
 
-<p><a href="http://www.arcs.org.au"><img
+<p><a href="https://www.arcs.org.au"><img
 	src="https://static.arcs.org.au/arcs_media/img/arcs-logo.png" alt="ARCS Logo"
 	style="border-style: none" /> </a></p>
 	
