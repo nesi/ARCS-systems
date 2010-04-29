@@ -103,7 +103,7 @@ public class CryptoUtils {
 
 	public static void main(String[] args) throws Exception {
 
-		String KEY_FILE = "../conf/secret.key";
+		String KEY_FILE = "../conf/crypto";
 
 		String clearPwd = null;
 		File keyFile = null;

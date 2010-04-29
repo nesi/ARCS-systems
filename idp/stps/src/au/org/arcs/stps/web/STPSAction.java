@@ -72,7 +72,6 @@ public class STPSAction extends ActionSupport {
 			String cert = props.getProperty("CERTIFICATE");
 			String encrypedPass = props.getProperty("PASSWORD");
 			
-			String decrypedPass = CryptoUtils.decrypt(encrypedPass, new File(keyFile));
 			
 			errorMessage = props.getProperty("ERROR_MESSAGE");
 			
@@ -80,7 +79,7 @@ public class STPSAction extends ActionSupport {
 
 
 			Map<String, String> attrMap = this.getShibAttributes(props);
-			// Map<String, String> attrMap = this.getAttributesMock();
+			 //Map<String, String> attrMap = this.getAttributesMock();
 
 			sharedToken = attrMap.get(props
 					.getProperty("HTTP_HEADER_NAME_SHAREDTOKEN"));
@@ -93,8 +92,12 @@ public class STPSAction extends ActionSupport {
 
 			HttpServletResponse response = ServletActionContext.getResponse();
 			response.setContentType("application/pdf");
+			//response.addHeader("content-disposition","attachment; filename=sharedtoken_statement");
+			response.addHeader("content-disposition","filename=sharedtoken_statement");
 
 			PDFUtil pdfUtil = new PDFUtil();
+			
+			String decrypedPass = CryptoUtils.decrypt(encrypedPass, new File(keyFile));
 
 			unsignedOs = (ByteArrayOutputStream) pdfUtil.genPDF(sourceIdP,
 					sharedToken, cn, mail, imageByteArray, cert, decrypedPass);

@@ -25,7 +25,7 @@ public class STPSConfiguration {
 	 * Parameter name in the context or in the web.xml file
 	 */
 	static private String CONFIGURATION_FILE_KEY = "STPSConfigurationFile";
-	static private String SECRETKEY_FILE_KEY = "SecretKeyFile";
+	static private String SECRETKEY_FILE_KEY = "cryptoFile";
 
 	/**
 	 * Singelton pattern
