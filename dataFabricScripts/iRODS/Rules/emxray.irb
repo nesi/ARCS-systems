@@ -1,1 +1,1 @@
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/EMXRAY/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/EMXRAY/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
