@@ -1,5 +1,5 @@
 #group rules - generally one liners.  If rules for groups a more complicated, create an individual file...
 
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/SSNTCP/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/SSNTCP/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ALA/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
 
