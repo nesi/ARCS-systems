@@ -194,6 +194,28 @@ public class STPSConfiguration {
 			log.error(msg);
 			throw new STPSException(msg);
 		}
+		
+		String errorMessage = properties
+		.getProperty("ERROR_MESSAGE");
+
+		if (errorMessage == null
+				|| httpHeaderNameProviderID.trim().equals("")) {
+			String msg = "The error message is not set in the properties file."
+					+ msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
+		
+		String arcsLogoUrl = properties
+		.getProperty("ARCSLOGO_URL");
+
+		if (arcsLogoUrl == null
+				|| httpHeaderNameProviderID.trim().equals("")) {
+			String msg = "The URL to obtain ARCS logo is not set in the properties file."
+					+ msgTmp;
+			log.error(msg);
+			throw new STPSException(msg);
+		}
 	}
 	public static String getKeyFile(){
 		return keyFile;

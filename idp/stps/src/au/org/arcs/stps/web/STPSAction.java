@@ -42,7 +42,8 @@ public class STPSAction extends ActionSupport {
 
 	private static Log log = LogFactory.getLog(STPSAction.class);
 
-	private static String arcsLogoUrl = "https://static.arcs.org.au/arcs_media/img/arcs-logo.png";
+	private String arcsLogoUrl = null;
+	private String errorMessage = null;
 
 	private static String arcsLogoDefaultPath = "/images/arcs-logo.png";
 
@@ -72,6 +73,10 @@ public class STPSAction extends ActionSupport {
 			String encrypedPass = props.getProperty("PASSWORD");
 			
 			String decrypedPass = CryptoUtils.decrypt(encrypedPass, new File(keyFile));
+			
+			errorMessage = props.getProperty("ERROR_MESSAGE");
+			
+			arcsLogoUrl = props.getProperty("ARCSLOGO_URL");
 
 
 			Map<String, String> attrMap = this.getShibAttributes(props);
@@ -103,13 +108,15 @@ public class STPSAction extends ActionSupport {
 			signedOs.close();
 
 		} catch (STPSException e) {
-			this.addActionError(e.getMessage());
+			this.addActionError(errorMessage);
+			log.error(e.getMessage());
 			e.printStackTrace();
 			log.info(cn + " is failed to obtain the SharedToken document from "
 					+ sourceIdP + " at " + new Date().toString());
 			return ERROR;
 		} catch (Exception e) {
-			this.addActionError(e.getMessage());
+			this.addActionError(errorMessage);
+			log.error(e.getMessage());
 			e.printStackTrace();
 			log.info(cn + " is failed to obtain the SharedToken document from "
 					+ sourceIdP + " at " + new Date().toString());
