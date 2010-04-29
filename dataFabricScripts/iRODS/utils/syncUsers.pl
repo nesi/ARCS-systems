@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100219
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100429
 use strict;
 use warnings;
 use File::Basename;
@@ -12,7 +12,7 @@ use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
 use vars qw($VERSION);
-$VERSION="2.12";
+$VERSION="2.14";
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -105,9 +105,9 @@ for (my $k=1;$k<=$j;$k++) {
 }
 
 # Remove DNs for unlisted users so they can't do GSI logins
-L:foreach my $existing (`iquest "%s" "SELECT USER_NAME where USER_DN <> ''"`) {
+L:foreach my $existing ( `iquest "%s" "SELECT USER_NAME where USER_DN <> ''
+          and USER_TYPE = 'rodsuser' and USER_GROUP_NAME <> 'NotPersons'"`) {
   chomp($existing);
-  if ( $existing !~ m/^[a-z]+\./ ) { next }
   for (my $k=1;$k<=$j;$k++) {
     next L if $username[$k] eq $existing;
   }
@@ -116,10 +116,9 @@ L:foreach my $existing (`iquest "%s" "SELECT USER_NAME where USER_DN <> ''"`) {
 }
 
 # Mangle ST records for unlisted users so they can't do Shibboleth logins
-M:foreach my $existing(
-              `iquest "%s" "SELECT USER_NAME where USER_INFO like '%<ST>%'"`) {
+M:foreach my $existing( `iquest "%s" "SELECT USER_NAME
+       where USER_INFO like '%<ST>%' and USER_GROUP_NAME <> 'NotPersons'"`) {
   chomp($existing);
-  if ( $existing !~ m/^[a-z]+\./ ) { next }
   for (my $k=1;$k<=$j;$k++) {
     next M if $username[$k] eq $existing;
   }
