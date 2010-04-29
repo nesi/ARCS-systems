@@ -42,7 +42,7 @@ public class STPSAction extends ActionSupport {
 
 	private static Log log = LogFactory.getLog(STPSAction.class);
 
-	private static String arcsLogoUrl = "http://static.arcs.org.au/arcs_media/img/arcs-logo.png";
+	private static String arcsLogoUrl = "https://static.arcs.org.au/arcs_media/img/arcs-logo.png";
 
 	private static String arcsLogoDefaultPath = "/images/arcs-logo.png";
 

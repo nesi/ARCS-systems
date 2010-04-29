@@ -121,7 +121,7 @@ public class CryptoUtils {
 		}
 
 		keyFile = new File(KEY_FILE);
-
+/*
 		if (!keyFile.exists()) {
 			System.out.println("Could find the key file: " + KEY_FILE
 					+ "Please input the key file path: ");
@@ -143,7 +143,7 @@ public class CryptoUtils {
 			}
 
 		}
-
+*/
 		String encryptedPwd = CryptoUtils.encrypt(clearPwd, keyFile);
 		if (encryptedPwd != null) {
 			System.out.println("Encrypted password:");
