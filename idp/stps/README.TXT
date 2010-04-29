@@ -37,13 +37,6 @@ $openssl pkcs12 -export -in cert.pem -inkey key.pem -out cert.p12
 5.2 Under /opt/stps/conf, edit the configuration files stps.properties, 
 context.xml and log4j.xml and make changes to suit your environment. 
 
-To generate a encrypted password for setting the PASSWORD in stps.properties, 
-run the command under bin directory, for example:
-
-/opt/stps/bin/java -jar stps-crypto.jar
-
-You will be prompted to input the password that is used to protect the pkcs12 certificate. 
-
 =============================
 6. Deploy
 
