@@ -25,7 +25,6 @@ public class STPSConfiguration {
 	 * Parameter name in the context or in the web.xml file
 	 */
 	static private String CONFIGURATION_FILE_KEY = "STPSConfigurationFile";
-	static private String SECRETKEY_FILE_KEY = "cryptoFile";
 
 	/**
 	 * Singelton pattern
@@ -49,14 +48,6 @@ public class STPSConfiguration {
 			throw new STPSException(msg);
 		}
 		
-		if (ctxt.getInitParameter(SECRETKEY_FILE_KEY) != null) {
-			keyFile = ctxt.getInitParameter(SECRETKEY_FILE_KEY);
-		} else {
-			String msg = "Couldn't get STPSConfigurationFile path from the servlet initial parameter";
-			log.error(msg);
-			throw new STPSException(msg);
-		}
-
 		initialize(filename);
 	}
 

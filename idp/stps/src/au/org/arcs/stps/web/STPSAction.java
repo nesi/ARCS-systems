@@ -66,11 +66,12 @@ public class STPSAction extends ActionSupport {
 			config.checkProperties();
 			props = config.getProperties();
 			
-			String keyFile = STPSConfiguration.getKeyFile();
+			//String keyFile = STPSConfiguration.getKeyFile();
 			
 
 			String cert = props.getProperty("CERTIFICATE");
-			String encrypedPass = props.getProperty("PASSWORD");
+			//String encrypedPass = props.getProperty("PASSWORD");
+			String password = props.getProperty("PASSWORD");
 			
 			
 			errorMessage = props.getProperty("ERROR_MESSAGE");
@@ -97,12 +98,12 @@ public class STPSAction extends ActionSupport {
 
 			PDFUtil pdfUtil = new PDFUtil();
 			
-			String decrypedPass = CryptoUtils.decrypt(encrypedPass, new File(keyFile));
+			//String decrypedPass = CryptoUtils.decrypt(encrypedPass, new File(keyFile));
 
 			unsignedOs = (ByteArrayOutputStream) pdfUtil.genPDF(sourceIdP,
-					sharedToken, cn, mail, imageByteArray, cert, decrypedPass);
+					sharedToken, cn, mail, imageByteArray, cert, password);
 
-			signedOs = pdfUtil.signPDF(cert, decrypedPass,
+			signedOs = pdfUtil.signPDF(cert, password,
 					new ByteArrayInputStream(unsignedOs.toByteArray()));
 
 			signedOs.writeTo(response.getOutputStream());

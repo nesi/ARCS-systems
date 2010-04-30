@@ -28,10 +28,4 @@ WEB-INF/web.xml file.
         override="false"
         type="java.lang.String"/>
 
-    
-    <Parameter
-        name="cryptoFile"
-        value="/opt/stps/etc/crypto"
-        override="false"
-        type="java.lang.String"/>      
 </Context>

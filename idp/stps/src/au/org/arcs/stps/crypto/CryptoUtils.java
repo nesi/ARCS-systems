@@ -103,16 +103,27 @@ public class CryptoUtils {
 
 	public static void main(String[] args) throws Exception {
 
-		String KEY_FILE = "../conf/crypto";
-
+		String keyPath = null;
 		String clearPwd = null;
 		File keyFile = null;
+		
+		
+		System.out.println("Please input the key file location: ");
+		// open up standard input
+		BufferedReader brKey = new BufferedReader(new InputStreamReader(System.in));
+		try{
+		keyPath = brKey.readLine();
+		}catch(IOException ioe){
+			System.out.println("IO error trying to read the key file path!");
+			System.exit(1);
+		}
 
+		keyFile = new File(keyPath);
+		
+	
 		System.out.println("Please input a clear password:");
 
-		// open up standard input
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
 		try {
 			clearPwd = br.readLine();
 		} catch (IOException ioe) {
@@ -120,30 +131,6 @@ public class CryptoUtils {
 			System.exit(1);
 		}
 
-		keyFile = new File(KEY_FILE);
-/*
-		if (!keyFile.exists()) {
-			System.out.println("Could find the key file: " + KEY_FILE
-					+ "Please input the key file path: ");
-			BufferedReader brKey = new BufferedReader(new InputStreamReader(
-					System.in));
-			try {
-				KEY_FILE = br.readLine();
-
-			} catch (IOException ioe) {
-				System.out
-						.println("IO error trying to read the key file path!");
-				System.exit(1);
-			}
-			try {
-				keyFile = new File(KEY_FILE);
-			} catch (Exception ex) {
-				System.out.println("Couldn't find the key file");
-				System.exit(1);
-			}
-
-		}
-*/
 		String encryptedPwd = CryptoUtils.encrypt(clearPwd, keyFile);
 		if (encryptedPwd != null) {
 			System.out.println("Encrypted password:");
