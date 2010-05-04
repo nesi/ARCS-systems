@@ -12,6 +12,25 @@ def minutes(pbs_time):
 	(hours, minutes, seconds) = map(int, pbs_time.split(":"))
 	return hours * 60 + minutes
 
+def parseLLTime(lltimeStr): # return type: seconds
+  # parsing "[days+]hours:mins:secs.fractsect
+  # 5+08:11:40.966084
+  # 02:00:00 (7200 seconds)
+    #sys.stderr.write("parsing LL time : %s\n" % lltimeStr)
+    if lltimeStr.find('+')>0:
+        (days,lltimeStr) = lltimeStr.split('+')
+	days = int(days)
+    else:
+        days = 0
+
+    (hours, minutes, seconds) = map(int, lltimeStr.split(":"))
+
+    totalseconds = seconds+60*(minutes+60*(hours+24*days))
+    #sys.stderr.write("totalseconds : %d\n" % totalseconds)
+    
+    return totalseconds
+
+
 def processNodeInfo(node_info, ce, filterArg):
 	try:
 		from nodeFilter import filter
@@ -37,6 +56,48 @@ def processNodeInfo(node_info, ce, filterArg):
 	if node_info.has_key('jobs'):
 		ce.FreeCPUs -= len(node_info['jobs'])
 
+def processLLNodeInfo(llnode_info, ce):
+
+	#print llnode_info.items();
+	if not 'Name' in llnode_info:
+		return
+        if (llnode_info['StartdAvail'] == 0):
+                return
+        if (not llnode_info['Machine Mode'].startswith( 'batch' )):
+                return
+
+	import re
+	class_expr = re.compile(r"^(\S+)\((\d+)\)")
+
+	nodeClsAvailCPUs = None;
+
+	# AvailableClasses is empty when node is full, use ConfiguredClasses
+	# instead
+	for clsStr in llnode_info['ConfiguredClasses'].split(' '):
+		matchO = class_expr.match(clsStr);
+		if matchO is None:
+		   return
+		results = matchO.groups();
+		if len(results) == 2 : 
+		  clsName,nrFree = results[0], results[1]
+		  if clsName.startswith(config.Name) and config.Name.startswith(clsName):
+		     nodeClsAvailCPUs=nrFree
+	#print "Node %s nodeClsAvailCPUs=%s" % ( llnode_info['Name'], nodeClsAvailCPUs)
+	if (nodeClsAvailCPUs is None):
+	   return
+
+	#np = int(llnode_info['Cpus'])
+        # for SMP nodes, Max_Starters matches what LoadLeveler will allow
+	np = int(llnode_info['Max_Starters'])
+	ce.TotalCPUs += np
+	ce.FreeCPUs += np
+
+        #sys.stderr.write("found %d cpus\n" % np)
+
+	if llnode_info.has_key('Running Tasks'):
+		ce.FreeCPUs -= int(llnode_info['Running Tasks'])
+        #sys.stderr.write("%d cpus are busy\n" % int(llnode_info['Running Tasks']))
+
 #	for key, value in node_info.items():
 #		print "%s: %s" % (key, value)
 
@@ -56,6 +117,7 @@ if __name__ == '__main__':
 	ce = lib.ComputingElement()
 	ce.users = []
 
+	ce.isBlueGene = "isBlueGene" in config.__dict__ and config.isBlueGene == True
 
 	# caclculate the number of cpus and free cpus, ie ce.TotalCPUs and ce.FreeCPUs
 	if config.LRMSType == "Torque" or config.LRMSType == "PBSPro":
@@ -100,6 +162,43 @@ if __name__ == '__main__':
 					#sys.stderr.write('matched line to resources_assigned' + '\n')
 					ce.FreeCPUs = ce.TotalCPUs - int(line.split()[-1])
 
+	elif config.LRMSType == "LoadLeveler":
+	# caclculate the number of cpus and free cpus, ie ce.TotalCPUs and ce.FreeCPUs
+		#sys.stderr.write('in the LoadLeveler number of cpus section\n')
+		if config.llstatus is not None and os.path.isfile(config.llstatus):
+                    if ce.isBlueGene:
+			lines = lib.run_command([config.llstatus, '-b', '-l'])
+                        import re
+			ce.TotalCPUs = 0
+			ce.FreeCPUs = 0
+			bgRE = re.compile(r"^\s*Total\s+Blue\s+Gene\s+Compute\s+Nodes\s+(\d+)\s*$")
+			for line in lines:
+			  bgMatch = bgRE.match(line)
+			  if (bgMatch is not None and len(bgMatch.groups())==1):
+			     ce.TotalCPUs = ce.FreeCPUs = bgMatch.groups()[0];
+			ce.AssignedJobSlots = ce.TotalCPUs # may be overriden by Maximum_slots:
+                        if "MaxCPUsVisible" in config.__dict__ and ce.TotalCPUs > config.MaxCPUsVisible:
+                            ce.TotalCPUs = ce.FreeCPUs = config.MaxCPUsVisible
+                        # TODO: get number of used CPUs on BlueGene - either parse "llstatus -b -l" or sum up nodes in "llq -b"
+                    else:
+			ce.TotalCPUs = 0
+			ce.FreeCPUs = 0
+
+			lines = lib.run_command([config.llstatus, '-l'])
+
+			llnode_info = {}
+			for line in lines:
+				if line.startswith('====') :
+					processLLNodeInfo(llnode_info, ce)
+					llnode_info = {}
+					continue
+
+				values = line.split('=')
+				if (len(values)>1):
+				    llnode_info[values[0].strip()] = values[1].strip();
+			processLLNodeInfo(llnode_info, ce);
+			ce.AssignedJobSlots = ce.TotalCPUs # may be overriden by Maximum_slots:
+                
 	else:
 		# do nothing, the LRMS type is not understood
 		pass
@@ -236,6 +335,144 @@ if __name__ == '__main__':
 					if ce.MaxTotalJobsPerUser and ce.FreeCPUs > ce.MaxTotalJobsPerUser - view.RunningJobs:
 						view.FreeJobSlots = ce.MaxTotalJobsPerUser - view.RunningJobs
 
+	# LoadLeveler: get information about the queues and the running jobs
+
+	# simplifying assumptions:
+	#  - no host/user ACLs
+	#  - queues are always started/enabled
+
+	# extracting: 
+	#   current job status from llq -c class
+	#   max walltime, priority, free slots, total slots from llclass -l 
+	if config.LRMSType == "LoadLeveler":
+		if config.llq is not None and os.path.isfile(config.llq):
+
+			# get version information
+			lines = lib.run_command([config.llq, '-version'])
+			for line in lines:
+				if line.startswith('llq'):
+					ce.LRMSVersion = " ".join(line.split()[1:])
+
+			import re
+			jobsRE = re.compile("^(\d+) job step\D+(\d+) waiting, (\d+) pending, (\d+) running, (\d+) held, (\d+) preempted")
+                        # note: this RE is also used later to get per VO information
+			
+			#lines = lib.run_command([config.llq, '-c',config.Name])
+                        # we want overall job stats, not just one class
+                        # Nope, it's really better to check only within the class
+                        # Better then getting the same results for all classes
+
+			# Initialize everything with zero - if we don't get a
+			# match, it means there's no job in this class and all
+			# these should be zero.
+                        ce.TotalJobs = ce.WaitingJobs = ce.RunningJobs = 0
+			lines = lib.run_command([config.llq, '-c', config.Name])
+			for line in lines:
+			  jobsMatch = jobsRE.match(line)
+			  if jobsMatch is not None:
+			    jobsResults=jobsMatch.groups()
+			    if len(jobsResults) == 6:
+			      #sys.stderr.write("parsed line %s\n" % line)
+			      ce.TotalJobs    = int(jobsResults[0]); # total
+			      ce.WaitingJobs  = int(jobsResults[1]); # waiting
+			      ce.RunningJobs  = int(jobsResults[3]); # running
+			      ce.RunningJobs += int(jobsResults[2]); # pending
+			      ce.WaitingJobs += int(jobsResults[4]); # held
+			      ce.WaitingJobs += int(jobsResults[5]); # preempted
+			    
+
+		if config.llclass is not None and os.path.isfile(config.llclass):
+
+			lines = lib.run_command([config.llclass, '-l', '-c', config.Name])
+
+			enabled = started = False
+
+			for line in lines:
+			    line=line.strip()
+			    line_value = line[line.find(':')+1:].strip()
+			    # Maxjobs has the meaning of "max running jobs",
+			    # but it's not clear for what.  In the output of
+			    # llclass -l, it would be meaning of Max Running
+			    # Jobs in this class - which OK, matches Max
+			    # Running Jobs for this CE.  
+			    #
+			    # We have to look at it differently in VOView,
+			    # where MaxRunning for this user would match
+			    # Maxjobs.
+			    # I still don't know how to get user's Maxjobs...
+			    #
+			    # For the CE, let MaxRunning be MaxJobs (-1 on HPC)
+			    # and let's leave PerUser undefined
+			    if line.startswith("Maxjobs:") and int(line_value) is not -1:
+			        ce.MaxRunningJobs = int(line_value)
+				# there's likely no value for MaxTotalJobs
+			    elif line.startswith("Maximum_slots:") and int(line_value) is not -1 and not ce.isBlueGene:
+			        ce.AssignedJobSlots = int(line_value)
+			    elif line.startswith("Free_slots:") and int(line_value) is not -1 and not ce.isBlueGene:
+			        ce.FreeJobSlots = int(line_value)
+			    elif line.startswith("Priority:") and int(line_value) is not -1:
+			        ce.Priority = int(line_value)
+			    elif line.startswith("Wall_clock_limit:") and not line_value.startswith("undefined"):
+				ce.MaxWallClockTime = parseLLTime(line_value.split(",")[0])/60
+				# Beware: PBS code says "MaxWallClockTime"
+                                # ... correctly. XSD says as well, and so does all other code.
+			    elif line.startswith("Job_cpu_limit:") and not line_value.startswith("undefined"):
+				ce.MaxCPUTime = parseLLTime(line_value.split(",")[0])/60
+
+
+			    # TODO: hmmm, this work is questionable
+			    # it just copies from the config to an emtpy VOView!
+			    ce.ACL = config.ACL
+			    if len(config.views) > 0:
+
+				for viewkey in config.views.keys():
+				    view = lib.VOView()
+				    
+				    for key in ('DefaultSE', 'DataDir', 'RealUser'):
+					if config.views[viewkey].__dict__[key] is not None:
+					    view.__dict__[key] = config.views[viewkey].__dict__[key]
+
+				    if len(config.views[viewkey].ACL) > 0:
+					    view.ACL = config.views[viewkey].ACL
+					    ce.ACL += view.ACL
+
+				    ce.views[viewkey] = view
+
+			    for viewkey in ce.views.keys():
+				    view = ce.views[viewkey]
+				    view.ApplicationDir = ce.ApplicationDir
+				    view.TotalJobs = 0
+				    view.RunningJobs = 0
+				    view.WaitingJobs = 0
+
+				    if view.RealUser is not None and config.llq is not None and os.path.isfile(config.llq):
+
+					    view.TotalJobs = view.WaitingJobs = view.RunningJobs = 0
+
+					    lines = lib.run_command([config.llq, '-u', view.RealUser, '-c', config.Name])
+					    # jobsRE already defined earlier
+					    for line in lines:
+					      jobsMatch = jobsRE.match(line)
+					      if jobsMatch is not None:
+						jobsResults=jobsMatch.groups()
+						if len(jobsResults) == 6:
+						  view.TotalJobs    = int(jobsResults[0]); # total
+						  view.WaitingJobs  = int(jobsResults[1]); # waiting
+						  view.RunningJobs  = int(jobsResults[3]); # running
+						  view.RunningJobs += int(jobsResults[2]); # pending
+						  view.WaitingJobs += int(jobsResults[4]); # held
+						  view.WaitingJobs += int(jobsResults[5]); # preempted
+						
+				    view.FreeJobSlots = ce.FreeCPUs
+				    # There is no way we can tell how many CPUs
+				    # (JobSlots) the user is allowed to use.
+				    # In LoadLEveler, this would be capped by
+				    # max_total_tasks, but this is not used in
+				    # our setting.  Hence, just pass
+				    # ce.FreeCPUs as view.FreeJobSlots
+				    ###if config.MaxTotalRunningJobsPerUser and ce.FreeCPUs > config.MaxTotalRunningJobsPerUser - view.RunningJobs:
+				    ###     view.FreeJobSlots = config.MaxTotalRunningJobsPerUser - view.RunningJobs
+
 # TODO: in pbs.pl $jobs{MaxTotalJobsPerUser} is always undefined!
 #					$jobs{FreeJobSlots}=$queues{$myqueue}{MaxTotalJobsPerUser}-$jobs{TotalJobs} if defined $jobs{MaxTotalJobsPerUser} and defined $jobs{TotalJobs};
 #					conf.user_info.__dict__[user].FreeJobSlots = cp.MaxTotalJobsPerUser - conf.user_info.__dict__[user].TotalJobs
@@ -252,10 +489,12 @@ if __name__ == '__main__':
 			ce.__dict__[key] = config.__dict__[key]
 
 
-	if ce.MaxTotalJobs is not None and ce.TotalJobs is not None:
+        # VM: minor change: do not recalculate FreeJobSlots if it is already set (leave it as # of CPUs available)
+	if ce.MaxTotalJobs is not None and ce.TotalJobs is not None and ce.FreeJobSlots is None:
 		ce.FreeJobSlots = int(ce.MaxTotalJobs) - int(ce.TotalJobs)
 
-	if ce.FreeCPUs < ce.FreeJobSlots:
+        # reduce FreeJobSlots if FreeCPUs (From a different calculation) is less
+	if ce.FreeCPUs < ce.FreeJobSlots or ce.FreeJobSlots is None:
 		ce.FreeJobSlots = ce.FreeCPUs
 
 	# print
@@ -273,7 +512,7 @@ if __name__ == '__main__':
 			if view.__dict__[key] is not None:
 				print "\t<%s>%s</%s>" % (key, view.__dict__[key], key)
 
-		print "<FreeJobSlots>%s</FreeJobSlots>" % view.FreeJobSlots
+		print "\t<FreeJobSlots>%s</FreeJobSlots>" % view.FreeJobSlots
 		print "\t<ACL>"
 		for rule in view.ACL:
 			print "\t\t<Rule>%s</Rule>" % rule

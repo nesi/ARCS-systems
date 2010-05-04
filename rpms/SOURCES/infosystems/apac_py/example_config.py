@@ -109,6 +109,14 @@ computeElement.GRAMVersion = '4.0.5'
 computeElement.qstat = '/usr/bin/qstat'
 computeElement.pbsnodes = '/usr/bin/pbsnodes'
 
+### For LoadLeveler, set:
+# computeElement.llstatus = '/opt/ibmll/LoadL/full/bin/llstatus'
+# computeElement.llq = '/opt/ibmll/LoadL/full/bin/llq'
+# computeElement.llclass = '/opt/ibmll/LoadL/full/bin/llclass'
+### and optionally (for BlueGene job queues)
+# computeElement.isBlueGene = True
+# computeElement.MaxCPUsVisible = 512 # same as in cluster
+
 # this information can be retrieved from your LRMS (if defined)
 #computeElement.MaxTotalJobs = 9999999
 #computeElement.MaxRunningJobs = 9999999
