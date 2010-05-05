@@ -103,19 +103,26 @@ computeElement.ContactString = 'ng2.hostname/jobmanager-pbs' # or if WSGRAM, htt
 computeElement.DefaultSE = 'ngdata.example.apac.site'
 computeElement.ApplicationDir = 'UNAVAILABLE'
 computeElement.DataDir = cluster.TmpDir
-computeElement.LRMSType = 'Torque' # Torque|PBSPro|OpenPBS
+computeElement.LRMSType = 'Torque' # Torque|PBSPro|OpenPBS|LoadLeveler|SGE
 computeElement.GRAMVersion = '4.0.5'
 
 computeElement.qstat = '/usr/bin/qstat'
 computeElement.pbsnodes = '/usr/bin/pbsnodes'
 
 ### For LoadLeveler, set:
+# computeElement.LRMSType = 'LoadLeveler'
 # computeElement.llstatus = '/opt/ibmll/LoadL/full/bin/llstatus'
 # computeElement.llq = '/opt/ibmll/LoadL/full/bin/llq'
 # computeElement.llclass = '/opt/ibmll/LoadL/full/bin/llclass'
 ### and optionally (for BlueGene job queues)
 # computeElement.isBlueGene = True
 # computeElement.MaxCPUsVisible = 512 # same as in cluster
+
+### For Sun Grid Engine, set:
+# computeElement.LRMSType = 'SGE'
+# computeElement.qstat = os.environ['SGE_ROOT'] + "/bin/" + os.environ['SGE_ARCH'] + "/qstat"
+# computeElement.qconf = os.environ['SGE_ROOT'] + "/bin/" + os.environ['SGE_ARCH'] + "/qconf"
+
 
 # this information can be retrieved from your LRMS (if defined)
 #computeElement.MaxTotalJobs = 9999999

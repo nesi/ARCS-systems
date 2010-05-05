@@ -199,6 +199,26 @@ if __name__ == '__main__':
 			processLLNodeInfo(llnode_info, ce);
 			ce.AssignedJobSlots = ce.TotalCPUs # may be overriden by Maximum_slots:
                 
+	# caclculate the number of cpus and free cpus, ie ce.TotalCPUs and ce.FreeCPUs
+	elif config.LRMSType == "SGE":
+		#sys.stderr.write('in the SGE number of cpus section\n')
+		if config.qstat is not None and os.path.isfile(config.qstat):
+			ce.TotalCPUs = 0
+			ce.FreeCPUs = 0
+
+                        # invoke: qstat -g c -q medium64
+			# expect:
+			# CLUSTER QUEUE                   CQLOAD   USED    RES  AVAIL  TOTAL aoACDS  cdsuE  
+			# --------------------------------------------------------------------------------
+			# medium64                          0.37     29      0     48     88      0     12 
+
+			lines = lib.run_command([config.qstat, '-g', 'c', '-q', config.Name])
+			if (len(lines) == 3):
+			        values = lines[2].split();
+				# indexes: 2:usedCPUs, 3:reserved, 4:avail, 5:total, 6:down1, 7:down2
+				ce.TotalCPUs = int(values[5]) - (int(values[6])+int(values[7]))
+				ce.FreeCPUs = int(values[4]);
+		                #sys.stderr.write("SGE qstat -g c -q done: TotalCPUs=%d, FreeCPUs=%d\n" % (ce.TotalCPUs, ce.FreeCPUs))
 	else:
 		# do nothing, the LRMS type is not understood
 		pass
@@ -293,7 +313,9 @@ if __name__ == '__main__':
 					for viewkey in config.views.keys():
 						view = lib.VOView()
 						
-						for key in ('DefaultSE', 'DataDir', 'RealUser'):
+						# note: now copying also ApplicationDir, but it
+						# will get overwritten by ce.ApplicationDir
+						for key in ('DefaultSE', 'DataDir', 'RealUser', 'ApplicationDir'):
 							if config.views[viewkey].__dict__[key] is not None:
 								view.__dict__[key] = config.views[viewkey].__dict__[key]
 
@@ -428,7 +450,9 @@ if __name__ == '__main__':
 				for viewkey in config.views.keys():
 				    view = lib.VOView()
 				    
-				    for key in ('DefaultSE', 'DataDir', 'RealUser'):
+				    # note: now copying also ApplicationDir, but it
+				    # will get overwritten by ce.ApplicationDir
+				    for key in ('DefaultSE', 'DataDir', 'RealUser', 'ApplicationDir'):
 					if config.views[viewkey].__dict__[key] is not None:
 					    view.__dict__[key] = config.views[viewkey].__dict__[key]
 
@@ -473,6 +497,99 @@ if __name__ == '__main__':
 				    ###if config.MaxTotalRunningJobsPerUser and ce.FreeCPUs > config.MaxTotalRunningJobsPerUser - view.RunningJobs:
 				    ###     view.FreeJobSlots = config.MaxTotalRunningJobsPerUser - view.RunningJobs
 
+	if config.LRMSType == "SGE":
+		if config.qstat is not None and os.path.isfile(config.qstat):
+			# Get LRMS version: get the first line of "qstat -help"
+			lines = lib.run_command([config.qstat, '-help'])
+			if ((len(lines)>=1) and lines[0]):
+			        ce.LRMSVersion = lines[0];
+
+			# Get various limits associated with a queue
+			# qconf -sq medium64
+			#
+			# Interesting bits:
+			# s_rt                  INFINITY
+			# h_rt                  240:00:00
+			# s_cpu                 INFINITY
+			# h_cpu                 228:00:00
+			# Is it soft/hard runtime(walltime)/cput limits? In HH:MM:SS ?
+			lines = lib.run_command([config.qconf, '-sq', config.Name])
+
+			for line in lines:
+				values = line.split(None, 1)
+				if (values[0] == "s_rt" or values[0] == "h_rt") and (values[1] != "INFINITY"): 
+					rt_limit = minutes(values[1])
+					if (ce.MaxWallClockTime is None) or (rt_limit < ce.MaxWallClockTime):
+					        ce.MaxWallClockTime = rt_limit
+				if (values[0] == "s_cpu" or values[0] == "h_cpu") and (values[1] != "INFINITY"): 
+					cpu_limit = minutes(values[1])
+					if (ce.MaxCPUTime is None) or (cpu_limit < ce.MaxCPUTime):
+					        ce.MaxCPUTime = cpu_limit
+				if (values[0] == "priority") and (values[1] != "NONE"): 
+					ce.Priority = int(values[1])
+				# not populating: ce.MaxTotalJobsPerUser, ce.MaxRunningJobs
+
+			# Get the queue utilization now
+			# Pending(Running+Held)+Suspended jobs with: qstat -s ps -q <qname> -u "*"
+			# Running jobs with: qstat -s r -q <qname> -u "*"
+			# If the output has >=2 lines, the number of jobs is len(lines)-2
+			# For empty output, the number of jobs is 0.
+			ce.WaitingJobs = 0
+			ce.RunningJobs = 0
+
+			lines = lib.run_command([config.qstat, '-s', 'ps', '-q', config.Name, '-u', '*'])
+			if len(lines) >=2:
+			        ce.WaitingJobs = len(lines)-2
+
+			lines = lib.run_command([config.qstat, '-s', 'r', '-q', config.Name, '-u', '*'])
+			if len(lines) >=2:
+			        ce.RunningJobs = len(lines)-2
+
+			ce.TotalJobs = ce.WaitingJobs + ce.RunningJobs
+
+			# grab the list of users from the vo map
+			# TODO: hmmm, this work is questionable
+			# it just copies from the config to an emtpy VOView!
+
+			for viewkey in config.views.keys():
+				view = lib.VOView()
+				
+				# note: now copying also ApplicationDir, but it
+				# will get overwritten by ce.ApplicationDir
+				for key in ('DefaultSE', 'DataDir', 'RealUser', 'ApplicationDir'):
+					if config.views[viewkey].__dict__[key] is not None:
+						view.__dict__[key] = config.views[viewkey].__dict__[key]
+
+				if len(config.views[viewkey].ACL) > 0:
+					view.ACL = config.views[viewkey].ACL
+					ce.ACL += view.ACL
+
+				ce.views[viewkey] = view
+
+			for viewkey in ce.views.keys():
+				view = ce.views[viewkey]
+				view.ApplicationDir = ce.ApplicationDir
+				view.TotalJobs = 0
+				view.RunningJobs = 0
+				view.WaitingJobs = 0
+
+				if view.RealUser is not None:
+
+					lines = lib.run_command([config.qstat, '-s', 'ps', '-q', config.Name, '-u', view.RealUser])
+					if len(lines) >=2:
+						view.WaitingJobs = len(lines)-2
+					lines = lib.run_command([config.qstat, '-s', 'r', '-q', config.Name, '-u', view.RealUser])
+					if len(lines) >=2:
+						view.RunningJobs = len(lines)-2
+					view.TotalJobs = view.WaitingJobs + view.RunningJobs
+
+				view.FreeJobSlots = ce.FreeCPUs
+				# voview's freejob slots should be maxtotaljobsperuser - running jobs (not totaljobs)
+				#if ce.MaxTotalJobsPerUser and ce.FreeCPUs > ce.MaxTotalJobsPerUser - view.TotalJobs:
+				#	view.FreeJobSlots = ce.MaxTotalJobsPerUser - view.TotalJobs
+				if ce.MaxTotalJobsPerUser and ce.FreeCPUs > ce.MaxTotalJobsPerUser - view.RunningJobs:
+					view.FreeJobSlots = ce.MaxTotalJobsPerUser - view.RunningJobs
+
 # TODO: in pbs.pl $jobs{MaxTotalJobsPerUser} is always undefined!
 #					$jobs{FreeJobSlots}=$queues{$myqueue}{MaxTotalJobsPerUser}-$jobs{TotalJobs} if defined $jobs{MaxTotalJobsPerUser} and defined $jobs{TotalJobs};
 #					conf.user_info.__dict__[user].FreeJobSlots = cp.MaxTotalJobsPerUser - conf.user_info.__dict__[user].TotalJobs
@@ -512,7 +629,6 @@ if __name__ == '__main__':
 			if view.__dict__[key] is not None:
 				print "\t<%s>%s</%s>" % (key, view.__dict__[key], key)
 
-		print "\t<FreeJobSlots>%s</FreeJobSlots>" % view.FreeJobSlots
 		print "\t<ACL>"
 		for rule in view.ACL:
 			print "\t\t<Rule>%s</Rule>" % rule
