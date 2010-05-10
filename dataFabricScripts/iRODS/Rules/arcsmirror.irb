@@ -1,0 +1,9 @@
+# iRODS local rules for ARCSMIRROR sites, Created 20100510.
+# Default-resource must be set appropriately for your site (e.g. arcs-df-test.ivec.org)
+#
+acAclPolicy||msiAclPolicy(STRICT)|nop
+acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
+acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
+acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
+acTrashPolicy||nop|nop
+
