@@ -1,7 +1,7 @@
 #!/bin/sh
 # updateRules.sh	Downloads ARCS-specific rules files for iRODS; should
 #			be invoked periodically via 'cron'.
-#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20100510
+#			Graham Jenkins <graham@vpac.org> Mar 2009; Rev 20100511
 
 
 # Usage, destination directory
@@ -39,12 +39,13 @@ fi
 # Determine Zone, select rules filename extension accordingly
 Zone="`cat ~/.irods/.irodsEnv 2>/dev/null | awk '/^irodsZone/ {print \$2;exit}' | tr -d /\\'/`" 
 case "$Zone" in
-  ARCS       ) Extn=".irb"                          ;;
-  ARCSDEV    ) Extn="dev.irb"                       ;;
-  ARCSTEST   ) Extn="test.irb"                      ;;
-  ARCSMIRROR ) Extn="mirror.irb"                    ;;
-  ARCSEXTRA  ) Extn="extra.irb"                     ;;
-  *          ) fail "Unknown or indeterminate zone!";;
+  ARCS           ) Extn=".irb"                          ;;
+  ARCSDEV        ) Extn="dev.irb"                       ;;
+  ARCSTEST       ) Extn="test.irb"                      ;;
+  ARCSMIRROR     ) Extn="mirror.irb"                    ;;
+  ARCSDEVBACKEND ) Extn="devbackend.irb"                ;;
+  ARCSEXTRA      ) Extn="extra.irb"                     ;;
+  *              ) fail "Unknown or indeterminate zone!";;
 esac
 
 # Get files and edit as appropriate, then exit
