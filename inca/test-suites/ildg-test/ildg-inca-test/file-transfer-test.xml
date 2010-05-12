@@ -131,13 +131,13 @@ USQCD_SE: usqcd_fnal.gov_srm
     <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
   </file>
 
-
-  <!--  file>
+  <!--  36M  -->
+  <file>
     <grid>ukqcd</grid>
     <se>epcc.ed.ac.uk</se>
-    <url>gsiftp://qcdgrid2.epcc.ed.ac.uk/home/qcdgrid/qcdgrid1.5/STORAGE/qcdgrid/private.txt</url>
-    <accessDeny/>
-  </file -->
+    <url>gsiftp://edqcdgrid.epcc.ed.ac.uk/Home/qcdgrid/qcdgrid/data1/lfn:/ukqcd/qcdgrid_project/videos/digs_gui_tech_preview.avi</url>
+    <md5>B9C54522599DBFC5F92CC7340F6FD141</md5>
+  </file>
 
   <!-- USQCD/FNAL (US) -->
   <!-- 56M -->
