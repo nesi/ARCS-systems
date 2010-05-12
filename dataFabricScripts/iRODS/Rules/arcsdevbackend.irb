@@ -1,0 +1,9 @@
+# iRODS local rules for ARCSDEVBACKEND sites, Created 20100512.
+# Default-resource must be set appropriately for your site (e.g. srb.ac3.edu.au)
+#
+acAclPolicy||msiAclPolicy(STRICT)|nop
+acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
+acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
+acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
+acTrashPolicy||nop|nop
+
