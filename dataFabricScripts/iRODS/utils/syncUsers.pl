@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100429
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100512
 use strict;
 use warnings;
 use File::Basename;
@@ -11,8 +11,10 @@ use Sys::Syslog;
 use LWP::UserAgent;       # You may need to do:
 use XML::XPath;           # yum install perl-Crypt-SSLeay perl-XML-XPath
 use Net::SMTP;
+use Sys::Hostname;
+use Socket;
 use vars qw($VERSION);
-$VERSION="2.14";
+$VERSION="2.15";
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -20,6 +22,7 @@ $ENV{HTTPS_CERT_FILE} = "/etc/grid-security/irodscert.pem";
 $ENV{HTTPS_KEY_FILE}  = "/etc/grid-security/irodskey.pem";
 $ENV{HTTPS_DEBUG} = 0;    # Set to "1" to enable debug
 my $URL="https://access.arcs.org.au/service/list.html?serviceId=3";
+my $notify="N";           # Set to "Y" to notify users when added
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
@@ -31,7 +34,8 @@ sub log_and_die { # Usage: log_and_die(message)
 sub mail_mess {  # Usage: mail_mess(address, message)
   if ( defined($_[0]) ) {
     if (my $smtp=Net::SMTP->new("localhost") ) {
-      $smtp->mail($ENV{USER}); $smtp->to($_[0]);
+      my @host=gethostbyaddr(inet_aton(hostname),AF_INET);
+      $smtp->mail($ENV{LOGNAME}."\@".$host[0]); $smtp->to($_[0]);
       $smtp->data("To: ",$_[0],"\nSubject: iRODS User Management",
                                " [mesg-id=".$$."]\n\n".$_[1]);
       $smtp->quit();
@@ -39,6 +43,16 @@ sub mail_mess {  # Usage: mail_mess(address, message)
     }
   }              # Note: Pid is appended to subject to foil
 }                # over-enthusiastic spam filters
+
+# Remove-DNs subroutine
+sub remove_dn_s { # Usage: remove_dn_s(username)
+  foreach my $dnvalue (`iquest "%s" "SELECT USER_DN 
+                                     where USER_NAME = '$_[0]'" 2>/dev/null`) {
+    chomp($dnvalue);
+    my $dnvalueplus="'".$dnvalue."'";
+    `iadmin rua $_[0] $dnvalueplus >/dev/null 2>&1`
+  }
+}
 
 # Check usage, check that we can execute 'iadmin', get the current user-list
 die "Usage: ".basename($0)." email-addrs\n".
@@ -64,6 +78,10 @@ foreach my $user ($xp->find('//User')->get_nodelist) {
 }                # Note: Stored list elements must be strings for later use
 log_and_die("Username list is suspect") if $j < 1;
 
+# Ascertain which version of IRODS we are using, adjust 'moduser' parameters
+my ($param1,$param2)=("moduser","DN");
+if ( `ienv 2>/dev/null`!~m/rods2.1/ ) { ($param1,$param2)=("aua"    ,""  ) }
+
 # Get the current users and their attributes
 my (%user_dn,%user_info,@field,$u);
 foreach my $line
@@ -87,14 +105,17 @@ for (my $k=1;$k<=$j;$k++) {
     if ( ! $? ) {
       $user_info{$u}=$user_dn{$u}="";
       $message.="Added user: ".$u."\n";
-      mail_mess($email[$k],
+      if ( ( length($email[$k]) > 0 ) && ( $notify eq "Y" ) ) {
+        mail_mess($email[$k],
         "An ARCS-DF user-environment has been created for: ".$u."\n".
-        "You can now use the ARCS Data Fabric!\n" ) if length($email[$k]) > 0
+        "You can now use the ARCS Data Fabric!\n" )
+      }
     }
   } 
   if ( $distiname[$k] ne $user_dn{$u} ) {
     $dnplus="\"".$distiname[$k]."\"";
-    `iadmin moduser $username[$k] DN $dnplus`;
+    if ( $param1 ne "moduser" ) { remove_dn_s($username[$k]) }
+    `iadmin $param1 $username[$k] $param2 $dnplus`;
     if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$u."\n"}
   }
   $stplus="\"<ST>".$sharedtoken[$k]."</ST>\"";
@@ -111,8 +132,9 @@ L:foreach my $existing ( `iquest "%s" "SELECT USER_NAME where USER_DN <> ''
   for (my $k=1;$k<=$j;$k++) {
     next L if $username[$k] eq $existing;
   }
-  `iadmin moduser $existing DN ""`;
-  if(! $?){$message.="Removed DN for user: ".$existing."\n"}
+  $message.="Removing DN(s) for user: ".$existing."\n";
+  if ( $param1 eq "moduser" ) { `iadmin moduser $existing DN ""` }
+  else                        { remove_dn_s ($existing)          }
 }
 
 # Mangle ST records for unlisted users so they can't do Shibboleth logins
