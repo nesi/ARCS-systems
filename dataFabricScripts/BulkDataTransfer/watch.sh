@@ -1,6 +1,6 @@
 #!/bin/ksh
 # watch.sh   Basic watch program for Solaris  
-#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20100517
+#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20100518
 
 # 'count' subroutine
 count() {
@@ -37,16 +37,16 @@ trap "clear; exit 0" 0 1 2 3 4 14 15
 
 # Loop forever, re-drawing the lines that changed during each pass 
 while : ; do
-  tput cup 0 0; tput el; echo "Every ${secs}s: ""$@""\c"
+  tput cup 0 0; tput el; print -nR "Every ${secs}s: ""$@"
   cols=`tput cols`
-  tput cup 0 `expr $cols - 29`; echo " \c"; date
+  tput cup 0 `expr $cols - 29`; print -nR " "; date
   eval "$@" | 
   for k in `count $rows`; do
     read newline[$k]
   done
   for k in `count $rows`; do
     if [ "${newline[k]}" != "${oldline[k]}" ] ; then
-      tput cup $k 0; tput el; echo "${newline[k]}""\c"
+      tput cup $k 0; tput el; print -nR "${newline[k]}"
       oldline[k]="${newline[k]}"
     fi
   done
