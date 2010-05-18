@@ -1,6 +1,6 @@
 #!/bin/ksh
 # watch.sh   Basic watch program for Solaris  
-#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20100514
+#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20100517
 
 # 'count' subroutine
 count() {
@@ -11,10 +11,18 @@ count() {
   done
 }
 
-# Usage
-if [ -z "$@" ] ; then
-  ( echo "Usage: `basename $0` Command"
-    echo " e.g.: `basename $0` \"ls -lt | head -19\"" ) >&2
+# Options, Usage
+secs=2
+while getopts n: Option; do
+  case $Option in
+    n) secs=$OPTARG;;
+   \?) Bad="Y"     ;;
+  esac
+done
+shift `expr $OPTIND - 1`
+if [ \(  -n "$Bad" \) -o \( -z "$@" \) ] ; then
+  ( echo "Usage: `basename $0` [ -n secs] Command"
+    echo " e.g.: `basename $0` -n 1 \"ls -lt | head -19\"" ) >&2
   exit 2
 fi
 
@@ -29,7 +37,9 @@ trap "clear; exit 0" 0 1 2 3 4 14 15
 
 # Loop forever, re-drawing the lines that changed during each pass 
 while : ; do
-  tput cup 0 50; date
+  tput cup 0 0; tput el; echo "Every ${secs}s: ""$@""\c"
+  cols=`tput cols`
+  tput cup 0 `expr $cols - 29`; echo " \c"; date
   eval "$@" | 
   for k in `count $rows`; do
     read newline[$k]
@@ -40,5 +50,5 @@ while : ; do
       oldline[k]="${newline[k]}"
     fi
   done
-  sleep 2
+  sleep $secs
 done
