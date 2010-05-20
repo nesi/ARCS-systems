@@ -1,7 +1,7 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100422
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100519
 
 # Path, usage check
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
@@ -13,10 +13,6 @@ PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
     echo " Note: Use option '-n' to show what would be done, then exit"
   ) >&2 && exit 2
 
-# A list-file is used to reduced elapsed time taken by 'ils -lr'
-TempFile=`mktemp` || exit 1
-trap "rm -f $TempFile; exit 0" 0 1 2 3 4 14 15
-
 # Extract resource-name, loop forever
 Resource="$1"; shift
 while : ; do
@@ -26,10 +22,10 @@ while : ; do
       if ($1~"^/") {    # Extract collection names from records starting in "/".
         Dir=substr($0,1,length-1)
       }
-      else {
-        if ($1!="C-") { # Extract file names from non-collection records
+      else {            # Extract file names from non-collection records,
+        if ($1!="C-") { # and skip those whose size is non-positive ..
           amperpos=index($0," & ")
-          if(amperpos>0) print "\""Dir"/"substr($0,amperpos+3)"\""
+          if(amperpos>0) if($4>0) print "\""Dir"/"substr($0,amperpos+3)"\""
         }
       }
     }' | uniq -u | sed 's/\$/\\\\$/g'
@@ -37,9 +33,6 @@ while : ; do
   
   # Process the list records
   while read Line ; do
-      # Skip files whose size is non-positive
-      FileSize=`eval ils -l "$Line" | awk '{print $4; exit}'`
-      [ `expr $FileSize + 0` -le 0 ]      && continue
       [ -n "$ListOnly"  ] && echo "$Line" && continue
       eval irepl -MBT -R $Resource "$Line" 
   done
