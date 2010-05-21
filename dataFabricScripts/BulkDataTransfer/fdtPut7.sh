@@ -2,7 +2,7 @@
 # fdtPut7.sh   Copies files in a designated directory to a remote server using
 #              FDT over a designated port. Needs Java 1.5 embedded or better.
 #              'fdt.jar' and 'java' need to be in PATH and executable.
-#              Graham.Jenkins@arcs.org.au  July 2009. Rev: 20090827
+#              Graham.Jenkins@arcs.org.au  July 2009. Rev: 20100521
 
 # Default port, ssh-key and batch-size; adjust as appropriate
 PORT=80; KEY=~/.ssh/id_dsa; BATCH=16; export PORT KEY BATCH
@@ -38,7 +38,7 @@ fail() {
 # Java FDT invocation
 doJava () {
   java -Xms256m -Xmx256m -jar `which fdt.jar` -sshKey $KEY -p $PORT \
-      -ss 32M -iof 4 $1/* $2:$3 </dev/null >/dev/null 2>&1
+      -noupdates -ss 32M -iof 4 $1/* $2:$3 </dev/null >/dev/null 2>&1
   echo
 }
 
@@ -69,7 +69,8 @@ while [ -n "$Flag" ] ; do
       Flag=Y
       echo "`date '+%a %T'` .. `wc -c $File` .. Pid: $$"
       ln -s $File $TmpDir/
-      [ `ls $TmpDir/ | wc -w` = $BATCH ] && ( doJava $TmpDir $2 $3 ; rm -f $TmpDir/* ) 
+      [ `ls $TmpDir/ | wc -w` = $BATCH ] && (
+                                      doJava $TmpDir $2 $3 ; rm -f $TmpDir/* ) 
     fi
   done
   [ `ls $TmpDir/ | wc -w` != 0 ] && ( doJava $TmpDir $2 $3 ; rm -f $TmpDir/* )
