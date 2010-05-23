@@ -1,8 +1,8 @@
 #!/bin/sh
 # fdtPut7.sh   Copies files in a designated directory to a remote server using
-#              FDT over a designated port. Needs Java 1.5 embedded or better.
+#              FDT over a designated port. Needs Java 1.6 or better.
 #              'fdt.jar' and 'java' need to be in PATH and executable.
-#              Graham.Jenkins@arcs.org.au  July 2009. Rev: 20100521
+#              Graham.Jenkins@arcs.org.au  July 2009. Rev: 20100523
 
 # Default port, ssh-key and batch-size; adjust as appropriate
 PORT=80; KEY=~/.ssh/id_dsa; BATCH=16; export PORT KEY BATCH
@@ -31,14 +31,16 @@ alias ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 # Failure/cleanup function; parameters are exit-code and message
 fail() {
   Code=$1; shift
-  rm -f $TmpFil
   echo "$@"; exit $Code
 }
 
 # Java FDT invocation
 doJava () {
+  [ `ssu $2 "df -P $3" 2>/dev/null | awk '{if ($5~/%/){print $5;exit}}' |
+     tr -d %` -gt 95 ] && fail 1 "Remote filesystem nearing capacity; aborted!"
   java -Xms256m -Xmx256m -jar `which fdt.jar` -sshKey $KEY -p $PORT \
       -noupdates -ss 32M -iof 4 $1/* $2:$3 </dev/null >/dev/null 2>&1
+  rm -f $1/*
   echo
 }
 
@@ -48,32 +50,27 @@ ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
 ssu $2 "mkdir -p -m 775 $3"   2>/dev/null || fail 1 "Remote-directory problem"
 ssu $2 "chmod 775       $3"   2>/dev/null 
 
-# Create temporary file and directory
-TmpFil=`mktemp`                           || fail 1 "Temporary-file problem"
+# Create temporary directory
 TmpDir=`mktemp -d`                        || fail 1 "Temporary-dir'y problem"
-trap "rm -rf $TmpFil $TmpDir; exit 0" 0 1 2 3 4 14 15
+trap "rm -rf $TmpDir; exit 0" 0 1 2 3 4 14 15
 
 # Loop until no more files need to be copied
 Flag=Y
 while [ -n "$Flag" ] ; do
   Flag=
   echo "Generating a list of files to be copied .. wait .."
-  # Generate a list of the files already copied successfully
-  ssu $2 "ls -ogl $3 2>/dev/null">$TmpFil 2>/dev/null||fail 1 "Remote list prob"
-  for File in `find $1 -maxdepth 1 -type f | sort` ; do
-    [ -r "$File"    ]             || continue
-    LocName=`basename $File`
-    LocSize=`ls -ogl $File | awk '{print $3}'`
-    RemSize=`awk '{if($NF==locname){print $3;exit 0}}' locname=$LocName<$TmpFil`
-    if [ "$LocSize" != "$RemSize" ]; then
-      Flag=Y
-      echo "`date '+%a %T'` .. `wc -c $File` .. Pid: $$"
-      ln -s $File $TmpDir/
-      [ `ls $TmpDir/ | wc -w` = $BATCH ] && (
-                                      doJava $TmpDir $2 $3 ; rm -f $TmpDir/* ) 
-    fi
+  # List filename/size couplets in remote and local directories; if a couplet
+  # appears once then it hasn't been copied properly, so add filename to list
+  for File in `( ssu $2 "ls -lL $3 2>/dev/null"
+                         ls -lL $1 2>/dev/null ) |
+      awk '{print \$NF, \$5}' | sort | uniq -u | awk '{print \$1}' | uniq`; do
+    [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue  
+    Flag=Y
+    echo "`date '+%a %T'` .. `wc -c $1/$File` .. Pid: $$"
+    ln -s $1/$File $TmpDir/
+    [ `ls $TmpDir/ | wc -w` -eq $BATCH ] && doJava $TmpDir $2 $3
   done
-  [ `ls $TmpDir/ | wc -w` != 0 ] && ( doJava $TmpDir $2 $3 ; rm -f $TmpDir/* )
+  [ `ls $TmpDir/ | wc -w` -ne 0 ] && doJava $TmpDir $2 $3
 done
 
 # All done, adjust permissions and exit

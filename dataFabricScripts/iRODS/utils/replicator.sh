@@ -1,9 +1,10 @@
 #!/bin/sh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100519
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100520
 
-# Path, usage check
+# Batch size, path, usage check
+BATCH=16
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
 [ "$1" = "-n" ] && ListOnly=Y && shift
@@ -18,6 +19,7 @@ Resource="$1"; shift
 while : ; do
   # List all files with full collection path, print those that appear only once
   logger -i "Replicating to $Resource .. $@"
+  J=0
   ( ils -lr "$@" 2>/dev/null | awk '{
       if ($1~"^/") {    # Extract collection names from records starting in "/".
         Dir=substr($0,1,length-1)
@@ -29,18 +31,24 @@ while : ; do
         }
       }
     }' | uniq -u | sed 's/\$/\\\\$/g'
+  echo                  # Append empty line to mark end of list
   ) | 
   
-  # Process the list records
+  # Process the list records in batches, flush when end marker seen
   while read Line ; do
-      [ -n "$ListOnly"  ] && echo "$Line" && continue
-      eval irepl -MBT -R $Resource "$Line" 
+    [ -n "$ListOnly"  ] && echo "$Line" && continue
+    J=`expr 1 + $J`
+    [ -n "$Line" ] && String="$String $Line" || J=999
+    if [ $J -ge $BATCH ] ; then
+      [ -n "$String" ] && eval irepl -MBT -R $Resource "$String"
+      J=0 ; String=""
+    fi
   done
 
   # 18-hour pause
-  [ -n "$ListOnly" ] && exit 0
   logger -i "Replication pass completed!"
   echo "Replication pass completed!" >&2
+  [ -n "$ListOnly" ] && exit 0
   sleep 64800
 
 done
