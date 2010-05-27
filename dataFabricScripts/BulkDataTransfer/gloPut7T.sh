@@ -1,12 +1,15 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100519
+#              For Solaris, use 'ksh' instead of 'sh'; you may also need
+#              to use 'du -h' instead of 'wc -c'.
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100527
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
-[ -d /opt/globus-5/bin ] && export GLOBUS_LOCATION=/opt/globus-5 \
-                         || export GLOBUS_LOCATION=/opt/globus-4.2.1
+for Dir in globus-5.0.1 globus-5 globus-4.2.1; do
+  [ -d "$Dir/bin" ] && export GLOBUS_LOCATION=/opt/$Dir && break
+done
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
@@ -73,9 +76,9 @@ while [ -n "$Flag" ] ; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     Flag=Y
     echo "file://$1/$File sshftp://$2$3/" >> $LisFil
-    [ "`cat $LisFil 2>/dev/null | wc -l`" = $BATCH ] && doGlobus $LisFil
+    [ "`cat $LisFil 2>/dev/null | wc -l`" -eq $BATCH ] && doGlobus $LisFil
   done
-  [ "`cat $LisFil 2>/dev/null | wc -l`" != 0 ] && doGlobus $LisFil
+  [ "`cat $LisFil 2>/dev/null | wc -l`" -ne 0 ] && doGlobus $LisFil
 done
 
 # All done, adjust permissions and exit
