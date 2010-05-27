@@ -8,7 +8,7 @@
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
 for Dir in globus-5.0.1 globus-5 globus-4.2.1; do
-  [ -d "$Dir/bin" ] && export GLOBUS_LOCATION=/opt/$Dir && break
+  [ -d "/opt/$Dir/bin" ] && export GLOBUS_LOCATION=/opt/$Dir && break
 done
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
