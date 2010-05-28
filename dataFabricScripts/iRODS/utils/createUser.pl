@@ -1,14 +1,14 @@
 #!/usr/bin/env perl
 # createUser     Creates a new password for an iRODS user during "Real-Shib"
 #                login. Exits with error if the user does not exist.
-#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20100430
+#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20100528
 
 use strict;
 use warnings;
 use File::Basename;
 use Sys::Syslog;
 use vars qw($VERSION);
-$VERSION = "4.02";
+$VERSION = "4.03";
 my $debug="N";   # Set to "Y" or "N" as appropriate
 
 # Log-and-die subroutine
@@ -29,8 +29,7 @@ my $cn=$ARGV[0];
 for (my $j=1;$j<($#ARGV-1);$j++) { $cn.=" ".$ARGV[$j] }
 my $stplus="'%<ST>".$ARGV[$#ARGV-1]."</ST>%'";
 my $username=
-  `iquest "SELECT USER_NAME where USER_INFO like $stplus" 2>/dev/null | \
-                                             sed -n "1s/^USER_NAME = //p"`;
+  `iquest "%s" "SELECT USER_NAME where USER_INFO like $stplus" 2>/dev/null`;
 chomp($username);
 log_and_die("Username not found for: ".$cn." ".$ARGV[$#ARGV-1]." xxxx") 
   if (length($username)<1);
