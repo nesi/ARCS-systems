@@ -44,4 +44,7 @@ GT 5.0.1 ..
 On 20100405, gloPut7T.sh was enhanced through the use of filename/size
 couplets in a sorted list; this made it both shorter and faster.
 
-GKJ-20100405
+On 20100601, more superseded scripts were deleted, and gloPut7R.sh was
+enhanced to include a 'reverse' capability.
+
+GKJ-20100601
