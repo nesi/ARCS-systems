@@ -1,8 +1,8 @@
 Summary:	The ARCS health reporting tool.
 Name:		APAC-gateway-gridpulse
 Version:	0.3
-Release:	3
-Source:		gridpulse.tar.gz
+Release:	4
+#Source:		gridpulse.tar.gz
 License:	GPL
 Group:		Applications/Internet
 BuildRoot:	%{_tmppath}/%{name}-buildroot
@@ -15,19 +15,19 @@ Conflicts:	Gpulse < 1.1
 #Obsoletes:	Gpulse < 1.1
 
 %description
-Installs the ARCS gridpulse script and cron entry to report on gateway health. Reports from all systems are collected by the GOC http://goc.grid.apac.edu.au/.
+Gridpulse is used by the ARCS National Grid to help monitor the status of grid gateway machines. It reports information via email (note: sending hosts must exist in DNS) back to a central server located at http://status.arcs.org.au
 
 %prep
-%setup -n gridpulse
+# %setup -n gridpulse
 
 %install
 # For software that has a proper Makefile:
 # PREFIX=%{prefix} make install
 
 # The Makefile of most ARCS packages, simply creates SOURCES/package.tar.gz
-install -D gridpulse $RPM_BUILD_ROOT%{prefix}/bin/gridpulse
-install -D system_shorts.pulse $RPM_BUILD_ROOT%{prefix}/lib/gridpulse/system_shorts.pulse
-install -D README $RPM_BUILD_ROOT%{prefix}/share/doc/gridpulse/README
+install -D ${HOME}/gridpulse/gridpulse $RPM_BUILD_ROOT%{prefix}/bin/gridpulse
+install -D ${HOME}/gridpulse/system_shorts.pulse $RPM_BUILD_ROOT%{prefix}/lib/gridpulse/system_shorts.pulse
+install -D ${HOME}/gridpulse/README $RPM_BUILD_ROOT%{prefix}/share/doc/gridpulse/README
 
 
 %clean
@@ -74,6 +74,8 @@ fi
 
 
 %changelog
+* Thu Jun 03 2010 Simon Yin
+- README has been changed together with description to reflect current GOC URL and naming 
 * Fri May 15 2009 Darran carey
 - changed mailing address to grid_pulse@lists.arcs.org.au
 * Tue Apr 22 2008 Daniel Cox
