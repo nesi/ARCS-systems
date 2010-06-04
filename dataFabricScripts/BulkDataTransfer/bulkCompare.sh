@@ -50,7 +50,7 @@ for C in `seq 1 $Count` ; do
   # Clean the destination, send files using movedat
   ssu ${USER} "rm -rf $DESTIN; mkdir $DESTIN"
   ssu ${USER} \
-    "/home/graham/ExpeDat/Server\ Files/servedat -p 40100 -a 5 / 2>/dev/null" \
+    "/opt/ExpeDat/Server\ Files/servedat -p 40100 -a 5 / 2>/dev/null" \
                                                               >/dev/null 2>&1 &
   sleep 20
   echo "Using: movedat -p 40100 -b 65536 -a $Aggres -q .."
