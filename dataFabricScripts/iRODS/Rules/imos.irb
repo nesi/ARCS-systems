@@ -1,3 +1,6 @@
+#Reading preferences
+acPreprocForDataObjOpen|"$objPath" like "/ARCS/projects/IMOS/public/AUV/*|msiSetDataObjPreferredResc(arcs-df.intersect.org.au%arcs-df.qcif.edu.au)|nop
+
 #ARGO rules
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/ARGO/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 
