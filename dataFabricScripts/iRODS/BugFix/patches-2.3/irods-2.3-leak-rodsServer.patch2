@@ -1,0 +1,28 @@
+--- rodsServer.c.fix	2010-05-21 15:31:23.000000000 +1000
++++ rodsServer.c	2010-05-23 17:14:04.000000000 +1000
+@@ -86,7 +86,7 @@
+ #ifndef _WIN32
+     signal(SIGTTIN, SIG_IGN);
+     signal(SIGTTOU, SIG_IGN);
+-    signal(SIGCHLD, SIG_IGN);
++    signal(SIGCHLD, SIG_DFL);
+     signal(SIGPIPE, SIG_IGN);
+ #ifdef osx_platform
+     signal(SIGINT, (void *) serverExit);
+@@ -527,13 +527,10 @@
+ {
+     agentProc_t *tmpAagentProc;
+ 
+-    tmpAagentProc = *agentProcHead;
+-    if (tmpAagentProc == NULL) {
+-        tmpAagentProc = (agentProc_t *) malloc (sizeof (agentProc_t));
+-        memset (tmpAagentProc, 0, sizeof (agentProc_t));
+-    }
++    tmpAagentProc = (agentProc_t *) malloc (sizeof (agentProc_t));
++    memset (tmpAagentProc, 0, sizeof (agentProc_t));
+ 
+-    tmpAagentProc->next = NULL;
++    tmpAagentProc->next = *agentProcHead;
+     tmpAagentProc->pid = childPid;
+     rstrcpy (tmpAagentProc->proxyUser, startupPack->proxyUser, NAME_LEN);
+     rstrcpy (tmpAagentProc->clientUser, startupPack->clientUser, NAME_LEN);

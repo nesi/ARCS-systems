@@ -1,0 +1,69 @@
+Index: iRODS/server/icat/src/icatHighLevelRoutines.c
+===================================================================
+--- iRODS/server/icat/src/icatHighLevelRoutines.c	(revision 2638)
++++ iRODS/server/icat/src/icatHighLevelRoutines.c	(revision 2639)
+@@ -3421,14 +3421,18 @@
+ 	    /* 
+ 	       When using GSI, the client might not provide a user
+ 	       name, in which case we avoid the query below (which
+-	       would fail) and instead return the error
+-	       CAT_INVALID_CLIENT_USER.  To handle this situation (the
+-	       client is using GSI, connecting to a non-IES, and not
+-	       specifying their irodsUserName) properly, we'll need to
+-	       modify the protocol a bit; which we will do after the
+-	       upcoming release (2.3).
++	       would fail) and instead set up minimal privileges.
++	       This is safe since we have just authenticated the
++	       remote server as an admin account.  This will allow
++	       some queries (including the one needed for retrieving
++	       the client's DNs).  Since the clientUser is not set,
++	       some other queries are still exclued.  The non-IES will
++	       reconnect once the rodsUserName is determined.  In
++	       iRODS 2.3 this would return an error.
+ 	     */
+-	    return(CAT_INVALID_CLIENT_USER);
++	    *clientPrivLevel = REMOTE_USER_AUTH;
++	    prevFailure=0;
++	    return(0);
+ 	 }
+ 	 else {
+ 	    if (logSQL) rodsLog(LOG_SQL, "chlCheckAuth SQL 6");
+Index: iRODS/server/api/src/rsGsiAuthRequest.c
+===================================================================
+--- iRODS/server/api/src/rsGsiAuthRequest.c	(revision 2638)
++++ iRODS/server/api/src/rsGsiAuthRequest.c	(revision 2639)
+@@ -343,6 +343,34 @@
+    rsComm->proxyUser.authInfo.authFlag = privLevel;
+    rsComm->clientUser.authInfo.authFlag = clientPrivLevel;
+ 
++   if (noNameMode) {  /* We didn't before, but now have an irodsUserName */
++      int status2, status3;
++      rodsServerHost_t *rodsServerHost = NULL;
++      status2 = getAndConnRcatHost (rsComm, MASTER_RCAT,
++                                    rsComm->myEnv.rodsZone, &rodsServerHost);
++      if (status2 >= 0 && 
++	  rodsServerHost->localFlag == REMOTE_HOST && 
++	  rodsServerHost->conn != NULL) {   /* If the IES is remote */
++
++	 status3 = rcDisconnect(rodsServerHost->conn); /* disconnect*/
++
++	 /* And clear out the connection information so
++	    getAndConnRcatHost will reconnect.  This may leak some
++	    memory but only happens at most once in an agent:  */
++	 rodsServerHost->conn = NULL;
++
++	 /* And reconnect (with irodsUserName here and in the IES): */
++	 status3 = getAndConnRcatHost (rsComm, MASTER_RCAT,
++				       rsComm->myEnv.rodsZone, 
++				       &rodsServerHost);
++	 if (status3) {
++	    rodsLog (LOG_ERROR,
++		     "igsiServersideAuth failed in getAndConnRcatHost, status = %d",
++		     status3);
++	    return (status3);
++	 }
++      }
++   }
+    return status;
+ #else
+     status = GSI_NOT_BUILT_INTO_SERVER;
