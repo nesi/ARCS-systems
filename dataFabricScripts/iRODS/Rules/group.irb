@@ -2,4 +2,4 @@
 
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/SSNTCP/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ALA/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
-
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ABIN/*"|msiSetDefaultResc(arcs-df.hpsc.csiro.au,preferred)|nop
