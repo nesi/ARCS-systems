@@ -1,0 +1,52 @@
+--- server/core/src/objMetaOpr.c.bak	2010-05-14 10:42:13.000000000 +1000
++++ server/core/src/objMetaOpr.c	2010-05-14 10:46:52.000000000 +1000
+@@ -2278,6 +2278,8 @@
+           NULL) {
+             rodsLog (LOG_ERROR,
+               "isData: getSqlResultByInx for COL_D_DATA_ID failed");
++            freeGenQueryOut (&genQueryOut);
++            clearGenQueryInp (&genQueryInp);
+             return (UNMATCHED_KEY_OR_INDEX);
+         }
+ 	if (dataId != NULL) {
+@@ -2285,6 +2287,7 @@
+ 	}
+     }
+ 
++    freeGenQueryOut (&genQueryOut);
+     clearGenQueryInp (&genQueryInp);
+     return(status);
+ }
+@@ -2310,6 +2313,8 @@
+           NULL) {
+             rodsLog (LOG_ERROR,
+               "isColl: getSqlResultByInx for COL_D_DATA_ID failed");
++            freeGenQueryOut (&genQueryOut);
++            clearGenQueryInp (&genQueryInp);
+             return (UNMATCHED_KEY_OR_INDEX);
+         }
+ 
+@@ -2318,6 +2323,7 @@
+ 	}
+     }
+ 
++    freeGenQueryOut (&genQueryOut);
+     clearGenQueryInp (&genQueryInp);
+     return(status);
+ }
+@@ -2336,6 +2342,7 @@
+     addInxIval (&genQueryInp.selectInp, COL_USER_ID, 1);
+     genQueryInp.maxRows = 2;
+     status =  rsGenQuery (rsComm, &genQueryInp, &genQueryOut);
++    freeGenQueryOut (&genQueryOut);
+     clearGenQueryInp (&genQueryInp);
+     return(status);
+ }
+@@ -2355,6 +2362,7 @@
+     addInxIval (&genQueryInp.selectInp, COL_R_RESC_ID, 1);
+     genQueryInp.maxRows = 2;
+     status =  rsGenQuery (rsComm, &genQueryInp, &genQueryOut);
++    freeGenQueryOut (&genQueryOut);
+     clearGenQueryInp (&genQueryInp);
+     return(status);
+ }
