@@ -1,7 +1,7 @@
 # iRODS local rules for ARCS sites
 # Default-resource must be set appropriately for your site (e.g. arcs-df.vpac.org)
 #
-acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
+acPreprocForDataObjOpen||msiSetDataObjPreferredResc(ARCS-FABRIC-DISK%DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate|$userNameClient == guest %% $userNameClient == anonymous|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au%emii.resource.tpac.org.au%arcs-df.eresearchsa.edu.au)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/charlie.bond/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/TCMIP/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
