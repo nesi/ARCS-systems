@@ -6,4 +6,4 @@ acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acTrashPolicy||nop|nop
-acPostProcForPut|"$objPath" not like "/ARCSDEVBACKEND/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCSDEVBACKEND-GROUP,null),nop)|nop
+#acPostProcForPut|"$objPath" not like "/ARCSDEVBACKEND/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCSDEVBACKEND-GROUP,null),nop)|nop
