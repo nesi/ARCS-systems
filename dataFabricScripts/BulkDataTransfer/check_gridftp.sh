@@ -1,13 +1,13 @@
 #!/usr/bin/env perl
 # check_gridftp.pl  Nagios script for GridFTP.
-#                   Graham Jenkins <grahjenk@vpac.org> June 2010. Rev: 20100622
+#                   Graham Jenkins <grahjenk@vpac.org> June 2010. Rev: 20100624
 
 use strict;
 use warnings;
 use File::Basename;
 use IO::Socket;
 use vars qw($VERSION);
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 # Check usage
 die "Usage: ".basename($0)." server port\n".
@@ -23,7 +23,7 @@ my $socket = IO::Socket::INET->new( PeerAddr=>$ARGV[0], PeerPort=>$ARGV[1],
 my $response;
 if ( ! defined ( $response = <$socket> ) ) { do_exit("CRITICAL", $@, 2) }
 chomp($response);
-if ( $response =~ m/GridFTP Server/      ) { do_exit("OK", $response, 0)}
+if ( $response =~ m/GridFTP Server/i     ) { do_exit("OK", $response, 0)}
 else          { do_exit("WARNING", "Unexpected response: ".$response, 1)}
 
 # Exit subroutine
