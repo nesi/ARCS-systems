@@ -1,0 +1,452 @@
+2010-06-26 15:46:30 IRODSFileSystem [INFO] connecting the commands to the irods socket
+2010-06-26 15:46:30 IRODSConnection [INFO] initializing connection with accountirods://OUTBOX_READER@srb.ac3.edu.au:1247
+2010-06-26 15:46:30 IRODSConnection [INFO] irods handshake
+2010-06-26 15:46:30 IRODSConnection [INFO] opening socket
+2010-06-26 15:46:30 IRODSConnection [INFO] socket connected
+2010-06-26 15:46:30 IRODSConnection [INFO] connection identified as:irodsSimpleConnection/btpool0-1/1277531190611
+2010-06-26 15:46:30 IRODSConnection [INFO] reading message
+2010-06-26 15:46:30 IRODSConnection [INFO] 1277531190718 millisecs
+2010-06-26 15:46:30 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:30 IRODSConnection [INFO] reading message
+2010-06-26 15:46:30 IRODSConnection [INFO] 1277531190770 millisecs
+2010-06-26 15:46:30 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:30 IRODSConnection [INFO] reading message
+2010-06-26 15:46:30 IRODSConnection [INFO] 1277531190834 millisecs
+2010-06-26 15:46:30 IRODSConnection [INFO] reading message
+2010-06-26 15:46:30 IRODSConnection [INFO] 1277531190924 millisecs
+2010-06-26 15:46:30 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSFileSystem [INFO] connecting the commands to the irods socket
+2010-06-26 15:46:31 IRODSConnection [INFO] initializing connection with accountirods://OUTBOX_READER@srb.ac3.edu.au:1247
+2010-06-26 15:46:31 IRODSConnection [INFO] irods handshake
+2010-06-26 15:46:31 IRODSConnection [INFO] opening socket
+2010-06-26 15:46:31 IRODSConnection [INFO] socket connected
+2010-06-26 15:46:31 IRODSConnection [INFO] connection identified as:irodsSimpleConnection/btpool0-1/1277531191065
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191169 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191225 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191290 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191359 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] info less than zero:-808000
+2010-06-26 15:46:31 IRODSConnection [INFO] no rows found or success with no info
+2010-06-26 15:46:31 IRODSConnection [INFO] returning null from read
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191430 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSConnection [INFO] connection shutdown
+2010-06-26 15:46:31 IRODSFileSystem [INFO] calling close() on irodsCommands
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191546 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] info less than zero:-808000
+2010-06-26 15:46:31 IRODSConnection [INFO] no rows found or success with no info
+2010-06-26 15:46:31 IRODSConnection [INFO] returning null from read
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191611 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191706 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] info less than zero:-808000
+2010-06-26 15:46:31 IRODSConnection [INFO] no rows found or success with no info
+2010-06-26 15:46:31 IRODSConnection [INFO] returning null from read
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191776 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:31 IRODSConnection [INFO] 1277531191871 millisecs
+2010-06-26 15:46:31 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:31 IRODSConnection [INFO] reading message
+2010-06-26 15:46:32 IRODSConnection [INFO] 1277531192007 millisecs
+2010-06-26 15:46:32 IRODSConnection [INFO] reading message
+2010-06-26 15:46:32 IRODSConnection [INFO] 1277531192062 millisecs
+2010-06-26 15:46:32 IRODSConnection [INFO] reading message
+2010-06-26 15:46:32 IRODSConnection [INFO] 1277531192132 millisecs
+2010-06-26 15:46:32 IRODSFileSystem [INFO] calling close() on irodsCommands
+2010-06-26 15:46:32 IRODSConnection [INFO] connection shutdown
+2010-06-26 15:46:45 IRODSConnection [ERROR] attempting flush when connection was closed
+2010-06-26 15:46:45 IRODSConnection [INFO] connection shutdown
+2010-06-26 15:46:45 IRODSFileSystem [INFO] calling close() on irodsCommands
+2010-06-26 15:46:58 OutboxServlet [DEBUG] config path: /Users/pmak/src/outbox/myproto-outbox/src/main/webapp/outbox.properties
+2010-06-26 15:46:58 OutboxServlet [DEBUG] Trying to match metadata for: asflaertoep359q34toalgadfg
+2010-06-26 15:46:59 IRODSFileSystem [INFO] connecting the commands to the irods socket
+2010-06-26 15:46:59 IRODSConnection [INFO] initializing connection with accountirods://OUTBOX_READER@srb.ac3.edu.au:1247
+2010-06-26 15:46:59 IRODSConnection [INFO] irods handshake
+2010-06-26 15:46:59 IRODSConnection [INFO] opening socket
+2010-06-26 15:46:59 IRODSConnection [INFO] socket connected
+2010-06-26 15:46:59 IRODSConnection [INFO] connection identified as:irodsSimpleConnection/btpool0-1/1277531219052
+2010-06-26 15:46:59 IRODSCommands [INFO] Connecting to server, srb.ac3.edu.au:1247 running version: rods2.3jargon2.3 as username: OUTBOX_READER
+time: 1277531219052
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 0
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 105 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 703
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 55 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <authResponseInp_PI><response>FWGRbrte5q7piLTUaTe8eQ==</response>
+<username>OUTBOX_READER</username>
+</authResponseInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 704
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 61 millisecs
+2010-06-26 15:46:59 IRODSFileSystem [DEBUG] account after GSI checks:irods://OUTBOX_READER@srb.ac3.edu.au:1247
+2010-06-26 15:46:59 MetaDataSet [DEBUG] building array of selects
+2010-06-26 15:46:59 MetaDataSet [DEBUG] creating new MetaDataSelect for:file name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:file name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] creating new MetaDataSelect for:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:OUTBOX_URL
+2010-06-26 15:46:59 MetaDataSet [DEBUG] lookup was null, will treat as definable metadata
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:file name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:403
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:Definable metadata value name for files
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:Definable metadata attribute name for files
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:Definable metadata value name for files
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:601
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:Definable metadata value name for files
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:Definable metadata attribute name for files
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:600
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:Definable metadata attribute name for files
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>300</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>2</iiLen>
+<inx>403</inx>
+<inx>501</inx>
+<ivalue>1</ivalue>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>2</isLen>
+<inx>601</inx>
+<inx>600</inx>
+<svalue> = 'asflaertoep359q34toalgadfg'</svalue>
+<svalue> = 'OUTBOX_URL'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 89 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] getting irods metadata field for field name:403
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] field was null
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] getting irods metadata field for field name:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] field was null
+2010-06-26 15:46:59 OutboxServlet [DEBUG] found file!: /ARCSDEVBACKEND/home/pauline.mak/MenuBar.js
+2010-06-26 15:46:59 OutboxServlet [DEBUG] found file, about to send content to client
+2010-06-26 15:46:59 IRODSFileSystem [INFO] connecting the commands to the irods socket
+2010-06-26 15:46:59 IRODSConnection [INFO] initializing connection with accountirods://OUTBOX_READER@srb.ac3.edu.au:1247
+2010-06-26 15:46:59 IRODSConnection [INFO] irods handshake
+2010-06-26 15:46:59 IRODSConnection [INFO] opening socket
+2010-06-26 15:46:59 IRODSConnection [INFO] socket connected
+2010-06-26 15:46:59 IRODSConnection [INFO] connection identified as:irodsSimpleConnection/btpool0-1/1277531219466
+2010-06-26 15:46:59 IRODSCommands [INFO] Connecting to server, srb.ac3.edu.au:1247 running version: rods2.3jargon2.3 as username: OUTBOX_READER
+time: 1277531219466
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 0
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 98 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 703
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 53 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <authResponseInp_PI><response>8aXSaJP01uepjPlVyCNgiA==</response>
+<username>OUTBOX_READER</username>
+</authResponseInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 704
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 63 millisecs
+2010-06-26 15:46:59 IRODSFileSystem [DEBUG] account after GSI checks:irods://OUTBOX_READER@srb.ac3.edu.au:1247
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:file size
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>3</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>501</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>1</isLen>
+<inx>501</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak/MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 65 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] info less than zero:-808000
+2010-06-26 15:46:59 IRODSConnection [INFO] no rows found or success with no info
+2010-06-26 15:46:59 IRODSConnection [INFO] returning null from read
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:file name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:file size
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:407
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file size
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:file name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:403
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file name
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>300</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>407</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>2</isLen>
+<inx>501</inx>
+<inx>403</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak'</svalue>
+<svalue> = 'MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 64 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:46:59 IRODSConnection [INFO] connection shutdown
+2010-06-26 15:46:59 IRODSConnection [DEBUG] I'm connected, call connection.close()
+2010-06-26 15:46:59 IRODSFileSystem [DEBUG] IRODSFileSystem finalizer
+2010-06-26 15:46:59 IRODSFileSystem [INFO] calling close() on irodsCommands
+2010-06-26 15:46:59 IRODSCommands [DEBUG] check if connected...
+2010-06-26 15:46:59 IRODSCommands [DEBUG] was not connected...leaving connection alone
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] getting irods metadata field for field name:407
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] field was null
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:file size
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>3</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>501</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>1</isLen>
+<inx>501</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak/MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:46:59 IRODSConnection [INFO] 60 millisecs
+2010-06-26 15:46:59 IRODSConnection [INFO] info less than zero:-808000
+2010-06-26 15:46:59 IRODSConnection [INFO] no rows found or success with no info
+2010-06-26 15:46:59 IRODSConnection [INFO] returning null from read
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:46:59 MetaDataSet [DEBUG] looking up metadata field for:file name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:file size
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:407
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file size
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] doing a getID for field:file name
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:403
+2010-06-26 15:46:59 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file name
+2010-06-26 15:46:59 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>300</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>407</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>2</isLen>
+<inx>501</inx>
+<inx>403</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak'</svalue>
+<svalue> = 'MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:46:59 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:46:59 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 68 millisecs
+2010-06-26 15:47:00 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] getting irods metadata field for field name:407
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] field was null
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:file size
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:47:00 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>3</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>501</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>1</isLen>
+<inx>501</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak/MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:47:00 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 64 millisecs
+2010-06-26 15:47:00 IRODSConnection [INFO] info less than zero:-808000
+2010-06-26 15:47:00 IRODSConnection [INFO] no rows found or success with no info
+2010-06-26 15:47:00 IRODSConnection [INFO] returning null from read
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:file name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:file size
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:407
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file size
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:file name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:403
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file name
+2010-06-26 15:47:00 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>300</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>407</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>2</isLen>
+<inx>501</inx>
+<inx>403</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak'</svalue>
+<svalue> = 'MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:47:00 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 64 millisecs
+2010-06-26 15:47:00 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] getting irods metadata field for field name:407
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] field was null
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:directory name
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:file name
+2010-06-26 15:47:00 MetaDataSet [DEBUG] looking up metadata field for:file name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:file name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:403
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:501
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:directory name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] doing a getID for field:file name
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] after jargonToIRODS lookup I have:403
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] successfully looked up, and returning:file name
+2010-06-26 15:47:00 IRODSCommands [DEBUG] <GenQueryInp_PI><maxRows>3</maxRows>
+<continueInx>0</continueInx>
+<partialStartIndex>0</partialStartIndex>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+<InxIvalPair_PI><iiLen>1</iiLen>
+<inx>403</inx>
+<ivalue>1</ivalue>
+</InxIvalPair_PI>
+<InxValPair_PI><isLen>2</isLen>
+<inx>501</inx>
+<inx>403</inx>
+<svalue> = '/ARCSDEVBACKEND/home/pauline.mak'</svalue>
+<svalue> = 'MenuBar.js'</svalue>
+</InxValPair_PI>
+</GenQueryInp_PI>
+
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 702
+2010-06-26 15:47:00 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 65 millisecs
+2010-06-26 15:47:00 IRODSConnection [INFO] message length gt 0 will read message body
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] getting irods metadata field for field name:403
+2010-06-26 15:47:00 IRODSMetaDataSet [DEBUG] field was null
+2010-06-26 15:47:00 IRODSCommands [DEBUG] <DataObjInp_PI><objPath>/ARCSDEVBACKEND/home/pauline.mak/MenuBar.js</objPath>
+<createMode>0</createMode>
+<openFlags>0</openFlags>
+<offset>0</offset>
+<dataSize>0</dataSize>
+<numThreads>0</numThreads>
+<oprType>0</oprType>
+<KeyValPair_PI><ssLen>0</ssLen>
+</KeyValPair_PI>
+</DataObjInp_PI>
+
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 602
+2010-06-26 15:47:00 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 112 millisecs
+2010-06-26 15:47:00 IRODSCommands [DEBUG] <dataObjReadInp_PI><l1descInx>3</l1descInx>
+<len>51200</len>
+</dataObjReadInp_PI>
+
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 603
+2010-06-26 15:47:00 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 51 millisecs
+2010-06-26 15:47:00 IRODSCommands [DEBUG] <dataObjReadInp_PI><l1descInx>3</l1descInx>
+<len>51200</len>
+</dataObjReadInp_PI>
+
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 603
+2010-06-26 15:47:00 IRODSConnection [INFO] reading message
+2010-06-26 15:47:00 IRODSConnection [INFO] 50 millisecs
+2010-06-26 15:47:00 IRODSFileSystem [INFO] calling close() on irodsCommands
+2010-06-26 15:47:00 IRODSCommands [DEBUG] check if connected...
+2010-06-26 15:47:00 IRODSCommands [DEBUG] IRODSCommands is connected, do a disconnect and shut down the socket
+2010-06-26 15:47:00 IRODSCommands [DEBUG] sending disconnect message, still sees connection as open
+2010-06-26 15:47:00 IRODSConnection [INFO] functionID: 0
+2010-06-26 15:47:00 IRODSConnection [INFO] connection shutdown
+2010-06-26 15:47:00 IRODSConnection [DEBUG] I'm connected, call connection.close()
+2010-06-26 15:47:00 IRODSCommands [DEBUG] shutdown complete, connection status is: false
+2010-06-26 15:47:51 IRODSCommands [DEBUG] <dataObjCloseInp_PI><l1descInx>3</l1descInx>
+<bytesWritten>0</bytesWritten>
+</dataObjCloseInp_PI>
+
+2010-06-26 15:47:51 IRODSConnection [INFO] functionID: 605
+2010-06-26 15:47:51 IRODSConnection [ERROR] attempting flush when connection was closed
+2010-06-26 15:47:51 IRODSConnection [INFO] connection shutdown
+2010-06-26 15:47:51 IRODSConnection [DEBUG] not connected, just return
+2010-06-26 15:47:51 IRODSFileSystem [DEBUG] IRODSFileSystem finalizer
+2010-06-26 15:47:51 IRODSFileSystem [INFO] calling close() on irodsCommands
+2010-06-26 15:47:51 IRODSCommands [DEBUG] check if connected...
+2010-06-26 15:47:51 IRODSCommands [DEBUG] was not connected...leaving connection alone

@@ -1,0 +1,17 @@
+#Username of the iRODS user for reading the outbox files
+outbox-username=
+
+#Password to the iRODS user
+outbox-password=
+
+#Host name of the iRODS server
+irods-host=
+
+#Port of the iRODS server
+irods-port=
+
+#Name of the zone you will be using this outbox for
+irods-zone=
+
+#Metadata key for querying iRODS for the random string to a file
+url_key=
