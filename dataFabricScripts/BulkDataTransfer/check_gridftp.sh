@@ -1,13 +1,13 @@
 #!/usr/bin/env perl
 # check_gridftp.pl  Nagios script for GridFTP.
-#                   Graham Jenkins <grahjenk@vpac.org> June 2010. Rev: 20100624
+#                   Graham Jenkins <grahjenk@vpac.org> June 2010. Rev: 20100628
 
 use strict;
 use warnings;
 use File::Basename;
 use IO::Socket;
 use vars qw($VERSION);
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 # Check usage
 die "Usage: ".basename($0)." server port\n".
@@ -15,16 +15,17 @@ die "Usage: ".basename($0)." server port\n".
   if ( ( $#ARGV != 1 ) || ( $ARGV[1] !~ m/^\d+$/ ) ); 
 
 # Attempt connection
-my $socket = IO::Socket::INET->new( PeerAddr=>$ARGV[0], PeerPort=>$ARGV[1],
-                                    Proto=>'tcp'      , Timeout=>5 )
-  or do_exit("CRITICAL", $@, 2);
+my $socket = IO::Socket::INET->new(PeerAddr=>$ARGV[0], PeerPort=>$ARGV[1],
+              Proto=>'tcp', Timeout=>5) or do_exit("CRITICAL",  $@, 2);
 
 # Get and check response
 my $response;
-if ( ! defined ( $response = <$socket> ) ) { do_exit("CRITICAL", $@, 2) }
+$socket->recv( $response, 128 );
+if ( ! defined($response) )              { do_exit("CRITICAL",  $@, 2) }
 chomp($response);
-if ( $response =~ m/GridFTP Server/i     ) { do_exit("OK", $response, 0)}
-else          { do_exit("WARNING", "Unexpected response: ".$response, 1)}
+if ( $response =~ m/GridFTP Server/i   ) { do_exit("OK", $response, 0) }
+else        { do_exit("WARNING", "Unexpected response: ".$response, 1) }
+
 
 # Exit subroutine
 sub do_exit {
