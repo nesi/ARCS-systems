@@ -1,7 +1,13 @@
 #!/usr/bin/env perl
 # syncTest.pl Prints the user-list XML file supplied by the ARCS
 #             Access Service.
-#             Graham Jenkins <graham@vpac.org> April 2010. Rev: 20100412
+#             Graham Jenkins <graham@vpac.org> April 2010. Rev: 20100628
+
+# Note: we perform an operation like:
+# wget --no-check-certificate --certificate=/etc/grid-security/irodscert.pem \
+#                             --private-key=/etc/grid-security/irodskey.pem  \
+#                      https://access.arcs.org.au/service/list.html?serviceId=3
+
 use strict;
 use warnings;
 use File::Basename;       # You may need to do:
