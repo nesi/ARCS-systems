@@ -2,7 +2,7 @@
 # gloPut8T.sh  Copies files in a designated directory to a remote server.
 #              Requires GT 5.0.2 threaded globus-url-copy; uses sshftp.
 #              For Solaris, use 'ksh' instead of 'sh'.
-#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100629
+#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100630
 
 # Environment, etc.
 for Dir in globus-5 globus-5.0.2 globus-5.0.1 globus-4.2.1; do
@@ -41,11 +41,10 @@ ssu $2 "test -w         $3"   2>/dev/null || fail 1 "Remote-directory problem"
 # Loop until no more files need to be copied
 ErrFil=`mktemp` && trap 'rm -f $ErrFil' 0 || fail 1 "Temporary file problem"
 SleTim=0
-while : ; do
+until grep -q "No files matched the source url." $ErrFil ; do
+  head -3 $ErrFil; sleep $SleTim; SleTim=`expr 1 + $SleTim`; echo
   echo "`date '+%a %T'` .. Determining files to be copied."
   globus-url-copy $Params "file://$1/" "sshftp://$2/$3/" 2>$ErrFil && break
-  grep -q "No files matched the source url." $ErrFil               && break
-  head -3 $ErrFil; sleep $SleTim; SleTim=`expr 1 + $SleTim`; echo
 done
 
 # All done, adjust permissions and exit
