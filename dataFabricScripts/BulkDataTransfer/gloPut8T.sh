@@ -2,7 +2,7 @@
 # gloPut8T.sh  Copies files in a designated directory to a remote server.
 #              Requires GT 5.0.2 threaded globus-url-copy; uses sshftp.
 #              For Solaris, use 'ksh' instead of 'sh'.
-#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100630
+#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100701
 
 # Environment, etc.
 for Dir in globus-5 globus-5.0.2 globus-5.0.1 globus-4.2.1; do
@@ -11,12 +11,13 @@ done
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
-Skip="A"
+Skip="A"; Sort="sort -r"
 Params="-v -cc 2 -g2 -pp -p 4 -sync -sync-level 1"
-while getopts su Option; do
+while getopts sru Option; do
   case $Option in
     s) Skip=;;
-    u) Params="-v -cc 2 -g2 -udt -fast -pp -p 2 -sync -sync-level 1";;
+    r) Sort="cat";;
+    u) Params="-v -cc 2 -g2 -udt -pp -p 2 -sync -sync-level 1";;
    \?) Bad="Y";;
   esac
 done
@@ -25,8 +26,9 @@ shift `expr $OPTIND - 1`
   ( echo "  Usage: `basename $0` directory remote-userid remote-directory"
     echo "   e.g.: `basename $0` /data/xraid0/v252l" \
                  "accumulator@arcs-df.ivec.org" \
-                 "/data/ASTRO-TRANSFERS/February09/v252l/Mopra"
+                 "/data/ASTRO-TRANSFERS/May10/v252l/Mopra"
     echo "Options: -s   .. skip files whose names begin with a period"
+    echo "         -r   .. reverse order"
     echo "         -u   .. use 'udt' protocol"                ) >&2 && exit 2
 alias ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 
@@ -43,7 +45,7 @@ ssu $2 "test -w         $3"   2>/dev/null || fail 1 "Remote-directory problem"
 
 # Create a link directory with links to the source files that are readable
 SouDir=`mktemp -d`&&trap 'rm -rf $ErrFil' 0||fail 1 "Temporary dir'y problem"
-for F in `ls -1L$Skip "$1"`; do
+for F in `ls -1L$Skip "$1" | $Sort`; do
   [ \( -r "$1/$F" \) -a \( -f "$1/$F" \) ] && ln -s "$1/$F" $SouDir
 done
 
