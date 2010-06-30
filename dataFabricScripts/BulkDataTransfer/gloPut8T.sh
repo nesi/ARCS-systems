@@ -14,7 +14,7 @@ export PATH=$GLOBUS_LOCATION/bin:$PATH
 Params="-v -cc 2 -g2 -pp -p 4 -sync -sync-level 1"
 while getopts u Option; do
   case $Option in
-    u) Params="-v -cc 2 -g2 -udt -pp -p 2 -sync -sync-level 1";;
+    u) Params="-v -cc 2 -g2 -udt -fast -pp -p 2 -sync -sync-level 1";;
    \?) Bad="Y";;
   esac
 done
