@@ -12,12 +12,12 @@ export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
 Skip="A"; Sort="sort -r"
-Params="-v -cc 2 -g2 -pp -p 4 -sync -sync-level 1"
+Params="-vb -cc 2 -g2 -pp -p 4 -sync -sync-level 1"
 while getopts sru Option; do
   case $Option in
     s) Skip=;;
     r) Sort="cat";;
-    u) Params="-v -cc 2 -g2 -udt -pp -p 2 -sync -sync-level 1";;
+    u) Params="-vb -cc 2 -g2 -udt -pp -p 2 -sync -sync-level 1";;
    \?) Bad="Y";;
   esac
 done
@@ -38,6 +38,27 @@ fail() {
   echo "$@"; exit $Code
 }
 
+# Progress function; allows real-time progress output with nohup
+showProgress() {
+  perl -e '{
+    while (sysread(*stdin,$buff,16)) {
+      $s.=$buff;
+      if ( ( $i=index($s,"Dest:") ) >= 0 ) {
+        if ( ( $j=index($s,"\n",$i+5) ) >= 0 ) {
+          if ( ( $k=index($s,"\n", $j+1) ) >=0 ) {
+            @x=localtime();
+            $x[6]=(Sun,Mon,Tue,Wed,Thu,Fri,Sat)[$x[6]];
+            $o="$x[6] $x[2]:".substr($x[1]+100,1).":".
+                              substr($x[0]+100,1).(substr($s,$j+1,$k-$j));
+            syswrite(*stdout,$o,length($o));
+            $s=substr($s,$k)
+          }
+        }
+      }
+    }  
+  }'
+}
+
 # Create destination directory if required, ensure that we can write to it 
 ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
 ssu $2 "mkdir -p -m 775 $3"   2>/dev/null
@@ -56,7 +77,8 @@ until grep -q "No files matched the source url." $ErrFil ; do
   head -3 $ErrFil; sleep $SleTim; SleTim=`expr 1 + $SleTim`; echo
   [ $SleTim -gt 20 ]                      && fail 1 "Too many failures!"
   echo "`date '+%a %T'` .. Determining files to be copied."
-  globus-url-copy $Params "file://$SouDir/" "sshftp://$2/$3/" 2>$ErrFil && break
+  globus-url-copy $Params "file://$SouDir/" "sshftp://$2/$3/" 2>$ErrFil |
+                             showProgress && break
 done
 
 # All done, adjust permissions and exit
