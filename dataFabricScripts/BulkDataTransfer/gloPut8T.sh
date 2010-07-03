@@ -2,7 +2,7 @@
 # gloPut8T.sh  Copies files in a designated directory to a remote server.
 #              Requires GT 5.0.2 threaded globus-url-copy; uses sshftp.
 #              For Solaris, use 'ksh' instead of 'sh'.
-#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100702
+#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100703
 
 # Environment, etc.
 for Dir in globus-5 globus-5.0.2 globus-5.0.1 globus-4.2.1; do
@@ -12,12 +12,12 @@ export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
 Skip="A"; Sort="sort -r"
-Params="-v -cd -cc 2 -g2 -pp -p 4 -sync -sync-level 1"
+Params="-v -cd -cc 2 -fast -p 4 -sync -sync-level 1"
 while getopts sru Option; do
   case $Option in
     s) Skip=;;
     r) Sort="cat";;
-    u) Params="-v -cd -cc 2 -g2 -udt -pp -p 2 -sync -sync-level 1";;
+    u) Params="-v -cd -cc 2 -udt -fast -p 2 -sync -sync-level 1";;
    \?) Bad="Y";;
   esac
 done
