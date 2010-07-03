@@ -12,12 +12,12 @@ export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
 Skip="A"; Sort="sort -r"
-Params="-v -cd -cc 2 -fast -p 4 -sync -sync-level 1"
+Params="-vb -cd -cc 2 -fast -p 4 -sync -sync-level 1"
 while getopts sru Option; do
   case $Option in
     s) Skip=;;
     r) Sort="cat";;
-    u) Params="-v -cd -cc 2 -udt -fast -p 2 -sync -sync-level 1";;
+    u) Params="-vb -cd -cc 2 -udt -fast -p 2 -sync -sync-level 1";;
    \?) Bad="Y";;
   esac
 done
@@ -38,6 +38,27 @@ fail() {
   echo "$@"; exit $Code
 }
 
+# Progress function; enables use of "-vb" parameter so 'nohup' shows progess
+progress() {
+  perl -e '{
+    while (sysread(*stdin,$buff,16)) {
+      $s.=$buff;
+      if ( ( $i=index($s,"Dest:") ) >= 0 ) {
+        if ( ( $j=index($s,"\n",$i+5) ) >= 0 ) {
+          if ( ( $k=index($s,"\n", $j+1) ) >=0 ) {
+            @x=localtime();
+            $x[6]=(Sun,Mon,Tue,Wed,Thu,Fri,Sat)[$x[6]];
+            $o="$x[6] $x[2]:".substr($x[1]+100,1).":".
+                              substr($x[0]+100,1).(substr($s,$j+1,$k-$j));
+            syswrite(*stdout,$o,length($o));
+            $s=substr($s,$k)
+          }
+        }
+      }
+    }  
+  }'
+}
+
 # Check ssh key validity
 ssu $2 /bin/date</dev/null>/dev/null 2>&1  || fail 1 "Remote-userid is invalid"
 
@@ -48,11 +69,12 @@ for F in `ls -1L$Skip "$1" | $Sort`; do
 done
 
 # Loop until no more files need to be copied from the link directory
-while : ; do
+while [ -d $SouDir ] ; do
   Pass=`expr $Pass + 1`; [ $Pass -gt 20 ] && fail 1 "Too many failures!"
   echo "`date '+%a %T'` .. Determining files to be copied (Pass $Pass)"
-  globus-url-copy $Params "file://$SouDir/" "sshftp://$2/$3/" && break || echo
-  sleep $Pass
+  ( globus-url-copy $Params "file://$SouDir/" "sshftp://$2/$3/" && 
+                                                    rm -rf $SouDir ) | progress
+  echo && sleep $Pass
 done
 
 # All done, adjust permissions and exit
