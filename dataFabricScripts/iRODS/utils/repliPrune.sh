@@ -38,10 +38,10 @@ done |
 # Process each record in the list
 while read Line; do
 
-  # Remove dirty replicas
+  # Update dirty replicas
   for Replica in `eval ils -l "$Line" | awk '{if($6 != "&") print $2}'`; do
-    echo DIRTY itrim -M -n ${Replica} "$Line"
-    [ -z "$ListOnly" ] && eval itrim -M -n ${Replica} "$Line" 
+    echo "DIRTY(#"$Replica")" irepl -MUT "$Line"
+    [ -z "$ListOnly" ] && eval irepl -MUT "$Line" 
   done 
 
   # Remove replicas on the same resource
