@@ -1,58 +1,69 @@
 #!/bin/ksh
-# repliPrune.sh  Ascertains which files have more than 2 clean replicas, and
-#                removes replicas so that there are only 2.
-#                Graham Jenkins <graham@vpac.org> May 2010. Rev: 20100601
+# repliPrune.sh Ascertains which files have more than 2 clean replicas, and
+#               removes replicas so that there are only 2.
+#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100707
 
 # Path, usage check
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
-String="removing"
-[ "$1" = "-n" ] && ListOnly=Y && shift && String="would remove"
-[ -z "$1" ] &&
-  ( echo "Usage: `basename $0` [-n] Collection [Collection2 ..]"
-    echo " e.g.: `basename $0` /ARCS/home /ARCS/projects/IMOS"
-    echo " Note: Use option '-n' to show what would be done"
+while getopts nd Option; do
+  case $Option in
+    n   ) ListOnly=Y;;
+    d   ) DirtyOnly=Y;;
+    h|\?) Bad=Y;;
+  esac
+done
+shift `expr $OPTIND - 1`
+
+if [ \( -n "$Bad" \) -o \( -z "$1" \) ] ; then
+  ( echo "  Usage: `basename $0` [-n] [-d] Collection [Collection2 ..]"
+    echo "   e.g.: `basename $0` /ARCS/home /ARCS/projects/EMXRAY"
+    echo
+    echo "Options: -n  No action; just show what would be done"
+    echo "         -d  \"Dirty\" and \"Same Resource\" processing only" 
   ) >&2 && exit 2
+fi
 
 # List the files with more than 2 replicas
-ils -lr "$@" 2>/dev/null | awk '{
-  if ($1~"^/") {    # Extract collection names from records starting in "/".
-    Dir=substr($0,1,length-1)
-  }
-  else {            # Extract filenames from non-collection records,
-    if ($1!="C-") { # and skip those whose size is non-positive ..
-      amperpos=index($0," & ")
-      if ( (amperpos>0) &&  ($4>0 )) {
-                    # If a filename is the same as the last, increment count
-                    # And if the count exceeds 1, print the filename
-        curr="\""Dir"/"substr($0,amperpos+3)"\""
-        if ( curr  == prev ) { count++    } else { count=0; prev=curr }
-        if ( count == 2    ) { print curr }
-      }
-    }
-  }
-}' |
+for Collection in "$@" ; do
+  ( yes | iquest "%s %s/%s" "select count(DATA_REPL_NUM),COLL_NAME,DATA_NAME
+      where COLL_NAME like '${Collection}/%'" ) 2>/dev/null |
+      awk '{if ($0 ~ /^Continue?/) $0=substr($0,16)
+            if ($1 > 2) {
+              j=index($0," ")
+              if(j>0) print "\""substr($0,j+1)"\""
+            } }'
+done |
 
-# For each file, get the set of replica numbers, the remove all except the
-# first two replicas
+# Process each record in the list
 while read Line; do
-  n=0
-  echo
-  echo "$Line"
-  eval ils -l "$Line"
-  if [ -n "`eval ils -l \"$Line\"|awk '/ & / {print $3}'|sort| uniq -d`" ]; then
-    echo "== ^^ REPLICAS ON SAME RESOURCE, PROCESSING SKIPPED! ^^ =="
-  else
-    for Replica in `eval ils -l "$Line" | awk '/ & / {print $2}'`; do
-      n=`expr 1 + $n`
-      repNum[$n]=$Replica
-    done
-    for k in `seq 3 $n`; do
-      echo " .. $String replica number: ${repNum[k]}"
-      [ -z "$ListOnly" ] && eval itrim -M -n ${repNum[k]} "$Line" 
-    done
-  fi
-done
 
-# All done
-echo
+  # Remove dirty replicas
+  for Replica in `eval ils -l "$Line" | awk '{if($6 != "&") print $2}'`; do
+    echo DIRTY itrim -M -n ${Replica} "$Line"
+    [ -z "$ListOnly" ] && eval itrim -M -n ${Replica} "$Line" 
+  done 
+
+  # Remove replicas on the same resource
+  for Resource in  \
+      `eval ils -l "$Line"|awk '/ & / {print $3}'|sort|uniq -d|head -1`; do
+    for Replica in \
+        `eval ils -l "$Line" |awk '{if($3==r) print $2}' r=$Resource`; do
+      echo SAME-RESOURCE itrim -M -n ${Replica} "$Line"
+      [ -z "$ListOnly" ] && eval itrim -M -n ${Replica} "$Line"
+    done
+  done
+
+  # Remove other excessive replicas
+  [ -n "$DirtyOnly" ] && continue
+  n=0
+  for Replica in `eval ils -l "$Line" | awk '/ & / {print $2}'`; do
+    n=`expr 1 + $n`
+    repNum[$n]=$Replica
+  done
+  for k in `seq 3 $n`; do
+    echo EXCESSIVE itrim -M -n ${repNum[k]} "$Line"
+    [ -z "$ListOnly" ] && eval itrim -M -n ${repNum[k]} "$Line"
+  done
+
+done
