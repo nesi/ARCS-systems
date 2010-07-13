@@ -2,6 +2,8 @@
 # record_nagents.sh  Prints the number of running irodsAgent processes
 #                  Should be called at 5-minute intervals from cron.
 #                  Gareth May 2010. Rev: 20100526
+# $Id$
+# $HeadURL$
 
 # Destination function, Path, Usage ..
 Destin() {

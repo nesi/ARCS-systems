@@ -1,4 +1,6 @@
 #!/bin/bash
+# $Id$
+# $HeadURL$
 day=$(date +%a)
 cat /tmp/record_usage.sh.$day | /Home/arcs-admin/bin/record2gp.sh > /tmp/$day.gp
 gnuplot /tmp/$day.gp > /tmp/$day.png

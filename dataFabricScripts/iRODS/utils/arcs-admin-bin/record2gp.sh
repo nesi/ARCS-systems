@@ -1,4 +1,6 @@
 #!/usr/bin/env perl
+# $Id$
+# $HeadURL$
 use strict;
 use warnings;
 use Date::Manip;
@@ -26,7 +28,7 @@ while (my $line = <>) {
     next;
   } elsif ($line =~ /^\s*(\d+)\s+(\d+)\s+(\w+)\s+(\d+)\s+([\w.]+)\s*$/) {
     my ($vsz, $rss, $user, $pid, $cmd) = ($1, $2, $3, $4, $5);
-    next unless $vsz > 40000;
+    next unless $vsz > 50000;
     my $key = "$cmd.$pid.$user";
     $process{$key} = () unless exists $process{$key};
     push @{$process{$key}}, "$time $vsz";
@@ -36,7 +38,7 @@ while (my $line = <>) {
     print STDERR "line not matched: $line";
   }
 }
-print "set timestamp top\nset terminal png\nset pointsize 0.4\nset xdata time\nset format x '%H:%M'\nset key outside\nset timefmt '%s'\nset xtics 60*60*4\nplot \\\n";
+print "set timestamp top\nset xtitle 'date/time'\nset ytitle 'size(Bytes)'\nset title 'vmem used by rods processes'\nset terminal png\nset pointsize 0.4\nset xdata time\nset format x '%H:%M'\nset key outside\nset timefmt '%s'\nset xtics 60*60*4\nplot \\\n";
 my @plots;
 foreach my $key (keys %process) {
   push @plots, "'-' u (\$1+10*60*60):2 w lp t '$key' \\\n";

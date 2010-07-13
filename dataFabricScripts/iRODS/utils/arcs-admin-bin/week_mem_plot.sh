@@ -1,4 +1,6 @@
 #!/bin/bash
+# $Id$
+# $HeadURL$
 cat /tmp/record_usage.sh.* | /Home/arcs-admin/bin/record2gp.sh > /tmp/week.gp
 perl -pi -e 's/set key outside/set key off/; s/%H:%M/%m-%d/; s/60\*60\*4/60*60*24/' /tmp/week.gp
 gnuplot /tmp/week.gp > /tmp/week.png

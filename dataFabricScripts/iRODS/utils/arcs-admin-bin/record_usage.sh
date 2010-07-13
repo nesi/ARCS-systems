@@ -2,6 +2,8 @@
 # record_usage.sh  Prints VM and RSS usage for designated users.
 #                  Should be called at 5-minute intervals from cron.
 #                  Graham Jenkins <graham@vpac.org> April 2010. Rev: 20100419
+# $Id$
+# $HeadURL$
 
 # Destination function, Path, Usage ..
 Destin() {
