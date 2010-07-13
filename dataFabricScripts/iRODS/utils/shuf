@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+# shuf.py  Simple implementation of 'shuf' program found in more recent
+#          releases of Linux Core Utilities.
+#          Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100712
+import sys, random
+lines = sys.stdin.readlines()
+random.shuffle(lines)
+for line in lines: print line,
