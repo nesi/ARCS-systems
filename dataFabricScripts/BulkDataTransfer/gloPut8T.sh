@@ -2,7 +2,7 @@
 # gloPut8T.sh  Copies files in a designated directory to a remote server.
 #              Requires GT 5.0.2 threaded globus-url-copy; uses sshftp.
 #              For Solaris, use 'ksh' instead of 'sh'.
-#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100703
+#              Graham.Jenkins@arcs.org.au  June 2010. Rev: 20100714
 
 # Environment, etc.
 for Dir in globus-5 globus-5.0.2 globus-5.0.1 globus-4.2.1; do
@@ -11,13 +11,14 @@ done
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
-Skip="A"; Sort="sort -r"
+Skip="A"; Sort="sort -r"; Verbos="-vb"
 Params="-vb -cd -cc 2 -fast -p 4 -sync -sync-level 1"
-while getopts sru Option; do
+while getopts sruq Option; do
   case $Option in
     s) Skip=;;
     r) Sort="cat";;
-    u) Params="-vb -cd -cc 2 -udt -fast -p 2 -sync -sync-level 1";;
+    u) Params="-cd -cc 2 -udt -fast -p 2 -sync -sync-level 1";;
+    q) Verbos="-q";;
    \?) Bad="Y";;
   esac
 done
@@ -29,7 +30,8 @@ shift `expr $OPTIND - 1`
                  "/data/ASTRO-TRANSFERS/May10/v252l/Mopra"
     echo "Options: -s   .. skip files whose names begin with a period"
     echo "         -r   .. reverse order"
-    echo "         -u   .. use 'udt' protocol"                ) >&2 && exit 2
+    echo "         -q   .. 'quiet' mode .. suppress progress messages"
+    echo "         -u   .. use 'udt' protocol"  ) >&2 && exit 2
 alias ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 
 # Failure/cleanup function; parameters are exit-code and message
@@ -72,7 +74,7 @@ done
 while [ -d $SouDir ] ; do
   Pass=`expr $Pass + 1`; [ $Pass -gt 20 ] && fail 1 "Too many failures!"
   echo "`date '+%a %T'` .. Determining files to be copied (Pass $Pass)"
-  ( globus-url-copy $Params "file://$SouDir/" "sshftp://$2/$3/" && 
+  ( globus-url-copy $Verbos $Params "file://$SouDir/" "sshftp://$2/$3/" && 
                                                     rm -rf $SouDir ) | progress
   echo && sleep $Pass
 done

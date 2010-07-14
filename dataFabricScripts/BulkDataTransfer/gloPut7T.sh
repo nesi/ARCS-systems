@@ -3,23 +3,23 @@
 #              Requires threaded globus-url-copy; uses sshftp.
 #              For Solaris, use 'ksh' instead of 'sh'; you may also need
 #              to use 'du -h' instead of 'wc -c'.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100601
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100714
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
-for Dir in globus-5 globus-5.0.1 globus-4.2.1; do
+for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
   [ -d "/opt/$Dir/bin" ] && export GLOBUS_LOCATION=/opt/$Dir && break
 done
 export PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
-Params="-pp -p 4"
+Params="-p 4"
 Skip="A"
 Sort="cat"
 while getopts b:usr Option; do
   case $Option in
     b) BATCH=$OPTARG;;
-    u) Params="-udt -pp -p 2";;
+    u) Params="-udt -p 2";;
     s) Skip=;;
     r) Sort="sort -r";;
    \?) Bad="Y";;
@@ -48,7 +48,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   wc -c `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q $Params -cc 2 -g2 -f $1
+  globus-url-copy -q $Params -cc 2 -fast -f $1
   echo
   >$1
   [ -x "$1" ]                             || fail 0 "Graceful Termination"
