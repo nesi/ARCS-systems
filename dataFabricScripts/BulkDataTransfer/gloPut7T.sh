@@ -3,7 +3,7 @@
 #              Requires threaded globus-url-copy; uses sshftp.
 #              For Solaris, use 'ksh' instead of 'sh'; you may also need
 #              to use 'du -h' instead of 'wc -c'.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100714
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100715
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -61,9 +61,9 @@ ssu $2 "test -w         $3"   2>/dev/null || fail 1 "Remote-directory problem"
 
 # Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
-trap "chmod a-x $LisFil ; echo Break detected .. wait"     CONT
-trap 'Params="     -pp -p 4"; echo Switched to TCP..'      USR1
-trap 'Params="-udt -pp -p 2"; echo Switched to UDT..'      USR2
+trap "chmod a-x $LisFil ; echo Break detected .. wait" CONT
+trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
+trap 'Params="-udt -p 2"; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -CONT $$"
