@@ -22,7 +22,7 @@ $ENV{HTTPS_CERT_FILE} = "/etc/grid-security/irodscert.pem";
 $ENV{HTTPS_KEY_FILE}  = "/etc/grid-security/irodskey.pem";
 $ENV{HTTPS_DEBUG} = 0;    # Set to "1" to enable debug
 my $URL="https://access.arcs.org.au/service/list.html?serviceId=3";
-my $notify="Y";           # Set to "Y" to notify users when added
+my $notify="N";           # Set to "Y" to notify users when added
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
