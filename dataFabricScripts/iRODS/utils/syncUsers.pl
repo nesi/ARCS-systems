@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100621
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100719
 use strict;
 use warnings;
 use File::Basename;
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.16";
+$VERSION="2.17";
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -22,7 +22,7 @@ $ENV{HTTPS_CERT_FILE} = "/etc/grid-security/irodscert.pem";
 $ENV{HTTPS_KEY_FILE}  = "/etc/grid-security/irodskey.pem";
 $ENV{HTTPS_DEBUG} = 0;    # Set to "1" to enable debug
 my $URL="https://access.arcs.org.au/service/list.html?serviceId=3";
-my $notify="N";           # Set to "Y" to notify users when added
+my $notify="Y";           # Set to "Y" to notify users when added
 
 # Log-and-die subroutine
 sub log_and_die { # Usage: log_and_die(message)
@@ -85,7 +85,8 @@ if ( `ienv 2>/dev/null`!~m/rods2.1/ ) { ($param1,$param2)=("aua"    ,""  ) }
 # Get the current users and their attributes
 my (%user_dn,%user_info,@field,$u);
 foreach my $line
-  (split ("\n",`iquest "select USER_NAME,USER_DN,USER_INFO" 2>/dev/null`) ) {
+  (split ("\n",`yes|iquest "select USER_NAME,USER_DN,USER_INFO" 2>/dev/null`)) {
+  if ( $line =~ m/^Continue/ )       { $line=substr($line,15)              }
   @field=split(" ",$line);
   next if ! defined $field[2];
   if    ( $field[0] eq "USER_NAME" ) { 
