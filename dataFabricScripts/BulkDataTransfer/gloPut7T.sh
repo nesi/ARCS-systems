@@ -1,16 +1,15 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              For Solaris, use 'ksh' instead of 'sh'; you may also need
-#              to use 'du -h' instead of 'wc -c'.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100715
+#              For Solaris, you may need to use 'du -h' instead of 'wc -c'.
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100722
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
 for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
-  [ -d "/opt/$Dir/bin" ] && export GLOBUS_LOCATION=/opt/$Dir && break
+  [ -d "/opt/$Dir/bin" ] && GLOBUS_LOCATION=/opt/$Dir && break
 done
-export PATH=$GLOBUS_LOCATION/bin:$PATH
+PATH=$GLOBUS_LOCATION/bin:$PATH
 
 # Usage, alias
 Params="-p 4"
@@ -35,7 +34,7 @@ shift `expr $OPTIND - 1`
     echo "         -r   .. reverse order"
     echo "         -s   .. skip files whose names begin with a period"
     echo "         -u   .. use 'udt' protocol"                ) >&2 && exit 2
-alias ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
+Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 
 # Failure/cleanup function; parameters are exit-code and message
 fail() {
@@ -55,9 +54,9 @@ doGlobus() {
 }
 
 # Create destination directory if required, ensure that we can write to it 
-ssu $2 /bin/date</dev/null>/dev/null 2>&1 || fail 1 "Remote-userid is invalid"
-ssu $2 "mkdir -p -m 775 $3"   2>/dev/null
-ssu $2 "test -w         $3"   2>/dev/null || fail 1 "Remote-directory problem"
+eval $Ssu $2 /bin/date</dev/null>/dev/null 2>&1 ||fail 1 "Remote-userid invalid"
+eval $Ssu $2 "mkdir -p -m 775 $3"   2>/dev/null
+eval $Ssu $2 "test -w         $3"   2>/dev/null ||fail 1 "Remote-dir'y problem"
 
 # Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
@@ -74,7 +73,7 @@ while [ -n "$Flag" ] ; do
   echo "Generating a list of files to be copied .. wait .."
   # List filename/size couplets in remote and local directories; if a couplet
   # appears once then it hasn't been copied properly, so add filename to list
-  for File in `( ssu $2 "ls -lL$Skip $3 2>/dev/null"
+  for File in `( eval $Ssu $2 "ls -lL$Skip $3 2>/dev/null"
                          ls -lL$Skip $1 2>/dev/null ) |
       awk '{print \$NF, \$5}'|sort|uniq -u|awk '{print \$1}'|uniq|$Sort`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
@@ -86,5 +85,5 @@ while [ -n "$Flag" ] ; do
 done
 
 # All done, adjust permissions and exit
-ssu $2 "chmod -R g+rw $3" 2>/dev/null
+eval $Ssu $2 "chmod -R g+rw $3" 2>/dev/null
 fail 0 "No more files to be copied!"
