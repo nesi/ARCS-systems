@@ -2,7 +2,7 @@
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
 #              For Solaris, you may need to use 'du -h' instead of 'wc -c'.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100722
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100723
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -10,8 +10,9 @@ for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
   [ -d "/opt/$Dir/bin" ] && GLOBUS_LOCATION=/opt/$Dir && break
 done
 PATH=$GLOBUS_LOCATION/bin:$PATH
+export GLOBUS_LOCATION PATH
 
-# Usage, alias
+# Usage, ssh parameters
 Params="-p 4"
 Skip="A"
 Sort="cat"
