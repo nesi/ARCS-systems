@@ -2,17 +2,18 @@
 # fdtPut7.sh   Copies files in a designated directory to a remote server using
 #              FDT over a designated port. Needs Java 1.6 or better.
 #              'fdt.jar' and 'java' need to be in PATH and executable.
-#              Graham.Jenkins@arcs.org.au  July 2009. Rev: 20100617
+#              Graham.Jenkins@arcs.org.au  July 2009. Rev: 20100805
 
 # Default port, ssh-key and batch-size; adjust as appropriate
 PORT=80; KEY=~/.ssh/id_dsa; BATCH=16; export PORT KEY BATCH
 
 # Options
-while getopts p:k:b: Option; do
+while getopts p:k:b:r Option; do
   case $Option in
     p) PORT=$OPTARG;;
     k) KEY=$OPTARG;;
     b) BATCH=$OPTARG;;
+    r) Order="-r";;
   esac
 done
 shift `expr $OPTIND - 1`
@@ -25,6 +26,7 @@ shift `expr $OPTIND - 1`
     echo "                       /data/ASTRO-TRANSFERS/February09/v252l/Mopra"
     echo "Options: -p m .. use port 'm' (default $PORT)"
     echo "         -b N .. use batch-size N (default $BATCH)"
+    echo "         -r   .. reverse order"
     echo "         -k keyfile .. use 'keyfile' (default $KEY)" ) >&2 && exit 2
 alias ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 
@@ -37,7 +39,7 @@ fail() {
 # Java FDT invocation
 doJava () {
   [ `ssu $2 "df -P $3" 2>/dev/null | awk '{if ($5~/%/){print $5;exit}}' |
-     tr -d %` -gt 95 ] && fail 1 "Remote filesystem nearing capacity; aborted!"
+     tr -d %` -ge 95 ] && fail 1 "Remote filesystem nearing capacity; aborted!"
   java -Xms256m -Xmx256m -jar `which fdt.jar` -sshKey $KEY -p $PORT \
        -noupdates -ss 32M -iof 4 -notmp -rCount 2 -wCount 2         \
                                           $1/* $2:$3 </dev/null >/dev/null 2>&1
@@ -67,7 +69,7 @@ while [ -n "$Flag" ] ; do
   # appears once then it hasn't been copied properly, so add filename to list
   for File in `( ssu $2 "ls -lL $3 2>/dev/null"
                          ls -lL $1 2>/dev/null ) |
-      awk '{print \$NF, \$5}' | sort | uniq -u | awk '{print \$1}' | uniq`; do
+      awk '{print \$NF, \$5}'|sort $Order|uniq -u|awk '{print \$1}'| uniq`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue  
     Flag=Y
     [ `ls $TmpDir/ | wc -w` -eq 0 ] && echo "== `date '+%a %T'` .. Pid: $$ =="
