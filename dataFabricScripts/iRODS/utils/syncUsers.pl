@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100726
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100805
 use strict;
 use warnings;
 use File::Basename;
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.18";
+$VERSION="2.19";
 
 # Adjust these as appropriate:
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -120,7 +120,7 @@ for (my $k=1;$k<=$j;$k++) {
     if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$u."\n"}
   }
   $stplus="\"<ST>".$sharedtoken[$k]."</ST>\"";
-  if ( $stplus ne "\"".$user_info{$u}."\"" ) {
+  if ( (defined($user_info{$u}))&&($stplus ne "\"".$user_info{$u}."\"") ) {
     `iadmin moduser $u info $stplus`;
     if(! $?){$message.="Inserted INFO: ".$stplus." for user: ".$u."\n"}
   }
