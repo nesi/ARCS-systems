@@ -2,7 +2,7 @@
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
 #              For Solaris, you may need to use 'du -h' instead of 'wc -c'.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100723
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100816
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -15,13 +15,14 @@ export GLOBUS_LOCATION PATH
 # Usage, ssh parameters
 Params="-p 4"
 Skip="A"
-Sort="cat"
-while getopts b:usr Option; do
+Match="."
+while getopts b:usrm: Option; do
   case $Option in
     b) BATCH=$OPTARG;;
     u) Params="-udt -p 2";;
     s) Skip=;;
-    r) Sort="sort -r";;
+    r) Order="-r";;
+    m) Match=$OPTARG;;
    \?) Bad="Y";;
   esac
 done
@@ -31,10 +32,11 @@ shift `expr $OPTIND - 1`
     echo "   e.g.: `basename $0` /data/xraid0/v252l" \
                  "accumulator@arcs-df.ivec.org" \
                  "/data/ASTRO-TRANSFERS/February09/v252l/Mopra"
-    echo "Options: -b n .. use a batch-size of 'n' (default 16)"
-    echo "         -r   .. reverse order"
-    echo "         -s   .. skip files whose names begin with a period"
-    echo "         -u   .. use 'udt' protocol"                ) >&2 && exit 2
+    echo "Options: -b n      .. use a batch-size of 'n' (default 16)"
+    echo "         -r        .. reverse order"
+    echo "         -s        .. skip files whose names begin with a period"
+    echo "         -m String .. send only files whose names contain 'String'"
+    echo "         -u        .. use 'udt' protocol"              ) >&2 && exit 2
 Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 
 # Failure/cleanup function; parameters are exit-code and message
@@ -75,8 +77,9 @@ while [ -n "$Flag" ] ; do
   # List filename/size couplets in remote and local directories; if a couplet
   # appears once then it hasn't been copied properly, so add filename to list
   for File in `( eval $Ssu $2 "ls -lL$Skip $3 2>/dev/null"
-                         ls -lL$Skip $1 2>/dev/null ) |
-      awk '{print \$NF, \$5}'|sort|uniq -u|awk '{print \$1}'|uniq|$Sort`; do
+                               ls -lL$Skip $1 2>/dev/null ) |
+      awk '{print \$NF, \$5}' | sort $Order | uniq -u |
+      awk '{print \$1}'       |                  uniq | grep $Match`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     Flag=Y
     echo "file://$1/$File sshftp://$2$3/" >> $LisFil
