@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 # gloGet7T.sh  Gets files from a remote server. Beta Version!
-#              Graham Jenkins <graham@vpac.org> Aug. 2010, Rev: 20100818
+#              Graham Jenkins <graham@vpac.org> Aug. 2010, Rev: 20100819
 
 # Usage, alias
 [ $# -ne 3 ] && 
