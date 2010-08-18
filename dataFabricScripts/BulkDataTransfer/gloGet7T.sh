@@ -1,6 +1,6 @@
 #!/bin/sh
-# gloPull7T.sh  Pulls files from a remote server. Beta Version!
-#               Graham Jenkins <graham@vpac.org> Aug. 2010, Rev: 20100818
+# gloGet7T.sh  Gets files from a remote server. Beta Version!
+#              Graham Jenkins <graham@vpac.org> Aug. 2010, Rev: 20100818
 
 # Usage, alias
 [ $# -ne 3 ] && 
@@ -27,16 +27,14 @@ while [ -n "$Flag" ] ; do
                                ls -lL $1 2>/dev/null ) |
       awk '{print \$NF, \$5}' | sort | uniq -u |
       awk '{print \$1}'              | uniq`     ; do
-    eval $Ssu $2 "test -r $3/$File" 2>/dev/null && FLAG=Y || continue
+    eval $Ssu $2 "test -r $3/$File" 2>/dev/null && Flag=Y || continue
+    # Wait while we dump first block to ensure file is available on disk
+    eval $Ssu $2 "dd if=$3/$File of=/dev/null count=1" 2>/dev/null
+    echo `date '+%a %T'` $3/$File
+    # Mode E won't work with some firewalls; use basic options
+    globus-url-copy -q -cd -st 2400 -nodcau sshftp://$2/$3/$File file://$1/ &
     # Maintain pipeline of several jobs
-    ( # Do character-count to ensure files are available on disk
-      RemSiz=`eval $Ssu $2 "wc -c \< $3/$File" 2>/dev/null`
-      echo `date '+%a %T'` $3/$File $RemSiz
-      # Mode E won't work with some firewalls; use basic options
-      globus-url-copy -q -cd -st 2400 -nodcau  \
-        sshftp://$2/$3/$File file://$1/
-    ) &
-    until [ `pgrep -P $$ globus-url-copy 2>&1 | wc -l` -lt 4 ] ; do
+    until [ `jobs 2>&1 | wc -l` -lt 4 ] ; do
       sleep 1
     done
   done
