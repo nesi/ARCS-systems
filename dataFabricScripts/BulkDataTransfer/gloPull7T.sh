@@ -34,8 +34,9 @@ while [ -n "$Flag" ] ; do
       echo `date '+%a %T'` $3/$File $RemSiz
       # Mode E won't work with some firewalls; use basic options
       globus-url-copy -q -cd -st 2400 -nodcau  \
-        sshftp://$2/$3/$File file://$1/ ) &
-    until [ `jobs 2>&1 | wc -l` -lt 4 ] ; do
+        sshftp://$2/$3/$File file://$1/
+    ) &
+    until [ `pgrep -P $$ globus-url-copy 2>&1 | wc -l` -lt 4 ] ; do
       sleep 1
     done
   done
