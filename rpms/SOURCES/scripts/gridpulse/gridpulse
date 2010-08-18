@@ -207,7 +207,7 @@ fi
 
 # check services
 IGNORE_SERVICES="iptables anacron"
-for SERVICE in $(chkconfig --list | awk "! /${IGNORE_SERVICES/ /|}/ && \$5 == \"3:on\" {print \$1}"); do
+for SERVICE in $(chkconfig --list | awk "! /${IGNORE_SERVICES// /|}/ && \$5 == \"3:on\" {print \$1}"); do
 	case "$(service $SERVICE status 2>/dev/null | head -n1)" in
 		*is\ running*) echo "Service: $SERVICE is OK"
 			;;
