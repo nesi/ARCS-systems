@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100809
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20100817
 use strict;
 use warnings;
 use File::Basename;
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.20";
+$VERSION="2.22";
 
 # Adjust these as appropriate; you may need to comment the next line
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -55,6 +55,34 @@ sub remove_dn_s { # Usage: remove_dn_s(username)
   }
 }
 
+# Add-to-Group subroutine
+sub add_to_group { # Usage: add_to_group(organisation,username)
+  `iadmin mkgroup $_[0] >/dev/null 2>&1`;
+  if(! $?) {       # If group doesn't exist, create it and create a its dir'ty
+    my $c="iadmin atg               ".$_[0]." rods\n".
+          "ichmod own rods       ../".$_[0]."\n".
+          "imkdir                ../".$_[0]."/public\n".
+          "ichmod read ".$_[0]." ../".$_[0]."\n".
+          "ichmod own  ".$_[0]." ../".$_[0]."/public\n".
+          "ichmod inherit        ../".$_[0]."/public\n";
+    #print "DB1: \n$c \n";
+    `( $c ) >/dev/null 2>&1`
+  }
+  my $ret_stat=0;
+  `iadmin atg $_[0] $_[1] >/dev/null 2>&1`;
+  if(! $?) {       # If we added the user, create his/her subdirectory
+    $ret_stat=1;
+    my $c="iadmin atg               ".$_[0]." rods\n".
+          "imkdir                ../".$_[0]."/". $_[1]."\n".
+          "ichmod own  ".$_[1]." ../".$_[0]."/". $_[1]."\n".
+          "ichmod null rods      ../".$_[0]."/". $_[1]."\n".
+          "iadmin rfg               ".$_[0]." rods\n";
+    #print "DB2: \n$c \n";
+    `( $c ) >/dev/null 2>&1`
+  }                # If we coudn't add the user, return an error
+  return $ret_stat; 
+}
+
 # Check usage, check that we can execute 'iadmin', get the current user-list
 die "Usage: ".basename($0)." email-addrs\n".
     " e.g.: ".basename($0)." arcs-data\@lists.arcs.org.au\n" if $#ARGV != 0;
@@ -92,8 +120,8 @@ foreach my $line
   elsif ( $field[0] eq "USER_DN"   ) { $user_dn{$u}  =substr($line,10)     }
 }
 foreach my $line (`iquest --no-page "%s=%s" "select USER_NAME, USER_GROUP_NAME
-                      where USER_GROUP_NAME like 'Organisation: %'
-                      and USER_NAME not like 'Organisation: %'"`) {
+                      where USER_GROUP_NAME like 'Organisation %'
+                      and USER_NAME not like 'Organisation %'"`) {
   chomp($line);
   @field=split("=",$line);
   if ( defined ($org_group{$field[0]}) ) { 
@@ -134,16 +162,15 @@ for (my $k=1;$k<=$j;$k++) {
   }
   # Organisation-Group maintenance
   $group=substr($distiname[$k],3+index($distiname[$k],"/O=")); 
-  $group="Organisation: ".substr($group,0,index($group,"/"));
+  $group="Organisation ".substr($group,0,index($group,"/"));
   if ( (defined($org_group{$u}))&&($org_group{$u} ne $group) ) {
     my $orgplus="\"".$org_group{$u}."\"";
     `iadmin rfg $orgplus $u`
   }
   if ( (! defined($org_group{$u})) && ($distiname[$k]=~m"^/") ) {
-    my $groupplus="\"".$group."\"";
-    `iadmin mkgroup $groupplus >/dev/null 2>&1`;
-    `iadmin atg $groupplus $u`;
-    if(! $?){$message.="Added user: $u to group: $group"."\n"}
+    if (add_to_group("\"".$group."\"",$u) ) { 
+      $message.="Added user: $u to group: $group"."\n"
+    }
   }
 }
 
