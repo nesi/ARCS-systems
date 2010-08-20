@@ -16,6 +16,6 @@ acTrashPolicy||nop|nop
 #acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 #acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 #Adding rules to test automatic replication to AMAZON S3
-acPostProcForPut|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc,null),nop)|nop
-acPostProcForCopy|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc,null),nop)|nop
+acPostProcForPut|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc_us,null),nop)|nop
+acPostProcForCopy|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc_us,null),nop)|nop
 acSetReServerNumProc||msiSetReServerNumProc(4)|nop
