@@ -5,6 +5,7 @@
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acPreprocForRmColl|($collParentName != /ARCS/home) && ($collParentName != /ARCS/projects)|nop|nop
 acSetRescSchemeForCreate|$userNameClient == guest %% $userNameClient == anonymous|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au%emii.resource.tpac.org.au%arcs-df.eresearchsa.edu.au)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|msiSetDefaultResc(S3,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/charlie.bond/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/TCMIP/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/PUBLUMW/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
@@ -16,6 +17,6 @@ acTrashPolicy||nop|nop
 #acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 #acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC,null),nop)|nop
 #Adding rules to test automatic replication to AMAZON S3
-acPostProcForPut|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc_us,null),nop)|nop
-acPostProcForCopy|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc_us,null),nop)|nop
+#acPostProcForPut|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc_us,null),nop)|nop
+#acPostProcForCopy|"$objPath" like "/ARCS/home/*/AMAZON_S3/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(s3Resc_us,null),nop)|nop
 acSetReServerNumProc||msiSetReServerNumProc(4)|nop
