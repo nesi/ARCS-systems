@@ -1,7 +1,7 @@
-#!/bin/sh
-# RepliPara.sh   Replicator script intended for invovation (as the iRODS user)
+#!/bin/ksh
+# replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100712
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100824
 
 # Batch size, path, usage check
 BATCH=16
@@ -17,6 +17,19 @@ PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin:/usr/local/bin
 # Extract resource-name, loop forever
 Resource="$1"; shift
 while : ; do
+
+  # Generate an array of objects which have a replica on an 's3' resource
+  typeset -A s3obj
+  for Collection in "$@" ; do
+    iquest --no-page "%s/%s" "select COLL_NAME,DATA_NAME
+                               where RESC_TYPE_NAME = 's3'
+                                 and COLL_NAME like '${Collection}/%'" 2>/dev/null |
+                                                                sed 's/\$/\\\\$/g' |
+    while read s3Line; do
+      s3obj["\"$s3Line\""]=Y
+    done
+  done
+
   # List all files with full collection path, print those that appear only once
   logger -i "Replicating to $Resource .. $@"
   J=0
@@ -34,6 +47,7 @@ while : ; do
   
   # Feed the randomly-ordered list records into a parallel-job launch-pipe
   while read Line ; do
+    [ -n ${s3obj["$Line"]} ]            && continue
     [ -n "$ListOnly"  ] && echo "$Line" && continue
     eval irepl -MBT -R $Resource "$Line" &
     while [ `jobs | wc -l` -ge $BATCH ] ; do
