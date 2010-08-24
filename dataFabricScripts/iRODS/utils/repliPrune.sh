@@ -1,7 +1,8 @@
 #!/bin/ksh
-# repliPrune.sh Ascertains which files have more than 2 clean replicas, and
-#               removes replicas so that there are only 2.
-#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100707
+# repliPrune.sh Ascertains which objects have more than 2 clean replicas, and
+#               removes replicas so that there are only 2.  Excess replicas are
+#               retained where one replica is on an 's3' resource.
+#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100824
 
 # Path, usage check
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
@@ -24,16 +25,27 @@ if [ \( -n "$Bad" \) -o \( -z "$1" \) ] ; then
   ) >&2 && exit 2
 fi
 
+# Generate an array of objects which have a replica on an 's3' resource
+typeset -A s3obj
+for Collection in "$@" ; do
+  iquest --no-page "%s/%s" "select COLL_NAME,DATA_NAME
+                             where RESC_TYPE_NAME = 's3'
+                               and COLL_NAME like '${Collection}/%'" 2>/dev/null |
+                                                              sed 's/\$/\\\\$/g' |
+  while read s3Line; do
+    s3obj["\"$s3Line\""]=Y
+  done
+done
+
 # List the files with more than 2 replicas
 for Collection in "$@" ; do
-  ( yes | iquest "%s %s/%s" "select count(DATA_REPL_NUM),COLL_NAME,DATA_NAME
-      where COLL_NAME like '${Collection}/%'" ) 2>/dev/null |
-      awk '{if ($0 ~ /^Continue?/) $0=substr($0,16)
-            if ($1 > 2) {
+  iquest --no-page "%s %s/%s" "select count(DATA_REPL_NUM),COLL_NAME,DATA_NAME
+      where COLL_NAME like '${Collection}/%'" 2>/dev/null |
+      awk '{ if ($1 > 2) {
               j=index($0," ")
               if(j>0) print "\""substr($0,j+1)"\""
             } }'
-done |
+done | sed 's/\$/\\\\$/g' |
 
 # Process each record in the list
 while read Line; do
@@ -61,6 +73,7 @@ while read Line; do
     n=`expr 1 + $n`
     repNum[$n]=$Replica
   done
+  [ -n ${s3obj["$Line"]} ] && echo "SKIPPING (s3)" $Line && continue
   for k in `seq 3 $n`; do
     echo EXCESSIVE itrim -M -n ${repNum[k]} "$Line"
     [ -z "$ListOnly" ] && eval itrim -M -n ${repNum[k]} "$Line"
