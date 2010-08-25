@@ -3,7 +3,7 @@
 #               Graham Jenkins <graham@vpac.org> August 2010. Rev: 20100826
 
 # Path, options, user validation
-[ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
+[ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
 while getopts na Option; do
   case $Option in

@@ -2,10 +2,10 @@
 # repliPrune.sh Ascertains which objects have more than 2 clean replicas, and
 #               removes replicas so that there are only 2.  Excess replicas are
 #               retained where one replica is on an 's3' resource.
-#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100824
+#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100826
 
 # Path, usage check
-[ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
+[ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin
 while getopts nd Option; do
   case $Option in

@@ -1,11 +1,11 @@
 #!/bin/ksh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100825
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100826
 
 # Batch size, path, usage check
 BATCH=16
-[ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
+[ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin:/usr/local/bin
 [ "$1" = "-n" ] && ListOnly=Y && shift
 [ -z "$2" ] &&
