@@ -1,7 +1,7 @@
 #!/bin/ksh
 # replicator.sh  Replicator script intended for invovation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100824
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100825
 
 # Batch size, path, usage check
 BATCH=16
@@ -54,6 +54,7 @@ while : ; do
       sleep 1
     done
   done
+  wait
 
   # 18-hour pause
   logger -i "Replication pass completed!"
