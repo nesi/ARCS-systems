@@ -62,5 +62,5 @@ for Resource in "$@" ; do
 done
 
 # All done, exit
-logger -i "Processing of objects with replicas on S3 resources completed!"
+logger -i "Processing of objects with replicas on S3 resource(s) completed!"
 exit 0
