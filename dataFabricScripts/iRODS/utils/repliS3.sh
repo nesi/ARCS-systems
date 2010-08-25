@@ -1,6 +1,6 @@
 #!/bin/ksh
 # repliS3.sh    Manages replicas for file on Amazon S3 or similar resource.
-#               Graham Jenkins <graham@vpac.org> August 2010. Rev: 20100825
+#               Graham Jenkins <graham@vpac.org> August 2010. Rev: 20100826
 
 # Path, options, user validation
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS
@@ -23,6 +23,7 @@ if [ \( -n "$Bad" \) -o \( -z "$1" \) ] ; then
 fi
 
 # Check objects on each 's3' resource in the parameter list
+logger -i "Processing objects with replicas on S3 resource(s): $@"
 for Resource in "$@" ; do
 
   if [ "`iquest --no-page \"%s\" \"select RESC_TYPE_NAME \
@@ -59,3 +60,7 @@ for Resource in "$@" ; do
   done
 
 done
+
+# All done, exit
+logger -i "Processing of objects with replicas on S3 resources completed!"
+exit 0
