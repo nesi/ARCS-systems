@@ -9,6 +9,7 @@ acSetRescSchemeForCreate|$userNameClient == guest %% $userNameClient == anonymou
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/charlie.bond/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/TCMIP/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/PUBLUMW/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/LiDAR/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acAclPolicy||msiAclPolicy(STRICT)|nop
