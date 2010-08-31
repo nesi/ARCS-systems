@@ -7,7 +7,7 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCSDEVBACKEND/home/$userNameClient/A
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|#nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 acTrashPolicy||nop|nop
-acPostProcForPut|"$objPath" not like "/ARCSDEVBACKEND/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCSDEVBACKEND-GROUP,null),nop)|nop
+acPostProcForPut|"$objPath" not like "/ARCSDEVBACKEND/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCSDEVBACKEND-GROUP,updateRepl),nop)|nop
 acRescQuotaPolicy||msiSetRescQuotaPolicy(off)|nop
 acPreprocForRmColl|($collParentName != /ARCSDEVBACKEND/home) && ($collParentName != /ARCSDEVBACKEND/projects) && ("$collName" != "/ARCSDEVBACKEND/home/$userNameClient/Archive_S3")|nop|nop
 acPreProcForObjRename(*sourceObject,*destObject)|("*sourceObject" like "/ARCSDEVBACKEND/home/*/*") && ("*sourceObject" != "/ARCSDEVBACKEND/home/$userNameClient/Archive_S3")|writeLine(serverLog,"TEST:acPreProcForObjRename: *sourceObject")|nop
