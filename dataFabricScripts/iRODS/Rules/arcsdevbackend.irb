@@ -10,4 +10,5 @@ acTrashPolicy||nop|nop
 acPostProcForPut|"$objPath" not like "/ARCSDEVBACKEND/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>30s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCSDEVBACKEND-GROUP,null),nop)|nop
 acRescQuotaPolicy||msiSetRescQuotaPolicy(on)|nop
 acPreprocForRmColl|($collParentName != /ARCSDEVBACKEND/home) && ($collParentName != /ARCSDEVBACKEND/projects) && ("$collName" != "/ARCSDEVBACKEND/home/$userNameClient/Archive_S3")|nop|nop
-acPreProcForObjRename(*sourceObject,*destObject)|("*sourceObject" like "/ARCSDEVBACKEND/home/*/*") %% ("*sourceObject" like "/ARCSDEVBACKEND/projects/*/*") && ("*sourceObject" != "/ARCSDEVBACKEND/home/$userNameClient/Archive_S3")|nop|nop
+acPreProcForObjRename(*sourceObject,*destObject)|("*sourceObject" like "/ARCSDEVBACKEND/home/*/*") && ("*sourceObject" != "/ARCSDEVBACKEND/home/$userNameClient/Archive_S3")|writeLine(serverLog,"TEST:acPreProcForObjRename: *sourceObject")|nop
+acPreProcForObjRename(*sourceObject,*destObject)|"*sourceObject" like "/ARCSDEVBACKEND/projects/*/*"|nop|nop
