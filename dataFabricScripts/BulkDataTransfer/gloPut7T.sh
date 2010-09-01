@@ -1,8 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              For Solaris, you may need to use 'du -h' instead of 'wc -c'.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100816
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100901
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -38,6 +37,7 @@ shift `expr $OPTIND - 1`
     echo "         -m String .. send only files whose names contain 'String'"
     echo "         -u        .. use 'udt' protocol"              ) >&2 && exit 2
 Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
+[ `uname -s` = SunOS ] && Wc="du -h" || Wc="wc -c"
 
 # Failure/cleanup function; parameters are exit-code and message
 fail() {
@@ -49,7 +49,7 @@ fail() {
 # Globus-URL-Copy function; file list is 1st param
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
-  wc -c `awk '{print $1}' < $1 | cut -c 8-`
+  eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
   globus-url-copy -q $Params -cc 2 -fast -f $1
   echo
   >$1
@@ -63,12 +63,12 @@ eval $Ssu $2 "test -w         $3"   2>/dev/null ||fail 1 "Remote-dir'y problem"
 
 # Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
-trap "chmod a-x $LisFil ; echo Break detected .. wait" CONT
+trap "chmod a-x $LisFil ; echo Break detected .. wait" TERM
 trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
 trap 'Params="-udt -p 2"; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
-echo "To Terminate gracefully,  enter: kill -CONT $$"
+echo "To Terminate gracefully,  enter: kill -TERM $$"
 echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
 Flag=Y
 while [ -n "$Flag" ] ; do
