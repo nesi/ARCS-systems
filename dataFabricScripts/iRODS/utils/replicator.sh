@@ -1,18 +1,26 @@
 #!/bin/ksh
 # replicator.sh  Replicator script intended for invocation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100901
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100902
 
 # Batch size, path, usage check
 BATCH=16
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin:/usr/local/bin
 Zone=`iquest "%s" "select ZONE_NAME" 2>/dev/null`
-[ "$1" = "-n" ] && ListOnly=Y && shift
-[ -z "$2" ] &&
-  ( echo "Usage: `basename $0` [-n] Resource Collection [Collection2 ..]"
-    echo " e.g.: `basename $0` ARCS-REPLISET /$Zone/home /$Zone/projects/IMOS"
-    echo " Note: Use option '-n' to show what would be done, then exit"
+while getopts nsh Option; do
+  case $Option in
+    n   ) ListOnly=Y;;
+    s   ) Skip=Y ;;
+    h|\?) Bad="Y"   ;;
+  esac
+done
+shift `expr $OPTIND - 1`
+[ \( -n "$Bad" \) -o \( -z "$2" \) ] &&
+  ( echo "  Usage: `basename $0` [-s] [-n] Resource Collection [Collection2 ..]"
+    echo "   e.g.: `basename $0` ARCS-REPLISET /$Zone/home /$Zone/projects/IMOS"
+    echo "Options: -s .. skips cleaning of dirty replicas"
+    echo "         -n .. shows what would be done, then exits"
   ) >&2 && exit 2
 
 # Extract resource-name, loop forever
@@ -20,19 +28,21 @@ Resource="$1"; shift
 while : ; do
 
   # Clean dirty replicas
-  logger -i -t `basename $0` "Cleaning Dirty Replicas"
-  iquest --no-page "%s/%s" "select COLL_NAME,DATA_NAME
-    where COLL_NAME not like '/ARCS/trash/%'
-    and   DATA_REPL_STATUS <> '1'
-    and   DATA_SIZE        <> '0'" 2>/dev/null | sed 's/\$/\\\\$/g' |
-  while read Object; do
-    eval ils -l "\"$Object\"" | grep " & " >/dev/null 2>&1 || continue
-    [ -n "$ListOnly" ] && echo DIRTY: irepl -MUT "\"$Object\"" && continue
-    DirtyTotal=`eval ils -l "\"$Object\"" | grep -v " & " | wc -l`
-    for Count in `seq 1 $DirtyTotal`; do
-      eval irepl -MUT "\"$Object\""
+  if [ -z "$Skip" ]; then
+    logger -i -t `basename $0` "Cleaning Dirty Replicas"
+    iquest --no-page "%s/%s" "select COLL_NAME,DATA_NAME
+      where COLL_NAME not like '/ARCS/trash/%'
+      and   DATA_REPL_STATUS <> '1'
+      and   DATA_SIZE        <> '0'" 2>/dev/null | sed 's/\$/\\\\$/g' |
+    while read Object; do
+      eval ils -l "\"$Object\"" | grep " & " >/dev/null 2>&1 || continue
+      [ -n "$ListOnly" ] && echo DIRTY: irepl -MUT "\"$Object\"" && continue
+      DirtyTotal=`eval ils -l "\"$Object\"" | grep -v " & " | wc -l`
+      for Count in `seq 1 $DirtyTotal`; do
+        eval irepl -MUT "\"$Object\""
+      done
     done
-  done
+  fi
 
   # Process objects which have a clean replica on an 's3' resource
   typeset -A s3obj
