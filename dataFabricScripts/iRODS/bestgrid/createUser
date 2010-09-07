@@ -45,7 +45,7 @@ die "Usage: ".basename($0)." DN\n".
     "   or: ".basename($0)." FirstName .. LastName SharedToken Password"."\n".
     " e.g.: ".basename($0).' "/C=AU/O=APACGrid/OU=VPAC/CN=Jane Doe"'."\n".
     "   or: ".basename($0).' Jane Doe VI8SEdbk_8Ph3E7M1O8jdABRAC2 GuessMe'."\n"
-  if ( ($#ARGV < 0) || ( ($ARGV[0] !~ m/^\057/) && ($ARGV[0] !~ m/^[A-Z]/) ) );
+  if ( ($#ARGV < 0) || ( ($ARGV[0] !~ m/^\057/) && ($ARGV[0] !~ m/^[A-Za-z]/) ) );
 for (my $j=1;$j<=$#ARGV;$j++) {$ARGV[0]=$ARGV[0]." ".$ARGV[$j]}
 my $config_dir=$ENV{irodsConfigDir};
 die "Environment variable: \$irodsConfigDir  not defined!\n" 
@@ -85,13 +85,12 @@ while ( <CF> ) {
   }
 }
 
-print "Finished reading config: create_inbox_path=$create_inbox_path, irods_master_server=$irods_master_server, mail_host_from=$mail_host_from\n";
 # Check that we got the path
 die "Path not defined\n" if ! defined($path);
 
 # If we didn't get a valid DN, we may have FirstName..SharedToken Password
 my $pass;
-if ( (! defined($cn)) && ($ARGV[0]=~m/^[A-Z]/) ) {
+if ( (! defined($cn)) && ($ARGV[0]=~m/^[A-Za-z]/) ) {
   (@fields)=split(" ",$ARGV[0]);$pass=pop(@fields);$ARGV[0]=join(" ",(@fields));
   $cn=$ARGV[0]; $st_count=1
 }
@@ -180,7 +179,7 @@ for (my $j=1;$j<=20;$j++) {  # Note: mkuser won't properly handle a long DN
     if ( $create_inbox_path ) {
         `$create_inbox_path -u $user_name >/dev/null 2>&1`;
     };
-    mail_mess($addr, $dn_plus." => ".$user_name." .. Completed!");
+    mail_mess($addr, $dn_plus." => ".$user_name."#".$zone." .. Completed!");
     exit(0)
   }
 }
