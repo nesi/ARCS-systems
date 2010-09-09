@@ -2,7 +2,7 @@
 # repliPrune.sh Ascertains which objects have more than 2 clean replicas, and
 #               removes replicas so that there are only 2.  Excess replicas are
 #               retained where one replica is on an 's3' resource.
-#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100907
+#               Graham Jenkins <graham@vpac.org> July 2010. Rev: 20100909
 
 # Path, usage check
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS/iRODS
@@ -40,6 +40,7 @@ done
 for Collection in "$@" ; do
   iquest --no-page "%s%s/%s" "select count(DATA_REPL_NUM),COLL_NAME,DATA_NAME
     where COLL_NAME like '${Collection}/%' 
+    and DATA_SIZE  <> '0'
     and DATA_REPL_STATUS = '1'" 2>/dev/null 
 done | sed 's/\$/\\\\$/g' |
 
@@ -77,3 +78,7 @@ while read Line; do
   done
 
 done
+
+# All done
+echo "COMPLETED!"
+exit 0
