@@ -1,14 +1,14 @@
 #!/usr/bin/env perl
 # createUser     Creates a new password for an iRODS user during "Real-Shib"
 #                login. Exits with error if the user does not exist.
-#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20100528
+#                Graham Jenkins <graham@vpac.org> Dec. 2008. Rev: 20100914
 
 use strict;
 use warnings;
 use File::Basename;
 use Sys::Syslog;
 use vars qw($VERSION);
-$VERSION = "4.03";
+$VERSION = "4.04";
 my $debug="N";   # Set to "Y" or "N" as appropriate
 
 # Log-and-die subroutine
@@ -22,7 +22,7 @@ die basename($0)." should not be invoked by a normal user\n"
   if ( defined($ENV{spClientUser}) && $ENV{spClientUser} ne "rods" );
 die "Usage: ".basename($0)." FirstName .. LastName SharedToken Password"."\n".
     " e.g.: ".basename($0).' Jane Doe VI8SEdbk_8Ph3E7M1O8jdABRAC2 GuessMe'."\n"
-  if ( ($#ARGV < 2) || ($ARGV[0] !~ m/^[A-Z]/) );
+  if ( ($#ARGV < 2) || ($ARGV[0] !~ m/^[A-Za-z]/) );
 
 # Extract CN, generate extended shared-token and get matching username
 my $cn=$ARGV[0];
