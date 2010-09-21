@@ -1,7 +1,7 @@
 #!/bin/ksh
 # replicator.sh  Replicator script intended for invocation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100902
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100921
 
 # Batch size, path, usage check
 BATCH=16
@@ -96,10 +96,11 @@ while : ; do
   done
   wait
 
-  # 1-hour pause
+  # All done; either exit, or release the array and sleep for 2 hours
   logger -i -t `basename $0` "Replication pass completed!"
   echo "Replication pass completed!" >&2
   [ -n "$ListOnly" ] && exit 0
-  sleep 3600
+  unset s3obj
+  sleep 7200
 
 done
