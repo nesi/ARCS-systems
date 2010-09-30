@@ -1,0 +1,11 @@
+--- iRODS/lib/core/src/sockComm.c.orig	2010-09-10 23:17:54.816056807 +1200
++++ iRODS/lib/core/src/sockComm.c	2010-09-10 23:18:15.710758543 +1200
+@@ -127,7 +127,7 @@
+     if (addr != NULL) {
+         struct sockaddr_in sin;
+ #if defined(aix_platform)
+-	size_t length = sizeof (sin);
++	socklen_t length = sizeof (sin);
+ #elif defined(windows_platform)
+ 	int length;
+ #else
