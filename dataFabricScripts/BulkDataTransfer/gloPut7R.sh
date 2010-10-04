@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20100910
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101004
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -41,7 +41,7 @@ Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 # Failure/cleanup function; parameters are exit-code and message
 fail() {
   Code=$1; shift
-  rm -f $LisFil
+  rm -f $LisFil $RemFil
   echo "$@"; exit $Code
 }
 
@@ -60,7 +60,8 @@ eval $Ssu $2 /bin/date</dev/null>/dev/null 2>&1 ||fail 1 "Remote-userid invalid"
 eval $Ssu $2 "mkdir -p -m 775 $3"   2>/dev/null
 eval $Ssu $2 "test -w         $3"   2>/dev/null ||fail 1 "Remote-dir'y problem"
 
-# Create temporary file, set traps
+# Create temporary files, set traps
+RemFil=`mktemp`                           || fail 1 "Temporary file problem"
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
 trap "chmod a-x $LisFil ; echo Break detected .. wait" TERM
 trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
@@ -73,14 +74,15 @@ Flag=Y
 while [ -n "$Flag" ] ; do
   Flag=
   echo "Generating a list of files to be copied .. wait .."
-  # List filename/size couplets in remote and local directories; if a couplet
-  # appears once then it hasn't been copied properly, so add filename to list
-  for File in `( 
-      ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no" $2 \
-        "cd $3 && find . -type f                |xargs ls -lLA 2>/dev/null"
-         cd $1 && find . -type f -mtime -${Days}|xargs ls -lLA 2>/dev/null ) |
-      awk '{print \$NF, \$5}' | sort $Order | uniq -u |
-      awk '{print \$1}'       |               uniq`     ; do
+  # List filename/size couplets for files already in remote directory
+  ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no" $2 \
+        "cd $3 && find . -type f          | xargs ls -lLA 2>/dev/null" |
+         awk '{print $NF, $5}' >$RemFil 2>/dev/null
+  cd $1 && find . -type f -mtime -${Days} | xargs ls -lLA 2>/dev/null  |
+         awk '{print $NF, $5}' | sort $Order |
+  while read FileWithSize; do
+    grep -q "$FileWithSize" $RemFil                    && continue
+    File="`echo $FileWithSize | awk '{print $1}'`"
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
