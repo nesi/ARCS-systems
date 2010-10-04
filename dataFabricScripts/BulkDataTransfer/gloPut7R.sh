@@ -61,7 +61,7 @@ eval $Ssu $2 "mkdir -p -m 775 $3"   2>/dev/null
 eval $Ssu $2 "test -w         $3"   2>/dev/null ||fail 1 "Remote-dir'y problem"
 
 # Create temporary files, set traps
-RemFil=`mktemp`                           || fail 1 "Temporary file problem"
+RemFil=`mktemp` && chmod a+x $RemFil      || fail 1 "Temporary file problem"
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
 trap "chmod a-x $LisFil ; echo Break detected .. wait" TERM
 trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
@@ -70,9 +70,8 @@ trap 'Params="-udt -p 2"; echo Switched to UDT..'      USR2
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -TERM $$"
 echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
-Flag=Y
-while [ -n "$Flag" ] ; do
-  Flag=
+while [ -x $RemFil ] ; do
+  chmod a-x $RemFil # Clear the "copy done" flag
   echo "Generating a list of files to be copied .. wait .."
   # List filename/size couplets for files already in remote directory
   ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no" $2 \
@@ -87,7 +86,7 @@ while [ -n "$Flag" ] ; do
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
     esac
-    Flag=Y
+    chmod a+x $RemFil # Set the "copy done" flag
     echo "file://$1/$File sshftp://$2$3/$File"|sed -e 's_/\./_/_'>>$LisFil
     [ "`cat $LisFil 2>/dev/null | wc -l`" -eq $BATCH ] && doGlobus $LisFil
   done
