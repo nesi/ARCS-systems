@@ -1,0 +1,11 @@
+--- iRODS/server/core/src/miscServerFunct.c.orig	2010-06-26 09:48:05.000000000 +1200
++++ iRODS/server/core/src/miscServerFunct.c	2010-10-06 16:32:23.088724845 +1300
+@@ -1582,7 +1582,7 @@
+     int udpPortBuf;
+     int status;
+ #if defined(aix_platform)
+-    size_t      laddrlen = sizeof(struct sockaddr);
++    socklen_t      laddrlen = sizeof(struct sockaddr);
+ #elif defined(windows_platform)
+         int laddrlen = sizeof(struct sockaddr);
+ #else
