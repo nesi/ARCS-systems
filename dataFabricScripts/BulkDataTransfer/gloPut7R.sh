@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101004
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101006
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -13,14 +13,16 @@ export GLOBUS_LOCATION PATH
 
 # Usage, ssh parameters
 Params="-p 4"
-Days=32767
-while getopts b:d:sru Option; do
+Match="."
+while getopts b:d:m:srux Option; do
   case $Option in
     b) BATCH=$OPTARG;;
-    d) Days=$OPTARG;;
+    d) Days="-mtime -$OPTARG";;
+    m) Match=$OPTARG;;
     s) Skip="Y";;
     r) Order="-r";;
     u) Params="-udt -p 2";;
+    x) MaxDep="-maxdepth 1";;
    \?) Bad="Y";;
   esac
 done
@@ -29,10 +31,12 @@ shift `expr $OPTIND - 1`
   ( echo "  Usage: `basename $0` directory remote-userid remote-directory"
     echo "   e.g.: `basename $0` /mnt/pulsar/MTP26M" \
                  "accumulator@arcs-df.ivec.org" \
-                 "/data/ASTRO-TRANSFERS/Aidan"
+                 "/opt/ASTRO-TRANSFERS/Aidan/mnt/pulsar/MTP26M"
     echo "Options: -b n      .. use a batch-size of 'n' (default 16)"
     echo "         -d m      .. only transfer files changed in last 'm' days"
+    echo "         -m String .. send only files whose names contain 'String'"
     echo "         -s        .. skip files whose names begin with a period"
+    echo "         -x        .. don't descend through directories"
     echo "         -r        .. reverse order"
     echo "         -u        .. use 'udt' protocol"              ) >&2 && exit 2
 Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
@@ -73,15 +77,16 @@ echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
 while [ -x $RemFil ] ; do
   chmod a-x $RemFil # Clear the "copy done" flag
   echo "Generating a list of files to be copied .. wait .."
-  # List filename/size couplets for files already in remote directory
+  # List filename/size couplets for files already in remote directory;
+  # should store size values in Korn array of names; ksh not always available!
   ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no" $2 \
-        "cd $3 && find . -type f          | xargs ls -lLA 2>/dev/null" |
-         awk '{print $NF, $5}' >$RemFil 2>/dev/null
-  cd $1 && find . -type f -mtime -${Days} | xargs ls -lLA 2>/dev/null  |
-         awk '{print $NF, $5}' | sort $Order |
-  while read FileWithSize; do
-    grep -q "$FileWithSize" $RemFil                    && continue
-    File="`echo $FileWithSize | awk '{print $1}'`"
+      "cd $3 && find . -type f                   | xargs ls -lLA 2>/dev/null" |
+       awk '{print $NF"=@@="$5}' >$RemFil 2>/dev/null
+  for FileWithSize in \
+      `cd $1 && find . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null  |
+       awk '{print $NF"=@@="$5}' | sort $Order` ; do
+    fgrep -q "$FileWithSize" $RemFil                   && continue
+    File="`echo $FileWithSize | sed 's/=@@=/ /'  |awk '{print $1}'|grep $Match`"
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
