@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101006
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101007
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -78,15 +78,14 @@ while [ -x $RemFil ] ; do
   chmod a-x $RemFil # Clear the "copy done" flag
   echo "Generating a list of files to be copied .. wait .."
   # List filename/size couplets for files already in remote directory;
-  # should store size values in Korn array of names; ksh not always available!
   ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no" $2 \
       "cd $3 && find . -type f                   | xargs ls -lLA 2>/dev/null" |
-       awk '{print $NF"=@@="$5}' >$RemFil 2>/dev/null
+       awk '{print "=@@="$NF"=@@="$5"="}' >$RemFil 2>/dev/null
   for FileWithSize in \
       `cd $1 && find . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null  |
-       awk '{print $NF"=@@="$5}' | sort $Order` ; do
+       awk '{print "=@@="$NF"=@@="$5"="}' | sort $Order` ; do
     fgrep -q "$FileWithSize" $RemFil                   && continue
-    File="`echo $FileWithSize | sed 's/=@@=/ /'  |awk '{print $1}'|grep $Match`"
+    File="`echo $FileWithSize | sed 's/=@@=/ /g' |awk '{print $1}'|grep $Match`"
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
