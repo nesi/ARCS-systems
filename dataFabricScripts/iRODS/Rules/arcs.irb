@@ -13,7 +13,7 @@ acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 #Access control, trash and quotas
 #acAclPolicy||msiAclPolicy(STRICT)|nop
-acAclPolicy|"$userNameClient" = "QuickShare"|msiAclPolicy(STRICT)|nop
+acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 acRescQuotaPolicy||msiSetRescQuotaPolicy(off)|nop
 #Rules for automatic replications
