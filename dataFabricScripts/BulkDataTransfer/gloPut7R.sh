@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101007
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101104
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -61,8 +61,8 @@ doGlobus() {
 
 # Create destination directory if required, ensure that we can write to it 
 eval $Ssu $2 /bin/date</dev/null>/dev/null 2>&1 ||fail 1 "Remote-userid invalid"
-eval $Ssu $2 "mkdir -p -m 775 $3"   2>/dev/null
-eval $Ssu $2 "test -w         $3"   2>/dev/null ||fail 1 "Remote-dir'y problem"
+eval $Ssu $2 "mkdir -p -m 2775 $3"  2>/dev/null
+eval $Ssu $2 "test -w          $3"  2>/dev/null ||fail 1 "Remote-dir'y problem"
 
 # Create temporary files, set traps
 RemFil=`mktemp` && chmod a+x $RemFil      || fail 1 "Temporary file problem"
