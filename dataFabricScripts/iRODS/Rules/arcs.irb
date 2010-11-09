@@ -17,8 +17,8 @@ acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 acRescQuotaPolicy||msiSetRescQuotaPolicy(off)|nop
 #Rules for automatic replications
-#acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>15s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC-HSM,null),nop)|nop
-#acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>15s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC-HSM,null),nop)|nop
+acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>15s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC-HSM,null),nop)|nop
+acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>15s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC-HSM,null),nop)|nop
 acSetReServerNumProc||msiSetReServerNumProc(4)|nop
 # Rules to stop deletion and moving. Note that for this to work the corresponding rules most be commented in core.irb
 acPreprocForRmColl|($collParentName != /ARCS/home) && ($collParentName != /ARCS/projects) && ("$collName" != "/ARCS/home/$userNameClient/Archive_S3")|nop|nop
