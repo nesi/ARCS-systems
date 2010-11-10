@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101104
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101111
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -89,5 +89,5 @@ while [ -n "$Flag" ] ; do
 done
 
 # All done, adjust permissions and exit
-eval $Ssu $2 "chmod -R g+rw $3" 2>/dev/null
+eval $Ssu $2 "chmod -f g+rw $3/*"
 fail 0 "No more files to be copied!"
