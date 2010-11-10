@@ -5,8 +5,9 @@
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate|$userNameClient == guest %% $userNameClient == anonymous|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au%emii.resource.tpac.org.au%arcs-df.eresearchsa.edu.au)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/*/Archive_S3/*"|msiSetDefaultResc(s3Resc_us,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/charlie.bond/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/TCMIP/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/charlie.bond/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/stephen.anthony/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/PUBLUMW/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/LiDAR/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
