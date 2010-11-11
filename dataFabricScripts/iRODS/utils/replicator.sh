@@ -1,13 +1,13 @@
 #!/bin/ksh
 # replicator.sh  Replicator script intended for invocation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20100921
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20101111
 
 # Batch size, path, usage check
 BATCH=16
 [ -z "$IRODS_HOME" ] && IRODS_HOME=/opt/iRODS/iRODS
 PATH=/bin:/usr/bin:$IRODS_HOME/clients/icommands/bin:/usr/local/bin
-Zone=`iquest "%s" "select ZONE_NAME" 2>/dev/null`
+Zone=`iquest "%s" "select ZONE_NAME" 2>/dev/null | head -1`
 while getopts nsh Option; do
   case $Option in
     n   ) ListOnly=Y;;
@@ -89,7 +89,8 @@ while : ; do
   while read Line ; do
     [ -n ${s3obj["$Line"]} ]            && continue
     [ -n "$ListOnly"  ] &&echo REPLIC: irepl -MBT -R $Resource "$Line"&&continue
-    eval irepl -MBT -R $Resource "$Line" &
+    ( eval timeout 3600 irepl -MBT -R $Resource "$Line" ||
+      logger -i -t `basename $0` "Failed: $Line"           ) &
     while [ `jobs | wc -l` -ge $BATCH ] ; do
       sleep 1
     done
