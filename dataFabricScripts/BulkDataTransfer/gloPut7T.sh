@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101111
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101112
 
 # Default-batch-size, environment
 BATCH=16       # Adjust as appropriate
@@ -50,7 +50,9 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q $Params -cc 2 -fast -f $1
+  if ! globus-url-copy -q $Params -cc 2 -fast -f $1 ; then
+    echo "Failed; sleeping for 5 mins!"; sleep 300
+  fi
   echo
   >$1
   [ -x "$1" ]                             || fail 0 "Graceful Termination"
