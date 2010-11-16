@@ -1,7 +1,7 @@
 #!/bin/ksh
 # replicator.sh  Replicator script intended for invocation (as the iRODS user)
 #                from /etc/init.d/replicator
-#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20101111
+#                Graham Jenkins <graham@vpac.org> Jan. 2010. Rev: 20101117
 
 # Batch size, path, usage check
 BATCH=16
@@ -89,7 +89,7 @@ while : ; do
   while read Line ; do
     [ -n ${s3obj["$Line"]} ]            && continue
     [ -n "$ListOnly"  ] &&echo REPLIC: irepl -MBT -R $Resource "$Line"&&continue
-    ( eval timeout 3600 irepl -MBT -R $Resource "$Line" ||
+    ( eval timeout 7200 irepl -MBT -R $Resource "$Line" ||
       logger -i -t `basename $0` "Failed: $Line"           ) &
     while [ `jobs | wc -l` -ge $BATCH ] ; do
       sleep 1
@@ -102,6 +102,6 @@ while : ; do
   echo "Replication pass completed!" >&2
   [ -n "$ListOnly" ] && exit 0
   unset s3obj
-  sleep 7200
+  sleep 10800
 
 done
