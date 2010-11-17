@@ -2,7 +2,7 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101117
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101118
 use strict;
 use warnings;
 use File::Basename;
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.23";
+$VERSION="2.24";
 
 # Adjust these as appropriate; you may need to comment the next line
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -29,6 +29,11 @@ my $notify="N";           # Set to "Y" to notify users when added
 sub log_and_die { # Usage: log_and_die(message)
   syslog("info",$_[0]." "."[pid=".$$."]");
   die($_[0])
+}
+
+# Log-and-continue subroutine
+sub log_and_continue { # Usage: log_and_continue(message)
+  syslog("info",$_[0]." "."[pid=".$$."]")
 }
 
 # Mail-message subroutine
@@ -148,7 +153,7 @@ for (my $k=1;$k<=$j;$k++) {
         "An ARCS-DF user-environment has been created for: ".$u."\n".
         "You can now use the ARCS Data Fabric!\n" )
       }
-    }
+    } else { log_and_continue("Failed to create user: ".$u) }
   } 
   if ( ( ! defined $user_dn{$u} ) || ( $distiname[$k] ne $user_dn{$u} ) ) {
     $dnplus="\"".$distiname[$k]."\"";
