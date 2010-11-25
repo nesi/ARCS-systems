@@ -2,10 +2,10 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101118
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101125
 use strict;
-use warnings;
-use File::Basename;
+use warnings;             # Interim Version, allows additional APACGrid
+use File::Basename;       # or BeSTGRID DN.
 use File::Spec;
 use Sys::Syslog;
 use LWP::UserAgent;       # You may need to do:
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.24";
+$VERSION="2.25";
 
 # Adjust these as appropriate; you may need to comment the next line
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -52,12 +52,19 @@ sub mail_mess {  # Usage: mail_mess(address, message)
 
 # Remove-DNs subroutine
 sub remove_dn_s { # Usage: remove_dn_s(username)
+  my $saved;
   foreach my $dnvalue (`iquest --no-page "%s" "SELECT USER_DN 
                                      where USER_NAME = '$_[0]'" 2>/dev/null`) {
     chomp($dnvalue);
     my $dnvalueplus="\"".$dnvalue."\"";
+    # If this is an APACGrid/BeSTGRID DN, save a copy before removing
+    if ( ($dnvalue=~m"^/C=AU/O=APACGrid/") ||
+         ($dnvalue=~m"^/C=NZ/O=BeSTGRID/")   ) { $saved=$dnvalueplus }
     `iadmin rua $_[0] $dnvalueplus >/dev/null 2>&1`
   }
+  # If we saved a DN, put it back; we do it like this because there may be
+  # several identical DNs, and 'rua' removes them all
+  if( defined ($saved) ) { `iadmin aua $_[0] $saved >/dev/null 2>&1`}
 }
 
 # Add-to-Group subroutine
@@ -114,16 +121,17 @@ foreach my $user ($xp->find('//User')->get_nodelist) {
 log_and_die("Username list is suspect") if $j < 1;
 
 # Get the current users and their attributes
-my (%user_dn,%user_info,%org_group,@field,$u,$message);
+my (%user_dn,%seco_dn,%user_info,%org_group,@field,$u,$message);
 foreach my $line
   (split ("\n",`iquest --no-page "select USER_NAME,USER_DN,USER_INFO" 2>/dev/null`)) {
   @field=split(" ",$line);
   next if ! defined $field[2];
-  if    ( $field[0] eq "USER_NAME" ) { 
-    $u=$field[2]; $user_info{$u}=$user_dn{$u}=""
+  if    ( $field[0] eq "USER_NAME" ) { $u=$field[2]             }
+  elsif ( $field[0] eq "USER_INFO" ) { $user_info{$u}=$field[2] }
+  elsif ( $field[0] eq "USER_DN"   ) {
+    if ( ! defined ($user_dn{$u})  )   { $user_dn{$u}=substr($line,10) }
+    else                               { $seco_dn{$u}=substr($line,10) }
   }
-  elsif ( $field[0] eq "USER_INFO" ) { $user_info{$u}=$field[2]            }
-  elsif ( $field[0] eq "USER_DN"   ) { $user_dn{$u}  =substr($line,10)     }
 }
 foreach my $line (`iquest --no-page "%s=%s" "select USER_NAME, USER_GROUP_NAME
                       where USER_GROUP_NAME like 'Organisation %'
@@ -155,7 +163,10 @@ for (my $k=1;$k<=$j;$k++) {
       }
     } else { log_and_continue("Failed to create user: ".$u) }
   } 
-  if ( ( ! defined $user_dn{$u} ) || ( $distiname[$k] ne $user_dn{$u} ) ) {
+
+  $user_dn{$u}="" if ! defined $user_dn{$u};
+  $seco_dn{$u}="" if ! defined $seco_dn{$u};
+  if ( ($user_dn{$u} ne $distiname[$k]) && ($seco_dn{$u} ne $distiname[$k]) ) {
     $dnplus="\"".$distiname[$k]."\"";
     remove_dn_s($username[$k]);
     `iadmin aua $username[$k] $dnplus`;
