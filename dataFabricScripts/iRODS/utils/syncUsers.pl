@@ -2,10 +2,10 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101125
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101129
 use strict;
-use warnings;             # Interim Version, allows additional APACGrid
-use File::Basename;       # or BeSTGRID DN.
+use warnings;             # Interim Version, takes secondary DNs from 
+use File::Basename;       # /etc/grid-security/dn-mapfile
 use File::Spec;
 use Sys::Syslog;
 use LWP::UserAgent;       # You may need to do:
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.25";
+$VERSION="2.27";
 
 # Adjust these as appropriate; you may need to comment the next line
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -52,19 +52,12 @@ sub mail_mess {  # Usage: mail_mess(address, message)
 
 # Remove-DNs subroutine
 sub remove_dn_s { # Usage: remove_dn_s(username)
-  my $saved;
   foreach my $dnvalue (`iquest --no-page "%s" "SELECT USER_DN 
                                      where USER_NAME = '$_[0]'" 2>/dev/null`) {
     chomp($dnvalue);
     my $dnvalueplus="\"".$dnvalue."\"";
-    # If this is an APACGrid/BeSTGRID DN, save a copy before removing
-    if ( ($dnvalue=~m"^/C=AU/O=APACGrid/") ||
-         ($dnvalue=~m"^/C=NZ/O=BeSTGRID/")   ) { $saved=$dnvalueplus }
     `iadmin rua $_[0] $dnvalueplus >/dev/null 2>&1`
   }
-  # If we saved a DN, put it back; we do it like this because there may be
-  # several identical DNs, and 'rua' removes them all
-  if( defined ($saved) ) { `iadmin aua $_[0] $saved >/dev/null 2>&1`}
 }
 
 # Add-to-Group subroutine
@@ -104,16 +97,27 @@ my $agent = LWP::UserAgent->new;
 my $response = $agent->get($URL);
 my $string=$response->content if $response->is_success;
 
+# Get secondary-dn values from the map-file
+my (%map_dn);
+if ( open(MAPFILE,"/etc/grid-security/df-mapfile") ) {
+  while (<MAPFILE>) {
+    chomp;
+    my $i=rindex($_," ");
+    $map_dn{substr($_,$i+1)}=substr($_,1,$i-2);
+  }
+}
+
 # Decode XML.
 my $xp = XML::XPath->new(xml=>$string);
 log_and_die("Failed to get XML file") if ! defined($xp);
 
 # Validate the XML by ensuring that we get a complete list of valid usernames
-my (@username,@distiname,@sharedtoken,@email,@organisation);
+my (@username,@distiname,@distinam2,@sharedtoken,@email,@organisation);
 my $j=0;
 foreach my $user ($xp->find('//User')->get_nodelist) {
   $username[++$j]  =$user->find('ARCSUserName/@Name')."";
   $distiname[$j]   =$user->find('DistinguishedName/@DN')."";
+  $distinam2[$j]   =$map_dn{$username[$j]} if defined($username[$j]);
   $sharedtoken[$j] =$user->find('SharedToken/@Value')."";
   $email[$j]       =$user->find('Email/@Address')."";
   $organisation[$j]=$user->find('Organisation/@Value').""
@@ -123,14 +127,15 @@ log_and_die("Username list is suspect") if $j < 1;
 # Get the current users and their attributes
 my (%user_dn,%seco_dn,%user_info,%org_group,@field,$u,$message);
 foreach my $line
-  (split ("\n",`iquest --no-page "select USER_NAME,USER_DN,USER_INFO" 2>/dev/null`)) {
+  (split ("\n",`iquest no-distinct --no-page "select USER_NAME,USER_DN,USER_INFO" 2>/dev/null`)) {
   @field=split(" ",$line);
   next if ! defined $field[2];
   if    ( $field[0] eq "USER_NAME" ) { $u=$field[2]             }
   elsif ( $field[0] eq "USER_INFO" ) { $user_info{$u}=$field[2] }
   elsif ( $field[0] eq "USER_DN"   ) {
-    if ( ! defined ($user_dn{$u})  )   { $user_dn{$u}=substr($line,10) }
-    else                               { $seco_dn{$u}=substr($line,10) }
+    if   ( ! defined ($user_dn{$u}) ) { $user_dn{$u}=substr($line,10) }
+    elsif( ! defined ($seco_dn{$u}) ) { $seco_dn{$u}=substr($line,10) }
+    else                              { $seco_dn{$u}="EXCESS_DN_S"    }
   }
 }
 foreach my $line (`iquest --no-page "%s=%s" "select USER_NAME, USER_GROUP_NAME
@@ -164,13 +169,21 @@ for (my $k=1;$k<=$j;$k++) {
     } else { log_and_continue("Failed to create user: ".$u) }
   } 
 
-  $user_dn{$u}="" if ! defined $user_dn{$u};
-  $seco_dn{$u}="" if ! defined $seco_dn{$u};
-  if ( ($user_dn{$u} ne $distiname[$k]) && ($seco_dn{$u} ne $distiname[$k]) ) {
-    $dnplus="\"".$distiname[$k]."\"";
+  $distinam2[$k]="UNDEFINED" if ! defined($distinam2[$k]);
+  $user_dn{$u}  ="UNDEFINED" if ! defined $user_dn{$u};
+  $seco_dn{$u}  ="UNDEFINED" if ! defined $seco_dn{$u};
+  ($distiname[$k],$distinam2[$k])=sort($distiname[$k],$distinam2[$k]);
+  ($user_dn{$u},  $seco_dn{$u}  )=sort($user_dn{$u},  $seco_dn{$u}  );
+  if ( ($user_dn{$u} ne $distiname[$k]) || ($seco_dn{$u} ne $distinam2[$k]) ) {
     remove_dn_s($username[$k]);
+    $dnplus="\"".$distiname[$k]."\"";
     `iadmin aua $username[$k] $dnplus`;
     if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$u."\n"}
+    if ( $distinam2[$k] ne "UNDEFINED" ) {
+      $dnplus="\"".$distinam2[$k]."\"";
+      `iadmin aua $username[$k] $dnplus`;
+      if(! $?){$message.="Inserted DN: ".$dnplus." for user: ".$u."\n"}
+    }
   }
   $stplus="\"<ST>".$sharedtoken[$k]."</ST>\"";
   if ( (defined($user_info{$u}))&&($stplus ne "\"".$user_info{$u}."\"") ) {
