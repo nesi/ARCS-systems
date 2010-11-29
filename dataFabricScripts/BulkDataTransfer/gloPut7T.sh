@@ -1,10 +1,10 @@
 #!/bin/sh
 # gloPut7T.sh  Copies files in a designated directory to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101112
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101130
 
-# Default-batch-size, environment
-BATCH=16       # Adjust as appropriate
+# Default-batch-size, concurrency, environment; adjust as appropriate
+BATCH=16; CONCUR=2
 for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
   [ -d "/opt/$Dir/bin" ] && GLOBUS_LOCATION=/opt/$Dir && break
 done
@@ -15,9 +15,10 @@ export GLOBUS_LOCATION PATH
 Params="-p 4"
 Skip="A"
 Match="."
-while getopts b:usrm: Option; do
+while getopts b:c:usrm: Option; do
   case $Option in
     b) BATCH=$OPTARG;;
+    c) CONCUR=$OPTARG;;
     u) Params="-udt -p 2";;
     s) Skip=;;
     r) Order="-r";;
@@ -29,9 +30,10 @@ shift `expr $OPTIND - 1`
 [ \( -n "$Bad" \) -o \( $# -ne 3 \) ] &&
   ( echo "  Usage: `basename $0` directory remote-userid remote-directory"
     echo "   e.g.: `basename $0` /data/xraid0/v252l" \
-                 "accumulator@arcs-df.ivec.org" \
-                 "/data/ASTRO-TRANSFERS/February09/v252l/Mopra"
-    echo "Options: -b n      .. use a batch-size of 'n' (default 16)"
+                 "graham@pbstore.ivec.org" \
+                 "/pbstore/as03/ARCS-TRANSFERS/May11/v434a/ATCA"
+    echo "Options: -b n      .. use a batch-size of 'n' (default $BATCH)"
+    echo "         -c m      .. do 'm' concurrent transfers (default $CONCUR)"
     echo "         -r        .. reverse order"
     echo "         -s        .. skip files whose names begin with a period"
     echo "         -m String .. send only files whose names contain 'String'"
@@ -50,7 +52,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
-  if ! globus-url-copy -q $Params -cc 2 -fast -f $1 ; then
+  if ! globus-url-copy -q $Params -cc $CONCUR -fast -f $1 ; then
     echo "Failed; sleeping for 5 mins!"; sleep 300
   fi
   echo
@@ -90,6 +92,6 @@ while [ -n "$Flag" ] ; do
   [ "`cat $LisFil 2>/dev/null | wc -l`" -ne 0 ] && doGlobus $LisFil
 done
 
-# All done, adjust permissions and exit
-eval $Ssu $2 "chmod -f g+rw $3/*"
+# All done; adjust permissions and exit
+(eval $Ssu $2 "chmod -f 2775 $3";eval $Ssu $2 "chmod -f 775 $3/\*") 2>/dev/null
 fail 0 "No more files to be copied!"
