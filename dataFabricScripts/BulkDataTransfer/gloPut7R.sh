@@ -1,10 +1,10 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101117
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101130
 
-# Default-batch-size, environment
-BATCH=16       # Adjust as appropriate
+# Default-batch-size, concurrency, environment; adjust as appropriate
+BATCH=16; CONCUR=2
 for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
   [ -d "/opt/$Dir/bin" ] && GLOBUS_LOCATION=/opt/$Dir && break
 done
@@ -14,9 +14,10 @@ export GLOBUS_LOCATION PATH
 # Usage, ssh parameters
 Params="-p 4"
 Match="."
-while getopts b:d:m:srux Option; do
+while getopts b:c:d:m:srux Option; do
   case $Option in
     b) BATCH=$OPTARG;;
+    c) CONCUR=$OPTARG;;
     d) Days="-mtime -$OPTARG";;
     m) Match=$OPTARG;;
     s) Skip="Y";;
@@ -30,10 +31,11 @@ shift `expr $OPTIND - 1`
 [ \( -n "$Bad" \) -o \( $# -ne 3 \) ] &&
   ( echo "  Usage: `basename $0` directory remote-userid remote-directory"
     echo "   e.g.: `basename $0` /mnt/pulsar/MTP26M" \
-                 "accumulator@arcs-df.ivec.org" \
-                 "/opt/ASTRO-TRANSFERS/Aidan/mnt/pulsar/MTP26M"
-    echo "Options: -b n      .. use a batch-size of 'n' (default 16)"
-    echo "         -d m      .. only transfer files changed in last 'm' days"
+                 "graham@pbstore.ivec.org" \
+                 "/pbstore/as03/pulsar/MTP26M"
+    echo "Options: -b l      .. use a batch-size of 'l' (default $BATCH)"
+    echo "         -c m      .. do 'm' concurrent transfers (default $CONCUR)"
+    echo "         -d n      .. only transfer files changed in last 'n' days"
     echo "         -m String .. send only files whose names contain 'String'"
     echo "         -s        .. skip files whose names begin with a period"
     echo "         -x        .. don't descend through directories"
@@ -53,7 +55,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
-  if ! globus-url-copy -q -cd $Params -cc 2 -fast -f $1 ; then
+  if ! globus-url-copy -q -cd $Params -cc $CONCUR -fast -f $1 ; then
     echo "Failed; sleeping for 5 mins!"; sleep 300
   fi
   echo
@@ -80,8 +82,8 @@ while [ -x $RemFil ] ; do
   chmod a-x $RemFil # Clear the "copy done" flag
   echo "Generating a list of files to be copied .. wait .."
   # List filename/size couplets for files already in remote directory;
-  ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no" $2 \
-      "cd $3 && find . -type f                   | xargs ls -lLA 2>/dev/null" |
+  eval $Ssu $2 \
+      "cd $3 \&\& find . -type f                \| xargs ls -lLA 2>/dev/null" |
        awk '{print "=@@="$NF"=@@="$5"="}' >$RemFil 2>/dev/null
   for FileWithSize in \
       `cd $1 && find . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null  |
@@ -100,5 +102,8 @@ while [ -x $RemFil ] ; do
 done
 
 # All done, adjust permissions and exit
-eval $Ssu $2 "chmod -R g+rw $3" 2>/dev/null
+User="`echo $2 | awk -F@ '{if(NF>1)print $1}'`"
+[ -z "$User" ] && User=$LOGNAME
+eval $Ssu $2 "find $3 -type d -user $User \| xargs chmod  2775" 2>/dev/null
+eval $Ssu $2 "find $3 -type f -user $User \| xargs chmod   775" 2>/dev/null
 fail 0 "No more files to be copied!"
