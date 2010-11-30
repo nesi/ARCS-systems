@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101130
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101201
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -105,5 +105,5 @@ done
 User="`echo $2 | awk -F@ '{if(NF>1)print $1}'`"
 [ -z "$User" ] && User=$LOGNAME
 eval $Ssu $2 "find $3 -type d -user $User \| xargs chmod  2775" 2>/dev/null
-eval $Ssu $2 "find $3 -type f -user $User \| xargs chmod   775" 2>/dev/null
+eval $Ssu $2 "find $3 -type f -user $User \| xargs chmod   664" 2>/dev/null
 fail 0 "No more files to be copied!"
