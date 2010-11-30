@@ -108,33 +108,34 @@ USQCD_SE: usqcd_fnal.gov_srm
 
   <!-- UKQCD/Edinburgh (Scotland) -->
   <!-- 80M -->
+<!--
   <file>
     <grid>ukqcd</grid>
     <se>swan.ac.uk</se>
     <url>gsiftp://pytier2.swan.ac.uk/home/qcdgrid/qcdgrid/data2/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
     <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
   </file>
-
+-->
   <file>
     <grid>ukqcd</grid>
     <se>ph.liv.ac.uk</se>
     <url>gsiftp://qcd1.ph.liv.ac.uk//home/qcdgrid/qcdgrid/data6/lfn:/ukqcd/qcdgrid_project/videos/digs_gui_tech_preview.avi </url>
     <md5>B9C54522599DBFC5F92CC7340F6FD141</md5>
   </file>
-
+<!--
   <file>
     <grid>ukqcd</grid>
     <se>iridis.soton.ac.uk</se>
     <url>gsiftp://qcdocx2.epcc.ed.ac.uk:2811/home/qcdgrid/data1/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>
-<!--    <url>gsiftp://ukqcd.iridis.soton.ac.uk:2811/opt/src/DiGS-v2.0-src/data5/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>  -->
+    <url>gsiftp://ukqcd.iridis.soton.ac.uk:2811/opt/src/DiGS-v2.0-src/data5/lfn:/ukqcd/qcdgrid_project/videos/ildg_browser_ensemble.avi</url>  
     <md5>22c245e5b1d356f7baf87995c1d85e43</md5>
   </file>
-
+-->
   <!--  36M  -->
   <file>
     <grid>ukqcd</grid>
     <se>epcc.ed.ac.uk</se>
-    <url>gsiftp://wennekers.epcc.ed.ac.uk/home/qcdgrid/qcdgrid/data/lfn\:/ukqcd/qcdgrid_project/videos/digs_gui_tech_preview.avi</url>
+    <url>gsiftp://wennekers.epcc.ed.ac.uk/home/qcdgrid/qcdgrid/data/lfn:/ukqcd/qcdgrid_project/videos/digs_gui_tech_preview.avi</url>
     <md5>B9C54522599DBFC5F92CC7340F6FD141</md5>
   </file>
 
