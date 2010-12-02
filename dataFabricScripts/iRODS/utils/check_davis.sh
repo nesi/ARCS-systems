@@ -1,6 +1,6 @@
 #!/bin/sh
 # check_idavis.sh Nagios plugin for Davis.
-#                 Graham Jenkins <graham@vpac.org> Feb 2010. Rev: 20100330
+#                 Graham Jenkins <graham@vpac.org> Feb 2010. Rev: 20101202
 
 # Test file and contents .. adjust as appropriate
 Collection="https://df.arcs.org.au/ARCS/worldview"
@@ -12,19 +12,15 @@ PATH=/usr/bin:/bin
 [ $# != 0 ] && echo "Usage: `basename $0`" >&2      && exit 2
 
 # Attempt to get the file and check its content
+LockDir=~/.`basename $0`.LCK
 wget -q -T 25 --no-cache --no-cookies -O - $File 2>/dev/null | grep -q "$String"
 if [ $? -eq 0 ] ; then
+  rmdir $LockDir 2>/dev/null
   echo "DAVIS OK: access succeeded"                  ; exit 0
 fi
 
-# If we failed, perform a reset on the Collection and try again
-wget -q -T 25 --no-cache --no-cookies -O - $Collection?reset >/dev/null 2>&1
-sleep 5
-wget -q -T 25 --no-cache --no-cookies -O - $File 2>/dev/null | grep -q "$String"
-
-# If we got it this time, flag as WARNING; else flag as CRITICAL 
-if [ $? -eq 0 ] ; then
-  echo "DAVIS WARNING: access succeeded after reset" ; exit 1 
+if mkdir $LockDir >/dev/null 2>&1 ; then
+  echo "DAVIS WARNING: access failed once"           ; exit 1 
 else
-  echo "DAVIS CRITICAL: access failed"               ; exit 2
+  echo "DAVIS CRITICAL: access failed more than once"; exit 2
 fi
