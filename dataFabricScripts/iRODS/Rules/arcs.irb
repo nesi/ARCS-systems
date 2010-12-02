@@ -1,8 +1,6 @@
 # iRODS local rules for ARCS sites
 # Default-resource must be set appropriately for your site (e.g. arcs-df.vpac.org)
 #
-#acPreprocForDataObjOpen||msiSetDataObjPreferredResc(arcs-df.vpac.org%arcs-df.intersect.org.au%arcs-df.eresearchsa.edu.au%arcs-df.tpac.edu.au%DEFAULT_RESOURCE)|nop
-acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
 acSetRescSchemeForCreate|$userNameClient == guest %% $userNameClient == anonymous|msiSetNoDirectRescInp(ARCS-FABRIC%arcs-df.ivec.org%arcs-df.vpac.org%arcs-df.qcif.edu.au%arcs-df.intersect.org.au%arcs-df.tpac.org.au%emii.resource.tpac.org.au%arcs-df.eresearchsa.edu.au)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/*/Archive_S3/*"|msiSetDefaultResc(s3Resc_us,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/TCMIP/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
@@ -13,15 +11,13 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/PUBLUMW/*"|msiSetDefaul
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/LiDAR/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
+
 #Access control, trash and quotas
-#acAclPolicy||msiAclPolicy(STRICT)|nop
 acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 acRescQuotaPolicy||msiSetRescQuotaPolicy(off)|nop
-#Rules for automatic replications
-#acPostProcForPut|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>15s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC-HSM,null),nop)|nop
-#acPostProcForCopy|"$objPath" not like "/ARCS/trash/*"|delayExec(<PLUSET>1s</PLUSET><EF>15s DOUBLE UNTIL SUCCESS OR 5 TIMES</EF>,msiSysReplDataObj(ARCS-FABRIC-HSM,null),nop)|nop
 acSetReServerNumProc||msiSetReServerNumProc(4)|nop
+
 # Rules to stop deletion and moving. Note that for this to work the corresponding rules most be commented in core.irb
 acPreprocForRmColl|($collParentName != /ARCS/home) && ($collParentName != /ARCS/projects) && ("$collName" != "/ARCS/home/$userNameClient/Archive_S3")|nop|nop
 acPreProcForObjRename(*sourceObject,*destObject)|("*sourceObject" like "/ARCS/home/*/*") && ("*sourceObject" != "/ARCS/home/$userNameClient/Archive_S3")|nop|nop
