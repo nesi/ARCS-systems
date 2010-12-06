@@ -12,6 +12,10 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/LiDAR/*"|msiSetDefaultR
 acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 
+#Replication Rules
+acPostProcForPut||acGetValueForObjectAttribute(RESC_NAME,RESC_STATUS like '%up' AND RESC_GROUP_NAME = 'ARCS-REPLISET' AND RESC_NAME != '$rescName',*resourceList)##delayExec(<PLUSET>20s</PLUSET><EF>2s DOUBLE UNTIL SUCCESS OR 2 TIMES</EF>,acGetDataModifyTime($dataId,*dataModifiedTime)##msiGetSystemTime(*systemTime, null)##msiGetDiffTime(*dataModifiedTime,*systemTime,null,*diffTime)##ifExec(*diffTime > 15,msiSysChksumDataObj##msiSysReplDataObj(*resourceList,null),nop##nop,fail,nop),nop##nop##nop##succeed)|msiSendMail(arcs-data@arcs.org.au,ARCS Data Fabric Alert: All replication resources down,All resources suitable for replication are down. Replication disrupted.)##nop
+acPostProcForCopy||acGetValueForObjectAttribute(RESC_NAME,RESC_STATUS like '%up' AND RESC_GROUP_NAME = 'ARCS-REPLISET' AND RESC_NAME != '$rescName',*resourceList)##delayExec(<PLUSET>20s</PLUSET><EF>2s DOUBLE UNTIL SUCCESS OR 2 TIMES</EF>,acGetDataModifyTime($dataId,*dataModifiedTime)##msiGetSystemTime(*systemTime, null)##msiGetDiffTime(*dataModifiedTime,*systemTime,null,*diffTime)##ifExec(*diffTime > 15,msiSysChksumDataObj##msiSysReplDataObj(*resourceList,null),nop##nop,fail,nop),nop##nop##nop##succeed)|msiSendMail(arcs-data@arcs.org.au,ARCS Data Fabric Alert: All replication resources down,All resources suitable for replication are down. Replication disrupted.)##nop
+
 #Access control, trash and quotas
 acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
@@ -23,3 +27,9 @@ acPreprocForRmColl|($collParentName != /ARCS/home) && ($collParentName != /ARCS/
 acPreProcForObjRename(*sourceObject,*destObject)|("*sourceObject" like "/ARCS/home/*/*") && ("*sourceObject" != "/ARCS/home/$userNameClient/Archive_S3")|nop|nop
 acPreProcForObjRename(*sourceObject,*destObject)|"*sourceObject" like "/ARCS/projects/*/*"|nop|nop
 acPreProcForObjRename(*sourceObject,*destObject)|"*sourceObject" like "/ARCS/trash/*"|nop|nop
+
+#Utilities
+acGetValueForObjectAttribute(*rodsAttribute,*attributeCondition,*attributeValue)||msiMakeQuery(*rodsAttribute,*attributeCondition,*attributeQuery)##msiExecStrCondQuery(*attributeQuery,*queryResults)##forEachExec(*queryResults,msiGetValByKey(*queryResults,*rodsAttribute,*attributeValue),nop)
+acGetDataModifyTime(*dataID,*dataModifyTime)||acGetValueForObjectAttribute(DATA_MODIFY_TIME,DATA_ID = '*dataID',*dataModifyTime)
+acGetIcatResults(*Action,*Condition,*GenQOut)|(*Action == chksumRescLoc) |msiMakeQuery("DATA_REPL_NUM,DATA_NAME,DATA_PATH, COLL_NAME, RESC_NAME,RESC_LOC",*Condition,*Query)##msiExecStrCondQuery(*Query, *GenQOut)|nop##nop
+acGetIcatResults(*Action,*Condition,*GenQOut)|*Action == list|msiMakeQuery("DATA_NAME, COLL_NAME, DATA_RESC_NAME, DATA_REPL_NUM, DATA_SIZE",*Condition,*Query)##msiExecStrCondQuery(*Query, *GenQOut)|nop##nop
