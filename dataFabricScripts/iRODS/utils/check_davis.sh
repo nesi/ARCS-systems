@@ -1,6 +1,6 @@
 #!/bin/sh
 # check_idavis.sh Nagios plugin for Davis.
-#                 Graham Jenkins <graham@vpac.org> Feb 2010. Rev: 20101209
+#                 Graham Jenkins <graham@vpac.org> Feb 2010. Rev: 20101210
 
 # Test file and contents .. adjust as appropriate
 Collection="https://df.arcs.org.au/ARCS/worldview"
@@ -8,8 +8,7 @@ File="https://df.arcs.org.au/ARCS/worldview/Melbourne/CityDetails.txt"
 String="Victoria"
 
 # Allowable time between successful accesses (mins)
-#Minutes=12
-Minutes=1
+Minutes=12
 
 # Path, usage message
 PATH=/usr/bin:/bin
