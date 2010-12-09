@@ -27,7 +27,9 @@ acSetRescSchemeForCreate||msiSetDefaultResc(griddata.canterbury.ac.nz,preferred)
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 
 # this one is needed to make sure users can't browse other user's home directories by default
-acAclPolicy||msiAclPolicy(STRICT)|nop
+#acAclPolicy||msiAclPolicy(STRICT)|nop
+#Exclude the QuickShare user from the STRICT policy:
+acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
 
 # this one again looks useful
 acTrashPolicy||nop|nop
