@@ -2,10 +2,10 @@
 # syncUsers.pl    Decodes the user-list XML file supplied by the ARCS
 #                 Access Service, and uses its content to add, modify or
 #                 de-activate iRODS users as appropriate.
-#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101129
+#                 Graham Jenkins <graham@vpac.org> Oct. 2009. Rev: 20101212
 use strict;
-use warnings;             # Interim Version, takes secondary DNs from 
-use File::Basename;       # /etc/grid-security/dn-mapfile
+use warnings;
+use File::Basename;
 use File::Spec;
 use Sys::Syslog;
 use LWP::UserAgent;       # You may need to do:
@@ -14,7 +14,7 @@ use Net::SMTP;
 use Sys::Hostname;
 use Socket;
 use vars qw($VERSION);
-$VERSION="2.27";
+$VERSION="2.28";
 
 # Adjust these as appropriate; you may need to comment the next line
 $ENV{HTTPS_CA_DIR} = "/etc/grid-security/certificates";
@@ -97,16 +97,6 @@ my $agent = LWP::UserAgent->new;
 my $response = $agent->get($URL);
 my $string=$response->content if $response->is_success;
 
-# Get secondary-dn values from the map-file
-my (%map_dn);
-if ( open(MAPFILE,"/etc/grid-security/df-mapfile") ) {
-  while (<MAPFILE>) {
-    chomp;
-    my $i=rindex($_," ");
-    $map_dn{substr($_,$i+1)}=substr($_,1,$i-2);
-  }
-}
-
 # Decode XML.
 my $xp = XML::XPath->new(xml=>$string);
 log_and_die("Failed to get XML file") if ! defined($xp);
@@ -117,7 +107,7 @@ my $j=0;
 foreach my $user ($xp->find('//User')->get_nodelist) {
   $username[++$j]  =$user->find('ARCSUserName/@Name')."";
   $distiname[$j]   =$user->find('DistinguishedName/@DN')."";
-  $distinam2[$j]   =$map_dn{$username[$j]} if defined($username[$j]);
+  $distinam2[$j]   =$user->find('SecondaryDN/@Value')."";
   $sharedtoken[$j] =$user->find('SharedToken/@Value')."";
   $email[$j]       =$user->find('Email/@Address')."";
   $organisation[$j]=$user->find('Organisation/@Value').""
@@ -169,7 +159,7 @@ for (my $k=1;$k<=$j;$k++) {
     } else { log_and_continue("Failed to create user: ".$u) }
   } 
 
-  $distinam2[$k]="UNDEFINED" if ! defined($distinam2[$k]);
+  $distinam2[$k]="UNDEFINED" if length($distinam2[$k]) < 2;
   $user_dn{$u}  ="UNDEFINED" if ! defined $user_dn{$u};
   $seco_dn{$u}  ="UNDEFINED" if ! defined $seco_dn{$u};
   ($distiname[$k],$distinam2[$k])=sort($distiname[$k],$distinam2[$k]);
