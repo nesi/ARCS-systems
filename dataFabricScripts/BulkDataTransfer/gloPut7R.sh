@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7R.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101201
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101228
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -47,7 +47,7 @@ Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 # Failure/cleanup function; parameters are exit-code and message
 fail() {
   Code=$1; shift
-  rm -f $LisFil $RemFil
+  rm -f $LisFil
   echo "$@"; exit $Code
 }
 
@@ -68,8 +68,7 @@ eval $Ssu $2 /bin/date</dev/null>/dev/null 2>&1 ||fail 1 "Remote-userid invalid"
 eval $Ssu $2 "mkdir -p -m 2775 $3"  2>/dev/null
 eval $Ssu $2 "test -w          $3"  2>/dev/null ||fail 1 "Remote-dir'y problem"
 
-# Create temporary files, set traps
-RemFil=`mktemp` && chmod a+x $RemFil      || fail 1 "Temporary file problem"
+# Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
 trap "chmod a-x $LisFil ; echo Break detected .. wait" TERM
 trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
@@ -78,23 +77,29 @@ trap 'Params="-udt -p 2"; echo Switched to UDT..'      USR2
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -TERM $$"
 echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
-while [ -x $RemFil ] ; do
-  chmod a-x $RemFil # Clear the "copy done" flag
+Flag=Y
+while [ -n "$Flag" ] ; do
+  Flag= # Clear the "copy done" flag
   echo "Generating a list of files to be copied .. wait .."
-  # List filename/size couplets for files already in remote directory;
-  eval $Ssu $2 \
-      "cd $3 \&\& find . -type f                \| xargs ls -lLA 2>/dev/null" |
-       awk '{print "=@@="$NF"=@@="$5"="}' >$RemFil 2>/dev/null
-  for FileWithSize in \
-      `cd $1 && find . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null  |
-       awk '{print "=@@="$NF"=@@="$5"="}' | sort $Order` ; do
-    fgrep -q "$FileWithSize" $RemFil                   && continue
-    File="`echo $FileWithSize | sed 's/=@@=/ /g' |awk '{print $1}'|grep $Match`"
+  for File in `
+  ( # List files already in remote directory, with blank line at end
+    eval $Ssu $2 "cd $3 \&\& find . -type f \| xargs ls -lLA 2>/dev/null"
+    echo 
+    # List files to be copied from local directory, then process the output
+    cd $1 && find . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null
+  ) | awk '{if (NF==0)      {Local="Y"; next  }
+            if (Local=="Y") {locsiz[$NF]="s"$5}
+            else            {remsiz[$NF]="s"$5}
+           }
+       END {for (file in locsiz) {
+              if (locsiz[file]!=remsiz[file]) {print file}
+            }
+           }' | sort $Order | grep $Match`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
     esac
-    chmod a+x $RemFil # Set the "copy done" flag
+    Flag=Y # Set the "copy done" flag
     echo "file://$1/$File sshftp://$2$3/$File"|sed -e 's_/\./_/_'>>$LisFil
     [ "`cat $LisFil 2>/dev/null | wc -l`" -eq $BATCH ] && doGlobus $LisFil
   done
