@@ -87,14 +87,14 @@ while [ -n "$Flag" ] ; do
     echo 
     # List files to be copied from local directory, then process the output
     cd $1 && find . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null
-  ) | awk '{if (NF==0)      {Local="Y"; next  }
-            if (Local=="Y") {locsiz[$NF]="s"$5}
-            else            {remsiz[$NF]="s"$5}
-           }
-       END {for (file in locsiz) {
-              if (locsiz[file]!=remsiz[file]) {print file}
-            }
-           }' | sort $Order | grep $Match`; do
+  ) | awk '{ if (NF==0)      {Local="Y"; next  }
+             if (Local=="Y") {locsiz[$NF]="s"$5}
+             else            {remsiz[$NF]="s"$5}
+           } # s-prefix is inserted so zero-length files are treated correctly
+       END { for (file in locsiz) {
+               if (locsiz[file]!=remsiz[file]) {print file}
+             }
+           }' | grep $Match | sort $Order`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
