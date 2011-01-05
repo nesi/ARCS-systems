@@ -1,7 +1,7 @@
 #!/bin/sh
-# gloPut7T.sh  Copies files in a designated directory to a remote server.
+# gloPut7T.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20101201
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110102
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -13,30 +13,33 @@ export GLOBUS_LOCATION PATH
 
 # Usage, ssh parameters
 Params="-p 4"
-Skip="A"
 Match="."
-while getopts b:c:usrm: Option; do
+while getopts b:c:d:m:srux Option; do
   case $Option in
     b) BATCH=$OPTARG;;
     c) CONCUR=$OPTARG;;
-    u) Params="-udt -p 2";;
-    s) Skip=;;
-    r) Order="-r";;
+    d) Days="-mtime -$OPTARG";;
     m) Match=$OPTARG;;
+    s) Skip="Y";;
+    r) Order="-r";;
+    u) Params="-udt -p 2";;
+    x) MaxDep="-maxdepth 1";;
    \?) Bad="Y";;
   esac
 done
 shift `expr $OPTIND - 1`
 [ \( -n "$Bad" \) -o \( $# -ne 3 \) ] &&
   ( echo "  Usage: `basename $0` directory remote-userid remote-directory"
-    echo "   e.g.: `basename $0` /data/xraid0/v252l" \
+    echo "   e.g.: `basename $0` /mnt/pulsar/MTP26M" \
                  "graham@pbstore.ivec.org" \
-                 "/pbstore/as03/ARCS-TRANSFERS/May11/v434a/ATCA"
-    echo "Options: -b n      .. use a batch-size of 'n' (default $BATCH)"
+                 "/pbstore/as03/pulsar/MTP26M"
+    echo "Options: -b l      .. use a batch-size of 'l' (default $BATCH)"
     echo "         -c m      .. do 'm' concurrent transfers (default $CONCUR)"
-    echo "         -r        .. reverse order"
-    echo "         -s        .. skip files whose names begin with a period"
+    echo "         -d n      .. only transfer files changed in last 'n' days"
     echo "         -m String .. send only files whose names contain 'String'"
+    echo "         -s        .. skip files whose names begin with a period"
+    echo "         -x        .. don't descend through directories"
+    echo "         -r        .. reverse order"
     echo "         -u        .. use 'udt' protocol"              ) >&2 && exit 2
 Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 [ `uname -s` = SunOS ] && Wc="du -h" || Wc="wc -c"
@@ -52,7 +55,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
-  if ! globus-url-copy -q $Params -cc $CONCUR -fast -f $1 ; then
+  if ! globus-url-copy -q -cd $Params -cc $CONCUR -fast -f $1 ; then
     echo "Failed; sleeping for 5 mins!"; sleep 300
   fi
   echo
@@ -76,22 +79,32 @@ echo "To Terminate gracefully,  enter: kill -TERM $$"
 echo "To switch to TCP/UDT mode enter: kill -USR1/USR2 $$"
 Flag=Y
 while [ -n "$Flag" ] ; do
-  Flag=
+  Flag= # Clear the "copy done" flag
   echo "Generating a list of files to be copied .. wait .."
-  # List filename/size couplets in remote and local directories; if a couplet
-  # appears once then it hasn't been copied properly, so add filename to list
-  for File in `( eval $Ssu $2 "ls -lL$Skip $3 2>/dev/null"
-                               ls -lL$Skip $1 2>/dev/null ) |
-      awk '{print \$NF, \$5}' | sort $Order | uniq -u |
-      awk '{print \$1}'       |                  uniq | grep $Match`; do
+  for File in `
+  ( # List files already in remote directory, with blank line at end
+    eval $Ssu $2 "cd $3 \&\& find -L . -type f \| xargs ls -lLA 2>/dev/null"
+    echo 
+    # List files to be copied from local directory, then process the output
+    cd $1 && find -L . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null
+  ) | awk '{ if (NF==0)      {Local="Y"; next}
+             if (Local=="Y") {if ("X"remsiz[$NF]!="X"$5) {print $NF} }
+             else            {remsiz[$NF]=$5}
+           }' | grep $Match | sort $Order`; do
     [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
-    Flag=Y
-    echo "file://$1/$File sshftp://$2$3/" >> $LisFil
+    case "`basename $File`" in
+      .* ) [ -n "$Skip" ] && continue ;;
+    esac
+    Flag=Y # Set the "copy done" flag
+    echo "file://$1/$File sshftp://$2$3/$File"|sed -e 's_/\./_/_'>>$LisFil
     [ "`cat $LisFil 2>/dev/null | wc -l`" -eq $BATCH ] && doGlobus $LisFil
   done
   [ "`cat $LisFil 2>/dev/null | wc -l`" -ne 0 ] && doGlobus $LisFil
 done
 
-# All done; adjust permissions and exit
-(eval $Ssu $2 "chmod -f 2775 $3";eval $Ssu $2 "chmod -f 664 $3/\*") 2>/dev/null
+# All done, adjust permissions and exit
+User="`echo $2 | awk -F@ '{if(NF>1)print $1}'`"
+[ -z "$User" ] && User=$LOGNAME
+eval $Ssu $2 "find $3 -type d -user $User \| xargs chmod  2775" 2>/dev/null
+eval $Ssu $2 "find $3 -type f -user $User \| xargs chmod   664" 2>/dev/null
 fail 0 "No more files to be copied!"
