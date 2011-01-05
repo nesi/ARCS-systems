@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110102
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110105
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -30,8 +30,7 @@ done
 shift `expr $OPTIND - 1`
 [ \( -n "$Bad" \) -o \( $# -ne 3 \) ] &&
   ( echo "  Usage: `basename $0` directory remote-userid remote-directory"
-    echo "   e.g.: `basename $0` /mnt/pulsar/MTP26M" \
-                 "graham@pbstore.ivec.org" \
+    echo "   e.g.: `basename $0` /mnt/pulsar/MTP26M" "graham@pbstore.ivec.org" \
                  "/pbstore/as03/pulsar/MTP26M"
     echo "Options: -b l      .. use a batch-size of 'l' (default $BATCH)"
     echo "         -c m      .. do 'm' concurrent transfers (default $CONCUR)"
