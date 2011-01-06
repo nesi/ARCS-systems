@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# isftpd       Starts/stop script for the iRODS/sFTP daemon.
+#              Graham Jenkins <graham@vpac.org> Nov. 2010. Rev: 20101221
+#
+# chkconfig:   345 99 02
+# description: iRODS/sFTP daemon
+
+ISFTP_HOME=/opt/isftpd         # Adjust as appropriate
+ISFTP_USER=isftpd
+PROG_NAME=isftp.jar
+CONF_FILE=config.xml
+LOG_PROPS=log4j.properties
+#JAVA_OPTS="-server -Xms512m -Xmx1200m"
+
+. /etc/init.d/functions
+RETVAL=0
+
+case "$1" in 
+
+  start ) echo -n "Starting $PROG_NAME: "
+          pgrep -u $ISFTP_USER java && echo "Failed!" && exit 1
+          runuser -s /bin/bash - $ISFTP_USER -c \
+            "cd $ISFTP_HOME
+             java $JAVA_OPTS -jar $PROG_NAME ./$CONF_FILE ./$LOG_PROPS >/dev/null 2>&1" &
+	  RETVAL=$?
+	  echo
+	  [ $RETVAL -eq 0 ] && touch /var/lock/subsys/isftpd
+	  exit $RETVAL ;;
+
+  stop  ) echo -n "Shutting down $PROG_NAME: "
+	  pkill -u $ISFTP_USER java
+	  RETVAL=$?
+	  echo
+	  [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/isftpd
+          exit $RETVAL ;;
+
+  *     ) echo "Usage: $0 {start|stop}"
+          exit 2       ;;
+
+esac
