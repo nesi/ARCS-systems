@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110111
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110117
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -92,7 +92,7 @@ while [ -n "$Flag" ] ; do
              if (Local=="Y") {if ("X"remsiz[$NF]!="X"$5) {print $NF} }
              else            {remsiz[$NF]=$5}
            }' | grep $Match | sort $Order`; do
-    [ \( ! -f "$1/$File" \) -o \( ! -r "$1/$File" \) ] && continue
+    [ ! -r "$1/$File" ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
     esac
