@@ -27,19 +27,14 @@ shift `expr $OPTIND - 1`
     echo "Options: -m String .. send only files whose names contain 'String'"
     echo "         -r        .. reverse order"                   ) >&2 && exit 2
 
-# Transmit all files in the directory, maintaining a piplein of several jobs
 for File in `find -L $1 -maxdepth 1 -type f | grep $Match | sort $Order`; do
   [ ! -r "$File" ] && continue
-  [ -z "$Flag" ] && echo "`date '+%a %T'` .. Starting first file .." && Flag=Y
+  echo -n "`date '+%a %T'` .. `wc -c $File` .. " 
   if globus-url-copy -q -cd -fast file:///$File $2/ 2>/dev/null; then
-    echo "`date '+%a %T'` .. `wc -c $File` .. OK"
+    echo OK
   else
-    echo "`date '+%a %T'` .. `wc -c $File` .. Failed!"; sleep 5
-  fi &
-  until [ `jobs | wc -l` -lt 8 ] ; do
-    sleep 1
-  done
+    echo Failed; sleep 5
+  fi
 done
-wait
 
 echo "No more files to be copied!"
