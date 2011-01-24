@@ -2,7 +2,7 @@
 # updateIrodsMapfile.sh  Updates the iRODS mapfile used by Griffin on "slave"
 #                        servers; required for versions of iRODS below 2.3.
 #                        Should be called at 30-min intervals by 'rods' cron.
-#                        Graham Jenkins <graham@vpac.org> Rev: 20100322
+#                        Graham Jenkins <graham@vpac.org> Rev: 20110124
 
 # Usage, permissions
 if   [ ! -w "$1" ] ; then
@@ -14,7 +14,7 @@ elif   ! touch $1.NEW ; then
 fi
 
 # Generate the list
-if ! `iquest "\"%s\" %s@%s" \
+if ! `iquest --no-page "\"%s\" %s@%s" \
            "select USER_DN,USER_NAME,USER_ZONE where USER_DN like '/%'" \
               >$1.NEW 2>/dev/null` ; then
   logger -t `basename $0` "iquest command failed!";                   exit 1
