@@ -2,7 +2,7 @@
 # fdtGet7T.sh  Copies files from a designated directory on a remote server using
 #              FDT over a designated port. Needs Java 1.6. Beta version only!
 #              'fdt.jar' and 'java' need to be in PATH and executable.
-#              Graham.Jenkins@arcs.org.au Jan. 2011; Rev: 20110114
+#              Graham.Jenkins@arcs.org.au Jan. 2011; Rev: 20110125
 
 # Default port and ssh-key; adjust as appropriate
 PORT=80; KEY=~/.ssh/id_dsa; export PORT KEY
