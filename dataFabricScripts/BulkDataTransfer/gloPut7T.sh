@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110119
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110128
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -85,13 +85,15 @@ while [ -n "$Flag" ] ; do
       echo "Remote-directory problem; will retry in 5 mins .." >&2 ; sleep 300
     done
     echo
-    # List files to be copied from local directory, then process the output
-    cd $1 && find -L . ${MaxDep} -type f ${Days} | xargs ls -lLA 2>/dev/null
+    # List files to be copied from local directory, then process the output;
+    # "/dev/null" is appended because Solaris 'xargs' doesn't allow '-r' ..
+    cd $1 && ( find -L . ${MaxDep} -type f ${Days}; echo /dev/null ) |
+                                                  xargs ls -lLA 2>/dev/null
   ) | awk '{ if (NF==0)      {Local="Y"; next}
              if (Local=="Y") {if ("X"remsiz[$NF]!="X"$5) {print $NF} }
              else            {remsiz[$NF]=$5}
            }' | grep $Match | sort $Order`; do
-    [ ! -r "$1/$File" ] && continue
+    [ \( ! -r "$1/$File" \) -o \( "$File" = "/dev/null" \) ] && continue
     case "`basename $File`" in
       .* ) [ -n "$Skip" ] && continue ;;
     esac
