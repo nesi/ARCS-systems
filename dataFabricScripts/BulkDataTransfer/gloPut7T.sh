@@ -1,7 +1,7 @@
 #!/bin/sh
 # gloPut7T.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110128
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110317
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
@@ -12,7 +12,6 @@ PATH=$GLOBUS_LOCATION/bin:$PATH
 export GLOBUS_LOCATION PATH
 
 # Usage, ssh parameters
-Params="-p 4"
 Match="."
 while getopts b:c:d:m:srux Option; do
   case $Option in
@@ -22,7 +21,7 @@ while getopts b:c:d:m:srux Option; do
     m) Match=$OPTARG;;
     s) Skip="Y";;
     r) Order="-r";;
-    u) Params="-udt -p 2";;
+    u) Params="-udt";;
     x) MaxDep="-maxdepth 1";;
    \?) Bad="Y";;
   esac
@@ -54,7 +53,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -cd $Params -cc $CONCUR -fast -f $1 || \
+  globus-url-copy -q -cd $Params -p 4 -pp -cc $CONCUR -fast -f $1 || \
     ( echo "Failed; sleeping for 5 mins!"; sleep 300 )
   echo
   >$1
@@ -69,8 +68,8 @@ eval $Ssu $2 "test -w          $3"  2>/dev/null ||fail 1 "Remote-dir'y problem"
 # Create temporary file, set traps
 LisFil=`mktemp` && chmod a+x $LisFil      || fail 1 "Temporary file problem"
 trap "chmod a-x $LisFil ; echo Break detected .. wait" TERM
-trap 'Params="     -p 4"; echo Switched to TCP..'      USR1
-trap 'Params="-udt -p 2"; echo Switched to UDT..'      USR2
+trap 'Params=""         ; echo Switched to TCP..'      USR1
+trap 'Params="-udt"     ; echo Switched to UDT..'      USR2
 
 # Loop until no more files need to be copied
 echo "To Terminate gracefully,  enter: kill -TERM $$"
