@@ -45,6 +45,7 @@ case "$Zone" in
   ARCSMIRROR     ) Extn="mirror.irb"                    ;;
   ARCSDEVBACKEND ) Extn="devbackend.irb"                ;;
   ARCSEXTRA      ) Extn="extra.irb"                     ;;
+  ARCSUTS1       ) Extn="uts1.irb"                      ;;
   *              ) fail "Unknown or indeterminate zone!";;
 esac
 
