@@ -1,0 +1,5 @@
+# iRODS local rules for ARCSUTS1 sites, Revised 20110318.
+# Default-resource must be set appropriately for your site (e.g. srbdev.vpac.org)
+#
+acGetUserByDN(*arg,*OUT)||msiExecCmd(createUser,'"*arg"',null,null,null,*OUT)|nop
+acPreprocForDataObjOpen||msiSetDataObjPreferredResc(DEFAULT_RESOURCE)|nop
