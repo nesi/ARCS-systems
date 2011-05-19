@@ -1,11 +1,11 @@
 #!/bin/sh
 # gloPut7T.sh  Recursively copies files to a remote server.
 #              Requires threaded globus-url-copy; uses sshftp.
-#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110317
+#              Graham.Jenkins@arcs.org.au  April 2009. Rev: 20110519
 
 # Default-batch-size, concurrency, environment; adjust as appropriate
 BATCH=16; CONCUR=2
-for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
+for Dir in globus-5 globus-5.0.4 globus-5.0.2 globus-5.0.1 globus-4.2.1; do
   [ -d "/opt/$Dir/bin" ] && GLOBUS_LOCATION=/opt/$Dir && break
 done
 PATH=$GLOBUS_LOCATION/bin:$PATH
@@ -53,7 +53,7 @@ fail() {
 doGlobus() {
   echo "`date '+%a %T'` .. Pid: $$ .. Files:"
   eval $Wc `awk '{print $1}' < $1 | cut -c 8-`
-  globus-url-copy -q -cd $Params -p 4 -pp -cc $CONCUR -fast -f $1 || \
+  globus-url-copy -q -cd $Params -p 24 -pp -cc $CONCUR -fast -f $1 || \
     ( echo "Failed; sleeping for 5 mins!"; sleep 300 )
   echo
   >$1
