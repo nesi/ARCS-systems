@@ -13,8 +13,8 @@ acSetRescSchemeForCreate||msiSetDefaultResc(DEFAULT_RESOURCE,preferred)|nop
 acSetVaultPathPolicy||msiSetGraftPathScheme(no,0)|nop
 
 #Replication Rules
-acPostProcForPut||delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
-acPostProcForCopy||delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
+acPostProcForPut|$dataSize > 0|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
+acPostProcForCopy|$dataSize > 0|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
 
 #Access control, trash and quotas
 acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
