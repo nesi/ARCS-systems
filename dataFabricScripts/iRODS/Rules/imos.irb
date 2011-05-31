@@ -46,6 +46,7 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/AUV/Tasmania"|ms
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/AUV/SouthAustralia"|msiSetDefaultResc(arcs-df.eresearchsa.edu.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/*/AUV/WestAustralia"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/AATAMS/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/SRS/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
 
 #----------catch all else opendap/public that doesn't match any of the above rules
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
