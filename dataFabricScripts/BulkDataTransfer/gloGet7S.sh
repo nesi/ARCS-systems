@@ -4,7 +4,7 @@
 #              accept connections on ports in GLOBUS_TCP_PORT_RANGE, since
 #              it uses a new connection for each transfer and exhausts all
 #              available ports.
-#              Graham Jenkins <graham@vpac.org> Aug. 2010, Rev: 20110609
+#              Graham Jenkins <graham@vpac.org> Aug. 2010, Rev: 20110630
 
 # Note: GLOBUS_FTP_CLIENT_SOURCE_PASV can be set to open data connections from
 # data destination to source. This might allow use of "-fast" parameter.      
@@ -14,7 +14,8 @@ for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
   [ -d "/opt/$Dir/bin" ] && GLOBUS_LOCATION=/opt/$Dir && break
 done
 PATH=$GLOBUS_LOCATION/bin:$PATH
-export GLOBUS_LOCATION PATH
+GLOBUS_FTP_CLIENT_SOURCE_PASV=Y
+export GLOBUS_LOCATION PATH GLOBUS_FTP_CLIENT_SOURCE_PASV
 
 # Usage, alias
 CONCUR=2
