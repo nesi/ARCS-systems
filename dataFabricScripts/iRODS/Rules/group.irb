@@ -2,4 +2,7 @@
 
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/SSNTCP/*"|msiSetDefaultResc(arcs-df.qcif.edu.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ALA/*"|msiSetDefaultResc(arcs-df.vpac.org,preferred)|nop
-acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ABIN/*"|msiSetDefaultResc(arcs-df.hpsc.csiro.au,preferred)|nop
+#acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ABIN/*"|msiSetDefaultResc(arcs-df.hpsc.csiro.au,preferred)|nop
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/Maia_XRF/*"|msiSetDefaultResc(arcs-df.hpsc.csiro.au,preferred)|nop
+acPostProcForPut|"$objPath" like "/ARCS/projects/Maia_XRF/*|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
+acPostProcForCopy|"$objPath" like "/ARCS/projects/Maia_XRF/*|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
