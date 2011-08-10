@@ -20,7 +20,7 @@ acPostProcForCopy|$dataSize > 0|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replic
 acAclPolicy|"$userNameClient" != "QuickShare"|msiAclPolicy(STRICT)|nop
 acTrashPolicy||nop|nop
 acRescQuotaPolicy||msiSetRescQuotaPolicy(off)|nop
-acSetReServerNumProc||msiSetReServerNumProc(4)|nop
+acSetReServerNumProc||msiSetReServerNumProc(8)|nop
 
 # Rules to stop deletion and moving. Note that for this to work the corresponding rules most be commented in core.irb
 acPreprocForRmColl|($collParentName != /ARCS/home) && ($collParentName != /ARCS/projects) && ("$collName" != "/ARCS/home/$userNameClient/Archive_S3")|nop|nop
