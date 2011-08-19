@@ -10,4 +10,4 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/Maia_XRF/*"|msiSetDefau
 acPostProcForPut|"$objPath" like "/ARCS/projects/Maia_XRF/*"|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
 acPostProcForCopy|"$objPath" like "/ARCS/projects/Maia_XRF/*"|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
 #acPostProcForFilePathReg|"$objPath" like "/ARCS/projects/Maia_XRF/*"|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
-
+acPreprocForDataObjOpen|"$objPath" like "/ARCS/projects/Maia_XRF/*"|msiSetDataObjPreferredResc(ivec_disk)|nop
