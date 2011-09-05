@@ -1,3 +1,6 @@
+#set vault to random to protect system fom too many files in ANMN collections
+acSetVaultPathPolicy|"$objPath" like "/ARCS/projects/IMOS/*/ANMN/*"|msiSetRandomScheme|nop
+
 #Reading preferences
 acPreprocForDataObjOpen||msiSetDataObjPreferredResc(arcs-df.vpac.org%arcs-df.intersect.org.au%arcs-df.eresearchsa.edu.au%arcs-df.tpac.edu.au%emii.resource.tpac.org.au%DEFAULT_RESOURCE)|nop
 
