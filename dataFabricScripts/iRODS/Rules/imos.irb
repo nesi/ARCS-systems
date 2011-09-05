@@ -55,11 +55,3 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/SRS/*"|msi
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/opendap/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/IMOS/public/*"|msiSetDefaultResc(emii.resource.tpac.org.au,preferred)|nop
 
-#fix read permissions on IMOS/public
-acPostProcForPut|"$objPath" like "/ARCS/projects/IMOS/public/*"|msiSetACL("default","read","public","$objPath")##msiWriteRodsLog("Setting read on $objPath for public")|nop##nop
-acPostProcForCopy|"$objPath" like "/ARCS/projects/IMOS/public/*"|msiSetACL("default","read","public","$objPath")##msiWriteRodsLog("Setting read on $objPath for public")|nop##nop
-acPostProcForFilePathReg|"$objPath" like "/ARCS/projects/IMOS/public/*"|msiSetACL("default","read","public","$objPath")##msiWriteRodsLog("Setting read on $objPath for public")|nop##nop
-acPostProcForCreate|"$objPath" like "/ARCS/projects/IMOS/public/*"|msiSetACL("default","read","public","$objPath")##msiWriteRodsLog("Setting read on $objPath for public")|nop##nop
-acPostProcForCollCreate|"$collName" like "/ARCS/projects/IMOS/public/*"|msiSetACL("default","read","public","$collName")##msiWriteRodsLog("Setting read on $objPath for public")|nop##nop
-
-
