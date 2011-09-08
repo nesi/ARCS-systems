@@ -6,8 +6,15 @@ acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/ALA/*"|msiSetDefaultRes
 
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/home/ARCHI/*"|msiSetDefaultResc(arcs-df.intersect.org.au,preferred)|nop
 
+### CSIRO Sync Rules
+###
 acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/Maia_XRF/*"|msiSetDefaultResc(arcs-df.hpsc.csiro.au,preferred)|nop
 acPostProcForPut|"$objPath" like "/ARCS/projects/Maia_XRF/*"|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
 acPostProcForCopy|"$objPath" like "/ARCS/projects/Maia_XRF/*"|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
 #acPostProcForFilePathReg|"$objPath" like "/ARCS/projects/Maia_XRF/*"|delayExec(<PLUSET>30s</PLUSET>,msiExecCmd(replicate_csiro_sync.py,$dataId,null,null,null,*REPLI_OUT),nop)|nop
 acPreprocForDataObjOpen|"$objPath" like "/ARCS/projects/Maia_XRF/*"|msiSetDataObjPreferredResc(ivec_disk)|nop
+###
+
+### AODN Rules
+###
+acSetRescSchemeForCreate|"$objPath" like "/ARCS/projects/AODN/opendap/*"|msiSetDefaultResc(arcs-df.ivec.org,preferred)|nop
