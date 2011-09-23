@@ -5,7 +5,7 @@
 #              usage of Mode E connections.
 #              Ref: "Globus XIO Pipe Open Driver ..", Raj Kettimuthu et al,
 #              TeraGrid '11, July 2011, Salt lake City.
-#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110923
+#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110924
 
 # Environment
 for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
@@ -20,7 +20,7 @@ while getopts uv Option; do
   case $Option in
     u) Param="-u";;
     v) Verbo="v" ;;
-   \?) Bad="Y";;
+   \?) Bad="Y"   ;;
   esac
 done
 shift `expr $OPTIND - 1`
@@ -31,12 +31,40 @@ shift `expr $OPTIND - 1`
     echo "Options: -u        .. use udt" 
     echo "         -v        .. verbose operation"
   )  >&2 && exit 2
+Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
 
-# Create destination directory, do the transfer
-# See: www.mcs.anl.gov/~bresnaha/Stretch/
-echo "`date '+%a %T'` Transferring files .."
+# Make local directory, then loop until no more files need to be copied
 mkdir -pv $1
-globus-url-copy -v -c $Param -src-fsstack popen:argv="#/bin/tar#cf#-#-C#$3#." \
-                    sshftp://$2/src file:///dev/stdout | /bin/tar x"$Verbo"f - -C $1
+ListFile=`mktemp`; trap 'rm -f $ListFile' 0
+LinkDir=`eval $Ssu $2 mktemp -d 2>/dev/null`
+trap 'eval $Ssu $2 rm -rf $LinkDir 2>/dev/null' 0
+while : ; do
+  # Create links to files which need to be copied and are readable
+  Start=`date +%s`
+  echo "`date '+%a %T'` Generating a list of files to be copied .. wait .."
+  eval $Ssu $2 "cd $3 \&\& find -L . -type f\|xargs ls -lLA 2\>/dev/null">$ListFile
+  [ `wc -c < $ListFile` -lt 1 ] && echo "Failed!" >&2 && exit 2
+  for File in `
+  ( cd $1 && ( find -L . -type f; echo /dev/null ) | xargs ls -lLA 2>/dev/null
+    echo
+    cat $ListFile 
+  ) | awk '{ if (NF==0)      {Local="Y"; next}
+             if (Local=="Y") {if ("X"remsiz[$NF]!="X"$5) {print $NF} }
+             else            {remsiz[$NF]=$5}
+           }' | sort`; do
+    echo mkdir -p $LinkDir/`dirname $File`
+    echo "[ -r $3/$File ] && ln -s $3/$File $LinkDir/$File"
+  done | eval $Ssu $2 >/dev/null 2>&1
+  [ `eval $Ssu $2 "find $LinkDir ! -type d" | wc -l` -lt 1 ] && break
+  # Do the transfer! See: www.mcs.anl.gov/~bresnaha/Stretch/
+  echo "`date '+%a %T'` Commencing transfer .. wait .."
+  globus-url-copy -v -c -nodcau $Param \
+                  -src-fsstack popen:argv="#/bin/tar#chf#-#-C#$LinkDir#." \
+                   sshftp://$2/src file:///dev/stdout | /bin/tar x"$Verbo"f - -C $1
+  eval $Ssu $2 "rm -rf $LinkDir/\*" 2>/dev/null
+  while [ $((`date +%s`-$Start)) -lt 20 ] ; do
+    sleep 1 # Wait until 20 secs has elapsed since start of loop so remote
+  done      # server doesn't think we're doing a DOS attack
+done
 echo "`date '+%a %T'` All Done!"
 exit 0
