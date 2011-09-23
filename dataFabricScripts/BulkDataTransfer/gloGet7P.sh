@@ -16,9 +16,10 @@ GLOBUS_FTP_CLIENT_SOURCE_PASV=Y
 export GLOBUS_LOCATION PATH GLOBUS_FTP_CLIENT_SOURCE_PASV
 
 # Usage, alias
-while getopts u Option; do
+while getopts uv Option; do
   case $Option in
     u) Param="-u";;
+    v) Verbo="v" ;;
    \?) Bad="Y";;
   esac
 done
@@ -28,6 +29,7 @@ shift `expr $OPTIND - 1`
     echo "   e.g.: `basename $0` /data2/arcs" "graham@cortex.ivec.org" \
              "/pbstore/groupfs/astrotmp/as03/VLBI/Archive/SSWC_archive"
     echo "Options: -u        .. use udt" 
+    echo "         -v        .. verbose operation"
   )  >&2 && exit 2
 
 # Create destination directory, do the transfer
@@ -35,7 +37,6 @@ shift `expr $OPTIND - 1`
 echo "`date '+%a %T'` Transferring files .."
 mkdir -pv $1
 globus-url-copy -v -c $Param -src-fsstack popen:argv="#/bin/tar#cf#-#-C#$3#." \
-                             -dst-fsstack popen:argv="#/bin/tar#xf#-#-C#$1"   \
-                                sshftp://$2/src sshftp://`hostname`///tmp/dst
+                    sshftp://$2/src file:///dev/stdout | /bin/tar x"$Verbo"f - -C $1
 echo "`date '+%a %T'` All Done!"
 exit 0
