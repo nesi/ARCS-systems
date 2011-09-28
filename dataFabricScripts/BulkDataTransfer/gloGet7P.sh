@@ -5,7 +5,10 @@
 #              usage of Mode E connections.
 #              Ref: "Globus XIO Pipe Open Driver ..", Raj Kettimuthu et al,
 #              TeraGrid '11, July 2011, Salt lake City.
-#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110928
+#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110929
+
+# Note: For pipe operations, 'exec' line in remote 'sshftp' file must
+# include: '-fs-whitelist popen,file,ordering -popen-whitelist tar:/bin/tar'
 
 # Environment
 for Dir in globus-5 globus-5.0.1 globus-5.0.2 globus-4.2.1; do
