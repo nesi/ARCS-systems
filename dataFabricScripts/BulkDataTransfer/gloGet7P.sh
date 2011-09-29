@@ -1,10 +1,8 @@
 #!/bin/bash
-# gloGet7P.sh  Gets files (recursively) from a remote server. Can use Globus
-#              XIO Pipe-Open-Driver to circumvent problems which might arise
-#              when incoming restrictions limit number of connections.
-#              Ref: "Globus XIO Pipe Open Driver ..", Raj Kettimuthu et al,
-#              TeraGrid '11, July 2011, Salt lake City.
-#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110929
+# gloGet7P.sh  Gets files (recursively) from a remote server. Can use
+#              remote-end-pipe to circumvent problems which might arise when
+#              incoming restrictions limit number of connections.
+#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110930
 
 # Note: For pipe operations, 'exec' line in remote 'sshftp' file must
 # include: '-fs-whitelist popen,file,ordering -popen-whitelist tar:/bin/tar'
@@ -16,6 +14,7 @@ done
 PATH=$GLOBUS_LOCATION/bin:$PATH
 GLOBUS_FTP_CLIENT_SOURCE_PASV=Y
 export GLOBUS_LOCATION PATH GLOBUS_FTP_CLIENT_SOURCE_PASV
+#export GLOBUS_FTP_CLIENT_DATA_IP=202.158.218.34 # May need to set this
 
 # Usage, alias
 Match="."
@@ -69,8 +68,8 @@ while : ; do
   echo "`date '+%a %T'` Commencing transfer .. wait .."
   if [ -z "$Concur" ]; then 
     globus-url-copy -v -c -nodcau $Param \
-      -src-fsstack popen:argv="#/bin/tar#chf#-#-C#$LinkDir#." \
-      sshftp://$2/src file:///dev/stdout | /bin/tar xvf - -C $1
+      -src-pipe "/bin/tar chf - -C $LinkDir ." \
+      sshftp://$2/src - | /bin/tar xvf - -C $1
   else
     globus-url-copy -v -c -nodcau $Param -cd -cc $Concur -g2 -r \
       sshftp://$2/$LinkDir/ file://$1/
