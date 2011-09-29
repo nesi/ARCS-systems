@@ -1,8 +1,7 @@
 #!/bin/bash
-# gloGet7P.sh  Gets files (recursively) from a remote server. Can use
-#              Globus XIO Pipe-Open-Driver to circumvent problems which
-#              might arise when incoming connection restrictions prevent
-#              usage of Mode E connections.
+# gloGet7P.sh  Gets files (recursively) from a remote server. Can use Globus
+#              XIO Pipe-Open-Driver to circumvent problems which might arise
+#              when incoming restrictions limit number of connections.
 #              Ref: "Globus XIO Pipe Open Driver ..", Raj Kettimuthu et al,
 #              TeraGrid '11, July 2011, Salt lake City.
 #              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110929
