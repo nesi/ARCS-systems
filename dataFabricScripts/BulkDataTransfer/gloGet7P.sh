@@ -14,16 +14,16 @@ done
 PATH=$GLOBUS_LOCATION/bin:$PATH
 GLOBUS_FTP_CLIENT_SOURCE_PASV=Y
 export GLOBUS_LOCATION PATH GLOBUS_FTP_CLIENT_SOURCE_PASV
-#export GLOBUS_FTP_CLIENT_DATA_IP=202.158.218.34 # May need to set this
 
 # Usage, alias
 Match="."
-while getopts um:c: Option; do
+while getopts ufm:c: Option; do
   case $Option in
-    u) Param="-u"     ;;
-    m) Match=$OPTARG  ;;
-    c) Concur=$OPTARG ;;
-   \?) Bad="Y"        ;;
+    u) Udt="-u";;
+    f) Fast="-fast -pp -p 8";;
+    m) Match=$OPTARG;;
+    c) Concur=$OPTARG;;
+   \?) Bad="Y";;
   esac
 done
 shift `expr $OPTIND - 1`
@@ -32,10 +32,18 @@ shift `expr $OPTIND - 1`
     echo "   e.g.: `basename $0` /data2/arcs" "graham@cortex.ivec.org" \
              "/pbstore/groupfs/astrotmp/as03/VLBI/Archive/SSWC_archive"
     echo "Options: -u        .. use udt" 
+    echo "         -f        .. use 'fast' transfers, no pipe-drivers"
     echo "         -c m      .. do 'm' concurrent transfers, no pipe-drivers"
     echo "         -m String .. send only files whose names contain 'String'" 
   )  >&2 && exit 2
 Ssu='ssh -o"UserKnownHostsFile /dev/null" -o"StrictHostKeyChecking no"'
+
+# For 'fast' transfers, ensure that correct network address is used
+if [ -n "$Fast" ] ; then
+  export \
+  GLOBUS_FTP_CLIENT_DATA_IP=`host $HOSTNAME|awk '{if($0~/address/)print $NF}'`
+  [ -z "$Concur" ] && echo "Setting '-c 1' .." && Concur=1
+fi
 
 # Make local directory, then loop until no more files need to be copied
 mkdir -pv $1
@@ -67,11 +75,11 @@ while : ; do
   # Do the transfer! See: www.mcs.anl.gov/~bresnaha/Stretch/
   echo "`date '+%a %T'` Commencing transfer .. wait .."
   if [ -z "$Concur" ]; then 
-    globus-url-copy -v -c -nodcau $Param \
+    globus-url-copy -v -c -nodcau $Udt \
       -src-pipe "/bin/tar chf - -C $LinkDir ." \
       sshftp://$2/src - | /bin/tar xvf - -C $1
   else
-    globus-url-copy -v -c -nodcau $Param -cd -cc $Concur -g2 -r \
+    globus-url-copy -v -c -nodcau $Udt $Fast -cd -cc $Concur -r \
       sshftp://$2/$LinkDir/ file://$1/
   fi
   eval $Ssu $2 "rm -rf $LinkDir/\*" 2>/dev/null
