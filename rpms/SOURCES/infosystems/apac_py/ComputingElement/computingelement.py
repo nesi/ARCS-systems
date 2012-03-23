@@ -63,7 +63,7 @@ def processLLNodeInfo(llnode_info, ce):
 		return
         if (llnode_info['StartdAvail'] == 0):
                 return
-        if (not llnode_info['Machine Mode'].startswith( 'batch' )):
+        if (not (llnode_info['Machine Mode'].startswith( 'batch' ) or llnode_info['Machine Mode'].startswith( 'general' ) )):
                 return
 
 	import re
@@ -144,8 +144,6 @@ if __name__ == '__main__':
 					node_info['name'] = values[0]
 				else:
 					node_info[values[0].strip()] = [v.strip() for v in values[1].split(",")]
-	# ANUPBS <=> OpenPBS
-	#elif config.LRMSType == "ANUPBS":
 	elif config.LRMSType == "OpenPBS":
 		#sys.stderr.write('in the ANUPBS number of cpus section\n')
 		if config.qstat is not None and os.path.isfile(config.qstat):
@@ -224,8 +222,6 @@ if __name__ == '__main__':
 		pass
 		
 	# get information about the queues and the running jobs
-	# ANUPBS <=> OpenPBS
-	#if config.LRMSType == "Torque" or config.LRMSType == "PBSPro" or config.LRMSType == "ANUPBS":
 	if config.LRMSType == "Torque" or config.LRMSType == "PBSPro" or config.LRMSType == "OpenPBS":
 		if config.qstat is not None and os.path.isfile(config.qstat):
 			lines = lib.run_command([config.qstat, '-B', '-f', config.HostName])
@@ -405,97 +401,92 @@ if __name__ == '__main__':
 
 		if config.llclass is not None and os.path.isfile(config.llclass):
 
-			lines = lib.run_command([config.llclass, '-l', '-c', config.Name])
+		    lines = lib.run_command([config.llclass, '-l', '-c', config.Name])
 
-			enabled = started = False
+		    enabled = started = False
 
+		    for line in lines:
+			line=line.strip()
+			line_value = line[line.find(':')+1:].strip()
+			# Maxjobs has the meaning of "max running jobs",
+			# but it's not clear for what.  In the output of
+			# llclass -l, it would be meaning of Max Running
+			# Jobs in this class - which OK, matches Max
+			# Running Jobs for this CE.  
+			#
+			# We have to look at it differently in VOView,
+			# where MaxRunning for this user would match
+			# Maxjobs.
+			# I still don't know how to get user's Maxjobs...
+			#
+			# For the CE, let MaxRunning be MaxJobs (-1 on HPC)
+			# and let's leave PerUser undefined
+			if line.startswith("Maxjobs:") and int(line_value) is not -1:
+			    ce.MaxRunningJobs = int(line_value)
+			    # there's likely no value for MaxTotalJobs
+			elif line.startswith("Maximum_slots:") and int(line_value) is not -1 and not ce.isBlueGene:
+			    ce.AssignedJobSlots = int(line_value)
+			elif line.startswith("Free_slots:") and int(line_value) is not -1 and not ce.isBlueGene:
+			    ce.FreeJobSlots = int(line_value)
+			elif line.startswith("Priority:") and int(line_value) is not -1:
+			    ce.Priority = int(line_value)
+			elif line.startswith("Wall_clock_limit:") and not line_value.startswith("undefined"):
+			    ce.MaxWallClockTime = parseLLTime(line_value.split(",")[0])/60
+			    # Beware: PBS code says "MaxWallClockTime"
+			    # ... correctly. XSD says as well, and so does all other code.
+			elif line.startswith("Job_cpu_limit:") and not line_value.startswith("undefined"):
+			    ce.MaxCPUTime = parseLLTime(line_value.split(",")[0])/60
+
+		ce.ACL = config.ACL
+		for viewkey in config.views.keys():
+		    view = lib.VOView()
+		    
+		    # note: now copying also ApplicationDir, but it
+		    # will get overwritten by ce.ApplicationDir
+		    for key in ('DefaultSE', 'DataDir', 'RealUser', 'ApplicationDir'):
+			if config.views[viewkey].__dict__[key] is not None:
+			    view.__dict__[key] = config.views[viewkey].__dict__[key]
+
+		    if len(config.views[viewkey].ACL) > 0:
+			    view.ACL = config.views[viewkey].ACL
+			    ce.ACL += view.ACL
+
+		    ce.views[viewkey] = view
+
+		for viewkey in ce.views.keys():
+		    view = ce.views[viewkey]
+		    view.ApplicationDir = ce.ApplicationDir
+		    view.TotalJobs = 0
+		    view.RunningJobs = 0
+		    view.WaitingJobs = 0
+
+		    if view.RealUser is not None and config.llq is not None and os.path.isfile(config.llq):
+
+			view.TotalJobs = view.WaitingJobs = view.RunningJobs = 0
+
+			lines = lib.run_command([config.llq, '-u', view.RealUser, '-c', config.Name])
+			# jobsRE already defined earlier
 			for line in lines:
-			    line=line.strip()
-			    line_value = line[line.find(':')+1:].strip()
-			    # Maxjobs has the meaning of "max running jobs",
-			    # but it's not clear for what.  In the output of
-			    # llclass -l, it would be meaning of Max Running
-			    # Jobs in this class - which OK, matches Max
-			    # Running Jobs for this CE.  
-			    #
-			    # We have to look at it differently in VOView,
-			    # where MaxRunning for this user would match
-			    # Maxjobs.
-			    # I still don't know how to get user's Maxjobs...
-			    #
-			    # For the CE, let MaxRunning be MaxJobs (-1 on HPC)
-			    # and let's leave PerUser undefined
-			    if line.startswith("Maxjobs:") and int(line_value) is not -1:
-			        ce.MaxRunningJobs = int(line_value)
-				# there's likely no value for MaxTotalJobs
-			    elif line.startswith("Maximum_slots:") and int(line_value) is not -1 and not ce.isBlueGene:
-			        ce.AssignedJobSlots = int(line_value)
-			    elif line.startswith("Free_slots:") and int(line_value) is not -1 and not ce.isBlueGene:
-			        ce.FreeJobSlots = int(line_value)
-			    elif line.startswith("Priority:") and int(line_value) is not -1:
-			        ce.Priority = int(line_value)
-			    elif line.startswith("Wall_clock_limit:") and not line_value.startswith("undefined"):
-				ce.MaxWallClockTime = parseLLTime(line_value.split(",")[0])/60
-				# Beware: PBS code says "MaxWallClockTime"
-                                # ... correctly. XSD says as well, and so does all other code.
-			    elif line.startswith("Job_cpu_limit:") and not line_value.startswith("undefined"):
-				ce.MaxCPUTime = parseLLTime(line_value.split(",")[0])/60
+			  jobsMatch = jobsRE.match(line)
+			  if jobsMatch is not None:
+			    jobsResults=jobsMatch.groups()
+			    if len(jobsResults) == 6:
+			      view.TotalJobs    = int(jobsResults[0]); # total
+			      view.WaitingJobs  = int(jobsResults[1]); # waiting
+			      view.RunningJobs  = int(jobsResults[3]); # running
+			      view.RunningJobs += int(jobsResults[2]); # pending
+			      view.WaitingJobs += int(jobsResults[4]); # held
+			      view.WaitingJobs += int(jobsResults[5]); # preempted
 
-
-			    # TODO: hmmm, this work is questionable
-			    # it just copies from the config to an emtpy VOView!
-			    ce.ACL = config.ACL
-			    if len(config.views) > 0:
-
-				for viewkey in config.views.keys():
-				    view = lib.VOView()
-				    
-				    # note: now copying also ApplicationDir, but it
-				    # will get overwritten by ce.ApplicationDir
-				    for key in ('DefaultSE', 'DataDir', 'RealUser', 'ApplicationDir'):
-					if config.views[viewkey].__dict__[key] is not None:
-					    view.__dict__[key] = config.views[viewkey].__dict__[key]
-
-				    if len(config.views[viewkey].ACL) > 0:
-					    view.ACL = config.views[viewkey].ACL
-					    ce.ACL += view.ACL
-
-				    ce.views[viewkey] = view
-
-			    for viewkey in ce.views.keys():
-				    view = ce.views[viewkey]
-				    view.ApplicationDir = ce.ApplicationDir
-				    view.TotalJobs = 0
-				    view.RunningJobs = 0
-				    view.WaitingJobs = 0
-
-				    if view.RealUser is not None and config.llq is not None and os.path.isfile(config.llq):
-
-					    view.TotalJobs = view.WaitingJobs = view.RunningJobs = 0
-
-					    lines = lib.run_command([config.llq, '-u', view.RealUser, '-c', config.Name])
-					    # jobsRE already defined earlier
-					    for line in lines:
-					      jobsMatch = jobsRE.match(line)
-					      if jobsMatch is not None:
-						jobsResults=jobsMatch.groups()
-						if len(jobsResults) == 6:
-						  view.TotalJobs    = int(jobsResults[0]); # total
-						  view.WaitingJobs  = int(jobsResults[1]); # waiting
-						  view.RunningJobs  = int(jobsResults[3]); # running
-						  view.RunningJobs += int(jobsResults[2]); # pending
-						  view.WaitingJobs += int(jobsResults[4]); # held
-						  view.WaitingJobs += int(jobsResults[5]); # preempted
-						
-				    view.FreeJobSlots = ce.FreeCPUs
-				    # There is no way we can tell how many CPUs
-				    # (JobSlots) the user is allowed to use.
-				    # In LoadLEveler, this would be capped by
-				    # max_total_tasks, but this is not used in
-				    # our setting.  Hence, just pass
-				    # ce.FreeCPUs as view.FreeJobSlots
-				    ###if config.MaxTotalRunningJobsPerUser and ce.FreeCPUs > config.MaxTotalRunningJobsPerUser - view.RunningJobs:
-				    ###     view.FreeJobSlots = config.MaxTotalRunningJobsPerUser - view.RunningJobs
+		    view.FreeJobSlots = ce.FreeCPUs
+		    # There is no way we can tell how many CPUs
+		    # (JobSlots) the user is allowed to use.
+		    # In LoadLEveler, this would be capped by
+		    # max_total_tasks, but this is not used in
+		    # our setting.  Hence, just pass
+		    # ce.FreeCPUs as view.FreeJobSlots
+		    ###if config.MaxTotalRunningJobsPerUser and ce.FreeCPUs > config.MaxTotalRunningJobsPerUser - view.RunningJobs:
+		    ###     view.FreeJobSlots = config.MaxTotalRunningJobsPerUser - view.RunningJobs
 
 	if config.LRMSType == "SGE":
 		if config.qstat is not None and os.path.isfile(config.qstat):
@@ -635,13 +626,8 @@ if __name__ == '__main__':
 		print "\t</ACL>"
 		print "</VOView>"
 
-
-	import sets
-
 	print "<ACL>"
-	for rule in sets.Set(ce.ACL):
+	for rule in set(ce.ACL):
 		print "\t<Rule>%s</Rule>" % rule
 	print "</ACL>"
-
-
 
