@@ -147,6 +147,7 @@ if __name__ == '__main__':
 	elif config.LRMSType == "OpenPBS":
 		#sys.stderr.write('in the ANUPBS number of cpus section\n')
 		if config.qstat is not None and os.path.isfile(config.qstat):
+                        # WARNING - this requires config.HostName to be the PBS server (not the grid gateway)
 			lines = lib.run_command([config.qstat, '-B', '-f', config.HostName])
 
 			for line in lines:
@@ -224,6 +225,7 @@ if __name__ == '__main__':
 	# get information about the queues and the running jobs
 	if config.LRMSType == "Torque" or config.LRMSType == "PBSPro" or config.LRMSType == "OpenPBS":
 		if config.qstat is not None and os.path.isfile(config.qstat):
+                        # WARNING - this requires config.HostName to be the PBS server (not the grid gateway)
 			lines = lib.run_command([config.qstat, '-B', '-f', config.HostName])
 
 			for line in lines:
