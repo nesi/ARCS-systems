@@ -174,11 +174,31 @@ if __name__ == '__main__':
 			for line in lines:
 			  bgMatch = bgRE.match(line)
 			  if (bgMatch is not None and len(bgMatch.groups())==1):
-			     ce.TotalCPUs = ce.FreeCPUs = bgMatch.groups()[0];
+                             # First, get the total number of BlueGene nodes
+			     ce.TotalCPUs = ce.FreeCPUs = int(bgMatch.groups()[0])
+
+                        # now get the list of all allocated BG partitions and subtract the nodes from FreeCPUs
+                        # Get the raw llq output with BlueGene size (for all running jobs)
+			lines = lib.run_command([config.llq, '-r', '%BS'])
+			bgJobSizeRE = re.compile(r"^(\d+)$")
+			for line in lines:
+			  bgMatch = bgJobSizeRE.match(line)
+			  if (bgMatch is not None and len(bgMatch.groups())==1):
+			     ce.FreeCPUs = ce.FreeCPUs - int(bgMatch.groups()[0])
+
+                        # now, scale the numbers by CPUs per node
+                        CPUsPerNode = 1
+                        if "BG_CPUsPerNode" in config.__dict__:
+                            CPUsPerNode = config.BG_CPUsPerNode;
+                        ce.TotalCPUs = ce.TotalCPUs * CPUsPerNode;
+                        ce.FreeCPUs = ce.FreeCPUs * CPUsPerNode;
+
 			ce.AssignedJobSlots = ce.TotalCPUs # may be overriden by Maximum_slots:
-                        if "MaxCPUsVisible" in config.__dict__ and ce.TotalCPUs > config.MaxCPUsVisible:
-                            ce.TotalCPUs = ce.FreeCPUs = config.MaxCPUsVisible
-                        # TODO: get number of used CPUs on BlueGene - either parse "llstatus -b -l" or sum up nodes in "llq -b"
+                        if "MaxCPUsVisible" in config.__dict__:
+                            if ce.TotalCPUs > config.MaxCPUsVisible:
+                                ce.TotalCPUs = config.MaxCPUsVisible
+                            if ce.FreeCPUs > config.MaxCPUsVisible:
+                                ce.FreeCPUs = config.MaxCPUsVisible
                     else:
 			ce.TotalCPUs = 0
 			ce.FreeCPUs = 0
