@@ -452,10 +452,20 @@ if __name__ == '__main__':
 			    ce.FreeJobSlots = int(line_value)
 			elif line.startswith("Priority:") and int(line_value) is not -1:
 			    ce.Priority = int(line_value)
-			elif line.startswith("Wall_clock_limit:") and not line_value.startswith("undefined"):
-			    ce.MaxWallClockTime = parseLLTime(line_value.split(",")[0])/60
-			    # Beware: PBS code says "MaxWallClockTime"
-			    # ... correctly. XSD says as well, and so does all other code.
+			elif line.startswith("Wall_clock_limit:"):
+			    wallRE = re.compile(r"^([^\s,]+),\s+([^\s,]+)\s+")
+			    wallMatch = wallRE.match(line_value)
+			    if (wallMatch is not None and len(wallMatch.groups())==2):
+                                wallSoftMax = parseLLTime(wallMatch.groups()[0])/60
+                                wallHardMax = parseLLTime(wallMatch.groups()[1])/60
+
+                                # if both limits are specified, use the lower - otherwise use the limit we have
+                                if wallSoftMax>0 and wallHardMax>0:
+				    ce.MaxWallClockTime = min(wallSoftMax, wallHardMax)
+                                elif wallHardMax>0:
+				    ce.MaxWallClockTime = wallHardMax
+                                elif wallsoftMax>0:
+				    ce.MaxWallClockTime = wallsoftMax
 			elif line.startswith("Job_cpu_limit:") and not line_value.startswith("undefined"):
 			    ce.MaxCPUTime = parseLLTime(line_value.split(",")[0])/60
 
