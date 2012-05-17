@@ -70,7 +70,7 @@ while [ -n "$NextIter" ] ; do
   }' | uniq -u | sed 's/\$/\\\\$/g' | # shuf |
   
   # Feed the randomly-ordered list records into a parallel-job launch-pipe
-  while read Line ; do
+  while read Line || { echo "Replication pass almost complete - waiting for pending jobs" >&2 ; wait ; false ; } ; do
     [ -n "$ListOnly"  ] &&echo REPLIC: irepl -MBT -R $Resource "$Line"&&continue
     [ -n "$Verbose"  ]  &&echo REPLIC: irepl -MBT -R $Resource "$Line"
     ( eval timeout 7200 irepl -MBT -R $Resource "$Line" ||
