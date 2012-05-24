@@ -119,7 +119,9 @@ if ( ($st_count == 1) && ($ARGV[0] =~ m/^\057/) ) {
   chomp($u1);
   if ( "$u1" ne "" ) {
     my ($lua,$luaplus);
-    while ( $param1 eq "aua") {
+    # this loop would delete all DNs - we do not want this feature (would break
+    # GSI access with other certificates), disable the loop
+    while ( 0 && $param1 eq "aua") {
       $lua=`$path/iadmin lua $u1 2>/dev/null | 
             sed -e 's/$u1 //' -e 's/ \$//' | head -1`;
       chomp($lua);
