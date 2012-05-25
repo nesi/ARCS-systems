@@ -1,0 +1,57 @@
+--- iRODS-3.1-vanilla/server/core/src/fileOpr.c	2012-03-16 21:32:42.000000000 +1300
++++ iRODS-3.1/server/core/src/fileOpr.c	2012-05-24 10:50:34.000000000 +1200
+@@ -119,6 +119,9 @@
+ 
+ /* mk the directory resursively */ 
+ 
++#define ROBS_QUICKFIX //in server/core/src/fileOpr.c
++
++
+ int
+ mkFileDirR (int fileType, rsComm_t *rsComm, char *startDir, 
+ char *destDir, int mode)
+@@ -142,9 +145,13 @@
+             if (statbuf.st_mode & S_IFDIR) {
+                 break;
+             } else {
++#ifdef ROBS_QUICKFIX /*Altered error message to differentiate it from one below and to record full destDir path*/
++                rodsLog (LOG_NOTICE, "mkFileDirR(%s).fileStat: A local non-directory %s already exists \n", destDir, tmpPath);
++#else
+ 		 rodsLog (LOG_NOTICE,
+                  "mkFileDirR: A local non-directory %s already exists \n",
+                   tmpPath);
++#endif
+                 return (status);
+             }
+         }
+@@ -162,10 +169,30 @@
+         tmpPath[tmpLen] = '/';
+        status = fileMkdir ((fileDriverType_t)fileType, rsComm, tmpPath, mode);
+         if (status < 0 && (getErrno (status) != EEXIST)) {
++#ifdef ROBS_QUICKFIX /* ######### Warning: This could be a different status code  in another OS or underlying file store */
++            if(status == -520017 )
++            {
++            int fstatus;
++              fstatus = fileStat ( (fileDriverType_t)fileType, rsComm, tmpPath, &statbuf);
++              if (fstatus >= 0 && (statbuf.st_mode & S_IFDIR) == 0) //Exists and is an ordinary file
++              {
++                 rodsLog (LOG_NOTICE, "mkFileDirR(%s).fileMkdir: A local non-directory %s already exists \n", destDir, tmpPath);
++                return (status); //Note status, not fstatus. i.e. the original error.
++              }
++              /* else should there be an ACL check here to see if we can write to this new directory ? */
++            }
++            else
++            {
++#endif /* ########## */
++
+ 	    rodsLog (LOG_NOTICE,
+              "mkFileDirR: mkdir failed for %s, status =%d",
+               tmpPath, status);
+             return status;
++#ifdef ROBS_QUICKFIX /* ######### Need to close else {} */
++            }
++#endif /* ########## End of patch */
++
+         }
+ #if 0	/* a fix from AndyS */
+         while (tmpLen && tmpPath[tmpLen] != '\0')
