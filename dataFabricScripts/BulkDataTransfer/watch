@@ -1,0 +1,56 @@
+#!/bin/ksh
+# watch.sh   Basic watch program for Solaris/AIX.
+#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20120711
+
+# 'count' subroutine
+count() {
+  j=0
+  while [ j -lt $1 ] ; do
+    j=$((1 + $j))
+    print $j
+  done
+}
+
+# Options, Usage, Exit trap
+secs=2
+while getopts n: Option 2>/dev/null; do
+  case $Option in
+    n) secs=$OPTARG;;
+   \?) Bad="Y"     ;;
+  esac
+done
+shift $((OPTIND - 1))
+if [ \(  X"$Bad" != X \) -o \( X"$@" = X \) ] ; then
+  ( print "Usage: `basename $0` [ -n secs] Command"
+    print " e.g.: `basename $0` -n 1 \"ls -lt | head -19\"" ) >&2
+  exit 2
+fi
+trap "tput clear; exit 0" 0
+
+# Ascertain how many columns the date will occupy
+datecols=`LC_TIME=C date | wc -c`
+
+# Loop forever, re-drawing the lines that changed during each pass
+oldrows=-1; oldcols=-1
+while : ; do
+  # If the number of rows/cols changed, clear screen, clear all history
+  rows=`tput lines`; rows=$((rows - 1)); cols=`tput cols`
+  if [ \( $rows -ne $oldrows \) -o \( $cols -ne $oldcols \) ]; then
+    tput clear
+    oldrows=$rows; oldcols=$cols
+    for k in `count $rows`; do
+      oldline[$k]=""
+    done
+  fi
+  tput cup 0 0; tput el; print -nR "Every ${secs}s: ""$@"
+  tput cup 0 $((cols - datecols + 1)); print -nR `LC_TIME=C date`
+  eval "$@" | cut -c 1-${cols} |
+  for k in `count $rows`; do
+    IFS="" read -r newline
+    if [ "${newline}" != "${oldline[k]}" ] ; then
+      tput cup $k 0; tput el; print -nR "${newline}"
+      oldline[k]="${newline}"
+    fi
+  done
+  sleep $secs
+done
