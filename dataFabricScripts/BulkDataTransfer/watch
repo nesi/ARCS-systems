@@ -1,6 +1,6 @@
 #!/bin/ksh
 # watch.sh   Basic watch program for Solaris/AIX.
-#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20120711
+#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20120725
 
 # 'count' subroutine
 count() {
@@ -42,8 +42,10 @@ while : ; do
       oldline[$k]=""
     done
   fi
-  tput cup 0 0; tput el; print -nR "Every ${secs}s: ""$@"
-  tput cup 0 $((cols - datecols + 1)); print -nR `LC_TIME=C date`
+  tput cup 0 0; tput el
+  print -nR "Every ${secs}s: ""$@" | cut -c 1-$((cols-datecols+1))
+  tput cup 0 $((cols - datecols + 1))
+  print -nR `LC_TIME=C date`
   eval "$@" | cut -c 1-${cols} |
   for k in `count $rows`; do
     IFS="" read -r newline
