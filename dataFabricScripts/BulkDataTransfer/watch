@@ -1,6 +1,6 @@
 #!/bin/ksh
 # watch.sh   Basic watch program for Solaris/AIX.
-#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20120725
+#            Graham Jenkins <graham@vpac.org> May 2010. Rev: 20120807
 
 # 'count' subroutine
 count() {
@@ -20,7 +20,7 @@ while getopts n: Option 2>/dev/null; do
   esac
 done
 shift $((OPTIND - 1))
-if [ \(  X"$Bad" != X \) -o \( X"$@" = X \) ] ; then
+if [ \(  X"$Bad" != X \) -o \( X"$1" = X \) ] ; then
   ( print "Usage: `basename $0` [ -n secs] Command"
     print " e.g.: `basename $0` -n 1 \"ls -lt | head -19\"" ) >&2
   exit 2
