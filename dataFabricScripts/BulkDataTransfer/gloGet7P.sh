@@ -1,8 +1,9 @@
 #!/bin/bash
 # gloGet7P.sh  Gets files (recursively) from a remote server. Can use
 #              remote-end-pipe to circumvent problems which might arise when
-#              incoming restrictions limit number of connections.
-#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20110930
+#              incoming restrictions limit number of connections. Accommodates
+#              subdirectories and files whose names contain spaces.
+#              Graham Jenkins <graham@vpac.org> Sep. 2011, Rev: 20121208
 
 # Note: For pipe operations, 'exec' line in remote 'sshftp' file must
 # include: '-fs-whitelist popen,file,ordering -popen-whitelist tar:/bin/tar'
@@ -46,7 +47,7 @@ if [ -n "$Fast" ] ; then
 fi
 
 # Make local directory, then loop until no more files need to be copied
-mkdir -pv $1
+mkdir -pv "$1"
 ListFil=`mktemp`; trap 'rm -f $ListFil' 0
 LinkDir=`eval $Ssu $2 mktemp -d 2>/dev/null`
 trap 'eval $Ssu $2 rm -rf $LinkDir 2>/dev/null' 0
@@ -57,21 +58,19 @@ while : ; do
   [ "$Count" -gt 3 ] && echo "Sleeping 5 mins .." && sleep 300
   # Create links to files which need to be copied and are readable
   echo "`date '+%a %T'` Generating a list of files to be copied .. wait .."
-  eval $Ssu $2 \
-   "cd $3 \&\& find -L . -type f\|xargs ls -lLA 2\>/dev/null">$ListFil
+  eval $Ssu $2 "/bin/sh" >$ListFil 2>/dev/null <<-EOF
+	cd $3 && find -L . -type f | perl -lne 'print \$_,"|",-s \$_ if -r \$_'
+	EOF
   [ `wc -c < $ListFil` -lt 1 ] && echo "Failed .." && continue
-  for File in `
-  ( cd $1 && ( find -L . -type f; echo /dev/null ) | xargs ls -lLA 2>/dev/null
-    echo
+  ( cd $1     && find -L . -type f | perl -lne 'print $_,"|",-s $_ if -r $_'
     cat $ListFil 
-  ) | awk '{ if (NF==0)      {Local="Y"; next}
-             if (Local=="Y") {if ("X"remsiz[$NF]!="X"$5) {print $NF} }
-             else            {remsiz[$NF]=$5}
-           }' | grep $Match | sort`; do
-    echo mkdir -p $LinkDir/`dirname $File`
-    echo "[ -r $3/$File ] && ln -s $3/$File $LinkDir/$File"
-  done | eval $Ssu $2 >/dev/null 2>&1
-  [ `eval $Ssu $2 "find $LinkDir ! -type d" | wc -l` -lt 1 ] && break
+  ) | sort | uniq -u | grep $Match | awk -F"|" '{
+    dest=linkdir"/`dirname \""$1"\"`"
+    print "[ -r \""srcdir"/"$1"\" ] && "
+    print "mkdir -p \""dest"\" && "
+    print "ln -s \""srcdir"/"$1"\" \""dest"\""}' srcdir="$3" linkdir="$LinkDir"|
+    eval $Ssu $2 >/dev/null 2>&1
+  [ `eval $Ssu $2 "find $LinkDir ! -type d" 2>/dev/null| wc -l` -lt 1 ] && break
   # Do the transfer! See: www.mcs.anl.gov/~bresnaha/Stretch/
   echo "`date '+%a %T'` Commencing transfer .. wait .."
   if [ -z "$Concur" ]; then 
